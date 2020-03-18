@@ -64,7 +64,6 @@ target_sources_ifdef(CONFIG_PFAT_SUPPORT app
 target_sources_ifdef(CONFIG_THERMAL_MANAGEMENT app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/thermal_management/thermalmgmt.c
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/smchost_thermal.c
     PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/thermal_management/thermalmgmt.h
     )

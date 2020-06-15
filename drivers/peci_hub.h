@@ -54,4 +54,51 @@ int peci_get_tjmax(u8_t *tjmax);
  */
 int peci_rdpkg_config(u8_t *req_buf, u8_t *resp_buf, u8_t rd_len);
 
+/**
+ * @brief Write package config using peci.
+ *
+ * This function writes package config to cpu using peci.
+ *
+ * @param *req_buf request buffer.
+ * @param *resp_buf response buffer.
+ * @param *wr_len write length.
+ * @retval 0 on success and failure code on error.
+ */
+int peci_wrpkg_config(u8_t *req_buf, u8_t *resp_buf, u8_t wr_len);
+
+/**
+ * @brief Read IA MSR.
+ *
+ * This function fetches Model Specific Registers (MSR) using peci.
+ *
+ * @param *req_buf request buffer.
+ * @param *resp_buf response buffer.
+ * @param *rd_len read length.
+ * @retval 0 on success and failure code on error.
+ */
+int peci_rd_ia_msr(u8_t *req_buf, u8_t *resp_buf, u8_t rd_len);
+
+/**
+ * @brief Write IA MSR.
+ *
+ * This function writes Model Specific Registers (MSR) using peci.
+ *
+ * @param *req_buf request buffer.
+ * @param *resp_buf response buffer.
+ * @param *wr_len write length.
+ * @retval 0 on success and failure code on error.
+ */
+int peci_wr_ia_msr(u8_t *req_buf, u8_t *resp_buf, u8_t wr_len);
+
+/**
+ * @brief Read DIB.
+ *
+ * This function fetches Device Information Byte (DIB) using peci.
+ *
+ * @param *dev_info device information byte.
+ * @param *rev_num revision number byte.
+ * @retval 0 on success and failure code on error.
+ */
+int peci_get_dib(u8_t *dev_info, u8_t *rev_num);
+
 #endif /* __PECI_HUB_H__ */

@@ -21,6 +21,8 @@
 #define PECI_CONFIGHOSTID       0u
 #define PECI_CONFIGPARAM        0u
 
+#define PECI_FCS_LEN         2
+
 #define PECI_RETRY_CNT		3
 #define PECI_RETRY_WAIT		1 /* 1 milli sec */
 
@@ -49,6 +51,16 @@ static u8_t cpu_tjmax;
 
 static void peci_get_max_temp(void);
 
+/**
+ * @brief Tranfers the peci packet and get the response.
+ *
+ * This function is intended for peci commands which
+ * doenst support command retry.
+ *
+ * @param *dev device struct.
+ * @param *msg peci packet message..
+ * @retval 0 on success and failure code on error.
+ */
 static int peci_exec_transfer(struct device *dev, struct peci_msg *msg)
 {
 	int ret;
@@ -73,11 +85,56 @@ static int peci_exec_transfer(struct device *dev, struct peci_msg *msg)
 	return ret;
 }
 
-int peci_rdpkg_config(u8_t *req_buf, u8_t *resp_buf, u8_t rd_len)
+/**
+ * @brief Tranfers the peci packet with retry and get the response.
+ *
+ * This function is intended for peci commands
+ * supports command retry.
+ *
+ * @param *dev device struct.
+ * @param *msg peci packet message.
+ * @retval 0 on success and failure code on error.
+ */
+static int peci_exec_transfer_retry(struct device *dev, struct peci_msg *msg)
 {
 	int ret;
 	int retries = PECI_RETRY_CNT;
 	u8_t peci_resp;
+
+	k_mutex_lock(&trans_mutex, K_FOREVER);
+	if (!peci_initialized) {
+		LOG_ERR("PECI not initialized");
+		k_mutex_unlock(&trans_mutex);
+		return -ENODEV;
+	}
+
+	do {
+		retries--;
+		ret = peci_transfer(peci_dev, msg);
+		if (ret) {
+			continue;
+		}
+
+		peci_resp = msg->rx_buffer.buf[PECI_RX_BUF_RESP_OFFSET];
+		k_sleep(K_MSEC(PECI_RETRY_WAIT));
+		LOG_DBG("peci_resp %x", peci_resp);
+	} while ((peci_resp != PECI_RW_PKG_CFG_RSP_PASS) && (retries > 0));
+
+	if (peci_resp != PECI_RW_PKG_CFG_RSP_PASS) {
+		LOG_ERR("Peci command-%x failed", msg->cmd_code);
+		k_mutex_unlock(&trans_mutex);
+		return -EIO;
+	}
+
+	LOG_DBG("Peci command-%x success", msg->cmd_code);
+	LOG_DBG("Rx-FCS=%x", msg->rx_buffer.buf[msg->rx_buffer.len]);
+	k_mutex_unlock(&trans_mutex);
+	return 0;
+}
+
+int peci_rdpkg_config(u8_t *req_buf, u8_t *resp_buf, u8_t rd_len)
+{
+	int ret;
 	struct peci_msg packet;
 
 	packet.tx_buffer.buf = req_buf;
@@ -85,33 +142,115 @@ int peci_rdpkg_config(u8_t *req_buf, u8_t *resp_buf, u8_t rd_len)
 	packet.rx_buffer.buf = resp_buf;
 	packet.rx_buffer.len = rd_len;
 
-	do {
-		packet.addr = PECI_HOST_ADDR;
-		packet.cmd_code = PECI_CMD_RD_PKG_CFG0;
+	packet.addr = PECI_HOST_ADDR;
+	packet.cmd_code = PECI_CMD_RD_PKG_CFG0;
 
-		ret = peci_exec_transfer(peci_dev, &packet);
-
-
-		peci_resp = resp_buf[PECI_RX_BUF_RESP_OFFSET];
-		k_sleep(K_MSEC(PECI_RETRY_WAIT));
-		LOG_DBG("peci_resp %x", peci_resp);
-		retries--;
-	} while ((peci_resp != PECI_RW_PKG_CFG_RSP_PASS) && (retries > 0));
-
-	if (peci_resp != PECI_RW_PKG_CFG_RSP_PASS) {
+	ret = peci_exec_transfer_retry(peci_dev, &packet);
+	if (ret) {
 		LOG_ERR("Peci RdPkgConfig failed");
-		return -EIO;
 	}
 
-	LOG_DBG("Peci RdPkgConfig success");
-	return 0;
+	return ret;
 }
+
+int peci_wrpkg_config(u8_t *req_buf, u8_t *resp_buf, u8_t wr_len)
+{
+	int ret;
+	struct peci_msg packet;
+
+	packet.tx_buffer.buf = req_buf;
+	packet.tx_buffer.len = wr_len;
+	packet.rx_buffer.buf = resp_buf;
+	packet.rx_buffer.len = PECI_WR_PKG_RD_LEN;
+
+	packet.addr = PECI_HOST_ADDR;
+	packet.cmd_code = PECI_CMD_WR_PKG_CFG0;
+
+	ret = peci_exec_transfer_retry(peci_dev, &packet);
+	if (ret) {
+		LOG_ERR("Peci WrPkgConfig failed");
+	}
+
+	return ret;
+}
+
+
+int peci_rd_ia_msr(u8_t *req_buf, u8_t *resp_buf, u8_t rd_len)
+{
+	int ret;
+	struct peci_msg packet;
+
+	packet.tx_buffer.buf = req_buf;
+	packet.tx_buffer.len = PECI_RD_IAMSR_WR_LEN;
+	packet.rx_buffer.buf = resp_buf;
+	packet.rx_buffer.len = rd_len;
+
+	packet.addr = PECI_HOST_ADDR;
+	packet.cmd_code = PECI_CMD_RD_IAMSR0;
+
+	ret = peci_exec_transfer_retry(peci_dev, &packet);
+	if (ret) {
+		LOG_ERR("Peci RdIAMSR failed");
+	}
+
+	return ret;
+}
+
+
+int peci_wr_ia_msr(u8_t *req_buf, u8_t *resp_buf, u8_t wr_len)
+{
+	int ret;
+	struct peci_msg packet;
+
+	packet.tx_buffer.buf = req_buf;
+	packet.tx_buffer.len = wr_len;
+	packet.rx_buffer.buf = resp_buf;
+	packet.rx_buffer.len = PECI_WR_PKG_RD_LEN;
+
+	packet.addr = PECI_HOST_ADDR;
+	packet.cmd_code = PECI_CMD_WR_IAMSR0;
+
+	ret = peci_exec_transfer_retry(peci_dev, &packet);
+	if (ret) {
+		LOG_ERR("Peci WrIAMSR failed");
+	}
+
+	return ret;
+}
+
+
+int peci_get_dib(u8_t *dev_info, u8_t *rev_num)
+{
+	int ret;
+	u8_t req_buf[PECI_GET_DIB_WR_LEN + PECI_FCS_LEN];
+	u8_t resp_buf[PECI_GET_DIB_RD_LEN + PECI_FCS_LEN];
+	struct peci_msg packet;
+
+	packet.tx_buffer.buf = req_buf;
+	packet.tx_buffer.len = PECI_GET_DIB_WR_LEN;
+	packet.rx_buffer.buf = resp_buf;
+	packet.rx_buffer.len = PECI_GET_DIB_RD_LEN;
+
+	packet.addr = PECI_HOST_ADDR;
+	packet.cmd_code = PECI_CMD_GET_DIB;
+
+	ret = peci_exec_transfer(peci_dev, &packet);
+	if (ret) {
+		LOG_ERR("Peci GetDIB failed");
+	} else {
+		*dev_info = resp_buf[PECI_GET_DIB_DEVINFO];
+		*rev_num = resp_buf[PECI_GET_DIB_RD_LEN];
+	}
+
+	return ret;
+}
+
 
 int peci_get_tjmax(u8_t *tjmax)
 {
 	int ret;
 
-	u8_t resp_buf[PECI_RD_PKG_LEN_DWORD + 1];
+	u8_t resp_buf[PECI_RD_PKG_LEN_DWORD + PECI_FCS_LEN];
 	u8_t req_buf[] = { PECI_CONFIGHOSTID,
 				PECI_CONFIGINDEX_TJMAX,
 				PECI_CONFIGPARAM & 0x00FF,
@@ -145,7 +284,7 @@ int peci_get_temp(int *temperature)
 		}
 	}
 
-	u8_t resp_buf[PECI_GET_TEMP_RD_LEN + 1];
+	u8_t resp_buf[PECI_GET_TEMP_RD_LEN + PECI_FCS_LEN];
 
 	packet.tx_buffer.buf = NULL;
 	packet.tx_buffer.len = PECI_GET_TEMP_WR_LEN;

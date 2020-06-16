@@ -137,9 +137,12 @@ int peci_get_temp(int *temperature)
 	 * calculated. In this case return fail safe temperature.
 	 */
 	if (cpu_tjmax == 0) {
-		peci_get_max_temp();
-		*temperature = PECI_CPUTEMP_FAILSAFE;
-		return -EINVAL;
+		ret = peci_get_tjmax(&cpu_tjmax);
+		if (ret) {
+			LOG_ERR("Fail to get TjMax: %d", ret);
+			*temperature = PECI_CPUTEMP_FAILSAFE;
+			return -EINVAL;
+		}
 	}
 
 	u8_t resp_buf[PECI_GET_TEMP_RD_LEN + 1];

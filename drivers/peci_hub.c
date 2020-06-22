@@ -99,7 +99,7 @@ static int peci_exec_transfer_retry(struct device *dev, struct peci_msg *msg)
 {
 	int ret;
 	int retries = PECI_RETRY_CNT;
-	u8_t peci_resp;
+	u8_t peci_resp = 0;
 
 	k_mutex_lock(&trans_mutex, K_FOREVER);
 	if (!peci_initialized) {
@@ -269,6 +269,7 @@ int peci_get_tjmax(u8_t *tjmax)
 int peci_get_temp(int *temperature)
 {
 	s16_t raw_cpu_temp;
+	u16_t peci_resp;
 	int ret;
 	struct peci_msg packet;
 
@@ -301,11 +302,11 @@ int peci_get_temp(int *temperature)
 		return ret;
 	}
 
-	raw_cpu_temp = (s16_t)(resp_buf[PECI_GET_TEMP_LSB] |
-			(s16_t)((resp_buf[PECI_GET_TEMP_MSB] << 8) & 0xFF00));
+	peci_resp = (u16_t)(resp_buf[PECI_GET_TEMP_LSB] |
+			(u16_t)((resp_buf[PECI_GET_TEMP_MSB] << 8) & 0xFF00));
 
-	if (raw_cpu_temp == PECI_GENERAL_SENSOR_ERROR) {
-		LOG_ERR("%s:Invalid temp %x", __func__, raw_cpu_temp);
+	if (peci_resp == PECI_GENERAL_SENSOR_ERROR) {
+		LOG_ERR("%s:PECI_GENERAL_SENSOR_ERROR", __func__);
 		*temperature = PECI_CPUTEMP_FAILSAFE;
 		return -EINVAL;
 	}
@@ -313,6 +314,7 @@ int peci_get_temp(int *temperature)
 	 /* 16-bit interpretation of temperature,
 	  * sign bit = 15bit and bit14-bit6 = Temperatur data
 	  */
+	raw_cpu_temp = (s16_t)(peci_resp);
 	raw_cpu_temp = (raw_cpu_temp >> GET_TEMP_POS) | GET_TEMP_MASK;
 
 	/* Temperature conversion: Temperature reading is always -ve and

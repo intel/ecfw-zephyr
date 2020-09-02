@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>System Management Controller &mdash; Zephyr-based Embedded controller firmware 1.10 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Keyboard System Controller Host" href="../kbchost/index.html" />
+    <link rel="prev" title="Peripheral management" href="../peripheral/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Zephyr-based Embedded controller firmware
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.10
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Documentation Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hw.html">Supported Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">EC FW application modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../task_handling/index.html">Task Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../power_sequencing/index.html">Power Sequencing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../peripheral/index.html">Peripheral management</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">System Management Controller</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hw-interface">HW interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sw-flow">SW flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#queue-mechanism">Queue Mechanism</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sci-notifications">SCI Notifications</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#acpi-region">ACPI Region</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#custom-ec-commands">Custom EC Commands</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kbchost/index.html">Keyboard System Controller Host</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kscan/index.html">Keyboard scan matrix</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Zephyr-based Embedded controller firmware</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../modules.html">EC FW application modules</a> &raquo;</li>
+        
+      <li>System Management Controller</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/reference/smc/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="system-management-controller">
+<span id="smc"></span><h1>System Management Controller<a class="headerlink" href="#system-management-controller" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#hw-interface" id="id1">HW interface</a></p></li>
+<li><p><a class="reference internal" href="#sw-flow" id="id2">SW flow</a></p></li>
+<li><p><a class="reference internal" href="#implementation" id="id3">Implementation</a></p></li>
+</ul>
+</div>
+<p>There are several forms of communication between the Embedded Controller and
+Intel SoC in the system including ACPI, System Management Bus (SMBus), or
+shared memory.
+The sections details how the reference code implements the interfaces
+described in the <a class="reference external" href="https://uefi.org/sites/default/files/resources/ACPI_6_3_final_Jan30.pdf">ACPI specification</a> Chapter 12, to enable communication
+between the Embedded Controller and BIOS/OS.</p>
+<p>This include communication in both directions. Either initiated by BIOS/EC where
+EC is queried to obtain system information within EC domain (battery, thermal,
+fan, and so on). Or initiated by EC when a system event detected needs to
+be notified to OS (button press, thermal event).</p>
+<p>This section also describes how this communication mechanism can be extended or
+modified.</p>
+<div class="section" id="hw-interface">
+<h2><a class="toc-backref" href="#id1">HW interface</a><a class="headerlink" href="#hw-interface" title="Permalink to this headline">¶</a></h2>
+<p>The most common Embedded Controllers include a host interface that physically
+connects the EC HW to the SoC host bus and allows a bidirectional communication.
+Similarly, it supports a bidirectional event mechanism that allows EC to
+“interrupt” the SoC and vice versa.</p>
+<p>The most common host interface architecture in microcontrollers is depicted
+in <a class="reference external" href="https://uefi.org/sites/default/files/resources/ACPI_6_3_final_Jan30.pdf">ACPI specification</a> Figure 12-70. The figure depicts the interrupts and
+the ports or ‘ranges’ used by the register interface for communication.</p>
+<p>Note that as described in the ACPI specification, there are 2 registers in the
+interface. EC_SC acts as a status register when read and as command when written.
+On the other hand, EC_DAT is used to exchange data in both directions.</p>
+<p>Operations over these registers are frequently emulated/tunneled through a
+physical bus. See <a class="reference external" href="https://www.intel.com/content/dam/www/program/design/us/en/documents/low-pin-count-interface-specification.pdf">LPC specification</a>, Section 11.2</p>
+<img alt="../../_images/smc_hw_interface.png" class="align-center" src="../../_images/smc_hw_interface.png" />
+</div>
+<div class="section" id="sw-flow">
+<h2><a class="toc-backref" href="#id2">SW flow</a><a class="headerlink" href="#sw-flow" title="Permalink to this headline">¶</a></h2>
+<p>In a nutshell the above register interface is used by BIOS and OS to interact
+with the EC as depicted below. Refer to <a class="reference external" href="https://uefi.org/sites/default/files/resources/ACPI_6_3_final_Jan30.pdf">ACPI specification</a> Section 12.2 for
+more details.</p>
+<p>When BIOS write to EC_SC one of the predefined values (0x80-0x84) to indicate
+EC to perform an operation it does using I/O ports 0x66 and 0x62.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In eSPI-enabled system, when the host perform operations over 0x66 and
+0x62, the traffic is tunneled over eSPI.</p>
+</div>
+<p>The sequence for predefined EC command processing is as follows:</p>
+<ol class="arabic simple">
+<li><p>Host wait for IBF flag on status register to be 0, which indicates interface is free.</p></li>
+<li><p>Host write to command byte to port 66.</p></li>
+<li><p>While the transaction is outgoing
+3a) Wait until IBF flag becomes 0 again
+3b) Write data or address byte to port 62.</p></li>
+<li><p>To receive data from EC
+4a) Wait for OBF flag to be 1, which indicates there is incoming data.
+4b) Read data byte from port 62.</p></li>
+</ol>
+</div>
+<div class="section" id="implementation">
+<h2><a class="toc-backref" href="#id3">Implementation</a><a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>The SMC host module is implemented as a cooperative thread that registers multiple
+callbacks within different modules to track event in the system.</p>
+<p>The most relevant notifications are:</p>
+<ol class="arabic simple">
+<li><p>BIOS/EC commands</p></li>
+</ol>
+<ul class="simple">
+<li><p>Host has sent data or command over eSPI bus using HW interface previously described.</p></li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p>Peripheral notifications</p></li>
+</ol>
+<p>Used to be aware of any human interaction with the system that need to be
+notified to the BIOS/OS.</p>
+<ol class="arabic simple" start="3">
+<li><p>Host warning notifications</p></li>
+</ol>
+<p>Host has issued a warning for an upcoming platform or host reset.</p>
+<div class="section" id="queue-mechanism">
+<h3>Queue Mechanism<a class="headerlink" href="#queue-mechanism" title="Permalink to this headline">¶</a></h3>
+<p>The thread performs periodic checks on above notifications to handle
+all operations outside of ISR/callback context it follows same pattern as all
+other tasks where upon notification.</p>
+<p>This module uses 2 queues one for incoming data and for outgoing data. A third
+queue is used to schedule system interrupt notifications towards BIOS/OS.</p>
+<img alt="../../_images/smc_swstack.png" class="align-center" src="../../_images/smc_swstack.png" />
+</div>
+<div class="section" id="sci-notifications">
+<h3>SCI Notifications<a class="headerlink" href="#sci-notifications" title="Permalink to this headline">¶</a></h3>
+<p>In several scenarios, EC is responsible to notify BIOS/OS about asynchronous event
+in the system, EC modules do enqueue different notifications.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As mentioned before, in eSPI-enabled platform the register interface
+traffic is tunneled eSPI bus peripheral channel. Similarly, the System
+Controller Interrupt pin level is transmitted as eSPI virtual wire.
+Main implication is that SCI queue should be flushed whenever there is
+a platform reset event.</p>
+</div>
+</div>
+<div class="section" id="acpi-region">
+<h3>ACPI Region<a class="headerlink" href="#acpi-region" title="Permalink to this headline">¶</a></h3>
+<p>ACPI standard supports multiple embedded controller in a system, each with
+its own addressable I/O space or EC ACPI region. Nevertheless, reference HW
+only has one instance. The region is defined in BIOS ACPI tables and this module
+defines a memory region that matches byte per byte the fields in that table.</p>
+<p>BIOS runtime does implement ACPI methods that request EC read/write operations
+over this region. i.e. battery status.</p>
+</div>
+<div class="section" id="custom-ec-commands">
+<h3>Custom EC Commands<a class="headerlink" href="#custom-ec-commands" title="Permalink to this headline">¶</a></h3>
+<p>EC FW framework does extend the command interface defined in ACPI specification
+to enrich BIOS-EC interaction communication. These custom commands are defined
+under smchost_codes.h</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 Intel Corporation
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

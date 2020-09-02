@@ -1,0 +1,1187 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Keyboard System Controller Host &mdash; Zephyr-based Embedded controller firmware 1.10 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Keyboard scan matrix" href="../kscan/index.html" />
+    <link rel="prev" title="System Management Controller" href="../smc/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Zephyr-based Embedded controller firmware
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.10
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Documentation Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hw.html">Supported Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">EC FW application modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../task_handling/index.html">Task Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../power_sequencing/index.html">Power Sequencing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../peripheral/index.html">Peripheral management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../smc/index.html">System Management Controller</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Keyboard System Controller Host</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#theory-of-operation">Theory of operation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ps-2-keyboard-initialization-sequence-executed-in-bios">PS/2 keyboard initialization sequence executed in BIOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ps-2-keyboard-and-mouse-initialization-sequence-executed-in-os">PS/2 keyboard and mouse initialization sequence executed in OS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kscan/index.html">Keyboard scan matrix</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Zephyr-based Embedded controller firmware</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../modules.html">EC FW application modules</a> &raquo;</li>
+        
+      <li>Keyboard System Controller Host</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/reference/kbchost/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="keyboard-system-controller-host">
+<span id="kbchost"></span><h1>Keyboard System Controller Host<a class="headerlink" href="#keyboard-system-controller-host" title="Permalink to this headline">¶</a></h1>
+<p>Initially, the EC was conceived as a Keyboard System Controller (KSC), and its
+purpose was to realize the 8042 spec from IBM <a class="reference external" href="http://64bitos.tistory.com/attachment/cfile29.uf&#64;02784B4D50F966F12C3160.pdf">8042 IBM design guide</a> <a class="footnote-reference brackets" href="#id1" id="id2">1</a>. The
+core function of keyboard controllers was to inform the CPU when a key was
+pressed or released. They also managed auxiliary devices such as a mouse.</p>
+<p>However, the KSC kept evolving to the point where it handles more
+responsibilities than just PS/2 devices.  Therefore, today every 8042
+command/behavior became a subset of the Embedded Controller chip.
+In modern PC systems, the EC can receive 8042 commands from either BIOS
+or the PS/2 windows driver. The picture below illustrates 8042 commands
+triggered by a Windows driver.</p>
+<blockquote>
+<div><img alt="../../_images/kbchost_sequence_ps2.png" class="align-center" src="../../_images/kbchost_sequence_ps2.png" />
+</div></blockquote>
+<p>Here we can see that final software entity receiving the commands is the
+Zephyr PS/2 driver which performs PS/2 communication with a mouse and/or
+keyboard. The alternate flow shows how EC can also receive and process
+8042 commands.</p>
+<div class="section" id="theory-of-operation">
+<h2>Theory of operation<a class="headerlink" href="#theory-of-operation" title="Permalink to this headline">¶</a></h2>
+<p>This implementation of the 8042 spec is mainly performed by a software FSM
+to handle host requests. These commands can be directed to 3 different
+entities which can be the EC (8042 module) , PS/2 Keyboard or P/2 mouse.
+The FSM is triggered by an ISR and at that precise moment port 0x60 is
+read. This is where the FSM determines if it can process the command in the
+DEFAULT_STATE or it requires to transition to a new state in order to
+continue processing a given command.</p>
+<p>Kbchost uses two threads to process input and return output values from
+PS/2 devices and Scan matrix keyboard. One of them is exclusively used for
+feeding input arguments to the FSM and returning dummy keyboard
+configuration results. The dummy results are required in order to exercise
+initialization commands for the scan matrix keyboard because
+this device is just a grid of input/output wires. Therefore,
+Kbchost code generates artificial host replies in order to maintain
+an initialization sequence going.  The remaining thread is
+used for handling data generated when a user interacts with
+PS/2 keyboard/mouse and scan matrix keyboard.</p>
+<p>Generally speaking, Kbchost gets the commands through port 0x60/0x64.
+There are some variations in terms of how the commands and data arrive.
+For example, in order to address the mouse, the host has to send a request
+through port 0x64 to indicate device destination, then it sends a command
+through port 0x60 and payload for the command, only if required, using port
+0x60. On the other hand, when the host wishes to address the keyboard, then
+both command and data arrive through port 0x60. The image below describes
+the FSM implementation:</p>
+<blockquote>
+<div><img alt="../../_images/kbchost_transitions.png" class="align-center" src="../../_images/kbchost_transitions.png" />
+</div></blockquote>
+<p>Once a given transaction has been completely processed, then the FSM goes
+back to DEFAULT_STATE and waits there for future requests.</p>
+</div>
+<div class="section" id="ps-2-keyboard-initialization-sequence-executed-in-bios">
+<h2>PS/2 keyboard initialization sequence executed in BIOS<a class="headerlink" href="#ps-2-keyboard-initialization-sequence-executed-in-bios" title="Permalink to this headline">¶</a></h2>
+<p>Below is an example of a 8042 command sequence needed to initialize
+the keyboard in BIOS context.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Port</p></th>
+<th class="head"><p>Payload</p></th>
+<th class="head"><p>Action</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF4</p></td>
+<td><p>Enable</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>Mouse reply</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xAD</p></td>
+<td><p>Disable keyboard</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xA7</p></td>
+<td><p>Disable mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xAA</p></td>
+<td><p>Reset self-test</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x55</p></td>
+<td><p>Self-test response</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0x60</p></td>
+<td><p>Write to command byte</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x67</p></td>
+<td><p>Command byte payload</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xED</p></td>
+<td><p>Set led</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>Previous command reply</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Led settings (turn off all 3 leds)</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>Previous command reply</p></td>
+</tr>
+</tbody>
+</table>
+<p>These are the commands expected to be triggered in order to
+have a functional keyboard in EFI shell or BIOS menu.  The keyboard
+is enabled while writing 0x67 to the command byte, whereas the mouse
+remains disabled. Bear in mind these commands may vary in terms of
+the BIOS driving 8042 commands.</p>
+</div>
+<div class="section" id="ps-2-keyboard-and-mouse-initialization-sequence-executed-in-os">
+<h2>PS/2 keyboard and mouse initialization sequence executed in OS<a class="headerlink" href="#ps-2-keyboard-and-mouse-initialization-sequence-executed-in-os" title="Permalink to this headline">¶</a></h2>
+<p>OS initialization for PS/2 devices is a little more complex since both
+keyboard and mouse require a finer calibration dictated by PS/2 driver
+running in OS context.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Port</p></th>
+<th class="head"><p>Payload</p></th>
+<th class="head"><p>Action</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xED</p></td>
+<td><p>Set leds</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>Command reply</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x02</p></td>
+<td><p>Turn led corresponding to bit 1</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>Command reply</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xED</p></td>
+<td><p>Set leds</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>Command reply</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x02</p></td>
+<td><p>Turn one led on</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>Command reply</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0x20</p></td>
+<td><p>Read command byte</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x67</p></td>
+<td><p>Command byte from EC</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0x60</p></td>
+<td><p>Write command byte to EC</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x67</p></td>
+<td><p>Command byte from host</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xED</p></td>
+<td><p>Set leds</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>Command reply</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Turn off all the leds</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>Command reply</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xAD</p></td>
+<td><p>Disable keyboard</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xA7</p></td>
+<td><p>Disable mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0x20</p></td>
+<td><p>Read command byte</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x77</p></td>
+<td><p>Command byte returned to the host</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xAE</p></td>
+<td><p>Enable keyboard</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xA8</p></td>
+<td><p>Enable mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0x60</p></td>
+<td><p>Write command byte</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x44</p></td>
+<td><p>Command byte from host</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xAD</p></td>
+<td><p>Disable keyboard</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xA7</p></td>
+<td><p>Disable mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0x20</p></td>
+<td><p>Read command byte</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x74</p></td>
+<td><p>Command byte returned to the host</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xAE</p></td>
+<td><p>Enable keyboard</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xA8</p></td>
+<td><p>Enable mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFF</p></td>
+<td><p>Reset(in this case keyboard)</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>Reply from keyboard</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xAA</p></td>
+<td><p>BAT from keyboard</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xAD</p></td>
+<td><p>Disable keyboard</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xA7</p></td>
+<td><p>Disable mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0x20</p></td>
+<td><p>Read command byte</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x74</p></td>
+<td><p>Command byte returned to the host</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xAE</p></td>
+<td><p>Enable keyboard</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xA8</p></td>
+<td><p>Enable mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0x60</p></td>
+<td><p>Write command byte</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x04</p></td>
+<td><p>Command byte from host</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xAD</p></td>
+<td><p>Disable keyboard</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xA7</p></td>
+<td><p>Disable mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0x20</p></td>
+<td><p>Read command byte</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x34</p></td>
+<td><p>Command byte returned to the host</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xAE</p></td>
+<td><p>Enable keyboard</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xA8</p></td>
+<td><p>Enable mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF3</p></td>
+<td><p>Set typematic rate and delay</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Typematic settings</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xED</p></td>
+<td><p>Set leds</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Turn off all the leds</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xAD</p></td>
+<td><p>Disable keyboard</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xA7</p></td>
+<td><p>Disable mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0x20</p></td>
+<td><p>Read command byte</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x34</p></td>
+<td><p>Command byte returned to the host</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xAE</p></td>
+<td><p>Enable keyboard</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xA8</p></td>
+<td><p>Enable mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0x60</p></td>
+<td><p>Write command byte</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x44</p></td>
+<td><p>Command byte from host</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xAD</p></td>
+<td><p>Disable keyboard</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xA7</p></td>
+<td><p>Disable mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0x20</p></td>
+<td><p>Read command byte</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x74</p></td>
+<td><p>Command byte returned to the host</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xAE</p></td>
+<td><p>Enable keyboard</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xA8</p></td>
+<td><p>Enable mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send command to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFF</p></td>
+<td><p>Reset command</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xAA</p></td>
+<td><p>BAT</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Mouse ID</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xED</p></td>
+<td><p>Set leds</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Turn off all the leds</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xAE</p></td>
+<td><p>Enable keyboard</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xA8</p></td>
+<td><p>Enable mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xAD</p></td>
+<td><p>Disable keyboard</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xA7</p></td>
+<td><p>Disable mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0x20</p></td>
+<td><p>Read command byte</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x74</p></td>
+<td><p>Command byte returned to the host</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xAE</p></td>
+<td><p>Enable keyboard</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xA8</p></td>
+<td><p>Enable mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0x60</p></td>
+<td><p>Write command byte</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x47</p></td>
+<td><p>Command byte payload</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xAD</p></td>
+<td><p>Disable keyboard</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xA7</p></td>
+<td><p>Disable mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0x20</p></td>
+<td><p>Read command byte</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x77</p></td>
+<td><p>Command byte returned to the host</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xAE</p></td>
+<td><p>Enable keyboard</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xA8</p></td>
+<td><p>Enable mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFF</p></td>
+<td><p>Reset</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xAA</p></td>
+<td><p>BAT</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Mouse ID</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xF2</p></td>
+<td><p>Read mouse ID</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Mouse ID</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xE8</p></td>
+<td><p>Set resolution</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Resolution payload</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xE6</p></td>
+<td><p>Set scaling 1:1</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xE6</p></td>
+<td><p>Set scaling 1:1</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xE6</p></td>
+<td><p>Set scaling 1:1</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xE9</p></td>
+<td><p>Status request</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Status reply</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x00</p></td>
+<td><p>Status reply</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x64</p></td>
+<td><p>Status reply</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xE8</p></td>
+<td><p>Set resolution</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x03</p></td>
+<td><p>Resolution payload</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF3</p></td>
+<td><p>Set sample rate</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xC8</p></td>
+<td><p>Sample rate</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF3</p></td>
+<td><p>Set sample rate</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x64</p></td>
+<td><p>Sample rate value</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF3</p></td>
+<td><p>Set sample rate</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x50</p></td>
+<td><p>Sample rate value</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF2</p></td>
+<td><p>Read device type</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x03</p></td>
+<td><p>Device type</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF3</p></td>
+<td><p>Set sample rate</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xC8</p></td>
+<td><p>Sample rate value</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF3</p></td>
+<td><p>Set sample rate</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xC8</p></td>
+<td><p>Sample rate value</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF3</p></td>
+<td><p>Set sample rate</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x50</p></td>
+<td><p>Sample rate value</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF2</p></td>
+<td><p>Read device type</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x04</p></td>
+<td><p>Device type</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF3</p></td>
+<td><p>Sample rate value</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x64</p></td>
+<td><p>Sample rate value</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xE8</p></td>
+<td><p>Set resolution</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0x03</p></td>
+<td><p>Resolution payload</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-even"><td><p>0x64</p></td>
+<td><p>0xD4</p></td>
+<td><p>Send to mouse</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF4</p></td>
+<td><p>Enable</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF3</p></td>
+<td><p>Set sample rate</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x08</p></td>
+<td><p>Sample rate value</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x03</p></td>
+<td><p>Resolution payload</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x20</p></td>
+<td><p>Resolution payload</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0xF3</p></td>
+<td><p>Set sample rate</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+<tr class="row-odd"><td><p>0x60</p></td>
+<td><p>0x20</p></td>
+<td><p>Sample rate value</p></td>
+</tr>
+<tr class="row-even"><td><p>0x60</p></td>
+<td><p>0xFA</p></td>
+<td><p>ACK</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<dl class="footnote brackets">
+<dt class="label" id="id1"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dd><p><a class="reference external" href="http://64bitos.tistory.com/attachment/cfile29.uf&#64;02784B4D50F966F12C3160.pdf">http://64bitos.tistory.com/attachment/cfile29.uf&#64;02784B4D50F966F12C3160.pdf</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 Intel Corporation
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

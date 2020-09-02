@@ -1,0 +1,264 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Keyboard scan matrix &mdash; Zephyr-based Embedded controller firmware 1.10 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Keyboard System Controller Host" href="../kbchost/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Zephyr-based Embedded controller firmware
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.10
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Documentation Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hw.html">Supported Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">EC FW application modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../task_handling/index.html">Task Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../power_sequencing/index.html">Power Sequencing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../peripheral/index.html">Peripheral management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../smc/index.html">System Management Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kbchost/index.html">Keyboard System Controller Host</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Keyboard scan matrix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Zephyr-based Embedded controller firmware</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../modules.html">EC FW application modules</a> &raquo;</li>
+        
+      <li>Keyboard scan matrix</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/reference/kscan/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="keyboard-scan-matrix">
+<span id="kscan-matrix"></span><h1>Keyboard scan matrix<a class="headerlink" href="#keyboard-scan-matrix" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>A keyboard matrix is composed of a grid of wires representing rows and
+columns. These rows and columns are connected to an embedded controller(KSC)
+which continuously scans the state of all the grid. A circuit in the grid is
+closed when a key is pressed, and this is eventually sensed by the FW running
+in the EC. Once the row and column has been determined, the EC maps the grid
+coordinates to a scan code which is provided to the host as a set of bytes.</p>
+</div>
+<div class="section" id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>In this realization, state and data for a keyboard matrix are represented
+in the EC as an application module. This module depends on <a class="reference internal" href="../kbchost/index.html#kbchost"><span class="std std-ref">Keyboard System Controller Host</span></a> to
+receive configuration commands and to sent keyboard events back to the host.
+Keyboard events are treated as if they were PS/2 keyboard events. There are a
+few configuration commands which are faked by kbchost since we want to let the
+initialization flow complete successfully. The image below illustrates
+components involved in the keyboard matrix configuration.</p>
+<blockquote>
+<div><img alt="../../_images/kscan_config.png" class="align-center" src="../../_images/kscan_config.png" />
+</div></blockquote>
+<p>Keyboard events provide row and column data, so there isn’t any scanning
+performed by the keyboard matrix module since that is performed by the
+underlying Zephyr driver. The Zephyr driver also tracks which keys in the
+matrix are still pressed and which ones are being released. This data is relayed
+to the kscan application module in the form of callbacks. Once the callbacks
+are received, the application module translates grid coordinates to scan codes
+and queues them in the same queue used for sending PS/2 scan codes. See the
+image below for more details.</p>
+<blockquote>
+<div><img alt="../../_images/kscan_key_event.png" class="align-center" src="../../_images/kscan_key_event.png" />
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The keyboard mapping (GTech) provided with the application cannot be connected
+to the modular card. The TGL board has a scan matrix ribbon connector at the
+bottom, but it is not mapped to the modular card which means it can’t also be
+used. More information will be provided later.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 Intel Corporation
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

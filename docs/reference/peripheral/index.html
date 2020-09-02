@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Peripheral management &mdash; Zephyr-based Embedded controller firmware 1.10 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="System Management Controller" href="../smc/index.html" />
+    <link rel="prev" title="Power Sequencing" href="../power_sequencing/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Zephyr-based Embedded controller firmware
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.10
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Documentation Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hw.html">Supported Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">EC FW application modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../task_handling/index.html">Task Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../power_sequencing/index.html">Power Sequencing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Peripheral management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#windows-button-support">Windows Button Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#switches-when-applicable">Switches (when applicable)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#implementation">Implementation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../smc/index.html">System Management Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kbchost/index.html">Keyboard System Controller Host</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kscan/index.html">Keyboard scan matrix</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Zephyr-based Embedded controller firmware</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../modules.html">EC FW application modules</a> &raquo;</li>
+        
+      <li>Peripheral management</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/reference/peripheral/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="peripheral-management">
+<span id="human-interface-devices"></span><h1>Peripheral management<a class="headerlink" href="#peripheral-management" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#windows-button-support" id="id1">Windows Button Support</a></p></li>
+<li><p><a class="reference internal" href="#switches-when-applicable" id="id2">Switches (when applicable)</a></p></li>
+</ul>
+</div>
+<p>This section describes the Embedded Controller human interface device management
+module, which mainly handles buttons and switches associated with human interaction.</p>
+<div class="section" id="windows-button-support">
+<h2><a class="toc-backref" href="#id1">Windows Button Support</a><a class="headerlink" href="#windows-button-support" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p>Power button</p>
+<p>The power button input to EC is by default driven HIGH with a pull-up.
+On power button press this line will be pulled LOW which triggers interrupt.</p>
+</li>
+<li><p>Volume up/down buttons</p></li>
+<li><p>Home button</p></li>
+</ul>
+</div>
+<div class="section" id="switches-when-applicable">
+<h2><a class="toc-backref" href="#id2">Switches (when applicable)</a><a class="headerlink" href="#switches-when-applicable" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Laptop lid</p></li>
+<li><p>Screen rotation lock</p></li>
+</ul>
+<p>This module is used to track the state of switches and notifies other modules
+when a state change occurs in any of them.</p>
+<ul class="simple">
+<li><p>Button (press, released)</p></li>
+<li><p>Switch (open, closed)</p></li>
+</ul>
+<p>The main role of this module is to deal with the undesirable effect that any
+mechanical switch has whenever it bangs together causing electrical rebound
+before settling down after the electrical transient time.</p>
+<blockquote>
+<div><img alt="../../_images/switch_transient.png" class="align-center" src="../../_images/switch_transient.png" />
+</div></blockquote>
+<p>Therefore, this module is mainly involved in removing these undesired changes
+or debouncing.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Disable this module if your board already has debouncing by hardware.</p>
+</div>
+<div class="section" id="implementation">
+<h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h3>
+<p>Mechanical switch debouncing is implemented using cooperative threading to
+track the state transitions from all buttons registered within the system.</p>
+<p>This module uses a cooperative thread to track the state transitions from all
+buttons registered within the system.</p>
+<p>Callbacks per button/switch are registered within the GPIO driver to track
+different state transitions for button and switches.</p>
+<img alt="../../_images/peripheral_swstack.png" class="align-center" src="../../_images/peripheral_swstack.png" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This module assumes that the gpios connected to buttons or switches are already
+configured during board initialization as input. It also assumes that interrupt
+for changes in the state is enabled and configured to trigger on both edges.</p>
+</div>
+<img alt="../../_images/debounce_aid_by_interrupts.png" class="align-center" src="../../_images/debounce_aid_by_interrupts.png" />
+<p>When the GPIO driver notifies this module of a GPIO level change in either direction,
+the pin is moved into “debouncing” state. Once the button is debounced,
+the pin is moved back to ‘stable’ state.</p>
+<p>The state of a button/pin changes from debouncing to stable state by means of a
+counter. Once the debounce process begins, a counter is increased every
+millisecond.  If the counter reaches zero without any additional level change,
+it means the “bouncing” or electrical transient period is considered over.
+This results in a state transition out of “debouncing” state and their
+respective observers are notified.</p>
+<p>Before the counter expires, if there is another callback indicating a change
+on the pin, the counter is reset back to maximum DEBOUNCE_TIME and the pin continues
+debouncing.</p>
+<blockquote>
+<div><img alt="../../_images/peripheral_implementation.png" class="align-center" src="../../_images/peripheral_implementation.png" />
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This module considers that most buttons or switches won’t exhibit bouncing
+with a duration exceeding 5 milliseconds, hence DEBOUNCE_TIME is set to 5.</p>
+</div>
+<p>Additionally, in order to handle cases where circuit is too noisy, the module
+filters events and only notifies the observers only when an actual change has
+occurred.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 Intel Corporation
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

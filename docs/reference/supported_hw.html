@@ -1,0 +1,385 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Supported Hardware &mdash; Zephyr-based Embedded controller firmware 1.10 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="EC FW application modules" href="modules.html" />
+    <link rel="prev" title="Getting started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Zephyr-based Embedded controller firmware
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.10
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Documentation Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Supported Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#other-ec-soc">Other EC SoC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#customize-ec-fw-framework-for-other-ec-soc">Customize EC FW framework for other EC SoC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gpio-initialization">GPIO initialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hw-limitations">HW limitations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">EC FW application modules</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Zephyr-based Embedded controller firmware</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Supported Hardware</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/reference/supported_hw.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="supported-hardware">
+<span id="id1"></span><h1>Supported Hardware<a class="headerlink" href="#supported-hardware" title="Permalink to this headline">¶</a></h1>
+<p>Intel Tiger lake Reference Validation Platform (RVP) used in conjunction with
+Microchip MEC15xx modular embedded control card (MECC) is currently supported.</p>
+<p>The reference HW used to showcase EC FW open source takes advantage of the Modular
+Embedded controller card (MECC) specification, which defines both pin mapping
+and provides general guidelines to use different Embedded Controller Soc to the
+on-board EC through an add-on card. This allows to evaluate different EC
+in an Intel RVP.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Reworks are required on RVP to be able to control the RVP from MECC
+card. Refer to <a class="reference external" href="https://www.intel.com/content/www/us/en/programmable/documentation/lit-index.html">Platform design guide</a> for details.</p>
+</div>
+<div class="section" id="other-ec-soc">
+<h2>Other EC SoC<a class="headerlink" href="#other-ec-soc" title="Permalink to this headline">¶</a></h2>
+<p>In order to use a different MECC card with a different EC SoC vendor, the vendor
+should add its Hardware Abstraction Layer (HAL) and board support package (BSP)
+to Zephyr RTOS. See <a class="reference external" href="https://docs.zephyrproject.org/latest/guides/porting/board_porting.html">Zephyr’s porting guide</a></p>
+<p>The list below presents the minimum drivers required by the EC application to
+boot an eSPI-based Intel platform.</p>
+<ul class="simple">
+<li><p>UART</p></li>
+<li><p>GPIO</p></li>
+<li><p>RTOS timer</p></li>
+<li><p>I2C - Port 80 visualization if board supports it.</p></li>
+<li><p>eSPI - Required by power sequencing module</p></li>
+<li><p>ACPI - Required by SMC host module (EC - BIOS interactions).</p></li>
+</ul>
+<p>The following drivers are needed to exercise other non-boot critical features:</p>
+<ul class="simple">
+<li><p>PS/2 - for PS/2 devices management</p></li>
+<li><p>Keyscan - for keyboard matrix</p></li>
+</ul>
+<p>These drivers are required to enable features available in upcoming releases:</p>
+<ul class="simple">
+<li><p>PECI - for thermal module</p></li>
+<li><p>TACH - for thermal module</p></li>
+<li><p>ADC - for thermal module</p></li>
+<li><p>PWM - for fan control</p></li>
+</ul>
+</div>
+<div class="section" id="customize-ec-fw-framework-for-other-ec-soc">
+<h2>Customize EC FW framework for other EC SoC<a class="headerlink" href="#customize-ec-fw-framework-for-other-ec-soc" title="Permalink to this headline">¶</a></h2>
+<p>Zephyr uses device tree to describe hardware both EC SoC and board’s peripherals.
+The EC FW abstracts the device tree using friendly macros which can be customized when
+using different EC SoC and/or different board. See boards/&lt;vendor&gt; for more details</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define I2C_BUS_0   DT_LABEL(DT_NODELABEL(i2c_smb_0))</span>
+</pre></div>
+</div>
+<p>For more details, see <a class="reference external" href="https://docs.zephyrproject.org/latest/guides/dts/index.html">Zephyr’s device tree guide</a>.</p>
+</div>
+<div class="section" id="gpio-initialization">
+<h2>GPIO initialization<a class="headerlink" href="#gpio-initialization" title="Permalink to this headline">¶</a></h2>
+<p>EC FW app doesn’t control/configure all GPIOs on the chip but only the ones used
+by the app. This is an important delegation to BSP’s where generic app pins
+are not configured.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For current supported HW, see boards/arm/mec15xx/pinmux.c</p>
+</div>
+<p>When a pin is intended to be controlled by the EC FW framework it should be
+mapped under boardname_chipversion.h to corresponding Zephyr GPIO port and pin.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PCH_PWROK    EC_GPIO_106  </span><span class="cm">/* Board #1 Port A, Pin B */</span><span class="cp"></span>
+<span class="cp">#define PCH_PWROK    EC_GPIO_036  </span><span class="cm">/* Board #2 Port B, Pin C */</span><span class="cp"></span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>EC_GPIO_XXX is a SoC specific macro, which abstracts GPIO port and
+GPIO pin number since Zephyr supports logical GPIO ports and
+EC FW requires the flexibility to map a signal to different pins.</p>
+</div>
+<p>Similarly, boardname_chipversion.c should contain the actual pin configuration
+required by the application input/output, open drain and so on.
+See <a class="reference external" href="https://docs.zephyrproject.org/latest/reference/peripherals/gpio.html">Zephyr’s GPIO reference</a> for Zephyr GPIO flags.</p>
+</div>
+<div class="section" id="hw-limitations">
+<h2>HW limitations<a class="headerlink" href="#hw-limitations" title="Permalink to this headline">¶</a></h2>
+<p>Most of the signals used by onboard EC are routed to MECC connector, however
+some signals may be missing on MECC compared to onboard EC.
+Refer to RVP schematics.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Additionally, some MECC cards implement some variations on the MECC
+spec. However, this is being addressed by discussing with the EC
+vendors to adhere to the spec allowing more consistency.</p>
+</div>
+<p>As indicated above some Intel RVP features available are reduced when using MECC
+card. Refer to table below for guidance about what can be verified end-to-end.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 37%" />
+<col style="width: 17%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Area</p></th>
+<th class="head"><p>Feature</p></th>
+<th class="head"><p>SW support</p></th>
+<th class="head"><p>HW support
+(TGL + MECC)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Power sequencing</p></td>
+<td><p>ACPI power (Sx)</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes (*)</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p>Deep sleep (DSx)</p></td>
+<td><p>Yes</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p>Human interface</p></td>
+<td><p>Volume buttons</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p>Power button</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes (*)</p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p>Home button</p></td>
+<td><p>No</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p>Lid switch</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>PS2/ scan matrix</p></td>
+<td><p>PS2 keyboard</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p>PS2 mouse</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p>Keyboard matrix</p></td>
+<td><p>Yes</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>Debug</p></td>
+<td><p>Port 80</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p>Serial port (UART)</p></td>
+<td><p>Yes</p></td>
+<td><p>MECC USB</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>(*) Rework on MECC card is required to align to more common configuration
+in Intel RVP boards for power button.
+Add a blue wire from TP65 to J50.11 and from TP64 to J50.8</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 Intel Corporation
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

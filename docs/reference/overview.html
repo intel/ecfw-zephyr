@@ -1,0 +1,249 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Overview &mdash; Zephyr-based Embedded controller firmware 1.10 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Getting started" href="getting_started.html" />
+    <link rel="prev" title="Embedded controller firmware documentation" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Zephyr-based Embedded controller firmware
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.10
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Documentation Home</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#repository-management">Repository Management</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supported_hw.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">EC FW application modules</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Zephyr-based Embedded controller firmware</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Overview</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/reference/overview.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>The Embedded Controller firmware (EC) in a system, handles various low-level tasks
+not performed by the operating system like board power sequencing, battery
+management, thermal management, keyboard management, LAN, PCIe reset etc.</p>
+<p>Intel Basic Embedded Controller firmware provides reference code with a subset
+of such capabilities.</p>
+<img alt="../_images/embedded_controller.png" class="align-center" src="../_images/embedded_controller.png" />
+<p>IA system designers, OEMs can leverage the Intel open source EC FW code to use
+as a base and customize for the system requirements.
+The reference code covers all the basic EC functionality required to boot
+Enhanced Serial Peripheral Interface (eSPI) enabled platforms.”</p>
+<p>The reference code will also demonstrate the 3rd party microcontroller role in
+common platform boot sequence as well as the interaction with Intel BIOS.
+Finally, it showcases the management of PC peripherals such as PS/2 devices
+and matrix keyboards.</p>
+<a class="reference internal image-reference" href="../_images/ecfw_zephyr_overview.png"><img alt="../_images/ecfw_zephyr_overview.png" class="align-center" src="../_images/ecfw_zephyr_overview.png" style="width: 600px;" /></a>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>The reference embedded controller firmware is based on <a class="reference external" href="https://www.zephyrproject.org/">Zephyr RTOS</a>, this
+repository contains only the application source code as depicted below,
+so it must be combined with Zephyr RTOS and the respective EC SoC Board Support
+Package (BSP) and Hardware Abstraction Layer (HAL).</p>
+<a class="reference internal image-reference" href="../_images/ecfw_zephyr_modules.png"><img alt="../_images/ecfw_zephyr_modules.png" class="align-center" src="../_images/ecfw_zephyr_modules.png" style="width: 600px;" /></a>
+</div>
+<div class="section" id="repository-management">
+<h2>Repository Management<a class="headerlink" href="#repository-management" title="Permalink to this headline">¶</a></h2>
+<p>In order to manage the combination of the above repositories and versions, this
+project uses <a class="reference external" href="https://docs.zephyrproject.org/latest/guides/west/">Zephyr’s west</a> (Zephyr’s meta-tool).</p>
+<p>The main repository contains a manifest file (west.yml), that list all the
+dependencies and revisions required for each of the external projects.</p>
+<p>This means the main repo acts as the manifest repository.</p>
+<img alt="../_images/ecfw_zephyr_repos.png" class="align-center" src="../_images/ecfw_zephyr_repos.png" />
+<p>You can find additional information about the repository management and west
+manifest in <a class="reference external" href="https://docs.zephyrproject.org/latest/guides/west/manifest.html">Zephyr’s west manifest</a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 Intel Corporation
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

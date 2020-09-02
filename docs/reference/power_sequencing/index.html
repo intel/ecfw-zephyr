@@ -1,0 +1,484 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Power Sequencing &mdash; Zephyr-based Embedded controller firmware 1.10 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Peripheral management" href="../peripheral/index.html" />
+    <link rel="prev" title="Task Handling" href="../task_handling/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Zephyr-based Embedded controller firmware
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.10
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Documentation Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hw.html">Supported Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">EC FW application modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../task_handling/index.html">Task Handling</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Power Sequencing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#power-signals">Power Signals</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#power-button-input">Power button input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rsmrst-pwrgd">RSMRST#_PWRGD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#all-sys-pwrgd">ALL_SYS_PWRGD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#slp-sx">SLP_Sx#</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#system-transitions">System transitions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#acpi-system-transitions">ACPI System Transitions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flow-for-g3-to-s0">Flow for G3 to S0</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flow-for-s0-to-s3-suspend">Flow for S0 to S3 (suspend)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flow-for-s3-to-s0-resume">Flow for S3 to S0 (resume)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flow-for-s0-to-s4-s5-hibernate-shutdown">Flow for S0 to S4/S5 (hibernate/shutdown)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flow-for-s5-s4-to-s0">Flow for S5/S4 to S0</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#intel-specific-power-management-transitions">Intel-specific Power Management Transitions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#flow-for-s3-s4-s5-to-deep-sleep">Flow for S3/S4/S5 to deep sleep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flow-for-deep-sleep-to-s3-s4-s5">Flow for deep sleep to S3/S4/S5</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#timeout-mechanism">Timeout Mechanism</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variants-across-platforms">Variants Across Platforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../peripheral/index.html">Peripheral management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../smc/index.html">System Management Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kbchost/index.html">Keyboard System Controller Host</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kscan/index.html">Keyboard scan matrix</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Zephyr-based Embedded controller firmware</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../modules.html">EC FW application modules</a> &raquo;</li>
+        
+      <li>Power Sequencing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/reference/power_sequencing/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="power-sequencing">
+<span id="id1"></span><h1>Power Sequencing<a class="headerlink" href="#power-sequencing" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#power-signals" id="id2">Power Signals</a></p></li>
+<li><p><a class="reference internal" href="#system-transitions" id="id3">System transitions</a></p></li>
+<li><p><a class="reference internal" href="#acpi-system-transitions" id="id4">ACPI System Transitions</a></p></li>
+<li><p><a class="reference internal" href="#intel-specific-power-management-transitions" id="id5">Intel-specific Power Management Transitions</a></p></li>
+<li><p><a class="reference internal" href="#implementation" id="id6">Implementation</a></p></li>
+<li><p><a class="reference internal" href="#timeout-mechanism" id="id7">Timeout Mechanism</a></p></li>
+<li><p><a class="reference internal" href="#variants-across-platforms" id="id8">Variants Across Platforms</a></p></li>
+</ul>
+</div>
+<p>This section describes the embedded controller firmware power sequencing module
+which handles platform out-of-reset sequencing and power management flows.</p>
+<p>The embedded controller firmware follows Intel <a class="reference external" href="https://www.intel.com/content/www/us/en/programmable/documentation/lit-index.html">Platform design guide</a>
+for all power sequencing timings and sequence.
+This module relies on platform events to keep track of these system transitions.
+These power signals either come from a host system (Intel SoC) or are generated
+by board circuitry.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>System in this case refers to either board, laptop or desktop running Windows OS,
+however some concepts are generic enough to be applicable to other OS.</p>
+</div>
+<div class="section" id="power-signals">
+<h2><a class="toc-backref" href="#id2">Power Signals</a><a class="headerlink" href="#power-signals" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="power-button-input">
+<h3>Power button input<a class="headerlink" href="#power-button-input" title="Permalink to this headline">¶</a></h3>
+<p>Also known as SMC_ONOFF, refers to the direct connection to EC from the board
+power button. Based on this signal the module generates a debounced or delayed
+power button signal towards Intel PCH as described in the <a class="reference external" href="https://www.intel.com/content/www/us/en/programmable/documentation/lit-index.html">Platform design guide</a>.</p>
+</div>
+<div class="section" id="rsmrst-pwrgd">
+<h3>RSMRST#_PWRGD<a class="headerlink" href="#rsmrst-pwrgd" title="Permalink to this headline">¶</a></h3>
+<p>Resume reset power good signal to the Embedded Controller hardware to indicate
+that main power rails on the board are stable, in response this module generates
+RSMRST output to PCH.</p>
+</div>
+<div class="section" id="all-sys-pwrgd">
+<h3>ALL_SYS_PWRGD<a class="headerlink" href="#all-sys-pwrgd" title="Permalink to this headline">¶</a></h3>
+<p>The all system power good input generated from board circuitry indicates to
+the Embedded Controller (EC) that SoC power rails are stable. Based on this
+the module will generate PCH_PWROK signal.</p>
+</div>
+<div class="section" id="slp-sx">
+<h3>SLP_Sx#<a class="headerlink" href="#slp-sx" title="Permalink to this headline">¶</a></h3>
+<p>SLP_S3#, SLP_S4# and SLP_S5# indicate that the host system is undergoing a system
+transition, in which case system is entering the specified sleep state indicated
+by the respective signal as defined in <a class="reference external" href="https://uefi.org/sites/default/files/resources/ACPI_6_3_final_Jan30.pdf">ACPI specification</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The power signals can either be physical pins or virtual pins which are
+transmitted over the eSPI bus in the form of a virtual wire. The reference code
+assumes an eSPI-capable host. See <a class="reference external" href="https://www.intel.com/content/dam/support/us/en/documents/software/chipset-software/327432-004_espi_base_specification_rev1.0_cb.pdf">Enhanced Serial Peripheral Interface specification</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="system-transitions">
+<h2><a class="toc-backref" href="#id3">System transitions</a><a class="headerlink" href="#system-transitions" title="Permalink to this headline">¶</a></h2>
+<p>This module main role is to handle system transitions between the global system
+states (Gx states) defined <cite>ACPI specification</cite>. The states apply to the system
+as a whole and are visible to the user.</p>
+<blockquote>
+<div><img alt="../../_images/system_transitions.png" class="align-center" src="../../_images/system_transitions.png" />
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Windows OS is assumed in Intel TGL RVP, in which case Gx states map to user
+actions as follows: suspend (S3), hibernate (S4), shutdown (S5).</p>
+</div>
+</div>
+<div class="section" id="acpi-system-transitions">
+<h2><a class="toc-backref" href="#id4">ACPI System Transitions</a><a class="headerlink" href="#acpi-system-transitions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="flow-for-g3-to-s0">
+<h3>Flow for G3 to S0<a class="headerlink" href="#flow-for-g3-to-s0" title="Permalink to this headline">¶</a></h3>
+<p>Trigger events</p>
+<ul class="simple">
+<li><p>Valid power button press</p></li>
+<li><p>Platform sleep signal assertion</p></li>
+</ul>
+<p>Actions</p>
+<ol class="arabic simple">
+<li><p>Check for any power button press</p></li>
+<li><p>Check RSMRST_PWRGD input</p></li>
+<li><p>Generate RSMRST#</p></li>
+<li><p>Propagate power button status to PCH</p></li>
+<li><p>Perform deep sleep exit handshake if supported
+a) PCH sends SUS_WRN virtual wire
+b) EC acknowledges by sending SUS_ACK virtual wire</p></li>
+<li><p>Indicate if there is a valid power source or enough battery capacity to power up the system using PM_BATLOW signal.</p></li>
+<li><p>Check power sequencing signals as described in the platform guide. These include SLP_S5, SLP_S4, SLP_S3 and SLP_M (sometimes referred as SLP_A).</p></li>
+<li><p>Wait for ALL_SYS_PWRGD</p></li>
+<li><p>Drive PCH_PWROK and if required by the system SYS_PWROK.
+Do refer to platform guide to see if this signal needs to be generated.</p></li>
+<li><p>Wait for platform reset signal.</p></li>
+</ol>
+<blockquote>
+<div><img alt="../../_images/power_signals.png" class="align-center" src="../../_images/power_signals.png" />
+</div></blockquote>
+</div>
+<div class="section" id="flow-for-s0-to-s3-suspend">
+<h3>Flow for S0 to S3 (suspend)<a class="headerlink" href="#flow-for-s0-to-s3-suspend" title="Permalink to this headline">¶</a></h3>
+<p>Trigger events:</p>
+<ul class="simple">
+<li><p>SLP_S3 signal assertion</p></li>
+</ul>
+<p>Actions:</p>
+<ul class="simple">
+<li><p>Turn off 7-segment display used for platform POST codes</p></li>
+<li><p>Turn off system fan</p></li>
+<li><p>Wait for event for resume</p></li>
+</ul>
+</div>
+<div class="section" id="flow-for-s3-to-s0-resume">
+<h3>Flow for S3 to S0 (resume)<a class="headerlink" href="#flow-for-s3-to-s0-resume" title="Permalink to this headline">¶</a></h3>
+<p>Trigger events:</p>
+<ul class="simple">
+<li><p>SLP_S3 signal de-assertion</p></li>
+<li><p>Power button</p></li>
+<li><p>AC adaptor insertion or removal</p></li>
+</ul>
+</div>
+<div class="section" id="flow-for-s0-to-s4-s5-hibernate-shutdown">
+<h3>Flow for S0 to S4/S5 (hibernate/shutdown)<a class="headerlink" href="#flow-for-s0-to-s4-s5-hibernate-shutdown" title="Permalink to this headline">¶</a></h3>
+<p>Trigger events:</p>
+<ul class="simple">
+<li><p>Respective sleep signal de-assertion (SLP_S4 or SLP_S5)</p></li>
+</ul>
+<p>Actions:</p>
+<ul class="simple">
+<li><p>Turn off 7-segment display used for platform POST codes</p></li>
+<li><p>Turn off system fan</p></li>
+<li><p>Reconfigure GPIOs for power saving</p></li>
+<li><p>Remove PCH_PWROK signal</p></li>
+</ul>
+</div>
+<div class="section" id="flow-for-s5-s4-to-s0">
+<h3>Flow for S5/S4 to S0<a class="headerlink" href="#flow-for-s5-s4-to-s0" title="Permalink to this headline">¶</a></h3>
+<p>Trigger events:</p>
+<ul class="simple">
+<li><p>Respective sleep signal de-assertion (SLP_S4 or SLP_S5)</p></li>
+</ul>
+<p>Actions:</p>
+<ul class="simple">
+<li><p>Turn on 7-segment display used for platform POST codes</p></li>
+<li><p>Turn on system fan</p></li>
+<li><p>Reconfigure GPIOs to previous state prior to transition.</p></li>
+<li><p>Provide PCH_PWROK signal</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="intel-specific-power-management-transitions">
+<h2><a class="toc-backref" href="#id5">Intel-specific Power Management Transitions</a><a class="headerlink" href="#intel-specific-power-management-transitions" title="Permalink to this headline">¶</a></h2>
+<p>There are 2 additional low power states supported in some platforms which reduce
+power consumption further from S3/S4/S5 global states described in ACPI spec.</p>
+<p>The implementation of these consider 2 different cases:</p>
+<ul class="simple">
+<li><p>Embedded controller losing power after deep sleep entry</p></li>
+<li><p>Embedded controller not losing power after deep sleep entry</p></li>
+</ul>
+<p>For the case where Embedded Controller loses power during the transition,
+EC_DSx# signal is used keep EC on/off during system deep sleep.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Deep sleep for S3 is not supported in this reference implementation.</p>
+</div>
+<div class="section" id="flow-for-s3-s4-s5-to-deep-sleep">
+<h3>Flow for S3/S4/S5 to deep sleep<a class="headerlink" href="#flow-for-s3-s4-s5-to-deep-sleep" title="Permalink to this headline">¶</a></h3>
+<p>Pre-condition:</p>
+<ul class="simple">
+<li><p>System is already in S3/S4/S5</p></li>
+</ul>
+<p>Triggers:</p>
+<ul class="simple">
+<li><p>SUS_WRN power signal assertion is received.</p></li>
+</ul>
+<p>Actions:</p>
+<ul class="simple">
+<li><p>Module acknowledges notification by sending SUS_ACK</p></li>
+<li><p>Module waits for PCH PM_SLP_SUS# assertion</p></li>
+<li><p>Module asserts RSMRST#</p></li>
+</ul>
+</div>
+<div class="section" id="flow-for-deep-sleep-to-s3-s4-s5">
+<h3>Flow for deep sleep to S3/S4/S5<a class="headerlink" href="#flow-for-deep-sleep-to-s3-s4-s5" title="Permalink to this headline">¶</a></h3>
+<p>Triggers:</p>
+<ul class="simple">
+<li><p>EC wakes via power button</p></li>
+</ul>
+<p>Actions:</p>
+<ul class="simple">
+<li><p>Module de-asserts RMSRST#</p></li>
+<li><p>Module waits for SUS_WARN de-assertion.</p></li>
+<li><p>Module acknowledges notification by sending SUS_ACK</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Once system is back to regular sleep states, EC FW waits for SLP_Sx# signals
+then follows normal S3 to S0 or S4/S5 to S0 flow.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If EC HW main power rail was off during entry to deep sleep, EC FW will
+perform same flow G3 to S0 after SUS_WRN handshake describe earlier.</p>
+</div>
+</div>
+</div>
+<div class="section" id="implementation">
+<h2><a class="toc-backref" href="#id6">Implementation</a><a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>This module uses a cooperative thread as described in the task handling section.
+The thread track overall system transitions then sleeps 10 ms before checking again
+for new events.</p>
+<p>To track the different triggers the power sequencing module registers for
+notifications with the <cite>eSPI hub</cite> and whenever there is a relevant virtual wire
+event, the new system state is determined, and actions as described above are
+executed.</p>
+<img alt="../../_images/espi_hub_dependency.png" class="align-center" src="../../_images/espi_hub_dependency.png" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Previous reference designs did rely on physical pins instead of eSPI Virtual Wires.</p>
+</div>
+</div>
+<div class="section" id="timeout-mechanism">
+<h2><a class="toc-backref" href="#id7">Timeout Mechanism</a><a class="headerlink" href="#timeout-mechanism" title="Permalink to this headline">¶</a></h2>
+<p>Each transition is triggered by a specific event and before the transition
+is completed, the module will check if certain conditions are met, if any
+each of these conditions is not fulfilled within a predetermined time interval
+the power sequencing will stop.</p>
+<p>Such scenario is considered a power sequencing failure, so RSMRST# signal will
+be pulled LOW as required by platform design guide and a timeout code will be
+displayed in postcode display in the following format “ECNN”, where NN refers
+to a specific error code.</p>
+</div>
+<div class="section" id="variants-across-platforms">
+<h2><a class="toc-backref" href="#id8">Variants Across Platforms</a><a class="headerlink" href="#variants-across-platforms" title="Permalink to this headline">¶</a></h2>
+<p>This module covers generic aspects of power sequencing, however for specific timings
+and/or signals not covered here refer to your Intel PCH specific <a class="reference external" href="https://www.intel.com/content/www/us/en/programmable/documentation/lit-index.html">Platform design guide</a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 Intel Corporation
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

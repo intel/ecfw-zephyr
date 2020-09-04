@@ -1,0 +1,455 @@
+# Kconfig - Config options for EC FW
+
+#
+# Copyright (c) 2019 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+mainmenu "Embedded controller firmware application"
+
+config PERIPHERAL_MANAGEMENT
+	bool "Enable EC human interface"
+	default y
+	help
+	  Enable EC support for button, switches, this includes:
+	  1) Buttons: i.e power button
+	  2) Switches: EC HW straps used to change EC behavior.
+
+config POSTCODE_MANAGEMENT
+	bool "Enable postcode management"
+	default y
+	help
+	  Indicate if BIOS debug port 80 block is enabled and the values
+	  are intercepted and display in 7-segment display array.
+
+config POSTCODE_TASK
+	int
+	default 1 if POSTCODE_MANAGEMENT
+	default 0
+
+menu "Power/bring-up overrides"
+
+config POWER_SEQUENCE_DISABLE_TIMEOUTS
+	bool "Disable power sequence timeouts"
+	help
+	  Indicate if EC will enforce timeouts during power sequencing or not.
+
+config POWER_SEQUENCE_MINIMUM_ESPI_CAPS
+	bool "eSPI handshake with minimum capabilities"
+	help
+	  Configure eSPI bus to advertise the minimum capabilities required
+	  to complete power sequence.
+
+config POWER_SEQUENCE_ERROR_LED
+	bool "Enable LED power sequencing error notification"
+	help
+	  Indicate if EC supports LED notifications for errors during power
+	  sequencing.
+
+config EC_DELAYED_BOOT
+	int "Enable EC FW delayed boot"
+	default 0
+	help
+	  Indicate if EC FW boot is delayed for N seconds. This is useful to
+	  debug early app initialization via serial logs or JTAG.
+
+endmenu
+
+config SMCHOST
+	bool "Enable EC - BIOS interaction"
+	default y
+	help
+	  Enables EC communication to BIOS.
+
+config SMCHOST_SCI_OVER_ESPI
+	bool "Enable SCI support over eSPI"
+	default y
+	help
+	  Indicate if EC sends System Control Interrupt over eSPI bus
+	  instead using a physical pin.
+
+config PFAT_SUPPORT
+	bool "Enable EC support for BIOS guard"
+	help
+	  Enable EC support for Platform Flash Armoring Technology (PFAT).
+
+menu "Power management"
+
+config PWRMGMT
+	bool "Enable EC power management"
+	default y
+	help
+	  Indicate if EC supports power management this includes:
+	  1) ACPI spec system transitions to S3, S4, S5
+	  2) Intel-specific transitions to Sx sub-states during S3/S4/S5
+	  (deep Sx) and or transition to S0ix during S0 (deep sleep)
+
+config PWRMGMT_DEEP_IDLE
+	bool "Enable system power deep idle management"
+	help
+	  Indicate if EC supports power management deep idle process.
+	  Deep idle refer to case where EC CPU is put in lower power state
+	  while system remains in S0ix substate.
+
+config PWRMGMT_DEEP_IDLE_TASK
+	int
+	default 1 if PWRMGMT_DEEP_IDLE
+	default 0
+
+config PWRMGMT_DEEP_IDLE_DEBUG
+	bool "Enable LEDs indicators for deep idle debug"
+	depends on PWRMGMT_DEEP_IDLE
+	help
+	  Indicate if EC toggles LEDs indicators for deep idle entry/exit.
+
+config PWRMGMT_DEEP_IDLE_ENTRY_DLY
+	int "Delay to enter deep sleep"
+	default 100
+	depends on PWRMGMT_DEEP_IDLE
+	help
+	  Indicate delay in miliseconds before EC will check for idle
+	  conditions and if met attempt deep sleep entry.
+
+config PWRMGMT_DEEPSX
+	bool "Enable system deep suspend support"
+	help
+	  Indicate if EC supports deep suspend process. Deep suspend refers
+	  to additional transition during S4, S5 states but reducing power
+	  further since EC loses either context or power.
+
+config PWRMGMT_DEEPSX_S3
+	bool "Support deep suspend during S3 transition"
+	depends on PWRMGMT_DEEPSX
+	help
+	  Indicate if deep suspend is supported in S3 transition in which case
+	  EC loses power.
+
+endmenu
+
+menu "Thermal management"
+
+config THERMAL_MANAGEMENT
+	bool "Enable thermal management"
+	help
+	  Indicate if EC supports management of fan, reading thermal
+	  sensors and cpu temperature.
+
+config THERMAL_MANAGEMENT_TASK
+	int
+	default 1 if THERMAL_MANAGEMENT
+	default 0
+
+config THERMAL_FAN_OVERRIDE
+	bool "Enable fan override"
+	help
+	  Indicate if EC overrides fan control to pre-defined value. This
+	  to ensure fan is running before Si parts are fully calibrated.
+
+config THERMAL_FAN_OVERRIDE_VALUE
+	int "Fan override duty cycle"
+	default 70
+	help
+	  When EC overrides fan management via SW or HW strap, EC will
+	  use this pre-defined duty cycle to control the fan.
+
+config PECI_OVER_ESPI_ENABLE
+	bool "Enable PECI over ESPI OOB"
+	help
+	  Indicate if peci over espi oob enabled or not.
+
+endmenu
+
+menu "Battery management"
+
+config BATTERY_MANAGEMENT
+	bool "Enable battery management"
+	help
+	  Indicate if EC supports management of battery and charger.
+
+config BATTERY_MANAGEMENT_TASK
+	int
+	default 1 if BATTERY_MANAGEMENT
+	default 0
+
+endmenu
+
+menu "EC optional features"
+
+menu "USBC Power Delivery"
+
+config USBC_POWER_DELIVERY
+	bool "Enable USBC Power Delivery Management"
+	default n
+	help
+	  Indicate if EC supports USB Type-C power delivery includes:
+	  1. Charging using USB-C power sources like Type-C chargers.
+	  2. UCSI support.
+	  3. Sink and source power path control.
+	  4. USBC PD controller fw update.
+
+config USBC_PD_TASK
+	int "Task to control USBC PD functionalities"
+	default 1 if USBC_POWER_DELIVERY
+	default 0
+
+config TI_USBC_PD_CONTROLLER
+	bool "Enable TI USBC PD controller driver"
+	depends on USBC_POWER_DELIVERY
+	default 0
+
+endmenu
+
+config ATX_SUPPORT
+	bool "ATX power supply detection"
+	help
+	  Indicate if EC handles detection of ATX power supply.
+
+config IMVP_SUPPORT
+	bool "Discrete voltage regulator control"
+	help
+	  Indicate if Intel Mobile Voltage Positioning chip is configured by EC.
+
+choice
+	prompt "Select your Intel RVP"
+	default BOARD_MEC1501_TGL
+	depends on BOARD_MEC1501MODULAR_ASSY6885
+	help
+	 Select your keyboard implementation which is going
+	 to allow you to handle variations specially in
+	 alternate functions.
+
+	config BOARD_MEC1501_TGL
+		bool "Use TGL RVP with MECC card"
+
+	config BOARD_MEC1501_ICL
+		bool "Allow to use ICL with MECC card"
+endchoice
+
+endmenu
+
+menu "EC drivers"
+
+config MAX6958_LOG_LEVEL
+	int "MAX6958 driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for MAX5958 LED driver.
+
+config EEPROM_LOG_LEVEL
+	int "EEPROM driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for EEPROM driver.
+
+config GPIO_EC_LOG_LEVEL
+	int "GPIO EC driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for GPIO wrapper  driver.
+
+config ESPIHUB_LOG_LEVEL
+	int "eSPI hub driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for eSPI hub.
+
+config IMVP_LOG_LEVEL
+	int "imvp log level"
+	depends on LOG
+	default 0
+	help
+	  Set log level for imvp programming routines.
+
+config PECI_LOG_LEVEL
+	int "peci log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for peci interface.
+
+config FAN_LOG_LEVEL
+	int "Fan driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for fan driver.
+
+config THERMAL_SENSOR_LOG_LEVEL
+	int "Thermal sensor driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for thermal sensor driver.
+
+config CHARGER_LOG_LEVEL
+	int "Charger driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for charger driver.
+
+config BATTERY_LOG_LEVEL
+	int "Battery driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for battery driver.
+
+endmenu
+
+menu "Modules logging control"
+
+config EC_LOG_LEVEL
+	int "Embedded controller application log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for EC FW app modules.
+
+config BOARD_LOG_LEVEL
+	int "Board initialization log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for board initialization module.
+
+config POSTCODE_LOG_LEVEL
+	int "Debug Port80 log level"
+	depends on LOG
+	depends on POSTCODE_MANAGEMENT
+	default 2
+	help
+	  Set log level for debug Port 80 log level.
+
+config SMCHOST_LOG_LEVEL
+	int "System management controller log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for board system management controller host module
+	  main interface.
+
+config SMCHOST_PVT_LOG_LEVEL
+	int "System management private controller log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for board system management controller host module
+	  private interface.
+
+config PERIPHERAL_LOG_LEVEL
+	int "Peripheral log level"
+	depends on LOG
+	depends on PERIPHERAL_MANAGEMENT
+	default 2
+	help
+	  Set log level for peripheral module.
+
+config PWRMGT_LOG_LEVEL
+	int "Power management log level"
+	depends on LOG
+	depends on PWRMGMT
+	default 2
+	help
+	  Set log level for power management module.
+
+config PWRMGMT_DEEPSX_LOG_LEVEL
+	int "Power management deep sx log level"
+	depends on LOG
+	depends on PWRMGMT
+	default 2
+	help
+	  Set log level for power management module which includes Intel
+	  transitions into deep sx sub-states.
+
+config PWRMGMT_DEEP_IDLE_LOG_LEVEL
+	int "Power management deep idle log level"
+	depends on LOG
+	depends on PWRMGMT
+	default 2
+	help
+	  Set log level for power management module which includes Intel
+	  transitions into deep sx sub-states.
+
+config THERMAL_MGMT_LOG_LEVEL
+	int "Thermal management log level"
+	depends on LOG
+	depends on THERMAL_MANAGEMENT
+	default 2
+	help
+	  Set log level for thermal management module.
+
+config KBCHOST_LOG_LEVEL
+	int "kbchost log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for the kbc8042 module and ps2.
+
+config BATTERY_MGMT_LOG_LEVEL
+	int "Battery management log level"
+	depends on LOG
+	depends on BATTERY_MANAGEMENT
+	default 2
+	help
+	  Set log level for battery management module.
+
+config USBC_LOG_LEVEL
+	int "USBC power delivery log level"
+	depends on LOG
+	depends on USBC_POWER_DELIVERY
+	default 2
+	help
+	  Set log level for USBC management module.
+
+endmenu
+
+menu "Keyboard and mouse"
+
+config 8042_IBF_KEYBOARD_TASKS
+	int
+	default 2 if PS2_KEYBOARD_AND_MOUSE || KSCAN_EC
+	default 0
+
+config PS2_KEYBOARD_AND_MOUSE
+	bool "Turn on PS/2 devices application application module."
+	default y if ESPI_PERIPHERAL_8042_KBC && PS2
+	help
+	 It is desirable that users turn this feature on, only if there
+	 is intention to use it.
+	 PS/2 and and keyboard scan matrix use the same applicaton
+	 interfaces to communicate information from/to the host.
+
+config KSCAN_EC
+	bool "Turn on kscan matrix application module."
+	default y if ESPI_PERIPHERAL_8042_KBC && KSCAN
+	help
+	 The keyboard scan matrix is a passive device which do not send
+	 any command during the configuration phase. Therefore, the EC has
+	 to fake this commands in order to preseve host configuration flow.
+	 PS/2 and and keyboard scan matrix use the same applicaton
+	 interfaces to communicate information from/to the host.
+
+if KSCAN_EC
+choice
+	prompt "Select your keyboard"
+	default EC_GTECH_KEYBOARD
+	help
+	 Select your keyboard implementation which is going
+	 to allow you to handle variations specially in
+	 alternate functions.
+
+	config EC_GTECH_KEYBOARD
+	bool "Gtech keyboard"
+
+endchoice
+endif
+
+endmenu
+
+source "Kconfig.zephyr"

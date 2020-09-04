@@ -1,0 +1,26 @@
+
+&i2c_smb_0 {
+	status = "okay";
+	label = "I2C0";
+	port_sel = <0>;
+
+	pca9555@22 {
+		compatible = "nxp,pca95xx";
+		label = "GPIO_P0";
+
+		/* Address depends on 0100<A2=0><A1=1><A0=0><R/W>b. */
+		reg = <0x22>;
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	pca9555@25 {
+		compatible = "nxp,pca95xx";
+		label = "GPIO_P1";
+
+		/* Address depends on 0100<A2=1><A1=0><A0=1><R/W>b. */
+		reg = <0x25>;
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+};

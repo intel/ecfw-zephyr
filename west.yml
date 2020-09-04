@@ -1,0 +1,48 @@
+# The west manifest file for the Zephyr EC FW.
+#
+# The per-installation west configuration file specifies the location of this
+# manifest file. The "path" option in the [manifest] section of .west/config
+# defines the folder that contains west.yml. The path is relative to the folder
+# that contains .west.
+#
+
+west:
+  url: https://github.com/zephyrproject-rtos/west
+  version: v0.7.2
+
+manifest:
+  defaults:
+    remote: wss
+
+  remotes:
+    - name: zephyrproject
+      url-base: https://github.com/zephyrproject-rtos
+    - name: wss
+      url-base: https://gitlab.devtools.intel.com/wss-pse-io-and-power-delivery
+    - name: wss_tools
+      url-base: https://gitlab.devtools.intel.com/wss-pse-io-and-power-delivery-tools
+
+  # The list of dependencies
+  #
+  projects:
+    # Open source branch uses official Zephyr tree
+    - name: zephyr_public
+      repo-path: zephyr.git
+      path: zephyr_snapshot
+      remote: zephyrproject
+      revision: v2.3-branch
+      clone-depth: 1
+      west-commands: scripts/west-commands.yml
+
+    - name: cmsis
+      path: modules/hal/cmsis
+      remote: zephyrproject
+      revision: 542b2296e6d515b265e25c6b7208e8fea3014f90
+
+    - name: hal_microchip
+      path: modules/hal/microchip
+      remote: zephyrproject
+      revision: aad89bf0531a30dcd6c87e4065f1b973fb31c11f
+
+  self:
+    path: .

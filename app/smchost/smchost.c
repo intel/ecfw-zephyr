@@ -17,6 +17,9 @@
 #include "pwrbtnmgmt.h"
 #include "periphmgmt.h"
 #include "espi_hub.h"
+#ifdef CONFIG_THERMAL_MANAGEMENT
+#include "thermalmgmt.h"
+#endif
 LOG_MODULE_REGISTER(smchost, CONFIG_SMCHOST_LOG_LEVEL);
 
 u8_t host_req[SMCHOST_MAX_BUF_SIZE];
@@ -502,13 +505,6 @@ static void smchost_cmd_handler(u8_t command)
 	case SMCHOST_CHRG_RATE_CHG_NOTIFY:
 	case SMCHOST_BATT_SHIP_MODE:
 		smchost_cmd_bmc_handler(command);
-		break;
-#endif
-
-#ifdef CONFIG_THERMAL_MANAGEMENT
-	case SMCHOST_SET_TMP_THRESHOLD:
-	case SMCHOST_UPDATE_PWM:
-		smchost_cmd_thermal_handler(command);
 		break;
 #endif
 

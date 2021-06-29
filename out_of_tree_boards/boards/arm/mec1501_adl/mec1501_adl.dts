@@ -1,0 +1,101 @@
+/*
+ * Copyright (c) 2020, Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <microchip/mec1501hsz.dtsi>
+
+/ {
+	model = "Intel MEC1501_ADL development board";
+	compatible = "microchip, mec1501_adl",
+		     "microchip,mec1501hsz";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,console = &uart2;
+		zephyr,flash = &flash0;
+	};
+
+	aliases {
+		pwm-0 = &pwm0;
+		peci-0 = &peci0;
+
+		i2c0 = &i2c_smb_0;
+		i2c1 = &i2c_smb_1;
+		i2c7 = &i2c_smb_2;
+	};
+};
+
+&uart2 {
+	status = "okay";
+	current-speed = <115200>;
+};
+
+&adc0 {
+	status = "okay";
+};
+
+&i2c_smb_0 {
+	status = "okay";
+	label = "I2C0";
+	port_sel = <0>;
+
+	pca9555@22 {
+		compatible = "nxp,pca95xx";
+		label = "GPIO_P0";
+
+		/* I2C address depends on PCA9555 HW straps.
+		 * Address is: 0100<A2><A1><A0>b.
+		 */
+		reg = <0x22>;
+
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+};
+
+&i2c_smb_1 {
+	status = "okay";
+	label = "I2C1";
+	port_sel = <1>;
+};
+
+&i2c_smb_2 {
+	status = "okay";
+	label = "I2C7";
+	port_sel = <7>;
+};
+
+&espi0 {
+	status = "okay";
+	io_girq = <19>;
+	vw_girq = <24>;
+	pc_girq = <15>;
+};
+
+&timer3 {
+	status = "okay";
+};
+
+&ps2_0 {
+	status = "okay";
+};
+
+&ps2_1 {
+	status = "okay";
+};
+
+&pwm0 {
+	status = "okay";
+};
+
+&peci0 {
+	status = "okay";
+};
+
+&tach0 {
+	status = "okay";
+};

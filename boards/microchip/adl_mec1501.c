@@ -128,9 +128,9 @@ static struct therm_sensor therm_sensor_tbl[] = {
 };
 
 static struct therm_sensor therm_sensor_tbl_adl_s[] = {
-/*      ADC_CH_##	ACPI_LOC		dtt_threshold */
-	{ADC_CH_05,	ACPI_THRM_SEN_VR,	{0} },	/* ADC_VR */
-	{ADC_CH_06,	ACPI_THRM_SEN_DDR,	{0} },	/* ADC_DDR*/
+/*      ADC_CH_##	ACPI_LOC		*/
+	{ADC_CH_05,	ACPI_THRM_SEN_VR },		/* ADC_VR */
+	{ADC_CH_06,	ACPI_THRM_SEN_DDR },	/* ADC_DDR*/
 };
 
 void board_therm_sensor_tbl_init(u8_t *p_max_adc_sensors,

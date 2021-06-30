@@ -265,8 +265,8 @@ config IMVP_LOG_LEVEL
 	help
 	  Set log level for imvp programming routines.
 
-config PECI_LOG_LEVEL
-	int "peci log level"
+config PECIHUB_LOG_LEVEL
+	int "peci hub log level"
 	depends on LOG
 	default 2
 	help

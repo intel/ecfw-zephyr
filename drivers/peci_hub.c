@@ -42,7 +42,7 @@
 /* CPU fail safe temperature value is 72C */
 #define PECI_CPUTEMP_FAILSAFE    72
 
-LOG_MODULE_REGISTER(peci_interface, CONFIG_PECI_LOG_LEVEL);
+LOG_MODULE_REGISTER(peci_interface, CONFIG_PECIHUB_LOG_LEVEL);
 K_MUTEX_DEFINE(trans_mutex);
 
 static struct device *peci_dev;

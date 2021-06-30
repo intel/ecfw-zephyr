@@ -12,6 +12,13 @@
 #include "errno.h"
 #include <soc.h>
 
+#define PECI_CC_RSP_SUCCESS              (0x40U)
+#define PECI_CC_RSP_TIMEOUT              (0x80U)
+#define PECI_CC_OUT_OF_RESOURCES_TIMEOUT (0x81U)
+#define PECI_CC_RESOURCES_LOWPWR_TIMEOUT (0x82U)
+#define PECI_CC_ILLEGAL_REQUEST          (0x90U)
+
+
 /* PECI Host address */
 #define PECI_HOST_ADDR          0x30u
 /* PECI Host bitrate 1Mbps */
@@ -30,6 +37,16 @@
 #define PECI_RX_BUF_RESP_OFFSET	0
 #define PECI_RX_BUF_TJMAX_OFFSET 3
 
+/* Offsets in tx buffer */
+#define PECI_TX_BUF_HOSTIDRETRY_OFFSET 0
+#define PECI_TX_BUF_INDEX		 1U
+#define PECI_TX_BUF_PARAM_LSB		 2U
+#define PECI_TX_BUF_PARAM_MSB		 3U
+#define PECI_TX_BUF_DATA0		 4U
+#define PECI_TX_BUF_DATA1		 5U
+#define PECI_TX_BUF_DATA2		 6U
+#define PECI_TX_BUF_DATA3		 7U
+
 /* 16-bit interpretation of temperature,
  * sign bit = 15bit and bit14-bit6 = Temperatur data
  */
@@ -37,7 +54,7 @@
 #define GET_TEMP_MASK		0x7E00
 
 #define PECI_TARGET_HOST_ID_OFFSET 0
-#define PECI_RETRY_BIT		BIT(0)
+#define PECI_RETRY_EN		BIT(0)
 
 /* CPU fail safe temperature value is 72C */
 #define PECI_CPUTEMP_FAILSAFE    72
@@ -48,8 +65,6 @@ K_MUTEX_DEFINE(trans_mutex);
 static struct device *peci_dev;
 static bool peci_initialized;
 static u8_t cpu_tjmax;
-
-static void peci_get_max_temp(void);
 
 /**
  * @brief Tranfers the peci packet and get the response.
@@ -116,19 +131,49 @@ static int peci_exec_transfer_retry(struct device *dev, struct peci_msg *msg)
 		}
 
 		peci_resp = msg->rx_buffer.buf[PECI_RX_BUF_RESP_OFFSET];
-		k_sleep(K_MSEC(PECI_RETRY_WAIT));
 		LOG_DBG("peci_resp %x", peci_resp);
-	} while ((peci_resp != PECI_RW_PKG_CFG_RSP_PASS) && (retries > 0));
 
-	if (peci_resp != PECI_RW_PKG_CFG_RSP_PASS) {
-		LOG_ERR("Peci command-%x failed", msg->cmd_code);
-		k_mutex_unlock(&trans_mutex);
+		if (peci_resp == PECI_CC_RSP_SUCCESS) {
+			/* Command execution successful */
+			break;
+		}
+
+		/* Command failed! Verify response code */
+		switch (peci_resp) {
+		case PECI_CC_RSP_TIMEOUT:
+		case PECI_CC_OUT_OF_RESOURCES_TIMEOUT:
+			/* Retry cmd since processor unable to generate response
+			 * ontime or unable to allocate resources required to
+			 * service the cmd.
+			 */
+			k_msleep(PECI_RETRY_WAIT);
+			msg->tx_buffer.buf[PECI_TX_BUF_HOSTIDRETRY_OFFSET] |=
+						PECI_RETRY_EN;
+			break;
+		case PECI_CC_RESOURCES_LOWPWR_TIMEOUT:
+			/* TODO: Resources required to service cmd are in low
+			 * power mode. Enable "wake on peci" mode to pop-up
+			 * processor to C2 state to service the cmd.
+			 */
+			break;
+		case PECI_CC_ILLEGAL_REQUEST:
+			/* Invalid or illegal Request */
+			break;
+		default:
+			LOG_WRN("Invalid peci response %x", peci_resp);
+			break;
+		}
+	} while (retries > 0);
+
+	k_mutex_unlock(&trans_mutex);
+
+	if (peci_resp != PECI_CC_RSP_SUCCESS) {
+		LOG_ERR("Peci command %x failed", msg->cmd_code);
 		return -EIO;
 	}
 
 	LOG_DBG("Peci command-%x success", msg->cmd_code);
 	LOG_DBG("Rx-FCS=%x", msg->rx_buffer.buf[msg->rx_buffer.len]);
-	k_mutex_unlock(&trans_mutex);
 	return 0;
 }
 
@@ -255,6 +300,7 @@ int peci_get_tjmax(u8_t *tjmax)
 				PECI_CONFIGINDEX_TJMAX,
 				PECI_CONFIGPARAM & 0x00FF,
 				(PECI_CONFIGPARAM & 0xFF00) >> 8,
+
 	};
 
 	ret = peci_rdpkg_config(req_buf, resp_buf, PECI_RD_PKG_LEN_DWORD);
@@ -263,6 +309,7 @@ int peci_get_tjmax(u8_t *tjmax)
 		*tjmax = resp_buf[PECI_RX_BUF_TJMAX_OFFSET];
 	}
 
+	LOG_INF("TjMax=%d", *tjmax);
 	return ret;
 }
 
@@ -311,6 +358,11 @@ int peci_get_temp(int *temperature)
 		return -EINVAL;
 	}
 
+	if (peci_resp == 0) {
+		LOG_ERR("%s:Incorrect PECI data response received", __func__);
+		*temperature = PECI_CPUTEMP_FAILSAFE;
+		return -EINVAL;
+	}
 	 /* 16-bit interpretation of temperature,
 	  * sign bit = 15bit and bit14-bit6 = Temperatur data
 	  */
@@ -324,18 +376,6 @@ int peci_get_temp(int *temperature)
 	*temperature = raw_cpu_temp + cpu_tjmax;
 
 	return 0;
-}
-
-static void peci_get_max_temp(void)
-{
-	int ret;
-
-	ret = peci_get_tjmax(&cpu_tjmax);
-	if (ret) {
-		LOG_ERR("Fail to obtain maximum temperature: %d", ret);
-	} else {
-		LOG_INF("CPU maximum temperature: %d", cpu_tjmax);
-	}
 }
 
 int peci_init(void)
@@ -363,6 +403,5 @@ int peci_init(void)
 	LOG_INF("Peci init success");
 
 	cpu_tjmax = 0;
-	peci_get_max_temp();
 	return 0;
 }

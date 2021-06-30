@@ -1,0 +1,47 @@
+From 7da7d997ef69b263bb4d6aac7d534ff4adafca21 Mon Sep 17 00:00:00 2001
+From: Diwakar C <diwakar.c@intel.com>
+Date: Wed, 27 Jan 2021 01:07:58 +0530
+Subject: [PATCH] peci: driver: Reset Tx/Rx FIFOs after every successful peci
+ tx
+
+In the current implementation, FW reads FCS only for the commands
+having read_len > 1. But PECI host controller (EC HW) expects, for
+all commands (including Ping) either FW should read FCS or reset
+Tx/Rx FIFOs for every successful transaction.
+
+In case of Ping command, PECI controller reads FCS from SOC and
+expected FW to read but FW didn't read since Ping have read_len=0.
+Due to this issue, FW getting corrupted response from PECI controller
+for all the subsequent PECI commands.
+
+Next GetTemp call from thermal thread, resulting in corrupted response
+values (mapping to huge temperature number 200+ degC) from SOC. Since
+EC observing temperature > 103 degC, EC is triggering shutdown.
+
+To address this issue, FW resets Tx/Rx FIFOs after every successful
+transaction.
+
+HSD: https://hsdes.intel.com/appstore/article/#/16012457215.
+
+Signed-off-by: Diwakar C <diwakar.c@intel.com>
+---
+ drivers/peci/peci_mchp_xec.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/peci/peci_mchp_xec.c b/drivers/peci/peci_mchp_xec.c
+index 00ea44654d..191322cf6c 100644
+--- a/drivers/peci/peci_mchp_xec.c
++++ b/drivers/peci/peci_mchp_xec.c
+@@ -337,6 +337,9 @@ static int peci_xec_transfer(const struct device *dev, struct peci_msg *msg)
+ 		return -EIO;
+ 	}
+ 
++	/* Reset Tx/Rx FIFO for successsful peci transactions */
++	peci_xec_bus_recovery(dev, false);
++
+ 	return 0;
+ }
+ 
+-- 
+2.17.1
+

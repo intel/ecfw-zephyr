@@ -1,0 +1,35 @@
+From 002f5ad66df67c8155fa04850daf81e215bf1621 Mon Sep 17 00:00:00 2001
+From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+Date: Tue, 2 Jun 2020 12:22:27 -0700
+Subject: [PATCH] soc: arm: mchp: Allow to configure HW-controlled pins as
+ GPIOs.
+
+Introduce switch to allow board configuration for VCI pins to
+remain HW-controled depending on the design.
+Currently pins are always configured as GPIOs which is not always
+desirable.
+
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ soc/arm/microchip_mec/mec1501/Kconfig.soc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/soc/arm/microchip_mec/mec1501/Kconfig.soc b/soc/arm/microchip_mec/mec1501/Kconfig.soc
+index 606a63c6b6..b48b6c0e63 100644
+--- a/soc/arm/microchip_mec/mec1501/Kconfig.soc
++++ b/soc/arm/microchip_mec/mec1501/Kconfig.soc
+@@ -68,3 +68,11 @@ config SOC_MEC1501_VTR3_1_8V
+ 	bool "VTR3 power rail is tied to 1.8V"
+ 	help
+ 	  Set this is if VTR3 power sourcejumper in the board is changed.
++
++config SOC_MEC1501_VCI_PINS_AS_GPIOS
++	bool "Use VCI block pins as GPIOS"
++	default y
++	help
++	  By default these pins are not GPIOs, but HW controlled.
++	  Set this if VCI pin block HW logic is not required in the board
++	  design.
+-- 
+2.17.1
+

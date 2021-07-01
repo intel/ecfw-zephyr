@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2019 Intel Corporation
+ * Copyright (c) 2020 Intel Corporation
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <soc.h>
+#include <drivers/gpio.h>
 #include <drivers/i2c.h>
 #include <logging/log.h>
 #include "gpio_ec.h"
 #include "espi_hub.h"
 #include "board.h"
 #include "board_config.h"
-#include "tgl_mec1501.h"
+#include "adl_mec1501.h"
 
 LOG_MODULE_DECLARE(board, CONFIG_BOARD_LOG_LEVEL);
 /** @brief EC FW app owned gpios list.
@@ -26,58 +27,82 @@ LOG_MODULE_DECLARE(board, CONFIG_BOARD_LOG_LEVEL);
  *
  */
 
-struct gpio_ec_config mecc1501_cfg[] =  {
-/*      Port Signal			Config       */
-	{ PROCHOT,			GPIO_OUTPUT_LOW },
-	{ RSMRST_PWRGD_G3SAF_P,		GPIO_INPUT },
-	{ RSMRST_PWRGD_MAF_P,		GPIO_INPUT },
-	{ PM_PWRBTN,			GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
-	{ PM_SLP_SUS,			GPIO_INPUT },
-	{ VOL_UP,			GPIO_INPUT | GPIO_INT_EDGE_BOTH },
-	{ WAKE_SCI,			GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
-	{ PM_RSMRST_G3SAF_P,		GPIO_OUTPUT_LOW },
+/* APP-owned gpios */
+struct gpio_ec_config mecc1501_cfg[] = {
+	{ PM_SLP_SUS,		GPIO_INPUT },
+	{ REAR_FAN_CTRL,	GPIO_OUTPUT_LOW },
+	{ EC_GPIO_011,		GPIO_INPUT },
+	{ RSMRST_PWRGD_G3SAF_P,	GPIO_INPUT },
+	{ RSMRST_PWRGD_MAF_P,	GPIO_INPUT },
+	{ ATX_DETECT,		GPIO_INPUT },
+	{ KBD_BKLT_CTRL,	GPIO_INPUT },
+	{ EC_GPIO_015,		GPIO_INPUT },
+	{ EC_GPIO_023,		GPIO_INPUT },
+	{ EC_GPIO_025,		GPIO_INPUT },
+	{ SMC_LID,		GPIO_INPUT },
+	{ EC_GPIO_035,		GPIO_INPUT },
+	{ EC_GPIO_036,		GPIO_INPUT },
+	{ SYS_PWROK,		GPIO_OUTPUT_LOW | GPIO_OPEN_DRAIN },
+	{ EC_GPIO_050,		GPIO_INPUT },
+	{ SLP_S0_PLT_EC_N,	GPIO_INPUT },
+	{ EC_GPIO_052,		GPIO_INPUT },
+	{ PM_RSMRST_G3SAF_P,	GPIO_OUTPUT_LOW },
 /* In MAF, boot ROM already made this pin 1, so we must to keep it like that
  * during the boot phase in order to avoid ESPI_RESETs
  */
-	{ PM_RSMRST_MAF_P,		GPIO_OUTPUT_HIGH },
-	{ ALL_SYS_PWRGD,		GPIO_INPUT },
-	{ PM_SLP_S0_CS,			GPIO_INPUT },
-	{ PCH_PWROK,			GPIO_OUTPUT_LOW },
-	{ PM_BATLOW,			GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
-	{ FAN_PWR_DISABLE_N,		GPIO_INPUT },
-	{ TYPEC_ALERT_2,		GPIO_INPUT },
-	{ BC_ACOK,			GPIO_INPUT },
-	{ PWRBTN_EC_IN_N,		GPIO_INPUT | GPIO_INT_EDGE_BOTH },
-	{ TYPEC_ALERT_1,		GPIO_INPUT },
-	{ PM_DS3,			GPIO_OUTPUT_HIGH },
-	{ BATT_ID,			GPIO_INPUT },
-	{ VOL_DOWN,			GPIO_INPUT | GPIO_INT_EDGE_BOTH },
+	{ PM_RSMRST_MAF_P,	GPIO_OUTPUT_HIGH },
+	{ ALL_SYS_PWRGD,	GPIO_INPUT },
+	{ FAN_PWR_DISABLE_N,	GPIO_OUTPUT_HIGH },
+	{ KBC_SCROLL_LOCK,	GPIO_OUTPUT_LOW },
+	{ HOME_BUTTON,		GPIO_INPUT },
+	{ EC_GPIO_067,		GPIO_INPUT },
+	{ EC_GPIO_100,		GPIO_INPUT },
+	{ EC_GPIO_104,		GPIO_INPUT },
+	{ PCH_PWROK,		GPIO_OUTPUT_LOW },
+	{ WAKE_SCI,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
+	{ DNX_FORCE_RELOAD_EC,	GPIO_INPUT },
+	{ KBC_CAPS_LOCK,	GPIO_OUTPUT_LOW },
+	{ I2C_ALERT_P1,		GPIO_INPUT },
+	/* PM_BATLOW NA for S platfroms, so make it input */
+	{ PM_BATLOW,		GPIO_INPUT },
+	{ CATERR_LED_DRV,	GPIO_INPUT },
+	{ CS_INDICATE_LED,	GPIO_OUTPUT_LOW },
+	{ C10_GATE_LED,		GPIO_OUTPUT_LOW },
+	{ EC_GPIO_161,		GPIO_INPUT },
+	{ PECI_MUX_CTRL,	GPIO_OUTPUT_LOW },
+	{ PWRBTN_EC_IN_N,	GPIO_INPUT | GPIO_INT_EDGE_BOTH },
+	{ SOC_VR_CNTRL_PE,	GPIO_OUTPUT_LOW },
+	{ BC_ACOK,		GPIO_INPUT },
+	{ PS_ON_OUT,		GPIO_INPUT },
+	{ CPU_C10_GATE,		GPIO_INPUT },
+	{ EC_SMI,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
+	{ PM_SLP_S0_CS,		GPIO_INPUT },
+	{ PM_DS3,		GPIO_INPUT },
+	{ WAKE_CLK,		GPIO_INPUT },
+	{ VOL_UP,		GPIO_INPUT | GPIO_INT_EDGE_BOTH },
+	{ TOP_SWAP_OVERRIDE,	GPIO_INPUT },
+	{ VOL_DOWN,		GPIO_INPUT | GPIO_INT_EDGE_BOTH },
+	{ PM_PWRBTN,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
+	{ PROCHOT,		GPIO_OUTPUT_HIGH },
+	{ EC_M_2_SSD_PLN,	GPIO_OUTPUT_HIGH },
+	{ KBC_NUM_LOCK,		GPIO_OUTPUT_LOW },
 };
 
 /* Any IO expanders pins should be defined here */
 struct gpio_ec_config expander_cfg[] = {
 #ifdef CONFIG_GPIO_PCA95XX
-	{ SPD_PRSNT,			GPIO_INPUT },
-	{ VIRTUAL_BAT,			GPIO_INPUT },
-	{ VIRTUAL_DOCK,			GPIO_INPUT },
-	{ RETIMER_BYPASS,		GPIO_INPUT },
-	{ PECI_OVER_ESPI,		GPIO_INPUT },
-	{ PD_AIC_DETECT1,		GPIO_INPUT },
-	{ PD_AIC_DETECT2,		GPIO_INPUT },
-	{ PNP_NPN_SKU,			GPIO_INPUT },
-	{ TIMEOUT_DISABLE,		GPIO_INPUT },
-	{ SOC_VR_CNTRL,			GPIO_INPUT },
-	{ M2_SSD_PLN_DELAY,		GPIO_INPUT },
+	{ SPD_PRSNT,		GPIO_INPUT },
+	{ G3_SAF_DETECT,	GPIO_INPUT },
+	{ THERM_STRAP,		GPIO_INPUT },
+	{ PECI_OVER_ESPI,	GPIO_INPUT },
+	{ TIMEOUT_DISABLE,	GPIO_INPUT },
 #endif
 };
 
-/* This action is performed explicitly, just adding here as reference */
 struct gpio_ec_config mecc1501_cfg_sus[] =  {
-	{ PCH_PWROK,			GPIO_OUTPUT_LOW },
 };
 
 struct gpio_ec_config mecc1501_cfg_res[] =  {
-	{ PCH_PWROK,			GPIO_OUTPUT_HIGH },
 };
 
 #ifdef CONFIG_THERMAL_MANAGEMENT
@@ -92,6 +117,7 @@ static struct fan_dev fan_tbl[] = {
 	{ PWM_CH_00,	TACH_CH_00 }, /* CPU Fan */
 };
 
+
 /**
  * @brief Thermal sensor table.
  *
@@ -101,21 +127,31 @@ static struct fan_dev fan_tbl[] = {
 static struct therm_sensor therm_sensor_tbl[] = {
 };
 
-static struct therm_sensor therm_sensor_tbl_tgl[] = {
+static struct therm_sensor therm_sensor_tbl_adl_s[] = {
 /*      ADC_CH_##	ACPI_LOC		*/
-	{ ADC_CH_00,	ACPI_THRM_SEN_VR, },
-	{ ADC_CH_03,	ACPI_THRM_SEN_AMBIENT, },
-	{ ADC_CH_04,	ACPI_THRM_SEN_SKIN, },
-	{ ADC_CH_05,	ACPI_THRM_SEN_DDR, },
+	{ADC_CH_05,	ACPI_THRM_SEN_VR },		/* ADC_VR */
+	{ADC_CH_06,	ACPI_THRM_SEN_DDR },	/* ADC_DDR*/
 };
 
 void board_therm_sensor_tbl_init(u8_t *p_max_adc_sensors,
 		struct therm_sensor **p_therm_sensor_tbl)
 {
 	switch (get_board_id()) {
-	case 1: /* TGL_BRD_U_CRB */
-		*p_therm_sensor_tbl = therm_sensor_tbl_tgl;
-		*p_max_adc_sensors = ARRAY_SIZE(therm_sensor_tbl_tgl);
+	case BRD_ID_ADL_S_ERB:
+	case BRD_ID_ADL_S_S01_TGP_H_SODIMM_DRR4:
+	case BRD_ID_ADL_S_S01_TGP_H_SODIMM_DRR4_CRB:
+	case BRD_ID_ADL_S_S01_TGP_H_SODIMM_DRR4_PPV:
+	case BRD_ID_ADL_S_S02_TGP_H_SODIMM_DRR4_CRB:
+	case BRD_ID_ADL_S_S03_ADP_S_UDIMM_DRR4_ERB1:
+	case BRD_ID_ADL_S_S03_ADP_S_UDIMM_DRR4_CRB:
+	case BRD_ID_ADL_S_S04_ADP_S_UDIMM_DRR4_CRB_EVCRB:
+	case BRD_ID_ADL_S_S05_ADP_S_UDIMM_DRR4_CRB_CPV:
+	case BRD_ID_ADL_S_S06_ADP_S_UDIMM_DRR4_CRB:
+	case BRD_ID_ADL_S_S09_ADP_S_UDIMM_DRR4_CRB_PPV:
+	case BRD_ID_ADL_S_S07_ADP_S_UDIMM_DRR4_CPV:
+	case BRD_ID_ADL_S_S08_ADP_S_SODIMM_DRR5_CRB:
+		*p_therm_sensor_tbl = therm_sensor_tbl_adl_s;
+		*p_max_adc_sensors = ARRAY_SIZE(therm_sensor_tbl_adl_s);
 		break;
 	default:
 		*p_therm_sensor_tbl = therm_sensor_tbl;

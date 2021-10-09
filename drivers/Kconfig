@@ -63,7 +63,9 @@ config OOBMNGR_SUPPORT
 
 config OOBMNGR_TASK_STACK_SIZE
 	int "Adjust eSPI OOB manager thread stack size"
-	default 512
+	default 498 if ECFW_STACK_OPTIMIZATION
+	default 892 if ESPIOOB_MNGR_LOG_LEVEL > 2
+	default 748
 	help
 	 EC FW eSPI Out-of-band channel manager thread task stack size.
 

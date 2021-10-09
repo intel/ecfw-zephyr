@@ -16,7 +16,9 @@ config THERMAL_MANAGEMENT
 config THERMAL_TASK_STACK_SIZE
 	int "Adjust thermal management thread stack size"
 	depends on THERMAL_MANAGEMENT
-	default 1024
+	default 762 if ECFW_STACK_OPTIMIZATION
+	default 1892 if THERMAL_MGMT_LOG_LEVEL > 2
+	default 1164
 	help
 	 EC FW thermal management thread task stack size.
 

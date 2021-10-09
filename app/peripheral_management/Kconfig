@@ -23,7 +23,9 @@ config PERIPHERAL_DEBOUNCE_TIME
 
 config PERIPH_TASK_STACK_SIZE
 	int "Adjust peripheral management thread stack size"
-	default 1024
+	default 252 if ECFW_STACK_OPTIMIZATION
+	default 876 if PERIPHERAL_LOG_LEVEL > 2
+	default 716
 	help
 	 EC FW peripheral management thread task stack size.
 

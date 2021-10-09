@@ -14,7 +14,9 @@ config SMCHOST
 
 config SMC_TASK_STACK_SIZE
 	int "Adjust System management controller thread stack size"
-	default 1024
+	default 444 if ECFW_STACK_OPTIMIZATION
+	default 1372 if SMCHOST_LOG_LEVEL > 2
+	default 804
 	help
 	 EC FW System management controller thread task stack size.
 

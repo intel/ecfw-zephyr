@@ -22,6 +22,7 @@ rsource "app/power_management/Kconfig"
 rsource "app/dnx/Kconfig"
 rsource "app/soc_debug_awareness/Kconfig"
 rsource "boards/Kconfig"
+rsource "misc/Kconfig"
 
 endmenu
 

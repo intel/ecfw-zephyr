@@ -15,7 +15,9 @@ config POSTCODE_MANAGEMENT
 config POST_TASK_STACK_SIZE
 	int "Adjust post management thread stack size"
 	depends on POSTCODE_MANAGEMENT
-	default 1024
+	default 372 if ECFW_STACK_OPTIMIZATION
+	default 588 if POSTCODE_LOG_LEVEL > 2
+	default 496
 	help
 	 EC FW postcode management thread task stack size.
 

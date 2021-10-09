@@ -14,7 +14,9 @@ config POWER_SEQUENCE_DISABLE_TIMEOUTS
 
 config PWR_TASK_STACK_SIZE
 	int "Adjust power plane thread stack size"
-	default 1024
+	default 432 if ECFW_STACK_OPTIMIZATION
+	default 1820 if PWRMGT_LOG_LEVEL > 2
+	default 1004
 	help
 	 EC FW power plane management thread task stack size.
 

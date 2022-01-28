@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2020 Intel Corporation.
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  */
 
 #ifndef __DEEP_SX_H__

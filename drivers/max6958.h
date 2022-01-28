@@ -23,7 +23,7 @@
  * @param mode_mask the bitmask indicating decode mode for each digit.
  *
  */
-int max6958_set_decode_mode(u8_t mode_mask);
+int max6958_set_decode_mode(uint8_t mode_mask);
 
 /* Duty cycle
  * This is define x / 64
@@ -42,7 +42,7 @@ int max6958_set_decode_mode(u8_t mode_mask);
  * @retval -EIO General input / output error, failed to configure device.
  *
  */
-int max6958_set_brightness(u8_t duty_cycle);
+int max6958_set_brightness(uint8_t duty_cycle);
 
 /**
  * @brief Sets the number of digits displayed.
@@ -52,7 +52,7 @@ int max6958_set_brightness(u8_t duty_cycle);
  * @retval -EIO General input / output error, failed to configure device.
  *
  */
-int max6958_set_digits(u8_t num);
+int max6958_set_digits(uint8_t num);
 
 /**
  * @brief Set display mode of operation.
@@ -72,13 +72,6 @@ int max6958_set_power(bool power);
  * @retval -EIO General input / output error, failed to configure device.
  *
  */
-int max6958_display_digits(u32_t digits);
-
-/**
- * @brief Initialize the display.
- *
- * @retval returns 0 if all passes.
- */
-int max6958_init(void);
+int max6958_display_digits(uint32_t digits);
 
 #endif /* __MAX6958_H__ */

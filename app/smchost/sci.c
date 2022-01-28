@@ -19,11 +19,17 @@ LOG_MODULE_REGISTER(sci, CONFIG_SMCHOST_LOG_LEVEL);
 
 struct acpi_state_flags g_acpi_state_flags;
 
-K_MSGQ_DEFINE(sci_msgq, sizeof(u8_t), SCIQ_SIZE, sizeof(u8_t));
+K_MSGQ_DEFINE(sci_msgq, sizeof(uint8_t), SCIQ_SIZE, sizeof(uint8_t));
 
 void sci_queue_init(void)
 {
 	g_acpi_state_flags.sci_enabled = 1;
+}
+
+void sci_queue_flush(void)
+{
+	LOG_DBG("%s %d SCI flushed", __func__, k_msgq_num_used_get(&sci_msgq));
+	k_msgq_purge(&sci_msgq);
 }
 
 /* System control interrupt are used to notify OS of ACPI events,
@@ -39,22 +45,17 @@ void generate_sci(void)
 
 	if ((!g_acpi_state_flags.sci_enabled) ||
 	    (!g_acpi_state_flags.acpi_mode)) {
+		LOG_DBG("SCI is disabled");
 		return;
 	}
 
 	if (pwrseq_system_state() == SYSTEM_S0_STATE) {
-#ifdef CONFIG_SMCHOST_ACPI_CRITICAL_SECTION
-		u8_t ccr;
-
-		ccr = CPU_GET_INTERRUPT_STATE();
-		CPU_DISABLE_INTERRUPTS();
-#endif
-
 #ifdef CONFIG_SMCHOST_SCI_OVER_ESPI
 		ret = espihub_send_vw(ESPI_VWIRE_SIGNAL_SCI, ESPIHUB_VW_LOW);
 		if (ret) {
 			LOG_WRN("SCI failed");
 		}
+		k_busy_wait(100);
 
 		ret = espihub_send_vw(ESPI_VWIRE_SIGNAL_SCI, ESPIHUB_VW_HIGH);
 		if (ret) {
@@ -63,11 +64,8 @@ void generate_sci(void)
 #else
 #warning "SCI using physical pin not supported"
 #endif
-
-
-#ifdef CONFIG_SMCHOST_ACPI_CRITICAL_SECTION
-		CPU_SET_INTERRUPT_STATE(ccr);
-#endif
+	} else {
+		LOG_ERR("No SCI. Power state check failed ");
 	}
 }
 
@@ -87,10 +85,17 @@ void check_sci_queue(void)
 	}
 }
 
+bool sci_pending(void)
+{
+	return (g_acpi_state_flags.sci_enabled &&
+		g_acpi_state_flags.acpi_mode &&
+		k_msgq_num_used_get(&sci_msgq) > 0);
+}
+
 void send_sci_events(void)
 {
 	int ret;
-	u8_t evt_byte = 0;
+	uint8_t evt_byte = 0;
 
 	if (!g_acpi_state_flags.acpi_mode) {
 		return;
@@ -121,12 +126,13 @@ void send_sci_events(void)
 	generate_sci();
 }
 
-void enqueue_sci(u8_t code)
+void enqueue_sci(uint8_t code)
 {
 	int ret;
 
 	if ((!g_acpi_state_flags.sci_enabled) ||
 	    (!g_acpi_state_flags.acpi_mode)) {
+		LOG_DBG("SCI not queued not in ACPI mode %02x", code);
 		return;
 	}
 
@@ -134,7 +140,18 @@ void enqueue_sci(u8_t code)
 		LOG_INF("enqueued SCI %02x", code);
 		ret = k_msgq_put(&sci_msgq, (void *)&code, K_NO_WAIT);
 		if (ret < 0) {
-			LOG_WRN("SCI msgq Put failure %02x", ret);
+			LOG_ERR("SCI msgq Put failure %02x", ret);
 		}
+	} else {
+		LOG_WRN("SCI not queued, power check failed %02x", code);
 	}
+
+#ifdef CONFIG_SMCHOST_EVENT_DRIVEN_TASK
+	smchost_signal_request();
+#endif
+}
+
+inline bool is_system_in_acpi_mode(void)
+{
+	return g_acpi_state_flags.acpi_mode;
 }

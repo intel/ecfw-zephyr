@@ -1,0 +1,45 @@
+# Kconfig - Config options for board
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menu "Optional board features"
+
+config DEPRECATED_HW_STRAP_BASED_PECI_MODE_SEL
+	bool "Enable HW Strap reading to determine peci mode only for ADL-S"
+	help
+	  Indicate if EC supporting HW strap reading or BIOS menu option.
+	  Remove this in future platforms and have only BIOS Menu option.
+
+config BOARD_ID_IO_EXPANDER
+	bool "IO Expander used for generating board ID"
+	default y
+	help
+	  Indicates if board ID is generated making use of an IO Expander.
+
+config ATX_SUPPORT
+	bool "ATX power supply detection"
+	help
+	  Indicate if EC handles detection of ATX power supply.
+
+choice
+	prompt "Select Intel RVP when using EC modular card"
+	default MEC15XX_AIC_ON_ADL_S if BOARD_MEC1501MODULAR_ASSY6885
+	help
+	  Select Intel RVP and modular card combination to be used.
+	  This is required since some peripherals an MECC connector pin
+	  mappings vary slightly from board to board.
+
+	config MEC15XX_AIC_ON_ADL_S
+		depends on BOARD_MEC1501MODULAR_ASSY6885
+		bool "Allow to use ADL-S with MECC card"
+
+	config MEC15XX_AIC_ON_TGL
+		depends on BOARD_MEC1501MODULAR_ASSY6885
+		bool "Use TGL RVP with MECC card"
+
+endchoice
+
+endmenu

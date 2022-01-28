@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 target_sources(app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/app.c
@@ -5,13 +7,14 @@ target_sources(app
 
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/peripheral_management)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/power_sequencing)
+include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/dnx)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/power_management)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/smchost)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/thermal_management)
-include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/battery_management)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/debug)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/kbchost)
-include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/usbc_management)
+include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/saf)
+include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/soc_debug_awareness)
 
 target_sources_ifdef(CONFIG_PERIPHERAL_MANAGEMENT app
     PRIVATE
@@ -25,21 +28,39 @@ target_sources_ifdef(CONFIG_PERIPHERAL_MANAGEMENT app
 target_sources_ifdef(CONFIG_PWRMGMT app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pwrplane.c
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/espi_hub.c
     ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/dswmode.c
     ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/deepsx.c
+    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pseudog3.c
+    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pmc.c
+    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pwrseq_utils.c
     PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pwrplane.h
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/espi_hub.h
     ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/dswmode.h
     ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/deepsx.h
+    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pseudog3.h
+    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pmc.h
+    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pwrseq_utils.h
     )
 
-target_sources_ifdef(CONFIG_PWRMGMT_DEEP_IDLE app
+target_sources_ifdef(CONFIG_DNX_SUPPORT app
     PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/power_management/pwrmgmt.c
+    ${CMAKE_CURRENT_LIST_DIR}/dnx/dnx.c
     PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/power_management/pwrmgmt.h
+    ${CMAKE_CURRENT_LIST_DIR}/dnx/dnx.h
+    )
+
+target_sources_ifdef(CONFIG_DNX_EC_ASSISTED_TRIGGER app
+    PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/dnx/dnx_ec_assisted_trigger.c
+    PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}/dnx/dnx_ec_assisted_trigger.h
+    )
+
+target_sources_ifdef(CONFIG_SOC_DEBUG_AWARENESS app
+    PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/soc_debug_awareness/soc_debug.c
+    PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}/soc_debug_awareness/soc_debug.h
     )
 
 target_sources_ifdef(CONFIG_SMCHOST app
@@ -56,11 +77,6 @@ target_sources_ifdef(CONFIG_SMCHOST app
     ${CMAKE_CURRENT_LIST_DIR}/smchost/scicodes.h
     )
 
-target_sources_ifdef(CONFIG_PFAT_SUPPORT app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/smchost_pfat.c
-    )
-
 target_sources_ifdef(CONFIG_THERMAL_MANAGEMENT app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/thermal_management/thermalmgmt.c
@@ -69,27 +85,11 @@ target_sources_ifdef(CONFIG_THERMAL_MANAGEMENT app
     ${CMAKE_CURRENT_LIST_DIR}/thermal_management/thermalmgmt.h
     )
 
-target_sources_ifdef(CONFIG_BATTERY_MANAGEMENT app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/battery_management/bmc.c
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/smchost_bmc.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/battery_management/bmc.h
-    )
-
 target_sources_ifdef(CONFIG_POSTCODE_MANAGEMENT app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/debug/postcodemgmt.c
     PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/debug/postcodemgmt.h
-    )
-
-
-target_sources_ifdef(CONFIG_USBC_POWER_DELIVERY app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/usbc_management/usbc.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/usbc_management/usbc.h
     )
 
 target_sources_ifdef(CONFIG_ESPI_PERIPHERAL_8042_KBC app
@@ -101,12 +101,18 @@ target_sources_ifdef(CONFIG_ESPI_PERIPHERAL_8042_KBC app
     ${CMAKE_CURRENT_LIST_DIR}/kbchost/keyboard_utility.h
     )
 
-# Modules not open sourced
-target_sources_ifdef(CONFIG_ESPI_PERIPHERAL_HOST_IO_PVT app
+target_sources_ifdef(CONFIG_ESPI_SAF app
     PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/smchost_pvt.c
+    ${CMAKE_CURRENT_LIST_DIR}/saf/saf_config.c
     PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/smchost_pvt.h
+    ${CMAKE_CURRENT_LIST_DIR}/saf/saf_config.h
+    )
+
+target_sources_ifdef(CONFIG_SAF_SPI_WINBOND app
+    PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/saf/saf_spi_winbond.c
+    PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}/saf/saf_spi_winbond.h
     )
 
 target_include_directories(app

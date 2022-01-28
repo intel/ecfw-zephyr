@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2020 Intel Corporation.
+ * Copyright (c) 2020 Intel Corporation
  *
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <zephyr.h>
@@ -18,13 +19,13 @@
 #include "pwrbtnmgmt.h"
 #include "pwrseq_timeouts.h"
 #include <logging/log.h>
-LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
+LOG_MODULE_REGISTER(pwrmgmt, CONFIG_PWRMGMT_DEEPSX_LOG_LEVEL);
 
 /* Delay to wait for SUS_WARN after PMIC change */
 #define DEEPSX_SUS_WARN_DELAY      20
 
 static bool sys_deep_sx;
-static u8_t slp_m;
+static uint8_t slp_m;
 
 /* DeepSx is enabled by BIOS, EC gets notified about via EC command about which
  * mode is selected.
@@ -47,7 +48,7 @@ bool dsx_entered(void)
 
 static void ack_deep_sleep_transition(void)
 {
-	u8_t sus_wrn;
+	uint8_t sus_wrn;
 	int ret;
 
 	espihub_retrieve_vw(ESPI_VWIRE_SIGNAL_SUS_WARN, &sus_wrn);
@@ -153,7 +154,7 @@ static bool exit_deeps4(void)
 	gpio_write_pin(PM_RSMRST, 1);
 
 	/* Check eSPI reset is de-asserted otherwise this is a failure */
-	ret = wait_for_espi_reset(1, ESPI_RST_TIMEOUT);
+	ret = espihub_wait_for_espi_reset(1, ESPI_RST_TIMEOUT);
 	if (ret) {
 		LOG_ERR("ESPI_RST timeout");
 		return false;
@@ -262,26 +263,6 @@ bool check_s5_battonly_condition(void)
 	return true;
 }
 
-
-/* atx_detect()
- * Return:
- * 	true = atx present.
- * 	false = atx not present.
- */
-bool atx_detect(void)
-{
-#ifdef CONFIG_ATX_SUPPORT
-#ifdef CONFIG_BOARD_MEC1501_ADL
-	/* If ATX present, the ATX_DETECT gpio will be pulled low */
-	return !gpio_pin_get(ATX_DETECT);
-#endif /* CONFIG_BOARD_MEC1501_ADL */
-	return true;
-#endif /* CONFIG_ATX_SUPPORT */
-
-	/* Only S platforms has ATX, so return by default as ATX not present */
-	return false;
-}
-
 bool check_s5_alwayson_condition(void)
 {
 	int ac_prsnt;
@@ -306,12 +287,10 @@ bool check_s5_alwayson_condition(void)
 	}
 
 	/* Check for additional conditions when power supply does matter */
-#ifdef CONFIG_ATX_SUPPORT
 	if ((atx_detect())) {
 		LOG_DBG("Invalid ATX status: %d", atx_detect());
 		return false;
 	}
-#endif
 
 	if (!ac_prsnt) {
 		return false;
@@ -350,12 +329,10 @@ bool check_s4s5_alwayson_condition(void)
 	}
 
 	/* Check for additional conditions when power supply does matter */
-#ifdef CONFIG_ATX_SUPPORT
 	if (atx_detect()) {
 		LOG_DBG("DSx ATX power condition not met");
 		return false;
 	}
-#endif
 
 	if (!ac_prsnt) {
 		LOG_DBG("DSx AC power condition not met");
@@ -368,7 +345,7 @@ bool check_s4s5_alwayson_condition(void)
 void deep_sx_enter(void)
 {
 	int ret;
-	u8_t sus_wrn;
+	uint8_t sus_wrn;
 
 	espihub_retrieve_vw(ESPI_VWIRE_SIGNAL_SUS_WARN, &sus_wrn);
 	if (espihub_reset_status() && !sus_wrn) {

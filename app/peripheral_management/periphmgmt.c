@@ -13,39 +13,54 @@
 #include "periphmgmt.h"
 #include "pwrbtnmgmt.h"
 #include "board_config.h"
-#include "eeprom.h"
-#include "dswmode.h"
 LOG_MODULE_DECLARE(periph, CONFIG_PERIPHERAL_LOG_LEVEL);
 
-/* Stack area used by button task thread */
-#define GPIO_DEB_TASK_STACK_SIZE    1024
-/* scheduling priority used by each thread */
-#define GPIO_DEBOUNCE_PRIORITY      13
-#define GPIO_DEBOUNCE_TIME          5000
-#define GPIO_DEBOUNCE_CNT           5
-
-#define NUM_MCHP_PINS_PER_PORT      32
+/* Debouncing is performed in 1 ms intervals.
+ * Maximum debounce count is the debounce time specified in milliseconds.
+ */
+#define GPIO_DEBOUNCE_CNT	CONFIG_PERIPHERAL_DEBOUNCE_TIME
 
 struct btn_info {
-	u32_t		port_pin;
+	uint32_t		port_pin;
 	bool		debouncing;
-	u8_t		deb_cnt;
+	uint8_t		deb_cnt;
 	btn_handler_t	handler;
 	bool		prev_level;
 	struct gpio_callback gpio_cb;
 	char		*name;
 };
 
-struct btn_info btn_lst[] = {
+static struct btn_info btn_lst[] = {
 	{VOL_UP,          false, GPIO_DEBOUNCE_CNT, NULL, VOL_UP_INIT_POS,
 					{{0}, NULL, 0}, "VolUp"},
 	{PWRBTN_EC_IN_N,  false, GPIO_DEBOUNCE_CNT, NULL, PWR_BTN_INIT_POS,
 					{{0}, NULL, 0}, "PwrBtn"},
 	{VOL_DOWN,        false, GPIO_DEBOUNCE_CNT, NULL, VOL_DN_INIT_POS,
 					{{0}, NULL, 0}, "VolDown"},
+	{HOME_BUTTON,		false, GPIO_DEBOUNCE_CNT, NULL, HOME_INIT_POS,
+					{{0}, NULL, 0}, "hmbtn"},
+	{SMC_LID,        false, GPIO_DEBOUNCE_CNT, NULL, LID_INIT_POS,
+					{{0}, NULL, 0}, "LidBtn"},
+#if defined(VIRTUAL_BAT) || defined(VIRTUAL_DOCK)
+	{VIRTUAL_BAT,    false, GPIO_DEBOUNCE_CNT, NULL, VIRTUAL_BAT_INIT_POS,
+					{{0}, NULL, 0}, "VirBat"},
+	{VIRTUAL_DOCK,   false, GPIO_DEBOUNCE_CNT, NULL, VIRTUAL_DOCK_INIT_POS,
+					{{0}, NULL, 0}, "VirDock"},
+#endif
+#ifdef EC_SLATEMODE_HALLOUT_SNSR_R
+	{EC_SLATEMODE_HALLOUT_SNSR_R, false, GPIO_DEBOUNCE_CNT, NULL,
+				SLATEMODE_INIT_POS, {{0}, NULL, 0}, "Slatesw"},
+#endif
+#if defined(CONFIG_SOC_DEBUG_AWARENESS) && defined(TIMEOUT_DISABLE)
+	{TIMEOUT_DISABLE, false, GPIO_DEBOUNCE_CNT, NULL, 1,
+					{{0}, NULL, 0}, "Timeout"},
+#endif
 };
 
-void notify_btn_handlers(u8_t btn_idx)
+static int debouncing_ongoing;
+static struct k_sem btn_debounce_lock;
+
+static void notify_btn_handlers(uint8_t btn_idx)
 {
 	int level;
 
@@ -73,14 +88,44 @@ void notify_btn_handlers(u8_t btn_idx)
 /* Single callback to handle all button change events.
  * Buttons can be identified using container of gpio_cb structure.
  */
-static void gpio_level_change_callback(struct device *dev,
-		     struct gpio_callback *gpio_cb, u32_t pins)
+static void gpio_level_change_callback(const struct device *dev,
+		     struct gpio_callback *gpio_cb, uint32_t pins)
 {
 	struct btn_info *info = CONTAINER_OF(gpio_cb, struct btn_info, gpio_cb);
 
 	LOG_DBG("%s level changed, starting debounce", info->name);
 	info->debouncing = true;
 	info->deb_cnt = GPIO_DEBOUNCE_CNT;
+
+
+	k_sem_give(&btn_debounce_lock);
+}
+
+static void debounce_pins(void)
+{
+	debouncing_ongoing = 0;
+
+	for (int i = 0; i < ARRAY_SIZE(btn_lst); i++) {
+		if (btn_lst[i].debouncing) {
+			btn_lst[i].deb_cnt--;
+
+			if (btn_lst[i].deb_cnt == 0) {
+				btn_lst[i].debouncing = false;
+				btn_lst[i].deb_cnt = GPIO_DEBOUNCE_CNT;
+				notify_btn_handlers(i);
+			}
+		}
+
+		if (btn_lst[i].debouncing) {
+			debouncing_ongoing++;
+		}
+	}
+}
+
+bool is_debouncing(void)
+{
+	LOG_INF("%s :%d ", __func__, debouncing_ongoing);
+	return (debouncing_ongoing > 0);
 }
 
 static int periph_add_gpio_cb_for_button(int btn_index)
@@ -111,10 +156,11 @@ static int periph_add_gpio_cb_for_button(int btn_index)
 	return ret;
 }
 
-int periph_register_button(u32_t port_pin, btn_handler_t handler)
+int periph_register_button(uint32_t port_pin, btn_handler_t handler)
 {
 	int i;
 	int ret;
+	int level;
 
 	for (i = 0; i < ARRAY_SIZE(btn_lst); i++) {
 		if (btn_lst[i].port_pin == port_pin) {
@@ -133,36 +179,65 @@ int periph_register_button(u32_t port_pin, btn_handler_t handler)
 	if (!ret) {
 		btn_lst[i].handler = handler;
 	}
+
+	/* Update button level from gpio pin status */
+	level = gpio_read_pin(btn_lst[i].port_pin);
+
+	if (level < 0) {
+		LOG_ERR("Failed to read %x",
+				gpio_get_pin(btn_lst[i].port_pin));
+		return level;
+	}
+
+	btn_lst[i].prev_level = level;
+
 	return ret;
+}
+
+void update_virtual_bat_dock_status(void)
+{
+	int level;
+
+	level = gpio_read_pin(VIRTUAL_BAT);
+	if (level < 0) {
+		LOG_ERR("Fail to read virtual battery io expander");
+	} else {
+		g_acpi_tbl.acpi_flags2.vb_sw_closed = (level > 0) ? level : 0;
+	}
+
+	level = gpio_read_pin(VIRTUAL_DOCK);
+	if (level < 0) {
+		LOG_ERR("Fail to read virtual dock io expander");
+	} else {
+		g_acpi_tbl.acpi_flags2.pcie_docked = (level > 0) ? level : 0;
+	}
+}
+
+bool is_virtual_battery_prsnt(void)
+{
+	return g_acpi_tbl.acpi_flags2.vb_sw_closed ? false : true;
+}
+
+bool is_virtual_dock_prsnt(void)
+{
+	return g_acpi_tbl.acpi_flags2.pcie_docked;
 }
 
 void periph_thread(void *p1, void *p2, void *p3)
 {
-	u32_t period = *(u32_t *)p1;
+	uint32_t period = *(uint32_t *)p1;
 
-	eeprom_init();
-	dsw_read_mode();
 	pwrbtn_init();
 
+	k_sem_init(&btn_debounce_lock, 0, 1);
 	while (true) {
-		k_msleep(period);
+		/* Wait until ISR occurs to start debouncing */
+		k_sem_take(&btn_debounce_lock, K_FOREVER);
 
-		/* Perform debounce for all buttons */
-		for (int i = 0; i < ARRAY_SIZE(btn_lst); i++) {
-			if (gpio_port_enabled(btn_lst[i].port_pin) &&
-			    btn_lst[i].debouncing) {
-
-				btn_lst[i].deb_cnt--;
-
-				if (btn_lst[i].deb_cnt == 0) {
-					btn_lst[i].debouncing = false;
-					btn_lst[i].deb_cnt = GPIO_DEBOUNCE_CNT;
-					notify_btn_handlers(i);
-				}
-			}
-		}
-
-		/* Update EEPROM if required */
-		dsw_save_mode();
+		do {
+			/* Perform debounce for all buttons */
+			k_msleep(period);
+			debounce_pins();
+		} while (is_debouncing());
 	}
 }

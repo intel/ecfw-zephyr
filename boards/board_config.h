@@ -10,27 +10,31 @@
 /**
  * @brief This global variable helps to configure variable gpios.
  */
-extern u8_t boot_mode_maf;
+extern uint8_t boot_mode_maf;
 
 #if defined(CONFIG_SOC_FAMILY_MEC)
 
 #if defined(CONFIG_BOARD_MEC1501MODULAR_ASSY6885)
-#ifdef CONFIG_BOARD_MEC1501_ICL
-#include "icl_mec1501.h"
-#else
-#include "tgl_mec1501.h"
-#endif
+#include "mec15xx_aic_rvp_selection.h"
 #elif defined(CONFIG_BOARD_MEC1501_EUCLID)
 #include "euclid_mec1501.h"
 #elif defined(CONFIG_BOARD_MEC1501_ADL)
 #include "adl_mec1501.h"
 #elif defined(CONFIG_BOARD_MEC1501_ADL_P)
 #include "adl_p_mec1501.h"
+#elif defined(CONFIG_BOARD_MEC1501_ADL_SBGA)
+#include "adl_sbga_mec1501.h"
+#elif defined(CONFIG_BOARD_MEC1501_RPL_S)
+#include "rpl_s_mec1501.h"
+#elif defined(CONFIG_BOARD_MEC1501_RPL_P)
+#include "rpl_p_mec1501.h"
+#elif defined(CONFIG_BOARD_MEC1501_MTL_P)
+#include "mtl_p_mec1501.h"
 #else
 #error "Platform not supported"
-#endif
+#endif /* CONFIG_BOARD_MEC1501MODULAR_ASSY6885 */
 
-#endif /*CONFIG_SOC_FAMILY_MEC */
+#endif /* CONFIG_SOC_FAMILY_MEC */
 
 #ifdef CONFIG_THERMAL_MANAGEMENT
 #include "thermalmgmt.h"

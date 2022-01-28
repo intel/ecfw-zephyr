@@ -7,6 +7,7 @@
 #ifndef __PWRSEQ_TIMEOUTS_H__
 #define __PWRSEQ_TIMEOUTS_H__
 
+#include "espi_hub.h"
 /**
  * @brief Power sequence default timeout values expresed in 100us periods.
  */
@@ -23,9 +24,11 @@
 #define ALL_SYS_PWRGD_TIMEOUT       10000
 /* 500 ms */
 #define RSMRST_PWRDG_TIMEOUT        5000
-/* 150 ms */
-#define ESPI_RST_TIMEOUT            1500
+/* 500 ms */
+#define ESPI_RST_TIMEOUT            5000
 /* 6s */
 #define PM_SLP_SUS_TIMEOUT          60000
 
+/* No time out for power sequence signals */
+#define PWR_SEQ_TIMEOUT_FOREVER	    WAIT_TIMEOUT_FOREVER
 #endif /* __PWRSEQ_TIMEOUTS_H__ */

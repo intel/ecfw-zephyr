@@ -8,11 +8,10 @@
 #define __BOARD_H__
 
 /**
- * @brief Fetch board ID from RVP.
+ * @brief Fetch board ID from RVP/XEP.
  *
- * @retval board id value from HW.
+ * @retval board id value read from HW.
  */
-
 int read_board_id(void);
 
 /**
@@ -20,28 +19,28 @@ int read_board_id(void);
  *
  * @retval board id value read during boot.
  */
-u8_t get_board_id(void);
+uint8_t get_board_id(void);
 
 /**
  * @brief Gets hardware id.
  *
  * @retval board id value read during boot.
  */
-u8_t get_hw_id(void);
+uint8_t get_hw_id(void);
 
 /**
  * @brief Gets board EC HW straps.
  *
  * @retval byte representing the EC HW straps status read during boot.
  */
-u8_t get_hw_straps(void);
+uint8_t get_hw_straps(void);
 
 /**
  * @brief Gets board fabrication id.
  *
  * @retval id value use to identify different HW revisions within same SKU.
  */
-u8_t get_fab_id(void);
+uint8_t get_fab_id(void);
 
 /**
  * @brief Gets board platform information.
@@ -50,6 +49,6 @@ u8_t get_fab_id(void);
  *
  * Note: This is the raw data as expected by BIOS.
  */
-u16_t get_platform_id(void);
+uint16_t get_platform_id(void);
 
 #endif /* BOARD_H */

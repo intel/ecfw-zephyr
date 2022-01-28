@@ -9,25 +9,39 @@
 
 #include "system.h"
 
+/* Macros needed for power boss params update to host */
+#define PEAK_CUR_CAP_MODE0	0
+#define PEAK_CUR_CAP_MODE1	1
+#define PEAK_CUR_CAP_MODE2	2
+#define PEAK_CUR_CAP_MODE3	3
+#define PEAK_CUR_EQ_IOC		100
+#define PEAK_CUR_150_IOC_1MS	150
+#define PEAK_CUR_125_IOC_2MS	125
+#define PEAK_CUR_110_IOC_10MS	110
+#define PEAK_CUR_200_IOC_1MS	200
+#define PEAK_CUR_150_IOC_2MS	150
+#define PEAK_CUR_125_IOC_10MS	125
+#define PEAK_CUR_175_IOC_2MS	175
+#define PEAK_CUR_150_IOC_10MS	150
+
 /**
  * @brief Power control flags.
  */
 struct pwr_flags {
-	u8_t ac_powered:1;
-	u8_t prev_ac_presence:1;
-	u8_t wait_pwr_btn_up:1;
-	u8_t turn_pwr_on:1;
-	u8_t en_pwr_btn_notify:1;
-	u8_t pwr_sw_enabled:1;
-	u8_t pwr_sw_suspend_resume:1;
-	u8_t def_turn_pwr_on:1;
-	u8_t turn_pwr_off:1;
-	u8_t s3_ac_event:1;
-	u8_t ao_ac_timer_on:1;
-	u8_t soisct_shift_key:1;
-	u8_t deep_s3_timer_on:1;
-	u8_t g3_exit:1;
-	u8_t pm_rsmrst:1;
+	uint8_t ac_powered:1;
+	uint8_t prev_ac_presence:1;
+	uint8_t wait_pwr_btn_up:1;
+	uint8_t turn_pwr_on:1;
+	uint8_t en_pwr_btn_notify:1;
+	uint8_t pwr_sw_enabled:1;
+	uint8_t def_turn_pwr_on:1;
+	uint8_t turn_pwr_off:1;
+	uint8_t s3_ac_event:1;
+	uint8_t ao_ac_timer_on:1;
+	uint8_t soisct_shift_key:1;
+	uint8_t deep_s3_timer_on:1;
+	uint8_t g3_exit:1;
+	uint8_t pm_rsmrst:1;
 };
 
 /**
@@ -50,7 +64,7 @@ void pwrseq_thread(void *p1, void *p2, void *p3);
  *
  * @param error_code the power sequencing error.
  */
-void pwrseq_error(u8_t error_code);
+void pwrseq_error(uint8_t error_code);
 
 /**
  * @brief Indicates current system power state.
@@ -65,6 +79,21 @@ enum system_power_state pwrseq_system_state(void);
  * @retval is the current boot mode.
  */
 enum boot_config_mode pwrseq_get_boot_mode(void);
+
+/**
+ * @brief Detect ATX presence.
+ *
+ * @retval true if atx present, else false.
+ */
+bool atx_detect(void);
+
+/**
+ * @brief API to shutdown the host.
+ *
+ * This is called by thermal task when CPU temp crosses above crit threshold.
+ *
+ */
+void therm_shutdown(void);
 
 extern struct pwr_flags g_pwrflags;
 

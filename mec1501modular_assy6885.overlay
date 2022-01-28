@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2020, Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 &i2c_smb_0 {
 	status = "okay";
@@ -23,4 +28,15 @@
 		gpio-controller;
 		#gpio-cells = <2>;
 	};
+};
+
+&kscan0 {
+	status = "okay";
+};
+
+&spi0 {
+	status = "okay";
+	port_sel = <0>;
+	chip_select = <0>;
+	lines = <4>;
 };

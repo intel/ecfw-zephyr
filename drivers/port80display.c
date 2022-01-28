@@ -18,16 +18,10 @@ int port80_display_init(void)
 	int ret;
 
 	/* Hexadecimal decode for digits 3-0 */
-	u8_t dig_sel = MAX6958_DIG_DECODE_SEL(MAX6958_HEX_DECODE, 0) |
+	uint8_t dig_sel = MAX6958_DIG_DECODE_SEL(MAX6958_HEX_DECODE, 0) |
 			MAX6958_DIG_DECODE_SEL(MAX6958_HEX_DECODE, 1) |
 			MAX6958_DIG_DECODE_SEL(MAX6958_HEX_DECODE, 2) |
 			MAX6958_DIG_DECODE_SEL(MAX6958_HEX_DECODE, 3);
-
-	ret = max6958_init();
-	if (ret) {
-		LOG_ERR("Failed to init max6958: %d", ret);
-		return ret;
-	}
 
 	ret = max6958_set_decode_mode(dig_sel);
 	if (ret) {
@@ -69,7 +63,7 @@ int port80_display_off(void)
 	return ret;
 }
 
-void port80_display_word(u16_t word)
+void port80_display_word(uint16_t word)
 {
 	int ret;
 

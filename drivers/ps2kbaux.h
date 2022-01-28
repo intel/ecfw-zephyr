@@ -13,7 +13,7 @@
 #ifndef __KEYBOARD_API_H__
 #define __KEYBOARD_API_H__
 
-typedef void (*ps2_callback)(u8_t data);
+typedef void (*ps2_callback)(uint8_t data);
 
 /**
  * @brief Initialize PS/2 instance representing the keyboard.
@@ -25,7 +25,7 @@ typedef void (*ps2_callback)(u8_t data);
  * @retval 0 if successful.
  * @retval negative on error code.
  */
-int ps2_keyboard_init(ps2_callback callback, u8_t *initial_set);
+int ps2_keyboard_init(ps2_callback callback, uint8_t *initial_set);
 
 /**
  * @brief Write commands or data to PS/2 Keyboard.
@@ -34,7 +34,7 @@ int ps2_keyboard_init(ps2_callback callback, u8_t *initial_set);
  *
  * @param data Byte value representing either command or data.
  */
-void ps2_keyboard_write(u8_t data);
+void ps2_keyboard_write(uint8_t data);
 
 /**
  * @brief Disable the PS/2 instance representing the keyboard.
@@ -71,7 +71,7 @@ int ps2_mouse_init(ps2_callback callback);
  *
  * @param ps2_callback Pointer to a function implemented in the caller code.
  */
-void ps2_mouse_write(u8_t data);
+void ps2_mouse_write(uint8_t data);
 
 /**
  * @brief Disable the PS/2 instance representing the mouse.

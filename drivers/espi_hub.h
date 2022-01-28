@@ -17,11 +17,12 @@
 
 #define ESPI_WAIT_TRUE            1u
 
+#define WAIT_TIMEOUT_FOREVER      0xFFFFu
+
 /* Minimum and maximum eSPI frequencies */
 #define MIN_ESPI_FREQ             20u
 #define MAX_ESPI_FREQ             66u
 
-#define MAX_WARN_HANDLERS         3u
 #define MAX_ACPI_HANDLERS         2u
 #define MAX_PERIPH_HANDLERS       2u
 
@@ -33,10 +34,14 @@
 #define ESPI_PERIPHERAL_TYPE(x)   ((x) & 0x0000FFFF)
 #define ESPI_PERIPHERAL_INDEX(x)  (((x) & 0xFFFF0000) >> 16)
 
+/* Map port to OCB index */
+#define ESPI_VW_SIGNAL_OCB_USBC_INDEX(x)	(ESPI_VWIRE_SIGNAL_OCB_0 | x)
+
 typedef void (*espi_acpi_handler_t)(void);
-typedef void (*espi_warn_handler_t)(u8_t status);
-typedef void (*espi_state_handler_t)(u32_t signal, u32_t status);
-typedef void (*espi_kbc_handler_t)(u8_t data, u8_t status);
+typedef void (*espi_warn_handler_t)(uint8_t status);
+typedef void (*espi_state_handler_t)(uint32_t signal, uint32_t status);
+typedef void (*espi_kbc_handler_t)(uint8_t data, uint8_t status);
+typedef void (*espi_postcode_handler_t)(uint8_t port_index, uint8_t code);
 
 enum espihub_vw_level {
 	ESPIHUB_VW_LOW,
@@ -47,6 +52,10 @@ enum espihub_handler {
 	ESPIHUB_RESET_WARNING,
 	ESPIHUB_PLATFORM_RESET,
 	ESPIHUB_SUSPEND_WARNING,
+	ESPIHUB_DNX_WARNING,
+	ESPIHUB_BUS_RESET,
+
+	ESPIHUB_MAX_HANDLER_INDEX,
 };
 
 enum espihub_acpi_handler {
@@ -68,9 +77,12 @@ struct espihub_context {
 #ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
 	struct espi_callback kbc_cb;
 #endif
-	u8_t espi_rst_sts;
+#ifdef CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC
+	struct espi_callback oob_cb;
+#endif
+	uint8_t espi_rst_sts;
 	bool host_vw_ready;
-
+	bool dnx_mode;
 	/* SPI flash sharing config detection */
 	enum boot_config_mode spi_boot_mode;
 	bool boot_config_detected;
@@ -101,6 +113,14 @@ enum boot_config_mode espihub_boot_mode(void);
 bool espihub_reset_status(void);
 
 /**
+ * @brief Return early boot Download and Execute (DnX) status.
+ *
+ * @retval true if DnX warning has been already received by eSPI driver.
+ * @retval false if no warning received or if status cannot be retrieved.
+ */
+bool espihub_dnx_status(void);
+
+/**
  * @brief Poll eSPI reset status until is asserted/de-asserted.
  *
  * @param exp_sts the expected status.
@@ -108,7 +128,7 @@ bool espihub_reset_status(void);
  *
  * @retval -ETIMEDOUT or 0 if success.
  */
-int wait_for_espi_reset(u8_t exp_sts, u16_t timeout);
+int espihub_wait_for_espi_reset(uint8_t exp_sts, uint16_t timeout);
 
 /**
  * @brief Poll eSPI virtual wire until asserted/de-asserted.
@@ -120,7 +140,7 @@ int wait_for_espi_reset(u8_t exp_sts, u16_t timeout);
  *
  * @retval -ETIMEDOUT or success.
  */
-int wait_for_vwire(enum espi_vwire_signal signal, u16_t timeout,
+int espihub_wait_for_vwire(enum espi_vwire_signal signal, uint16_t timeout,
 		   enum espihub_vw_level exp_level, bool ack_required);
 
 /**
@@ -136,7 +156,8 @@ int wait_for_vwire(enum espi_vwire_signal signal, u16_t timeout,
  *
  * @retval -ETIMEDOUT or 0 if success.
  */
-int wait_for_pin_monitor_vwire(u32_t port_pin, u32_t exp_sts, u16_t timeout,
+int wait_for_pin_monitor_vwire(uint32_t port_pin, uint32_t exp_sts,
+			       uint16_t timeout,
 			       enum espi_vwire_signal signal,
 			       enum espihub_vw_level abort_sts);
 
@@ -202,6 +223,15 @@ int espihub_add_acpi_handler(enum espihub_acpi_handler type,
 int espihub_add_kbc_handler(espi_kbc_handler_t handler);
 
 /**
+ * @brief Add a post-code update handler.
+ *
+ * @param handler module handler for updating post-codes.
+ *
+ * @retval -EINVAL if a handler already registered or  0 if success.
+ */
+int espihub_add_postcode_handler(espi_postcode_handler_t handler);
+
+/**
  * @brief Retrieve a virtual wire ensuring the eSPI channel is ready.
  *
  * @param signal the virtual wire to monitor.
@@ -249,7 +279,7 @@ int espihub_send_oob(struct espi_oob_packet *pckt);
  *
  * @retval 0 if success, error otherwise.
  */
-int espihub_kbc_write(enum lpc_peripheral_opcode cmd, u32_t payload);
+int espihub_kbc_write(enum lpc_peripheral_opcode cmd, uint32_t payload);
 
 /**
  * @brief Perform keyboard write operation over eSPI.
@@ -259,6 +289,56 @@ int espihub_kbc_write(enum lpc_peripheral_opcode cmd, u32_t payload);
  *
  * @retval 0 if success, error otherwise.
  */
-int espihub_kbc_read(enum lpc_peripheral_opcode cmd, u32_t *data);
+int espihub_kbc_read(enum lpc_peripheral_opcode cmd, uint32_t *data);
 
+#ifdef ENABLE_ESPI_LTR
+/**
+ * @brief Send LTR packet after BME is enabled.
+ *
+ * @retval 0 if success, error otherwise.
+ */
+int espihub_send_ltr(void);
+#endif
+
+/**
+ * @brief Sends a write request packet for shared flash.
+ *
+ * This routine provides an interface to send a request to write to the flash
+ * components shared between the eSPI master and eSPI slaves.
+ *
+ * @param pckt Address of the representation of write flash transaction.
+ *
+ * @retval -ENOTSUP eSPI flash logical channel transactions not supported.
+ * @retval -EBUSY eSPI flash channel is not ready or disabled by master.
+ * @retval -EIO General input / output error, failed request to master.
+ */
+int espihub_write_flash(struct espi_flash_packet *pckt);
+
+/**
+ * @brief Sends a read request packet for shared flash.
+ *
+ * This routine provides an interface to send a request to read the flash
+ * component shared between the eSPI master and eSPI slaves.
+ *
+ * @param pckt Adddress of the representation of read flash transaction.
+ *
+ * @retval -ENOTSUP eSPI flash logical channel transactions not supported.
+ * @retval -EBUSY eSPI flash channel is not ready or disabled by master.
+ * @retval -EIO General input / output error, failed request to master.
+ */
+int espihub_read_flash(struct espi_flash_packet *pckt);
+
+/**
+ * @brief Sends an erase request packet for shared flash.
+ *
+ * This routine provides an interface to send a request to erase a page in
+ * the flash component shared between the eSPI master and eSPI slaves.
+ *
+ * @param pckt Adddress of the representation of erase flash transaction.
+ *
+ * @retval -ENOTSUP eSPI flash logical channel transactions not supported.
+ * @retval -EBUSY eSPI flash channel is not ready or disabled by master.
+ * @retval -EIO General input / output error, failed request to master.
+ */
+int espihub_erase_flash(struct espi_flash_packet *pckt);
 #endif /* __ESPI_HUB_H__ */

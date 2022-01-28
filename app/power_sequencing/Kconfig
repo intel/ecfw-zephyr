@@ -1,0 +1,42 @@
+# Kconfig - Config options for EC FW power sequencing module
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menu "Power on/bring-up overrides"
+
+config POWER_SEQUENCE_DISABLE_TIMEOUTS
+	bool "Disable power sequence timeouts"
+	help
+	  Indicate if EC will enforce timeouts during power sequencing or not.
+
+config POWER_SEQUENCE_MINIMUM_ESPI_CAPS
+	bool "eSPI handshake with minimum capabilities"
+	help
+	  Configure eSPI bus to advertise the minimum capabilities required
+	  to complete power sequence.
+
+config POWER_SEQUENCE_ERROR_LED
+	bool "Enable LED power sequencing error notification"
+	help
+	  Indicate if EC supports LED notifications for errors during power
+	  sequencing.
+
+config EC_DELAYED_BOOT
+	int "Enable EC FW delayed boot"
+	default 0
+	help
+	  Indicate if EC FW boot is delayed for N seconds. This is useful to
+	  debug early app initialization via serial logs or JTAG.
+
+config PWRMGT_LOG_LEVEL
+	int "Power management log level"
+	depends on LOG
+	depends on PWRMGMT
+	default 0
+	default 3 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for power management module.
+endmenu

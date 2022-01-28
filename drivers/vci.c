@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2020 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <zephyr.h>
@@ -63,7 +65,7 @@ enum vci_wake_source vci_wake_reason(void)
 
 void bgpo_disable(void)
 {
-	u32_t data = WKTMR_REGS->BGPO_PWR;
+	uint32_t data = WKTMR_REGS->BGPO_PWR;
 	/* Clear mask to disable BGPO */
 	data &= ~(BGPO_EN_MASK);
 	WKTMR_REGS->BGPO_PWR = data;

@@ -1,0 +1,43 @@
+# Kconfig - Config options for SAF module
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+menu "Slave attached flash"
+config SAF_SPI_DEVICES_COUNT
+	int "Number of SPI devices in the SAF layout"
+	default 1
+	depends on ESPI_SAF
+	help
+	  Indicate number of SPI devices that constitutes the layout for
+	  Intel Integrated Firmware in SAF boot configuration.
+
+config SAF_SPI_CAPACITY
+	int "SAF SPI flash capacity"
+	default 16
+	depends on ESPI_SAF
+	help
+	  Indicate SPI flash devices capacity in MB.
+
+config SAF_SPI_FREQ_MHZ
+	int "SAF SPI flash frequency"
+	default 24
+	depends on ESPI_SAF
+	help
+	  Indicate SPI flash devices frequency in MHz.
+
+choice
+	prompt "Select your SAF SPI flash device"
+	default SAF_SPI_WINBOND
+	depends on ESPI_SAF
+	help
+	 Select your SPI flash device vendor to allow to select correct
+	 SPI-vendor specific command opcodes.
+
+	config SAF_SPI_WINBOND
+		bool "SAF Windbond SPI flash device"
+
+endchoice
+
+endmenu

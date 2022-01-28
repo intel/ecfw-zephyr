@@ -11,8 +11,13 @@
 #include <logging/log.h>
 #include "gpio_ec.h"
 #include "espi_hub.h"
+#include "espioob_mngr.h"
+#ifdef CONFIG_ESPI_SAF
+#include "saf_config.h"
+#endif
 #include "system.h"
 #include "pwrplane.h"
+#include "pwrseq_utils.h"
 #include "board_config.h"
 #include "postcodemgmt.h"
 #include "port80display.h"
@@ -21,10 +26,20 @@
 #include "scicodes.h"
 #include "deepsx.h"
 #include "dswmode.h"
+#include "pseudog3.h"
+#ifdef CONFIG_SOC_DEBUG_AWARENESS
+#include "soc_debug.h"
+#endif
 #include "pwrseq_timeouts.h"
 #include "errcodes.h"
 #include "vci.h"
 #include "kbchost.h"
+#include "task_handler.h"
+#include "softstrap.h"
+#include "smchost.h"
+#ifdef CONFIG_DNX_SUPPORT
+#include "dnx.h"
+#endif
 
 LOG_MODULE_REGISTER(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 
@@ -45,9 +60,17 @@ LOG_MODULE_REGISTER(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 /* PM_RSMRST_ should be released 200 ms after PM_RSMRST_PWRGD */
 #define PM_RSMRST_DELAY        200U
 
+/* Different types of chargers that will be used to indicate over 0x89.
+ * 0x01 -> Traditional Type
+ * 0x02 -> Hybrid Type
+ * 0x03 -> NVDC
+ */
+#define CTYPE_NVDC	0x03
+
 /* Track power sequencing events */
 struct pwr_flags g_pwrflags;
 static bool pwrseq_timeout_disabled;
+static bool pwrseq_failure;
 
 /* System state machine */
 static enum system_power_state current_state;
@@ -58,16 +81,46 @@ static void power_off(void);
 static int power_on(void);
 static void suspend(void);
 static int resume(void);
+static void pwrseq_reset(void);
 
 /* This global variable is used mostly for pin configuration in board init */
-u8_t boot_mode_maf;
+uint8_t boot_mode_maf;
 
 enum system_power_state pwrseq_system_state(void)
 {
 	return current_state;
 }
 
-static void pwrseq_slp_handler(u32_t signal, u32_t status)
+void disable_ec_timeout(void)
+{
+	if (!pwrseq_timeout_disabled) {
+		pwrseq_timeout_disabled = true;
+	}
+}
+
+bool ec_timeout_status(void)
+{
+	return pwrseq_timeout_disabled;
+}
+
+void ec_evaluate_timeout(void)
+{
+	int level;
+
+	level = gpio_read_pin(TIMEOUT_DISABLE);
+	LOG_WRN("%s pmc_gpio: %d", __func__, level);
+	if (level < 0) {
+		LOG_ERR("Fail to read timeout HW strap");
+	} else if (level == 0) {
+		pwrseq_timeout_disabled = true;
+		LOG_WRN("EC WDT disabled");
+	} else {
+		pwrseq_timeout_disabled = false;
+		LOG_WRN("EC WDT enabled");
+	}
+}
+
+static void pwrseq_slp_handler(uint32_t signal, uint32_t status)
 {
 	/* De-assert always indicates transition to S0 */
 	if (status) {
@@ -103,7 +156,7 @@ static void pwrseq_slp_handler(u32_t signal, u32_t status)
 /* This is required since workaround for DeepSx is not yet removed
  * Even if DSx is enabled, the ACK is not send from deepsx module
  */
-static void pwrseq_sus_handler(u8_t status)
+static void pwrseq_sus_handler(uint8_t status)
 {
 	if (!dsw_enabled() || current_state == SYSTEM_G3_STATE ||
 		!dsx_entered()) {
@@ -112,12 +165,15 @@ static void pwrseq_sus_handler(u8_t status)
 	}
 }
 
-static void handle_spi_sharing(u8_t boot_mode)
+static void handle_spi_sharing(uint8_t boot_mode)
 {
 	switch (boot_mode) {
 	case FLASH_BOOT_MODE_SAF:
 		LOG_DBG("Booted in SAF mode");
 		/* TODO: set FET HIGH, not possible in MECC card */
+#ifdef CONFIG_ESPI_SAF
+		initialize_saf_bridge();
+#endif
 		break;
 	case FLASH_BOOT_MODE_G3_SHARING:
 		LOG_DBG("Booted in G3 mode");
@@ -133,10 +189,10 @@ static void handle_spi_sharing(u8_t boot_mode)
 	}
 }
 
-int wait_for_pin(u32_t port_pin, u16_t timeout,
-			u32_t exp_level)
+static int wait_for_pin_level(uint32_t port_pin, uint16_t timeout,
+			uint32_t exp_level)
 {
-	u16_t loop_cnt = timeout;
+	uint16_t loop_cnt = timeout;
 	int level;
 
 	do {
@@ -148,14 +204,15 @@ int wait_for_pin(u32_t port_pin, u16_t timeout,
 		}
 
 		if (exp_level == level) {
-			LOG_DBG("Pin [%x]: %x",
-				gpio_get_pin(port_pin), exp_level);
+			LOG_DBG("Pin [%d]: %x",
+				get_absolute_gpio_num(port_pin), exp_level);
 			break;
 		}
 
 		k_usleep(100);
 		loop_cnt--;
-	} while (loop_cnt > 0 || pwrseq_timeout_disabled);
+	} while (loop_cnt > 0 || (timeout == PWR_SEQ_TIMEOUT_FOREVER) ||
+		ec_timeout_status());
 
 	if (loop_cnt == 0) {
 		LOG_DBG("Timeout [%x]: %x", gpio_get_pin(port_pin), level);
@@ -165,22 +222,53 @@ int wait_for_pin(u32_t port_pin, u16_t timeout,
 	return 0;
 }
 
+static inline int wait_for_pin(uint32_t port_pin, uint16_t timeout,
+			       uint32_t exp_level)
+{
+	if (pwrseq_timeout_disabled) {
+		timeout = PWR_SEQ_TIMEOUT_FOREVER;
+	}
+
+	return wait_for_pin_level(port_pin, timeout, exp_level);
+}
+
+static inline int wait_for_vwire(uint8_t signal, uint16_t timeout,
+				uint8_t exp_level, bool ack_req)
+{
+	if (pwrseq_timeout_disabled) {
+		timeout = PWR_SEQ_TIMEOUT_FOREVER;
+	}
+
+	return espihub_wait_for_vwire(signal, timeout, exp_level, ack_req);
+}
+
+static inline int wait_for_espi_reset(uint8_t exp_sts, uint16_t timeout)
+{
+	if (pwrseq_timeout_disabled) {
+		timeout = PWR_SEQ_TIMEOUT_FOREVER;
+	}
+
+	return espihub_wait_for_espi_reset(exp_sts, timeout);
+}
+
 static int check_slp_signals(void)
 {
 	int ret;
 
 	/* Check for SLPS5#, SLPS4#, SLPS3# signals */
-	ret = wait_for_vwire(ESPI_VWIRE_SIGNAL_SLP_S5, SLPS5_TIMEOUT,
+	ret = wait_for_vwire(ESPI_VWIRE_SIGNAL_SLP_S5,
+			     TIMEOUT_TO_US(sw_strps()->timeouts.slp_s5),
 			     ESPIHUB_VW_HIGH, false);
 	if (ret) {
 		pwrseq_error(ERR_PM_SLPS5);
 		return ret;
 	}
 
-	ret = wait_for_vwire(ESPI_VWIRE_SIGNAL_SLP_S4, SLPS4_TIMEOUT,
+	ret = wait_for_vwire(ESPI_VWIRE_SIGNAL_SLP_S4,
+			     TIMEOUT_TO_US(sw_strps()->timeouts.slp_s4),
 			     ESPIHUB_VW_HIGH, false);
 	if (ret) {
-		pwrseq_error(ERR_PM_SLPS5);
+		pwrseq_error(ERR_PM_SLPS4);
 		return ret;
 	}
 
@@ -194,15 +282,25 @@ static int check_slp_signals(void)
 	return 0;
 }
 
-void pwrseq_error(u8_t error_code)
+void pwrseq_error(uint8_t error_code)
 {
 	LOG_ERR("%s: %d", __func__, error_code);
 
+	pwrseq_failure = true;
 	update_error(error_code);
 	k_msleep(100);
 	gpio_write_pin(PCH_PWROK, 0);
 	gpio_write_pin(SYS_PWROK, 0);
-	gpio_write_pin(PM_RSMRST, 0);
+}
+
+void pwrseq_reset(void)
+{
+	LOG_DBG("%s", __func__);
+
+	pwrseq_failure = false;
+
+	/* Clear port 80 */
+	update_error(ERR_NONE);
 }
 
 static inline int pwrseq_task_init(void)
@@ -211,20 +309,31 @@ static inline int pwrseq_task_init(void)
 
 	LOG_DBG("Power initialization...");
 
+#ifdef CONFIG_SOC_DEBUG_AWARENESS
+	soc_debug_init();
+#endif
+#ifdef CONFIG_DNX_EC_ASSISTED_TRIGGER
+	dnx_ec_assisted_init();
+#endif
+
+	/* the charger type as of now is updated with a static value */
+	g_acpi_tbl.acpi_ctype_value = CTYPE_NVDC;
+
 	/* SW strap always takes precedence */
 #ifdef CONFIG_POWER_SEQUENCE_DISABLE_TIMEOUTS
 	pwrseq_timeout_disabled = true;
+	LOG_WRN("SW timeouts disabled: %d", pwrseq_timeout_disabled);
 #else
-	int level;
-
-	level = gpio_read_pin(TIMEOUT_DISABLE);
-	if (level < 0) {
-		LOG_ERR("Fail to read timeout HW strap");
-	} else {
-		pwrseq_timeout_disabled = !level;
-		LOG_WRN("Timeouts disabled: %d", pwrseq_timeout_disabled);
-	}
-#endif
+#ifndef CONFIG_SOC_DEBUG_CONSENT_GPIO
+	/* Intel SoC debug consent is communicated via SoC-bootstall pin and
+	 * connected to same path for legacy EC WDT HW strap.
+	 * However, Soc-bootstall is stable only have predetermined time,
+	 * EC WDT can be sampled immediately only if SoC debug consent is not
+	 * supported.
+	 */
+	ec_evaluate_timeout();
+#endif /* CONFIG_SOC_DEBUG_CONSENT_GPIO */
+#endif /* CONFIG_POWER_SEQUENCE_DISABLE_TIMEOUTS */
 
 	handle_spi_sharing(espihub_boot_mode());
 	gpio_write_pin(PM_PWRBTN, 1);
@@ -247,25 +356,31 @@ static inline int pwrseq_task_init(void)
 		 * not be portable across SOCs.
 		 */
 		ret = wait_for_pin(ESPI_RESET_MAF,
-				   ESPI_RST_TIMEOUT, 1);
+				   TIMEOUT_TO_US(sw_strps()->timeouts.espi_rst),
+				   1);
 		if (ret) {
 			pwrseq_error(ERR_ESPIRESET);
 			return ret;
 		}
 	} else {
+		LOG_DBG("PM_RSMRST_G3SAF_P");
 		ret = gpio_write_pin(PM_RSMRST, 1);
 		if (ret) {
 			LOG_ERR("Failed to write PM_RSMRST");
 			return ret;
 		}
 
-		ret = wait_for_espi_reset(ESPI_WAIT_TRUE, ESPI_RST_TIMEOUT);
+		ret = wait_for_espi_reset(ESPI_WAIT_TRUE,
+				TIMEOUT_TO_US(sw_strps()->timeouts.espi_rst));
 		if (ret) {
 			pwrseq_error(ERR_ESPIRESET);
 			return ret;
 		}
 	}
 
+#ifdef CONFIG_DNX_SUPPORT
+	dnx_handle_early_handshake();
+#endif
 	/* In MAF mode, manually send the SUS_ACK if automatic ACK
 	 * is diabled in the espi driver. This is because the SUS_WARN
 	 * isr event arrives before the ESPI callbacks are configured
@@ -273,68 +388,112 @@ static inline int pwrseq_task_init(void)
 	 * EC application.
 	 * For G3 exit same approach can be be used to simplify logic.
 	 */
+
 #ifndef CONFIG_ESPI_AUTOMATIC_WARNING_ACKNOWLEDGE
-	ret = wait_for_vwire(ESPI_VWIRE_SIGNAL_SUS_WARN, SUSWARN_TIMEOUT,
-			     ESPIHUB_VW_HIGH, true);
-	if (ret) {
+	/* This function performs when required SUS_ACK */
+	ret = wait_for_vwire(ESPI_VWIRE_SIGNAL_SUS_WARN,
+			TIMEOUT_TO_US(sw_strps()->timeouts.sus_wrn),
+			ESPIHUB_VW_HIGH, true);
+	/* Only perform SUS_WRN timeout if DSx is enabled */
+	if (ret && dsw_enabled()) {
 		pwrseq_error(ERR_PM_SUS_WARN);
 		return ret;
 	}
 #endif
-
 	espihub_add_state_handler(pwrseq_slp_handler);
 	espihub_add_warn_handler(ESPIHUB_SUSPEND_WARNING, pwrseq_sus_handler);
-
-	ret = gpio_write_pin(PM_BATLOW, 1);
-	if (ret) {
-		LOG_ERR("Failed to write PM_BATLOW");
-	}
 
 	return ret;
 }
 
 static void pwrseq_update(void)
 {
-	int ret = 0;
+	bool valid_sx_transition = false;
 
 	switch (next_state) {
 	case SYSTEM_S0_STATE:
 		check_slp_signals();
 		if (current_state == SYSTEM_G3_STATE ||
 		    current_state == SYSTEM_S5_STATE) {
-			ret = power_on();
+			if (!power_on()) {
+				valid_sx_transition = true;
+			}
 		} else {
-			ret = resume();
+			if (!resume()) {
+				valid_sx_transition = true;
+			}
 		}
 		break;
 	case SYSTEM_S3_STATE:
 		if (current_state == SYSTEM_S0_STATE) {
 			suspend();
+			valid_sx_transition = true;
 		}
 		break;
 	case SYSTEM_S4_STATE:
 	case SYSTEM_S5_STATE:
 		if (current_state == SYSTEM_S0_STATE) {
 			power_off();
+			valid_sx_transition = true;
 		}
 		break;
 	default:
-		LOG_ERR("Unsupported state");
+		LOG_ERR("Unsupported next state: %d", next_state);
+		/* Do not transition to invalid state,
+		 * stay in current valid role.
+		 */
+		next_state = current_state;
 		break;
 	}
 
-	if (!ret) {
+	if (valid_sx_transition) {
 		LOG_INF("System transition %d->%d", current_state, next_state);
 		current_state = next_state;
 	}
 }
 
+bool atx_detect(void)
+{
+#ifdef CONFIG_ATX_SUPPORT
+	/* If ATX present, the ATX_DETECT gpio will be pulled low */
+	return !gpio_read_pin(ATX_DETECT);
+#endif
+	/* Return by default as ATX not present */
+	return false;
+}
+
+static bool pwrpln_check_power_adapter_levels(void)
+{
+	if (atx_detect() == true) {
+		return true;
+	}
+
+	if (gpio_read_pin(BC_ACOK)) {
+		return true;
+	}
+
+	return false;
+}
+
+static void pwrpln_check_power_critical_levels(void)
+{
+	bool power_good = false;
+
+	/* Assert SOC bat low either for power adapter below the
+	 * threshold power limit or low battery condition
+	 */
+	power_good = pwrpln_check_power_adapter_levels();
+
+	gpio_write_pin(PM_BATLOW, (power_good) ? 1 : 0);
+}
+
 void pwrseq_thread(void *p1, void *p2, void *p3)
 {
 	int level;
-	u32_t period = *(u32_t *)p1;
+	uint32_t period = *(uint32_t *)p1;
 
 	pwrseq_task_init();
+	dsw_read_mode();
 
 	while (true) {
 		k_msleep(period);
@@ -352,6 +511,11 @@ void pwrseq_thread(void *p1, void *p2, void *p3)
 				 */
 				k_msleep(PM_RSMRST_DELAY);
 				LOG_DBG("Delayed PM_RSMRST_ HIGH");
+			} else {
+				/* Debug indication to check if this toggles
+				 * when power is cut-off in G3 cycling
+				 */
+				LOG_DBG("Immediate PM_RSMRST LOW");
 			}
 		}
 		g_pwrflags.pm_rsmrst = level;
@@ -379,10 +543,64 @@ void pwrseq_thread(void *p1, void *p2, void *p3)
 			manage_deep_s4s5();
 		}
 
-		if (next_state != current_state) {
+		/* Allow system to resume/boot after previous failure S4/S5
+		 * during power sequencing
+		 */
+		if ((next_state != current_state) &&
+		    ((current_state == SYSTEM_S4_STATE) ||
+		     (current_state == SYSTEM_S5_STATE) || (!pwrseq_failure))) {
 			pwrseq_update();
 		}
+
+		/* Update EEPROM if required */
+		dsw_save_mode();
+
+		pwrpln_check_power_critical_levels();
+
+#ifndef CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC
+		/*
+		 * When eSPI OOB RX callback is not enabled, downstream OOBs
+		 * need to be polled within the thread. This is blocking call.
+		 */
+		oob_rx_cb_handler();
+#endif
+		manage_pseudog3();
 	}
+}
+
+void therm_shutdown(void)
+{
+	suspend_all_tasks();
+
+	/* Turn off power */
+	power_off();
+
+	/* Assert RSMRST */
+	gpio_write_pin(PM_RSMRST, LOW);
+
+	while (true) {
+		if (gpio_read_pin(PWRBTN_EC_IN_N) == LOW) {
+			/* Rotate fan and toggle leds until pwr btn pressed */
+			break;
+		}
+
+		fan_set_duty_cycle(FAN_CPU, 50);
+
+		/* EC initiated shutdown is indicated by flashing of NUM and
+		 * CAPS lock LEDs alternatively.
+		 */
+#ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
+		kbc_set_leds(BIT(NUM_LOCK_POS));
+#endif
+		k_msleep(KBC_LED_FLASH_DELAY_MS);
+#ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
+		kbc_set_leds(BIT(CAPS_LOCK_POS));
+#endif
+		k_msleep(KBC_LED_FLASH_DELAY_MS);
+	}
+
+	/* Pwr btn pressed. Resume suspended tasks to allow boot */
+	resume_all_tasks();
 }
 
 static void power_off(void)
@@ -404,17 +622,21 @@ static void power_off(void)
 		LOG_ERR("Fail to read pwr_btn %d", level);
 	}
 
-	LOG_DBG("Shutting down %d", level);
-	do {
-		level = gpio_get_pin(PWRBTN_EC_IN_N);
-	} while (!level);
-
-	board_suspend();
-	port80_display_off();
-
 #ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
 	kbc_disable_interface();
 #endif
+	board_suspend();
+
+	LOG_DBG("Shutting down %d", level);
+	do {
+		level = gpio_get_pin(PWRBTN_EC_IN_N);
+		LOG_DBG("PWR_RST_STS  %x", PCR_REGS->PWR_RST_STS);
+	} while (!level);
+
+	port80_display_off();
+
+	gpio_write_pin(EC_PWRBTN_LED, LOW);
+	LOG_DBG("Power off complete");
 }
 
 static int power_on(void)
@@ -423,6 +645,14 @@ static int power_on(void)
 
 	LOG_INF("%s", __func__);
 
+	pwrseq_reset();
+
+#ifdef CONFIG_SOC_DEBUG_AWARENESS
+	soc_debug_consent_kbs();
+#endif
+#ifdef CONFIG_DNX_EC_ASSISTED_TRIGGER
+	dnx_ec_assisted_manage();
+#endif
 	ret = wait_for_pin(RSMRST_PWRGD,
 			   RSMRST_PWRDG_TIMEOUT, 1);
 	if (ret) {
@@ -438,33 +668,30 @@ static int power_on(void)
 
 	port80_display_on();
 
-	ret = gpio_write_pin(PM_PWRBTN, 1);
-	if (ret) {
-		LOG_ERR("Unable to initialize %d ", PM_PWRBTN);
-		return ret;
-	}
-
 	/* Check for SLPS5#, SLPS4#, SLPS3# signals */
 	ret = check_slp_signals();
 	if (ret) {
 		return ret;
 	}
 
-	ret = wait_for_vwire(ESPI_VWIRE_SIGNAL_SLP_A, SLP_M_TIMEOUT,
+	ret = wait_for_vwire(ESPI_VWIRE_SIGNAL_SLP_A,
+			     TIMEOUT_TO_US(sw_strps()->timeouts.slp_m),
 			     ESPIHUB_VW_HIGH, false);
 	if (ret) {
 		pwrseq_error(ERR_PM_SLP_M);
 		return ret;
 	}
 
-
-	ret = wait_for_pin(ALL_SYS_PWRGD, ALL_SYS_PWRGD_TIMEOUT, 1);
+	ret = wait_for_pin(ALL_SYS_PWRGD,
+			   TIMEOUT_TO_US(sw_strps()->timeouts.all_sys_pwrg),
+			   1);
 	if (ret) {
 		pwrseq_error(ERR_ALL_SYS_PWRGD);
 		return ret;
 	}
 
 	k_busy_wait(VR_ON_RAMP_DELAY_US);
+
 #ifdef VCCST_PWRGD
 	ret = gpio_write_pin(VCCST_PWRGD, 1);
 	if (ret) {
@@ -472,7 +699,6 @@ static int power_on(void)
 		return ret;
 	}
 #endif
-
 	ret = gpio_write_pin(PCH_PWROK, 1);
 	if (ret) {
 		LOG_ERR("Failed to indicate eSPI master to run");
@@ -493,18 +719,19 @@ static int power_on(void)
 		return ret;
 	}
 
-	ret = wait_for_vwire(ESPI_VWIRE_SIGNAL_PLTRST, PLT_RESET_TIMEOUT,
+	ret = wait_for_vwire(ESPI_VWIRE_SIGNAL_PLTRST,
+			     TIMEOUT_TO_US(sw_strps()->timeouts.plt_rst),
 			     ESPIHUB_VW_HIGH, false);
 	if (ret) {
 		pwrseq_error(ERR_PLT_RST);
 		return ret;
 	}
 
+	gpio_write_pin(EC_PWRBTN_LED, HIGH);
+
 #ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
 	kbc_enable_interface();
 #endif
-	current_state = SYSTEM_S0_STATE;
-
 	LOG_INF("%s new state %d", __func__, current_state);
 
 	return 0;
@@ -535,3 +762,4 @@ static int resume(void)
 	board_resume();
 	return ret;
 }
+

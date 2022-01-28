@@ -30,17 +30,17 @@ LOG_MODULE_REGISTER(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
  * this realization we just use a variable to represent its
  * internal state.
  */
-static u8_t cmdbyte = KBC_8042_KBD_DIS | KBC_8042_MOUSE_DIS |
+static uint8_t cmdbyte = KBC_8042_KBD_DIS | KBC_8042_MOUSE_DIS |
 			KBC_8042_HOST_SYS_FLAG | KBC_8042_TRANSLATE;
 
-static u8_t resend_cmd[MAX_HOST_REQ_SIZE];
-static u8_t resend_cmd_len;
+static uint8_t resend_cmd[MAX_HOST_REQ_SIZE];
+static uint8_t resend_cmd_len;
 
 /* We place the keyboards behind an factory/strategy API */
 struct host_byte {
-	u8_t data;
+	uint8_t data;
 	/* 1 = Command or 0 = Data */
-	u8_t cmd;
+	uint8_t cmd;
 };
 
 #define TO_HOST_LEN	16U
@@ -50,9 +50,10 @@ struct host_byte {
 #define MB_RESET_PERIOD 8U
 #define KBC_RETRY_PERIOD 1U
 #define TOHOST_RETRY_PERIOD 2U
+#define GAP_FOR_DUMMY_COMMANDS 5U
 
 K_MSGQ_DEFINE(from_host_queue, sizeof(struct host_byte), 8, 4);
-K_MSGQ_DEFINE(to_host_kb_queue, sizeof(u8_t), TO_HOST_LEN, 4);
+K_MSGQ_DEFINE(to_host_kb_queue, sizeof(uint8_t), TO_HOST_LEN, 4);
 K_SEM_DEFINE(kb_p60_sem, 0, 1);
 K_MUTEX_DEFINE(led_mutex);
 #if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
@@ -60,9 +61,9 @@ static atomic_t ps2_reset;
 #endif
 static int kbc_init(void);
 static void purge_kb_queue(void);
-static void send_kb_to_host(u8_t data);
+static void send_kb_to_host(uint8_t data);
 
-static u8_t current_scan_code = 2;
+static uint8_t current_scan_code = 2;
 
 static enum {
 	DEFAULT_STATE = 0,
@@ -80,12 +81,12 @@ static enum {
 } data_port_state = DEFAULT_STATE;
 
 /* Led internal states is tracked in a variable */
-static u8_t current_leds_state;
+static uint8_t current_leds_state;
 
 /* Command byte operations implicity affecting keyboard
  * and mouse. TODO add kscan APIs
  */
-static inline void write_command_byte(u8_t new_cmdbyte)
+static inline void write_command_byte(uint8_t new_cmdbyte)
 {
 	cmdbyte = new_cmdbyte;
 }
@@ -135,9 +136,9 @@ static inline bool cmdbyte_mb_enabled(void)
  * bytes will appear at port 0x60.
  *
  */
-static int process_keyboard_command(u8_t command, u8_t *output)
+static int process_keyboard_command(uint8_t command, uint8_t *output)
 {
-	u8_t out_len = 0;
+	uint8_t out_len = 0;
 
 #if !defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
 	if (command == KBC_8042_DIS_MOUSE || command == KBC_8042_ENA_MOUSE ||
@@ -235,11 +236,11 @@ static int process_keyboard_command(u8_t command, u8_t *output)
  *
  * This functions returns the number of bytes stored in *output buffer.
  */
-static int process_keyboard_data(u8_t data, u8_t *output)
+static int process_keyboard_data(uint8_t data, uint8_t *output)
 {
-	u8_t out_len = 0;
+	uint8_t out_len = 0;
 	int save_cmd = 1;
-	u32_t kbd_flags;
+	uint32_t kbd_flags;
 
 	switch (data_port_state) {
 	case WRITE_CMD_BYTE_STATE:
@@ -247,13 +248,12 @@ static int process_keyboard_data(u8_t data, u8_t *output)
 		/* Optionally we can introduce E8042_SET_KBC_STS
 		 * instead of individual flags
 		 */
-#ifdef CONFIG_8042_SYSFLAGS_SUPPORT
 		if (data & KBC_8042_HOST_SYS_FLAG) {
 			espihub_kbc_write(E8042_SET_FLAG, kbd_flags);
 		} else {
 			espihub_kbc_write(E8042_CLEAR_FLAG, kbd_flags);
 		}
-#endif
+
 		write_command_byte(data);
 		if (data & KBC_8042_KBD_DIS) {
 			purge_kb_queue();
@@ -455,9 +455,9 @@ static int process_keyboard_data(u8_t data, u8_t *output)
 
 static void handle_from_to_host(struct host_byte host_data)
 {
-	u8_t out_len;
-	u8_t data_to_host[MAX_HOST_REQ_SIZE] = {0};
-	u32_t host_char;
+	uint8_t out_len;
+	uint8_t data_to_host[MAX_HOST_REQ_SIZE] = {0};
+	uint32_t host_char;
 
 	/* If cmd = 1, then host sent data */
 	if (host_data.cmd) {
@@ -465,8 +465,6 @@ static void handle_from_to_host(struct host_byte host_data)
 						   data_to_host);
 		LOG_DBG("data: %x, state: %d, out_len: %d",
 			host_data.data, data_port_state, out_len);
-
-
 	} else {
 		out_len = process_keyboard_data(host_data.data,
 						data_to_host);
@@ -484,9 +482,15 @@ static void handle_from_to_host(struct host_byte host_data)
 	if (out_len) {
 		int i = 0;
 		int obf_retries = 0;
-
+		/* This is where we send dummy commands from ps/2 kbd,
+		 * keyboard controller and scan matrix, and we don't send reply
+		 * values inmediatly. This is because a ps/2 keyboard may be
+		 * doing real processing and the host could send another
+		 * command while the device is busy.
+		 */
+		k_msleep(GAP_FOR_DUMMY_COMMANDS);
 		do {
-			u32_t kb_data = *(data_to_host + i);
+			uint32_t kb_data = *(data_to_host + i);
 
 			espihub_kbc_read(E8042_OBF_HAS_CHAR, &host_char);
 			if (host_char) {
@@ -532,9 +536,9 @@ void to_from_host_thread(void *p1, void *p2, void *p3)
 
 void to_host_kb_thread(void *p1, void *p2, void *p3)
 {
-	u32_t kb_data;
-	u32_t host_char;
-	u8_t obf_retries = 0;
+	uint32_t kb_data;
+	uint32_t host_char;
+	uint8_t obf_retries = 0;
 
 	while (true) {
 		k_sem_take(&kb_p60_sem, K_FOREVER);
@@ -582,8 +586,9 @@ void to_host_kb_thread(void *p1, void *p2, void *p3)
 
 #if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
 /* Callback passed to the PS2 instance handling the keyboard */
-static void keyboard_callback(u8_t data)
+static void keyboard_callback(uint8_t data)
 {
+
 	/* We return the dummy ACKs when processing the keyboard
 	 * related commands. This is because we want to process
 	 * ps2 keyboard and kscan matrix in the case that both
@@ -597,8 +602,9 @@ static void keyboard_callback(u8_t data)
 }
 
 /* Callback passed to the PS2 instance handling the mouse */
-static void mouse_callback(u8_t data)
+static void mouse_callback(uint8_t data)
 {
+
 	/* For the mouse we enqueue data to host under two different conditions.
 	 * The first one is when the mouse interface is disabled, but the
 	 * data from the mouse is an ACK or NACK. This allows to sequence the
@@ -607,7 +613,6 @@ static void mouse_callback(u8_t data)
 	 * and ready to send mouse data such as x,y coordinates and button
 	 * interaction.
 	 */
-
 	if (atomic_get(&ps2_reset) == 1U) {
 		if (data == KBC_8042_ACK) {
 			atomic_set(&ps2_reset, 0U);
@@ -626,11 +631,12 @@ static void mouse_callback(u8_t data)
 
 #if defined(CONFIG_KSCAN_EC)
 /* All the kb data is being pushed to kbc host in a single shot */
-static void mtx_keyboard_callback(u8_t *data, u8_t len)
+static void mtx_keyboard_callback(uint8_t *data, uint8_t len)
 {
+
 	if (cmdbyte_kbd_enabled()) {
 		for (int i = 0; i < len; i++) {
-			send_kb_to_host(*data);
+			send_kb_to_host(data[i]);
 		}
 	}
 }
@@ -641,7 +647,6 @@ static int kbc_init(void)
 #if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
 	int ps2_mb_err;
 	int ps2_kb_err;
-
 
 	ps2_mb_err = ps2_mouse_init(mouse_callback);
 	ps2_kb_err = ps2_keyboard_init(keyboard_callback,
@@ -716,14 +721,13 @@ int kbc_enable_interface(void)
 	return 0;
 }
 
-
 /* This handles the configuration data from the host for both,
  * keyboard and mouse
  */
-void kbc_handler(u8_t data, u8_t cmd_data)
+void kbc_handler(uint8_t data, uint8_t cmd_data)
 {
 	struct host_byte host_data;
-	static u8_t repeated_data_hack;
+	static uint8_t repeated_data_hack;
 
 	host_data.data = data;
 	host_data.cmd = cmd_data;
@@ -742,7 +746,7 @@ void kbc_handler(u8_t data, u8_t cmd_data)
 	k_msgq_put(&from_host_queue, &host_data, K_NO_WAIT);
 }
 
-void kbc_set_leds(u8_t leds)
+void kbc_set_leds(uint8_t leds)
 {
 	k_mutex_lock(&led_mutex, K_FOREVER);
 
@@ -803,7 +807,7 @@ int kbc_get_leds(void)
 /* Typically data len will by 1 expect for the cases where we have to
  * fake the keyboard ID for Kscan devices.
  */
-static void send_kb_to_host(u8_t data)
+static void send_kb_to_host(uint8_t data)
 {
 	k_msgq_put(&to_host_kb_queue, &data, K_NO_WAIT);
 	k_sem_give(&kb_p60_sem);

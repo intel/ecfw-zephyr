@@ -1,0 +1,45 @@
+# Kconfig - Config options for SMC module
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+menu "System management controller (SMC)"
+
+config SMCHOST
+	bool "Enable EC - BIOS interaction"
+	default y
+	help
+	  Enables EC communication to BIOS.
+
+config SMCHOST_SCI_OVER_ESPI
+	bool "Enable SCI support over eSPI"
+	default y
+	help
+	  Indicate if EC sends System Control Interrupt over eSPI bus
+	  instead using a physical pin.
+
+config SMCHOST_EVENT_DRIVEN_TASK
+	bool "Enable SMCHOST event driven support"
+	help
+	  Indicate if EC sends System Control Interrupt will be event driven
+	  instead of been a periodic task.
+
+config DEPRECATED_SMCHOST_CMD
+	bool "Support for deprecated host commands for backward compatibility"
+	help
+	  Some of the SMCHost commands are no longer used / to be supported in
+	  BIOS & EC. Hence support for those removed with flag option.
+	  Once BIOS is ready with support i.e. remove calling these deprecated
+	  commands, then this flag and associated code can be removed
+	  from EC as well.
+
+config SMCHOST_LOG_LEVEL
+	int "System management controller log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for board system management controller host module
+	  main interface.
+endmenu

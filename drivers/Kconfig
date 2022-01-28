@@ -1,0 +1,148 @@
+# Kconfig - Config options for EC FW drivers
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menu "Keyboard matrix driver"
+
+if KSCAN_EC || PS2_KEYBOARD_AND_MOUSE
+choice
+	prompt "Select your keyboard"
+	default EC_GTECH_KEYBOARD
+	help
+	 Select your keyboard implementation which is going
+	 to allow you to handle variations specially in
+	 alternate functions.
+
+	config EC_GTECH_KEYBOARD
+	bool "Gtech keyboard"
+
+	config EC_FUJITSU_KEYBOARD
+	bool "Fujitsu keyboard"
+
+endchoice
+
+config EARLY_KEY_SEQUENCE_DETECTION
+	bool "Turn on kscan early key sequence detection"
+	depends on KSCAN_EC
+	help
+	 Request that the keyboard scan matrix driver detects key sequence and
+	 notifies to an propagate these to other EC modules in addition to kbchost
+
+config EARLY_KEYSEQ_CUSTOM0
+	int "Custom key trigger to detect"
+	# Letter d
+	default 33
+	depends on EARLY_KEY_SEQUENCE_DETECTION
+	help
+	  Intercept this key sequence at boot to perform any user defined
+	  operation.
+
+config EARLY_KEYSEQ_CUSTOM1
+	int "Custom key trigger to detect"
+	# Letter e
+	default 19
+	depends on EARLY_KEY_SEQUENCE_DETECTION
+	help
+	  Intercept this key sequence at boot to perform any user defined
+	  operation.
+
+endif
+
+endmenu
+
+menu "eSPI hub features"
+config OOBMNGR_SUPPORT
+	bool "Enable OOB manager support"
+	default n
+	help
+	  Enable EC support for OOB manager eSPI hub extension to tunnel all
+	  the OOB traffic through OOB manager APIs.
+
+config ENABLE_ESPI_LTR
+	bool "Enable Latency Tolerance Reporting"
+	help
+	  Sends LTR message once BME is enabled.
+
+endmenu
+
+menu "EC basic drivers logging control"
+
+config MAX6958_LOG_LEVEL
+	int "MAX6958 driver log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for MAX5958 LED driver.
+
+config EEPROM_LOG_LEVEL
+	int "EEPROM driver log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for EEPROM driver.
+
+config GPIO_EC_LOG_LEVEL
+	int "GPIO EC driver log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for GPIO wrapper driver.
+
+config ESPIHUB_LOG_LEVEL
+	int "eSPI hub driver log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for eSPI hub.
+
+config ESPIOOB_MNGR_LOG_LEVEL
+	int "eSPI OOB manager driver log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for eSPI OOB manager.
+
+config PECIHUB_LOG_LEVEL
+	int "peci hub log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for peci hub interface.
+
+config FAN_LOG_LEVEL
+	int "Fan driver log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for fan driver.
+
+config LED_LOG_LEVEL
+	int "Led driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for led driver.
+
+endmenu
+
+menu "EC optional drivers logging control"
+
+config THERMAL_SENSOR_LOG_LEVEL
+	int "Thermal sensor driver log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for thermal sensor driver.
+
+endmenu

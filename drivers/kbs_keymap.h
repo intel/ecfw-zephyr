@@ -101,9 +101,18 @@
 #define KM_NUMKEY_SLASH		95U
 #define KEY_RSVD		0U
 
+/* This refers to a scan code 1 or 2 to indicate that that we
+ * must not send anything to the host. This flag is used for
+ * scenarios where keys that have make code, but they don't
+ * have a defined make code. This is assigned to a scan_code
+ * data type.
+ */
+#define SC_UNMAPPED		0x0U
+
 struct scan_code {
-	u8_t code[MAX_SCAN_CODE_LEN];
-	u8_t len;
+	uint8_t code[MAX_SCAN_CODE_LEN];
+	uint8_t len;
+	bool typematic;
 };
 
 /**
@@ -119,7 +128,7 @@ enum fn_data_type {
 
 /**
  * @brief fn_data enum.
- * Define if the message passed back to the kscan module.
+ * Define the message passed back to the kscan module.
  */
 struct fn_data {
 	enum fn_data_type type;
@@ -129,7 +138,7 @@ struct fn_data {
 		 */
 		struct scan_code sc;
 		/** sci data to be enqueued as an sci event. */
-		u8_t sci_code;
+		uint8_t sci_code;
 	};
 };
 
@@ -144,7 +153,7 @@ struct fn_data {
  * keyboard matrix.
  * @return 0 If the keymap is underfined.
  */
-typedef int (*km_get_keynum_t)(u8_t col, u8_t row);
+typedef int (*km_get_keynum_t)(uint8_t col, uint8_t row);
 
 /* @typedef km_get_fnkey_t
  * @brief Define the application callback handler function signature.
@@ -162,7 +171,7 @@ typedef int (*km_get_keynum_t)(u8_t col, u8_t row);
  * @param pressed help to determine a make or brake.
  *
  */
-typedef int (*km_get_fnkey_t)(u8_t key_num, struct fn_data *data,
+typedef int (*km_get_fnkey_t)(uint8_t key_num, struct fn_data *data,
 			      bool pressed);
 
 struct km_api {
@@ -178,6 +187,13 @@ struct km_api {
 struct km_api *gtech_init();
 
 /**
+ * @brief Concrete implementatoin for fujits keyboard init.
+ *
+ * @retval Forward a keyboard API to the caller.
+ */
+struct km_api *fujitsu_init();
+
+/**
  * @brief Factory function to select a specific keyboard.
  *
  * @retval Return an keyboard API for a specific implementation.
@@ -187,12 +203,14 @@ inline struct km_api *keymap_init_interface(void)
 {
 #if defined(CONFIG_EC_GTECH_KEYBOARD)
 	return gtech_init();
+#elif defined(CONFIG_EC_FUJITSU_KEYBOARD)
+	return fujitsu_init();
 #else
 	return NULL;
 #endif
 }
 
-inline int keymap_get_keynum(struct km_api *api, u8_t col, u8_t row)
+inline int keymap_get_keynum(struct km_api *api, uint8_t col, uint8_t row)
 {
 	if (api->get_keynum == NULL) {
 		return -EINVAL;
@@ -201,7 +219,7 @@ inline int keymap_get_keynum(struct km_api *api, u8_t col, u8_t row)
 	return api->get_keynum(col, row);
 }
 
-inline int keymap_get_fnkey(struct km_api *api, u8_t key_num,
+inline int keymap_get_fnkey(struct km_api *api, uint8_t key_num,
 			    struct fn_data *data,
 			    bool pressed)
 {

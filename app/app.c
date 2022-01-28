@@ -14,6 +14,7 @@
 #include "espi_hub.h"
 #include "pwrplane.h"
 #include "task_handler.h"
+#include "softstrap.h"
 LOG_MODULE_REGISTER(ecfw, CONFIG_EC_LOG_LEVEL);
 
 void main(void)
@@ -47,6 +48,7 @@ void main(void)
 		return;
 	}
 
+	strap_init();
 	start_all_tasks();
 
 	while (true) {

@@ -1,0 +1,31 @@
+# Kconfig - Config options for EC FW peripheral management
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+config PERIPHERAL_MANAGEMENT
+	bool "Enable EC human interface"
+	default y
+	help
+	  Enable EC support for button, switches, this includes:
+	  1) Buttons: i.e power button
+	  2) Switches: EC HW straps used to change EC behavior.
+
+config PERIPHERAL_DEBOUNCE_TIME
+	int "Switches/button debounce time"
+	default 5
+	depends on PERIPHERAL_MANAGEMENT
+	help
+	  Indicate time in milliseconds used to debounce buttons
+	  and switches for user interaction.
+
+config PERIPHERAL_LOG_LEVEL
+	int "Peripheral log level"
+	depends on LOG
+	depends on PERIPHERAL_MANAGEMENT
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for peripheral module.

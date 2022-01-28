@@ -28,21 +28,21 @@ manifest:
     # Open source branch uses official Zephyr tree
     - name: zephyr_public
       repo-path: zephyr.git
-      path: zephyr_snapshot
+      path: ecfwwork/zephyr_fork
       remote: zephyrproject
-      revision: v2.3-branch
+      revision: v2.5-branch
       clone-depth: 1
       west-commands: scripts/west-commands.yml
 
     - name: cmsis
-      path: modules/hal/cmsis
+      path: ecfwwork/modules/hal/cmsis
       remote: zephyrproject
-      revision: 542b2296e6d515b265e25c6b7208e8fea3014f90
+      revision: c3bd2094f92d574377f7af2aec147ae181aa5f8e
 
     - name: hal_microchip
-      path: modules/hal/microchip
+      path: ecfwwork/modules/hal/microchip
       remote: zephyrproject
-      revision: aad89bf0531a30dcd6c87e4065f1b973fb31c11f
+      revision: a1ec761014740a08699720298dd37ad4da360840
 
   self:
-    path: .
+    path: ecfwwork

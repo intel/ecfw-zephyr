@@ -1,0 +1,65 @@
+# Kconfig - Config options for EC FW DnX support
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+menu "EC DnX support"
+
+config DNX_SUPPORT
+	bool "Enable EC DnX support"
+	default y
+	help
+	 Enables EC DnX awareness to handle DnX entry flows while disabling
+	 EC timeout.
+
+config DNX_LOG_LEVEL
+	int "EC DnX module log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Define log level for EC DnX module.
+
+config DNX_SELF_RESET
+	bool "Enable EC soft-reset in DnX flows"
+	default y
+	depends on DNX_SUPPORT
+	help
+	 Enables EC DnX reset as indicated in DnX flows, this is trigger if
+	 global reset occurs while DnX warn is set.
+endmenu
+
+menu "EC-assisted DnX entry"
+
+config DNX_EC_ASSISTED_TRIGGER
+	bool "EC-assisted DnX trigger"
+	help
+	  Enable support in which EC will assist DnX entry by performing
+	  handshake with Intel PCH to allow SoC to enter DnX mode.
+
+choice
+	prompt "Select EC-assisted DnX trigger method"
+	default DNX_EC_ASSISTED_TRIGGER_SMC
+	depends on DNX_EC_ASSISTED_TRIGGER
+	help
+	 Select method to notify EC about user desire to assist on DnX entry
+	 in the platform for board designs where the DnX HW strap cannot be
+	 set through a jumper.
+
+	config DNX_EC_ASSISTED_TRIGGER_SMC
+		bool "SMC command to initiate DnX"
+		help
+		  Allows to use BIOS-EC commands to indicate EC that needs to
+		  set DnX strap and if supported trigger system restart.
+
+	config DNX_EC_ASSISTED_TRIGGER_KEYBOARD
+		depends on EARLY_KEY_SEQUENCE_DETECTION
+		bool "Keyboard matrix hotkey to initiate DnX"
+		help
+		  Enable EC keyboard-based detection to detect user
+		  pre-determined hotkey that would allow to enter Dnx mode.
+
+endchoice
+
+endmenu

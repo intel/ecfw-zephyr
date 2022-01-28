@@ -1,11 +1,11 @@
 #include <zephyr.h>
 #include "keyboard_utility.h"
 
-#define START_BREAK_CODE 0xf0U
+#define START_BREAK_CODE		0xf0U
 
 static bool found_break_code;
 
-int translate_key(enum scan_code_set scan_code, u8_t *data)
+int translate_key(enum scan_code_set scan_code, uint8_t *data)
 {
 	switch (scan_code) {
 	case SCAN_CODE_SET1:
@@ -17,7 +17,7 @@ int translate_key(enum scan_code_set scan_code, u8_t *data)
 			found_break_code = true;
 			return -EINVAL;
 		}
-		*data = kb_translation_table[0xFF - *data];
+		*data = kb_translation_table[*data];
 		if (found_break_code) {
 			*data |= 0x80;
 			found_break_code = false;
@@ -29,3 +29,4 @@ int translate_key(enum scan_code_set scan_code, u8_t *data)
 
 	return 0;
 }
+

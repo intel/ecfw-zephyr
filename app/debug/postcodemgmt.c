@@ -7,20 +7,21 @@
 #include <errno.h>
 #include <logging/log_ctrl.h>
 #include <logging/log.h>
+#include "espi_hub.h"
 #include "postcodemgmt.h"
 #include "port80display.h"
 LOG_MODULE_REGISTER(postcode, CONFIG_POSTCODE_LOG_LEVEL);
 
-/* Current postcode values displayed */
-static u8_t port80_code;
-static u8_t port81_code;
-static u8_t update_pending;
+static struct k_sem update_lock;
+/* Postcode requested to be displayed */
+static uint8_t port80_code;
+static uint8_t port81_code;
 
 /* Indicates a PCH/board error condition was detected */
-static u8_t err_code;
+static uint8_t err_code;
 
 #ifdef CONFIG_POWER_SEQUENCE_ERROR_LED
-static u8_t led_cntr;
+static uint8_t led_cntr;
 #endif
 
 #define BOARD_ERR_INDICATOR 0xEC
@@ -33,32 +34,52 @@ static u8_t led_cntr;
 /* Port80 display format */
 #define WORD_FROM_PORTS(p81, p80) ((p81 << 8) | p80)
 
-void update_error(u8_t errcode)
+static void signal_request(void)
+{
+	if (k_sem_count_get(&update_lock) == 0) {
+		k_sem_give(&update_lock);
+	}
+}
+
+void update_error(uint8_t errcode)
 {
 	err_code = errcode;
 	LOG_DBG("EC%02x", err_code);
+	signal_request();
 }
 
-void update_progress(u8_t port_index, u8_t code)
+static void update_postcode(uint8_t port_index, uint8_t code)
 {
-	if (port_index == POSTCODE_PORT80) {
+	bool update_pending = false;
+
+	switch (port_index) {
+	case POSTCODE_PORT80:
 		if (port80_code != code) {
 			port80_code = code;
-			update_pending = 1;
+			LOG_DBG("port80:%02x", code);
+			update_pending = true;
 		}
-	} else {
+		break;
+	case POSTCODE_PORT81:
 		if (port81_code != code) {
 			port81_code = code;
-			update_pending = 1;
+			LOG_DBG("port81:%02x", code);
+			update_pending = true;
 		}
+		break;
+	default:
+		break;
 	}
-	LOG_DBG("P %04x", WORD_FROM_PORTS(port81_code, port80_code));
+
+	if (update_pending) {
+		signal_request();
+	}
 }
 
 #ifdef CONFIG_POWER_SEQUENCE_ERROR_LED
 static void update_error_leds(void)
 {
-	u8_t led1_val, led2_val, led3_val;
+	uint8_t led1_val, led2_val, led3_val;
 
 	led_cntr++;
 
@@ -98,8 +119,7 @@ static void update_error_leds(void)
 
 void postcode_thread(void *p1, void *p2, void *p3)
 {
-	u32_t disp_word;
-	u32_t period = *(u32_t *)p1;
+	uint32_t disp_word;
 	int ret;
 
 	ret = port80_display_init();
@@ -108,21 +128,19 @@ void postcode_thread(void *p1, void *p2, void *p3)
 		return;
 	}
 
-	ret = port80_display_on();
-	if (ret) {
-		LOG_ERR("port80 display failed %d", ret);
-		return;
-	}
+	espihub_add_postcode_handler(update_postcode);
+	k_sem_init(&update_lock, 0, 1);
 
 	while (true) {
-		k_msleep(period);
-
+		/* Wait until postcode update is received */
+		k_sem_take(&update_lock, K_FOREVER);
 		if (err_code) {
 			port80_code = err_code;
 			port81_code = BOARD_ERR_INDICATOR;
 			port80_display_on();
 			disp_word = WORD_FROM_PORTS(port81_code, port80_code);
 			port80_display_word(disp_word);
+			LOG_DBG("Post:%04x", disp_word);
 
 			/* Flush the log buffer */
 			LOG_PANIC();
@@ -132,11 +150,10 @@ void postcode_thread(void *p1, void *p2, void *p3)
 		}
 
 		/* Update postcode in port80 display */
-		else if (update_pending) {
+		else {
 			disp_word = WORD_FROM_PORTS(port81_code, port80_code);
 			port80_display_word(disp_word);
-			LOG_DBG("P %x", disp_word);
-			update_pending = 0;
+			LOG_DBG("PostCode:%04x", disp_word);
 		}
 	}
 }

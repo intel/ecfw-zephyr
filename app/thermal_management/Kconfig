@@ -1,0 +1,49 @@
+# Kconfig - Config options for EC FW
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menu "Thermal management"
+
+config THERMAL_MANAGEMENT
+	bool "Enable thermal management"
+	help
+	  Indicate if EC supports management of fan, reading thermal
+	  sensors and cpu temperature.
+
+config THERMAL_FAN_OVERRIDE
+	bool "Enable fan override"
+	help
+	  Indicate if EC overrides fan control to pre-defined value. This
+	  to ensure fan is running before Si parts are fully calibrated.
+
+config THERMAL_FAN_OVERRIDE_VALUE
+	int "Fan override duty cycle"
+	default 70
+	help
+	  When EC overrides fan management via SW or HW strap, EC will
+	  use this pre-defined duty cycle to control the fan.
+
+config PECI_OVER_ESPI_ENABLE
+	bool "Enable PECI over ESPI OOB"
+	help
+	  Indicate if peci over espi oob enabled or not.
+
+config PECI_ACCESS_DISABLE_IN_CS
+	bool "Disable PECI access in connected standby"
+	help
+	  Indicate if PECI access disabled in connected standby to achieve
+	  infinite C10 residency.
+
+config THERMAL_MGMT_LOG_LEVEL
+	int "Thermal management log level"
+	depends on LOG
+	depends on THERMAL_MANAGEMENT
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for thermal management module.
+
+endmenu

@@ -27,19 +27,49 @@ struct pwrbtn_handler {
 /* This is just a pool */
 static struct pwrbtn_handler pwrbtn_handlers[MAX_PWRBTN_HANDLERS];
 static int pwrbtn_handler_index;
+static bool usb_pwr_btn_sts = HIGH;
+static bool sys_pwr_btn_sts = HIGH;
+static bool pwr_btn_out_sts = HIGH;
 
-
-void pwrbtn_btn_handler(u8_t pwrbtn_sts)
+void pwrbtn_btn_evt_processor(void)
 {
-	LOG_DBG("%s", __func__);
-	gpio_write_pin(PM_PWRBTN, pwrbtn_sts);
+	bool pwrbtn_evt;
 
-	for (int i = 0; i < MAX_PWRBTN_HANDLERS; i++) {
-		if (pwrbtn_handlers[i].handler) {
-			LOG_DBG("Calling handler %s\n", __func__);
-			pwrbtn_handlers[i].handler(pwrbtn_sts);
+	/*
+	 * Calculate the executable power button status based
+	 * on system and USB dock power button status.
+	 */
+	pwrbtn_evt = usb_pwr_btn_sts & sys_pwr_btn_sts;
+
+	/* Current status should be different from last
+	 * executed status.
+	 */
+	if (pwrbtn_evt != pwr_btn_out_sts) {
+
+		pwr_btn_out_sts = pwrbtn_evt;
+
+		LOG_DBG(" %s: power button event %d is executing ",
+				__func__, pwr_btn_out_sts);
+
+		gpio_write_pin(PM_PWRBTN, pwr_btn_out_sts);
+
+		for (int i = 0; i < MAX_PWRBTN_HANDLERS; i++) {
+			if (pwrbtn_handlers[i].handler) {
+				LOG_DBG("Calling handler %s", __func__);
+				pwrbtn_handlers[i].handler(pwr_btn_out_sts);
+			}
 		}
 	}
+}
+
+
+void sys_pwrbtn_evt_processor(uint8_t pwrbtn_evt)
+{
+	LOG_DBG("sys_evt=%d, usb_pwr_btn_sts=%d, sys_pwr_btn_sts=%d",
+		pwrbtn_evt, usb_pwr_btn_sts, sys_pwr_btn_sts);
+
+	sys_pwr_btn_sts = pwrbtn_evt;
+	pwrbtn_btn_evt_processor();
 }
 
 void pwrbtn_register_handler(pwrbtn_handler_t handler)
@@ -57,7 +87,8 @@ int pwrbtn_init(void)
 	LOG_INF("%s", __func__);
 
 	/* Register power button for debouncing */
-	return	periph_register_button(PWRBTN_EC_IN_N, pwrbtn_btn_handler);
+	return	periph_register_button(PWRBTN_EC_IN_N,
+			sys_pwrbtn_evt_processor);
 
 }
 

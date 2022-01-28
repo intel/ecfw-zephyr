@@ -13,13 +13,16 @@
  * @brief GPIO driver wrapper APIS.
  */
 #define EC_GPIO_PORT_POS	8U
-#define EC_GPIO_PORT_MASK	((u32_t) 0xfU << EC_GPIO_PORT_POS)
+#define EC_GPIO_PORT_MASK	((uint32_t) 0xfU << EC_GPIO_PORT_POS)
 #define EC_GPIO_PIN_POS		0U
-#define EC_GPIO_PIN_MASK	((u32_t)0x1fU << EC_GPIO_PIN_POS)
+#define EC_GPIO_PIN_MASK	((uint32_t)0x1fU << EC_GPIO_PIN_POS)
 
 #define EC_GPIO_PORT_PIN(_port, _pin)                   \
-	(((u32_t)(_port) << EC_GPIO_PORT_POS)   |       \
-	((u32_t)(_pin) << EC_GPIO_PIN_POS))             \
+	(((uint32_t)(_port) << EC_GPIO_PORT_POS)   |       \
+	((uint32_t)(_pin) << EC_GPIO_PIN_POS))             \
+
+#define HIGH	1
+#define LOW	0
 
 /*
  * This structure is used to pass an array of GPIOs and settings to
@@ -27,19 +30,31 @@
  * single variable.
  */
 struct gpio_ec_config {
-	u32_t port_pin;
-	u32_t cfg;
+	uint32_t port_pin;
+	uint32_t cfg;
 };
 
-static inline u32_t gpio_get_port(u16_t pin)
+static inline uint32_t gpio_get_port(uint16_t pin)
 {
 	return  ((pin & EC_GPIO_PORT_MASK) >> EC_GPIO_PORT_POS);
 }
 
-static inline u32_t gpio_get_pin(u16_t pin)
+static inline uint32_t gpio_get_pin(uint16_t pin)
 {
 	return ((pin & EC_GPIO_PIN_MASK) >> EC_GPIO_PIN_POS);
 }
+
+/**
+ * @brief Routine to get the absolute gpio number
+ *
+ * This routine gets the absolute gpio number from the port and the
+ * pin number. For e.g. GPIO_227 which is port 4 and pin 23 gets a
+ * value of 227.
+ *
+ * @param p1 a value which combines port and pin values.
+ * @retval absolute gpio number.
+ */
+uint32_t get_absolute_gpio_num(uint32_t port_pin);
 
 /**
  * @brief Initialize the gpio ports.
@@ -59,7 +74,7 @@ int gpio_init(void);
  *
  * @retval 0 if successful, negative errno code on failure.
  */
-int gpio_configure_pin(u32_t port_pin, gpio_flags_t flags);
+int gpio_configure_pin(uint32_t port_pin, gpio_flags_t flags);
 
 /**
  * @brief Configure an array of gpios.
@@ -72,7 +87,7 @@ int gpio_configure_pin(u32_t port_pin, gpio_flags_t flags);
  *
  * @retval 0 if successful, negative errno code on failure.
  */
-int gpio_configure_array(struct gpio_ec_config *gpios, u32_t len);
+int gpio_configure_array(struct gpio_ec_config *gpios, uint32_t len);
 
 /**
  * @brief Set the level for a pin.
@@ -86,7 +101,7 @@ int gpio_configure_array(struct gpio_ec_config *gpios, u32_t len);
  * @retval -ENODEV error when internal device validation failed.
  * @retval 0 if successful, negative errno code on failure.
  */
-int gpio_write_pin(u32_t port_pin, int value);
+int gpio_write_pin(uint32_t port_pin, int value);
 
 /**
  * @brief Read the level of a pin.
@@ -101,7 +116,7 @@ int gpio_write_pin(u32_t port_pin, int value);
  * @retval -ENODEV error when internal device validation failed.
  * @retval Negative errno code on failure.
  */
-int gpio_read_pin(u32_t port_pin);
+int gpio_read_pin(uint32_t port_pin);
 
 /**
  * @brief Initialize a gpio_callback struct.
@@ -116,7 +131,7 @@ int gpio_read_pin(u32_t port_pin);
  * @retval -ENODEV error when internal device validation failed.
  * @retval 0 if successful, negative errno code on failure.
  */
-int gpio_init_callback_pin(u32_t port_pin,
+int gpio_init_callback_pin(uint32_t port_pin,
 			   struct gpio_callback *callback,
 			   gpio_callback_handler_t handler);
 
@@ -135,7 +150,7 @@ int gpio_init_callback_pin(u32_t port_pin,
  * @retval -ENODEV error when internal device validation failed.
  * @retval 0 if successful, negative errno code on failure.
  */
-int gpio_add_callback_pin(u32_t port_pin,
+int gpio_add_callback_pin(uint32_t port_pin,
 			  struct gpio_callback *callback);
 
 /**
@@ -153,7 +168,7 @@ int gpio_add_callback_pin(u32_t port_pin,
  * @retval -ENODEV error when internal device validation failed.
  * @retval 0 if successful, negative errno code on failure.
  */
-int gpio_remove_callback_pin(u32_t port_pin,
+int gpio_remove_callback_pin(uint32_t port_pin,
 			     struct gpio_callback *callback);
 
 /**
@@ -167,7 +182,7 @@ int gpio_remove_callback_pin(u32_t port_pin,
  * @retval -ENODEV error when internal device validation failed.
  * @retval 0 if successful, negative errno code on failure.
  */
-int gpio_interrupt_configure_pin(u32_t port_pin, gpio_flags_t flags);
+int gpio_interrupt_configure_pin(uint32_t port_pin, gpio_flags_t flags);
 
 /**
  * @brief Validate if a specific gpio port was initialized.
@@ -180,7 +195,20 @@ int gpio_interrupt_configure_pin(u32_t port_pin, gpio_flags_t flags);
  * @retval -ENODEV error when internal device validation failed.
  * @retval true  if successful, false otherwise.
  */
-bool gpio_port_enabled(u32_t port_pin);
+bool gpio_port_enabled(uint32_t port_pin);
 
+
+/**
+ * @brief Allow to force GPIO onfiguration on a specific gpio pin.
+ *
+ * Note: This is temporary solution until proper solution to SAF DTS
+ * configuring pins in alternate function.
+ *
+ * @param port_pin Encoded device and pin.
+ * @param flags Standard GPIO driver flags to configure a pin.
+ *
+ * @retval 0 if successful, negative errno code on failure.
+ */
+int gpio_force_configure_pin(uint32_t port_pin, gpio_flags_t flags);
 
 #endif /* __GPIO_DRIVER_H__*/

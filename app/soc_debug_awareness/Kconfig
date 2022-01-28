@@ -1,0 +1,37 @@
+# Kconfig - Config options for soc-debug awareness module
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+menu "SoC debug awareness"
+
+config SOC_DEBUG_AWARENESS
+	bool "Enable methods to handle SoC debug consent in EC FW."
+	default y
+	help
+	 Enable methods to handle SoC debug consent in EC FW.
+
+config SOC_DEBUG_CONSENT_GPIO
+	bool "Enable method where SoC debug consent"
+	depends on SOC_DEBUG_AWARENESS
+	help
+	 Enable method where SoC debug consent is conveyed physically to EC via
+	 GPIO. If not enabled EC timeout disable is handled statically.
+
+config SOC_GPIO_VALID_AFTER_MS
+	int "Soc Debug sample"
+	default 500
+	depends on SOC_DEBUG_CONSENT_GPIO
+	help
+	  SoC debug GPIO is valid after this amount of miliseconds.
+
+config POWER_SEQUENCE_DISABLE_TIMEOUT_HOTKEY
+	bool "Use key sequence to disable EC timeout"
+	depends on EARLY_KEY_SEQUENCE_DETECTION
+	depends on SOC_DEBUG_AWARENESS
+	help
+	  Intercept key sequence at boot to disable EC timeout. Useful for DnX
+	  debug.
+
+endmenu

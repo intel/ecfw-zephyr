@@ -7,6 +7,7 @@
 #ifndef __ERR_CODES_H__
 #define __ERR_CODES_H__
 
+#define ERR_NONE            0x00
 #define ERR_RSMRST_PWRGD    0x01
 #define ERR_PM_SLPS5        0x02
 #define ERR_PM_SLPS4        0x03

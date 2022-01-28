@@ -1,0 +1,36 @@
+# Kconfig - Config options for keyboard module
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+menu "Keyboard and mouse"
+
+config PS2_KEYBOARD_AND_MOUSE
+	bool "Turn on PS/2 devices application application module."
+	default y if ESPI_PERIPHERAL_8042_KBC && PS2
+	help
+	 It is desirable that users turn this feature on, only if there
+	 is intention to use it.
+	 PS/2 and and keyboard scan matrix use the same applicaton
+	 interfaces to communicate information from/to the host.
+
+config KSCAN_EC
+	bool "Turn on kscan matrix application module."
+	default y if ESPI_PERIPHERAL_8042_KBC && KSCAN
+	help
+	 The keyboard scan matrix is a passive device which do not send
+	 any command during the configuration phase. Therefore, the EC has
+	 to fake this commands in order to preseve host configuration flow.
+	 PS/2 and and keyboard scan matrix use the same applicaton
+	 interfaces to communicate information from/to the host.
+
+config KBCHOST_LOG_LEVEL
+	int "kbchost log level"
+	depends on LOG
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for the kbc8042 module and ps2.
+
+endmenu

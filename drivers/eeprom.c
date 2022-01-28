@@ -1,10 +1,12 @@
 /*
  * Copyright (c) 2019 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <zephyr.h>
 #include <device.h>
-#include <drivers/i2c.h>
+#include "i2c_hub.h"
 #include "board.h"
 #include "board_config.h"
 #include "eeprom.h"
@@ -23,16 +25,6 @@ LOG_MODULE_REGISTER(eeprom, CONFIG_EEPROM_LOG_LEVEL);
 #define OFS_MSB(word)  (((word & 0xFF00) >> 8))
 #define OFS_LSB(word)  (word & 0xFF)
 
-static struct device *i2c_dev;
-
-void eeprom_init(void)
-{
-	i2c_dev = device_get_binding(I2C_BUS_0);
-	if (!i2c_dev) {
-		LOG_WRN("%s not found", I2C_BUS_0);
-	}
-}
-
 /* EEPROM access for offset greater than 255.
  * Following the 4-bit device type identifier in the bits 3-1 of the device
  * slave address byte are bits A10, A9 and A8 which are the three MSB of the
@@ -41,12 +33,13 @@ void eeprom_init(void)
  * i.e. offset 0x0106 correspond to device address 0x51, offset 0x00
  */
 
-int eeprom_read_byte(u16_t offset, u8_t *data)
+int eeprom_read_byte(uint16_t offset, uint8_t *data)
 {
-	u8_t ret;
-	u8_t buf = OFS_MSB(offset);
+	uint8_t ret;
+	uint8_t buf = OFS_MSB(offset);
 
-	ret = i2c_write_read(i2c_dev, EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset),
+	ret = i2c_hub_write_read(I2C_0,
+			     EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset),
 			     &buf, sizeof(buf),
 			     data, 1);
 	if (ret) {
@@ -57,12 +50,12 @@ int eeprom_read_byte(u16_t offset, u8_t *data)
 	return 0;
 }
 
-int eeprom_write_byte(u16_t offset, u8_t data)
+int eeprom_write_byte(uint16_t offset, uint8_t data)
 {
-	u8_t ret;
-	u8_t buf[] = { OFS_LSB(offset), data };
+	uint8_t ret;
+	uint8_t buf[] = { OFS_LSB(offset), data };
 
-	ret = i2c_write(i2c_dev, buf, sizeof(buf),
+	ret = i2c_hub_write(I2C_0, buf, sizeof(buf),
 			EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset));
 	if (ret) {
 		LOG_ERR("Fail to write: %d", ret);
@@ -74,13 +67,14 @@ int eeprom_write_byte(u16_t offset, u8_t data)
 	return 0;
 }
 
-int eeprom_read_word(u16_t offset, u16_t *data)
+int eeprom_read_word(uint16_t offset, uint16_t *data)
 {
-	u8_t ret;
-	u8_t buf = { OFS_LSB(offset) };
-	u8_t rbuf[] = {EEPROM_DEFAULT_DATA, EEPROM_DEFAULT_DATA};
+	uint8_t ret;
+	uint8_t buf = { OFS_LSB(offset) };
+	uint8_t rbuf[] = {EEPROM_DEFAULT_DATA, EEPROM_DEFAULT_DATA};
 
-	ret = i2c_write_read(i2c_dev, EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset),
+	ret = i2c_hub_write_read(I2C_0,
+			     EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset),
 			     &buf, sizeof(buf),
 			     rbuf, sizeof(rbuf));
 	if (ret) {
@@ -94,13 +88,13 @@ int eeprom_read_word(u16_t offset, u16_t *data)
 	return 0;
 }
 
-int eeprom_write_word(u16_t offset, u16_t data)
+int eeprom_write_word(uint16_t offset, uint16_t data)
 {
-	u16_t ret;
-	u8_t buf[] = { OFS_LSB(offset),
+	uint16_t ret;
+	uint8_t buf[] = { OFS_LSB(offset),
 		       OFS_MSB(data), OFS_LSB(data) };
 
-	ret = i2c_write(i2c_dev, buf, sizeof(buf),
+	ret = i2c_hub_write(I2C_0, buf, sizeof(buf),
 			EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset));
 	if (ret) {
 		LOG_ERR("Fail to write: %d", ret);
@@ -113,16 +107,17 @@ int eeprom_write_word(u16_t offset, u16_t data)
 	return 0;
 }
 
-int eeprom_read_block(u16_t offset, u8_t len, u8_t *data)
+int eeprom_read_block(uint16_t offset, uint8_t len, uint8_t *data)
 {
-	u16_t ret;
-	u8_t buf = { OFS_LSB(offset) };
+	uint16_t ret;
+	uint8_t buf = { OFS_LSB(offset) };
 
 	if (len > DATA_MAX_LEN) {
 		return -EINVAL;
 	}
 
-	ret = i2c_write_read(i2c_dev, EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset),
+	ret = i2c_hub_write_read(I2C_0,
+			     EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset),
 			     &buf, sizeof(buf),
 			     data, len);
 	if (ret) {
@@ -133,10 +128,10 @@ int eeprom_read_block(u16_t offset, u8_t len, u8_t *data)
 	return ret;
 }
 
-int eeprom_write_block(u16_t offset, u8_t len, u8_t *data)
+int eeprom_write_block(uint16_t offset, uint8_t len, uint8_t *data)
 {
 	int ret;
-	u8_t buf[DATA_MAX_LEN + sizeof(offset)];
+	uint8_t buf[DATA_MAX_LEN + sizeof(offset)];
 
 	if (len > DATA_MAX_LEN) {
 		return -EINVAL;
@@ -150,7 +145,7 @@ int eeprom_write_block(u16_t offset, u8_t len, u8_t *data)
 		return ret;
 	}
 
-	ret = i2c_write(i2c_dev, buf, len + sizeof(offset),
+	ret = i2c_hub_write(I2C_0, buf, len + sizeof(offset),
 			EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset));
 	if (ret) {
 		LOG_ERR("Fail to write: %d", ret);

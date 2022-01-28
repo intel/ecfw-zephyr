@@ -1,0 +1,158 @@
+/*
+ * Copyright (c) 2020, Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <microchip/mec1501hsz.dtsi>
+
+/ {
+	model = "Intel MEC1501_ADL_P development board";
+	compatible = "microchip, mec1501_adl_p",
+		     "microchip,mec1501hsz";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,console = &uart2;
+		zephyr,flash = &flash0;
+	};
+
+	aliases {
+		pwm-0 = &pwm0;
+		peci-0 = &peci0;
+		pwm-led8 = &pwm_led8;
+		pwm-led6 = &pwm_led6;
+
+		i2c0 = &i2c_smb_0;
+		i2c1 = &i2c_smb_1;
+	};
+
+	pwmleds {
+		compatible = "pwm-leds";
+
+		pwm_led8: pwm_led8 {
+			pwms = <&pwm8 0>;
+		};
+
+		pwm_led6: pwm_led6 {
+			pwms = <&pwm6 1>;
+		};
+	};
+	power-states {
+		idle: idle {
+			compatible = "zephyr,power-state";
+			power-state-name = "suspend-to-idle";
+			min-residency-us = <300000>;
+		};
+
+		suspend_to_ram: suspend_to_ram {
+			compatible = "zephyr,power-state";
+			power-state-name = "suspend-to-ram";
+			min-residency-us = <700000>;
+		};
+	};
+};
+
+&cpu0 {
+	cpu-power-states = <&idle &suspend_to_ram>;
+};
+
+&uart2 {
+	status = "okay";
+	current-speed = <115200>;
+};
+
+&adc0 {
+	status = "okay";
+};
+
+&i2c_smb_0 {
+	status = "okay";
+	label = "I2C0";
+	port_sel = <0>;
+	sda-gpios = <&gpio_000_036 3 0>;
+	scl-gpios = <&gpio_000_036 4 0>;
+
+	pca9555@22 {
+		compatible = "nxp,pca95xx";
+		label = "GPIO_P0";
+
+		/* I2C address depends on PCA9555 HW straps.
+		 * Address is: 0100<A2><A1><A0>b.
+		 */
+		reg = <0x22>;
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	pca9555@23 {
+		compatible = "nxp,pca95xx";
+		label = "GPIO_P1";
+
+		/* I2C address depends on PCA9555 HW straps.
+		 * Address is: 0100<A2><A1><A0>b.
+		 */
+		reg = <0x23>;
+		/* GPIO062 */
+		interrupt-gpios = <&gpio_040_076 18 GPIO_ACTIVE_LOW>;
+		gpio-controller;
+		#gpio-cells = <2>;
+		ngpios = <16>;
+	};
+};
+
+&i2c_smb_1 {
+	status = "okay";
+	label = "I2C1";
+	port_sel = <1>;
+	sda-gpios = <&gpio_100_136 24 0>;
+	scl-gpios = <&gpio_100_136 25 0>;
+};
+
+&espi0 {
+	status = "okay";
+	io_girq = <19>;
+	vw_girqs = <24 25>;
+	pc_girq = <15>;
+};
+
+&timer3 {
+	status = "okay";
+};
+
+&ps2_0 {
+	status = "okay";
+};
+
+&ps2_1 {
+	status = "okay";
+};
+
+&pwm0 {
+	status = "okay";
+};
+
+&pwm6 {
+	status = "okay";
+};
+
+&pwm8 {
+	status = "okay";
+};
+
+&peci0 {
+	status = "okay";
+};
+
+&tach0 {
+	status = "okay";
+};
+
+&kscan0 {
+	status = "okay";
+};
+&wdog {
+	status = "okay";
+};

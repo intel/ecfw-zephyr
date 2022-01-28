@@ -78,6 +78,8 @@
 #define GET_NUM_LOCK(x)			(((x) >> NUM_LOCK_POS) & 0x1)
 #define GET_CAPS_LOCK(x)		(((x) >> CAPS_LOCK_POS) & 0x1)
 
+#define KBC_LED_FLASH_DELAY_MS		250U
+
 /**
  * @brief Report IBF data when registered with the eSPI driver.
  *
@@ -88,7 +90,7 @@
  * @param cmd_data The parameter received from the host is a command when
  * the value is 1, and 0 indicates data was received.
  */
-void kbc_handler(u8_t data, u8_t cmd_data);
+void kbc_handler(uint8_t data, uint8_t cmd_data);
 
 /**
  * @brief Disable the IBF callback.
@@ -118,7 +120,7 @@ int kbc_enable_interface(void);
  * Bit 1 contains the value of Num Lock.
  * Bit 2 contains the value of Caps Lock.
  */
-void kbc_set_leds(u8_t leds);
+void kbc_set_leds(uint8_t leds);
 
 /**
  * @brief Retrieve the latest led state from an RVP.

@@ -31,15 +31,6 @@ void postcode_thread(void *p1, void *p2, void *p3);
  *
  * @param errcode the board error code identifier.
  */
-void update_error(u8_t errcode);
-
-/**
- * @brief Update the POST code into BIOS debug port.
- *
- * @param port_index the port index where this is to be displayed.
- * @param postcode the code to be sent to the debug port.
- */
-void update_progress(u8_t port_index, u8_t code);
-
+void update_error(uint8_t errcode);
 
 #endif /* __POSTCODE_MGMT_H__ */

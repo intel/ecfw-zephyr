@@ -64,9 +64,9 @@ void smc_init(void);
 /**
  * @brief Generates a wake event via SCI.
  */
-void smc_generate_wake(u8_t wake_reason);
+void smc_generate_wake(uint8_t wake_reason);
 void smc_clear_wake_sts(void);
-u8_t smc_get_wake_sts(void);
+uint8_t smc_get_wake_sts(void);
 
 /**
  * @brief Update the thermal sensor temperature value in ACPI table.
@@ -74,7 +74,7 @@ u8_t smc_get_wake_sts(void);
  * @param idx Index in the list of thermal sensors defined in ACPI space.
  * @param temp temperature value in order of magnitude 10 degree celsius.
  */
-void smc_update_thermal_sensor(enum acpi_thrm_sens_idx idx, s16_t temp);
+void smc_update_thermal_sensor(enum acpi_thrm_sens_idx idx, int16_t temp);
 
 /**
  * @brief Update the fan rpm (rotation per minute) value for given fan device.
@@ -82,7 +82,7 @@ void smc_update_thermal_sensor(enum acpi_thrm_sens_idx idx, s16_t temp);
  * @param fan_idx fan device index.
  * @param rpm rotation per minunte value of the fan.
  */
-void smc_update_fan_tach(u8_t fan_idx, u16_t rpm);
+void smc_update_fan_tach(uint8_t fan_idx, uint16_t rpm);
 
 /**
  * @brief Update thermal sensor trip status.
@@ -92,7 +92,7 @@ void smc_update_fan_tach(u8_t fan_idx, u16_t rpm);
  *	  and sensor number 3 got tripped.
  *
  */
-void smc_update_therm_trip_status(u16_t status);
+void smc_update_therm_trip_status(uint16_t status);
 
 /**
  * @brief Update cpu temperature value to ACPI offset acpi_remote_temp.
@@ -100,6 +100,14 @@ void smc_update_therm_trip_status(u16_t status);
  * @param temp cpu temperature in degree celsius.
  */
 void smc_update_cpu_temperature(int temp);
+void smc_update_gpu_temperature(int temp);
+
+/**
+ * @brief Update pch dts temperature value to ACPI offset
+ *
+ * @param temp pch temperature in degree celsius.
+ */
+void smc_update_pch_dts_temperature(int temp);
 
 /**
  * @brief Check write permissions for ACPI offset.
@@ -107,6 +115,6 @@ void smc_update_cpu_temperature(int temp);
  * @param offset acpi table offset.
  * @return 1 if offset has write permissions, otherwise 0.
  */
-bool smc_is_acpi_offset_write_permitted(u8_t offset);
+bool smc_is_acpi_offset_write_permitted(uint8_t offset);
 
 #endif /* __SMC_H__ */

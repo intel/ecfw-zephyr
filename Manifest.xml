@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest version="2.0">
+  <remote name="OWR-GitLab" fetch="ssh://git@gitlab.devtools.intel.com:29418/OWR" />
+  <artifactory-alias name="default">
+    <read-uri>https://ubit-artifactory.intel.com/artifactory</read-uri>
+    <write-uri>https://ubit-artifactory.intel.com/artifactory</write-uri>
+  </artifactory-alias>
+  <artifactory-alias name="ubit-artifactory-or">
+    <read-uri>https://ubit-artifactory-or.intel.com/artifactory</read-uri>
+    <write-uri>https://ubit-artifactory-or.intel.com/artifactory</write-uri>
+  </artifactory-alias>
+  <artifactory name="EWDK" alias="default" pkg-root="" repo="owr-repos" />
+  <artifactory name="OWR-Tools" alias="default" pkg-root="Tools" repo="owr-repos" />
+  <artifactory name="PLAT-DRVS" alias="ubit-artifactory-or" pkg-root="" repo="platformdrivers-or-local"/>
+  <project name="EWDK" ingredient="EWDK" pkg-path="C:\OWR\EWDK" version="17763.RS5.591" artifactory="EWDK" type="bldtool" hsd-full-name="platform.Common.sw.tool.Microsoft EWDK">
+    <platforms />
+    <annotations>
+      <annotation name="maintainer" value="russ.earl@intel.com" />
+      <annotation name="vendor" value="Microsoft" />
+    </annotations>
+  </project>
+  <project name="kwExport" ingredient="kwExport" pkg-path="..\Tools\KwExport" version="3.22" artifactory="OWR-Tools" type="bldtool" hsd-full-name="platform.Common.sw.tool.KW">
+    <platforms />
+    <annotations />
+  </project>
+</manifest>

@@ -36,12 +36,11 @@ enum acpi_ec_interface {
 };
 
 /**
-#define SMCHOST_PVT_MAX_BUF_SIZE	30
  * @brief Get ACPI flag.
  *
  * @param type the flag to be retrieved.
  */
-bool acpi_get_flag(enum acpi_ec_interface num, u8_t type);
+bool acpi_get_flag(enum acpi_ec_interface num, uint8_t type);
 
 /**
  * @brief Set ACPI flag.
@@ -49,29 +48,29 @@ bool acpi_get_flag(enum acpi_ec_interface num, u8_t type);
  * @param type the flag to be set.
  * @param hilow indicates if flag is to be set 1-HIGH or 0-LOW.
  */
-void acpi_set_flag(enum acpi_ec_interface num, u8_t type, bool hilow);
+void acpi_set_flag(enum acpi_ec_interface num, uint8_t type, bool hilow);
 
 /**
  * @brief Read data sent from OS to EC.
  *
  * @retval the byte sent.
  */
-u8_t acpi_read_idr(enum acpi_ec_interface num);
+uint8_t acpi_read_idr(enum acpi_ec_interface num);
 
 /**
  * @brief Send data from EC to OS.
  *
  * @param byte the data to be sent to OS.
  */
-void acpi_write_odr(enum acpi_ec_interface num, u8_t byte);
+void acpi_write_odr(enum acpi_ec_interface num, uint8_t byte);
 
 /**
  * @brief Read status from I/F block.
  *
  * @retval data sent from OS to EC.
  */
-u8_t acpi_read_str(enum acpi_ec_interface num);
+uint8_t acpi_read_str(enum acpi_ec_interface num);
 
-int acpi_send_byte(enum acpi_ec_interface num, u8_t data);
+int acpi_send_byte(enum acpi_ec_interface num, uint8_t data);
 
 #endif /* __ACPI_H__ */

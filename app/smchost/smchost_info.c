@@ -17,14 +17,49 @@
 
 LOG_MODULE_DECLARE(smchost, CONFIG_SMCHOST_LOG_LEVEL);
 
+static struct acpi_hid_btn_sci btn_ctrl;
+
+uint8_t check_btn_sci_sts(uint8_t btn_sci_en_dis)
+{
+	uint8_t ret = 0;
+
+	switch (btn_sci_en_dis) {
+	case HID_BTN_SCI_PWR:
+		ret = btn_ctrl.pwr_btn_en_dis;
+		break;
+	case HID_BTN_SCI_VOL_UP:
+		ret = btn_ctrl.vol_up_en_dis;
+		break;
+	case HID_BTN_SCI_VOL_DOWN:
+		ret = btn_ctrl.vol_down_en_dis;
+		break;
+	case HID_BTN_SCI_HOME:
+		ret = btn_ctrl.win_btn_en_dis;
+		break;
+	case HID_BTN_SCI_ROT_LOCK:
+		ret = btn_ctrl.rot_lock_en_dis;
+		break;
+	default:
+		break;
+	}
+
+	return ret;
+}
+
+static void btn_sci_cntrl(void)
+{
+	btn_ctrl = g_acpi_tbl.acpi_btn_cntrl;
+}
+
+#ifdef CONFIG_DEPRECATED_SMCHOST_CMD
 static void query_system_status(void)
 {
-	u8_t system_sts = 0x00;
+	uint8_t system_sts = 0x00;
 
 	system_sts |= BIT(4);
 	send_to_host(&system_sts, 1);
 }
-
+#endif
 
 /**
  * @brief Returns a key to identify SMC and state information.
@@ -36,12 +71,13 @@ static void query_system_status(void)
  *  Bit 5: 1 = Extended thermal sensor supported
  *  Bit 4: 1 = MAF mode
  *  Bit 3: 1 = SAF Mode
- *  Bit 1-2: reserved for future use.
+ *  Bit 2: reserved for future use.
+ *  Bit 1: 1 = PECI access mode
  *  Bit 0: 1 = ACPI mode
  */
 static void smc_mode(void)
 {
-	u8_t res[] = {'K', 'S', 'C', 0};
+	uint8_t res[] = {'K', 'S', 'C', 0};
 
 	res[SMC_CAPS_INDEX] |= BIT(GEYSERVILLE_SUPPORT);
 	res[SMC_CAPS_INDEX] |= BIT(LEGACY_SUPPORT);
@@ -63,82 +99,73 @@ static void smc_mode(void)
 		res[SMC_CAPS_INDEX] |= BIT(ACPI_MODE);
 	}
 
+	if (peci_access_mode == PECI_OVER_ESPI_MODE) {
+		res[SMC_CAPS_INDEX] |= BIT(PECI_ACCESS_MODE_POS);
+	}
+
 	send_to_host(res, sizeof(res));
 }
 
-static void get_dock_status(void)
-{
-	u8_t dock_sts;
-
-	dock_sts = 0x00;
-	send_to_host(&dock_sts, 1);
-}
-
+/**
+ * @brief Returns a switch status.
+ *
+ *  Bit 5: Virtual Dock
+ *  Bit 4: AC power
+ *  Bit 3: Home button
+ *  Bit 2: NMI is active
+ *  Bit 1: Virtual battery
+ *  Bit 0: Lid closed in legacy BIOS
+ */
 static void get_switch_status(void)
 {
-	/* TODO: Replace when real value is available */
-	u8_t sw_status = 0x93;
+	uint8_t sw_status = 0;
+
+	WRITE_BIT(sw_status, SWITCH_STATUS_VIRTUAL_DOCK_POS,
+		  gpio_read_pin(VIRTUAL_DOCK));
+	WRITE_BIT(sw_status, SWITCH_STATUS_AC_POWER_POS,
+		  gpio_read_pin(BC_ACOK));
+	WRITE_BIT(sw_status, SWITCH_STATUS_HOME_BTN_POS,
+		  (gpio_read_pin(HOME_BUTTON) == LOW));
+	WRITE_BIT(sw_status, SWITCH_STATUS_VIRTUAL_BATT_POS,
+		  gpio_read_pin(VIRTUAL_BAT));
+	WRITE_BIT(sw_status, SWITCH_STATUS_LEGACY_LID,
+		  gpio_read_pin(SMC_LID));
 
 	send_to_host(&sw_status, 1);
 }
 
 static void smc_get_fab_id(void)
 {
-	u16_t platform_id = get_platform_id();
+	uint16_t platform_id = get_platform_id();
 
-	send_to_host((u8_t *)&platform_id, 2);
+	send_to_host((uint8_t *)&platform_id, sizeof(platform_id));
 }
-
 
 static void read_revision(void)
 {
-	u8_t version[2] = {0};
+	uint8_t version[2] = {0};
 
 	version[0] = major_version();
 	version[1] = minor_version();
 
-	send_to_host((u8_t *)&version, 2);
+	send_to_host((uint8_t *)&version, 2);
 }
 
 static void read_platform_signature(void)
 {
-	u8_t value[8];
+	uint8_t value[8];
 
-	send_to_host((u8_t *)value, 8);
+	send_to_host((uint8_t *)value, 8);
 }
 
-static void get_ec_id(void)
-{
-	u8_t data = 0xC2;
-
-	send_to_host(&data, 1);
-}
-
-static void get_pmic_vid(void)
-{
-	u8_t pmic_vid = 0x00;
-
-#ifdef CONFIG_PMIC
-	read_pmic_vid(&pmic_vid);
-#endif
-	send_to_host(&pmic_vid, 1);
-}
-
-
-void ucsi_read_version(void)
-{
-	u8_t res[] = {0x01, 0x00};
-
-	send_to_host(res, 2);
-}
-
-
-void smchost_cmd_info_handler(u8_t command)
+void smchost_cmd_info_handler(uint8_t command)
 {
 	switch (command) {
+#ifdef CONFIG_DEPRECATED_SMCHOST_CMD
 	case SMCHOST_QUERY_SYSTEM_STS:
 		query_system_status();
 		break;
+#endif
 	case SMCHOST_GET_SMC_MODE:
 		smc_mode();
 		break;
@@ -150,20 +177,12 @@ void smchost_cmd_info_handler(u8_t command)
 		break;
 	case SMCHOST_READ_PLAT_SIGNATURE:
 		read_platform_signature();
-	case SMCHOST_GET_PMIC_VID:
-		get_pmic_vid();
-		break;
-	case SMCHOST_GET_DOCK_STS:
-		get_dock_status();
 		break;
 	case SMCHOST_READ_REVISION:
 		read_revision();
 		break;
-	case SMCHOST_UCSI_READ_VERSION:
-		ucsi_read_version();
-		break;
-	case SMCHOST_GET_KSC_ID:
-		get_ec_id();
+	case SMCHOST_HID_BTN_SCI_CONTROL:
+		btn_sci_cntrl();
 		break;
 	default:
 		LOG_WRN("%s: command 0x%X without handler", __func__, command);

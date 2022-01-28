@@ -38,7 +38,7 @@ int port80_display_off(void);
  *
  * @param word the hexadecimal value to be displayed.
  */
-void port80_display_word(u16_t word);
+void port80_display_word(uint16_t word);
 
 
 #endif /* __PORT80_DISPLAY_H__ */

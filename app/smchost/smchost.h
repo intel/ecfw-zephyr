@@ -12,22 +12,50 @@
 #ifndef __SMCHOST_H__
 #define __SMCHOST_H__
 
-/* SMC host definitions */
-#define SMC_CAPS_INDEX            3u
+/*  SMCHOST_GET_SMC_MODE definitions */
+#define SMC_CAPS_INDEX			3u
+#define GEYSERVILLE_SUPPORT		7u
+#define THERMAL_STATES_LOCKED		6u
+#define EXTENDED_THERMAL_SENSORS	5u
+#define BOOT_CONFIG_MAF			4u
+#define BOOT_CONFIG_SAF			3u
+#define LEGACY_SUPPORT			2u
+#define PECI_ACCESS_MODE_POS		1u
+#define ACPI_MODE			0u
 
-/* Geyserville supported */
-#define GEYSERVILLE_SUPPORT       7u
-#define THERMAL_STATES_LOCKED     6u
-/* Thermal sensor status */
-#define EXTENDED_THERMAL_SENSORS  5u
-#define BOOT_CONFIG_MAF           4u
-#define BOOT_CONFIG_SAF           3u
-#define LEGACY_SUPPORT            2u
-#define ACPI_MODE                 0u
+/*  SMCHOST_GET_SWITCH_STS definitions */
+#define SWITCH_STATUS_LEGACY_POS	7u
+#define SWITCH_STATUS_VIRTUAL_DOCK_POS	5u
+#define SWITCH_STATUS_AC_POWER_POS	4u
+#define SWITCH_STATUS_HOME_BTN_POS	3u
+#define SWITCH_STATUS_NMI_POS		2u
+#define SWITCH_STATUS_VIRTUAL_BATT_POS	1u
+#define SWITCH_STATUS_LEGACY_LID	0u
 
-#define SMCHOST_MAX_BUF_SIZE        10
+/* PLN definitions */
+#define PLN_PIN_ASSERT			0u
+#define PLN_PIN_DEASSERT		1u
+#define PLN_PIN_NC			2u
+/* PLN duration required by ssd for reset preparation */
+#define MINIMUM_PLN_TIME		2u
+
+/* PECI bus selection */
+#define LEGACY_PECI_MODE 0
+#define PECI_OVER_ESPI_MODE 1
+
+/* EC identifier */
+#define SMCHOST_MAX_BUF_SIZE		10
 
 #include "smchost_extended.h"
+
+enum hid_btn_sci {
+	HID_BTN_SCI_PWR = 0,
+	HID_BTN_SCI_VOL_UP,
+	HID_BTN_SCI_VOL_DOWN,
+	HID_BTN_SCI_HOME,
+	HID_BTN_SCI_ROT_LOCK,
+};
+
 
 /**
  * @brief SMC host management.
@@ -46,12 +74,54 @@ void smchost_thread(void *p1, void *p2, void *p3);
  * @param pdata pointer to buffer holding the data.
  * @param len the amount of bytes to be sent.
  */
-void send_to_host(u8_t *pdata, u8_t len);
+void send_to_host(uint8_t *pdata, uint8_t len);
 
-extern u8_t host_req[SMCHOST_MAX_BUF_SIZE];
-extern u8_t host_res[SMCHOST_MAX_BUF_SIZE];
-extern u8_t host_req_len;
-extern u8_t host_res_len;
-extern u8_t host_res_idx;
+/**
+ * @brief Indicate smchost task there is an event that requires to be processed.
+ */
+void smchost_signal_request(void);
+
+/**
+ * @brief get PLN pin status.
+ *
+ * @return PLN Pin status 0 - assert, 1- deassert, 2 - no action
+ */
+uint8_t get_pln_pin_sts(void);
+
+/**
+ * @brief Update PLN pin status
+ *
+ * @param PLN pin update 0 - assert, 1- deassert, 2 - no action
+ */
+void set_pln_pin_sts(uint8_t sts);
+
+/**
+ * @brief get PLT_RST signal status.
+ *
+ * @return PLT_RST status 0 - assert, 1 - deassert
+ */
+uint8_t get_pltrst_signal_sts(void);
+
+/**
+ * @brief Manage PLN pin
+ *
+ * This routine manages pln signal and drive it based on current state of pin.
+ */
+void manage_pln_signal(void);
+
+/**
+ * @brief checks whether SCI events need to be triggered
+ *
+ * @return 0 - SCI events need not be triggered
+ * 1 - SCI events need to be triggered.
+ */
+uint8_t check_btn_sci_sts(uint8_t btn_sci_en_dis);
+
+extern uint8_t host_req[SMCHOST_MAX_BUF_SIZE];
+extern uint8_t host_res[SMCHOST_MAX_BUF_SIZE];
+extern uint8_t host_req_len;
+extern uint8_t host_res_len;
+extern uint8_t host_res_idx;
+extern uint8_t peci_access_mode;
 
 #endif /* __SMCHOST_H__ */

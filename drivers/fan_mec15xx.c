@@ -39,8 +39,8 @@ LOG_MODULE_REGISTER(fan, CONFIG_FAN_LOG_LEVEL);
 #define	PWM_DEV_LIST_SIZE	(PWM_CH_08 + 1)
 #define	TACH_DEV_LIST_SIZE	(TACH_CH_03 + 1)
 
-static struct device *pwm_dev[PWM_DEV_LIST_SIZE];
-static struct device *tach_dev[TACH_DEV_LIST_SIZE];
+static const struct device *pwm_dev[PWM_DEV_LIST_SIZE];
+static const struct device *tach_dev[TACH_DEV_LIST_SIZE];
 
 static struct fan_dev fan_table[] = {
 	{ PWM_CH_00,	TACH_CH_00	},
@@ -130,7 +130,7 @@ int fan_power_set(bool power_state)
 	return gpio_write_pin(FAN_PWR_DISABLE_N, power_state);
 }
 
-int fan_set_duty_cycle(enum fan_type fan_idx, u8_t duty_cycle)
+int fan_set_duty_cycle(enum fan_type fan_idx, uint8_t duty_cycle)
 {
 	int ret;
 
@@ -140,7 +140,11 @@ int fan_set_duty_cycle(enum fan_type fan_idx, u8_t duty_cycle)
 
 	struct fan_dev *fan = &fan_table[fan_idx];
 
-	struct device *pwm = pwm_dev[fan->pwm_ch];
+	if (fan->pwm_ch >= PWM_DEV_LIST_SIZE) {
+		return -EINVAL;
+	}
+
+	const struct device *pwm = pwm_dev[fan->pwm_ch];
 
 	if (!pwm) {
 		return -ENODEV;
@@ -159,7 +163,7 @@ int fan_set_duty_cycle(enum fan_type fan_idx, u8_t duty_cycle)
 	return 0;
 }
 
-int fan_read_rpm(enum fan_type fan_idx, u16_t *rpm)
+int fan_read_rpm(enum fan_type fan_idx, uint16_t *rpm)
 {
 	int ret;
 	struct sensor_value val;
@@ -170,7 +174,11 @@ int fan_read_rpm(enum fan_type fan_idx, u16_t *rpm)
 
 	struct fan_dev *fan = &fan_table[fan_idx];
 
-	struct device *tach = tach_dev[fan->tach_ch];
+	if (fan->tach_ch >= TACH_DEV_LIST_SIZE) {
+		return -EINVAL;
+	}
+
+	const struct device *tach = tach_dev[fan->tach_ch];
 
 	if (!tach) {
 		return -ENODEV;
@@ -186,7 +194,7 @@ int fan_read_rpm(enum fan_type fan_idx, u16_t *rpm)
 		return ret;
 	}
 
-	*rpm = (u16_t) val.val1;
+	*rpm = (uint16_t) val.val1;
 
 	return 0;
 }

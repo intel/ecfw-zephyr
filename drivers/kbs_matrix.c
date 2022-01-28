@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2020 Intel Corportation
+ *
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <zephyr.h>
@@ -9,22 +11,28 @@
 #include "kbs_matrix.h"
 #include "board_config.h"
 #include "keyboard_utility.h"
+#include "sci.h"
+#include "scicodes.h"
+#include "smc.h"
+#ifdef CONFIG_EARLY_KEY_SEQUENCE_DETECTION
+#include "kbs_boot_keyseq.h"
+#endif
 #include <logging/log.h>
 LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 
-static struct device *kscan_dev;
+static const struct device *kscan_dev;
 static struct k_timer typematic_timer;
 static kbs_matrix_callback kbs_callback;
 static void typematic_callback(struct k_timer *timer);
-static void kscan_callback(struct device *dev, u32_t row,
-			   u32_t col, bool pressed);
+static void kscan_callback(const struct device *dev, uint32_t row,
+			   uint32_t col, bool pressed);
 
 /* This is received and forwarded by kbchost */
-static const u8_t *scan_code_set;
+static const uint8_t *scan_code_set;
 static struct km_api *keymap_api;
 
 /* Track current state of key modifiers/combinations */
-u32_t kscan_flags;
+uint32_t kscan_flags;
 
 /* Translated buffer with key data*/
 static struct scan_code make_tpmatic_code;
@@ -36,15 +44,15 @@ static struct scan_code make_tpmatic_code;
  * 0xF5 disable
  * 0XF4 enable
  */
-static const u8_t dflt_typematic_delay_rate = 0x01U | 0xBU;
+static const uint8_t dflt_typematic_delay_rate = 0x01U | 0xBU;
 
 /* This is the typematic rate index
  * Bits 4 - 0
  */
-static u8_t typematic_period_idx;
+static uint8_t typematic_period_idx;
 /* Delay index before repeating a key
  */
-static u8_t typematic_delay_idx;
+static uint8_t typematic_delay_idx;
 
 /* Typematic rate and delay values correspond to the data passed after
  * the F3 command (See the 8042 spec online). The typematic rate is calulated
@@ -62,14 +70,14 @@ static u8_t typematic_delay_idx;
 #define TYPEMATIC_DELAY_MASK	0x60U
 #define TYPEMATIC_DELAY_POS	5U
 
-static const u16_t typematic_period[] = {
+static const uint16_t typematic_period[] = {
 	33U,  37U,  42U,  46U,  50U,  54U,  58U,  63U,
 	67U,  75U,  83U,  92U, 100U, 109U, 116U, 125U,
 	133U, 149U, 167U, 182U, 200U, 217U, 232U, 250U,
 	270U, 303U, 333U, 370U, 400U, 435U, 470U, 500U
 };
 
-static const u16_t typematic_delay[] = { 250U, 500U, 750U, 1000U };
+static const uint16_t typematic_delay[] = { 250U, 500U, 750U, 1000U };
 
 #define MAX_SC2_TABLE_SIZE 130U
 /* This table represents the scancode set 2.
@@ -137,7 +145,7 @@ const struct scan_code scan_code2[MAX_SC2_TABLE_SIZE] = {
 	{{0x49U},		1U},	/* 54 */
 	{{0x4AU},		1U},	/* 55 */
 	{{0U},			0U},	/* 56 */
-	{{0x59U},		0U},	/* 57 */
+	{{0x59U},		1U},	/* 57 */
 	{{0x14U},		1U},	/* 58 */
 	{{0x0U},		0U},	/* 59 */
 	{{0x11U},		1U},	/* 60 */
@@ -223,6 +231,10 @@ const struct scan_code scan_code2[MAX_SC2_TABLE_SIZE] = {
 	{{0xE0, 0x2F},		2U},	/* 129*/
 };
 
+#ifdef CONFIG_EARLY_KEY_SEQUENCE_DETECTION
+static struct kbs_keyseq keyseq_det[KEYSEQ_MAX_SEQ_COUNT];
+#endif
+
 static inline bool numlock_on(void)
 {
 	return ((kscan_flags >> KBS_NUMLOCK_DOWN_POS) & 0x1) == 0x1;
@@ -306,7 +318,19 @@ static inline void set_shift_key(bool pressed)
 	}
 }
 
-int kbs_matrix_init(kbs_matrix_callback callback, u8_t *initial_set)
+static inline bool fn_with_valid_keynum(uint8_t key_num)
+{
+	return fn_pressed()
+		&& key_num != KM_LCNTRL_KEY
+		&& key_num != KM_RCNTRL_KEY
+		&& key_num != KM_LSHIFT_KEY
+		&& key_num != KM_RSHIFT_KEY
+		&& key_num != KM_LALT_KEY
+		&& key_num != KM_RALT_KEY
+		&& key_num != KM_LWIN_KEY;
+}
+
+int kbs_matrix_init(kbs_matrix_callback callback, uint8_t *initial_set)
 {
 	if (!callback) {
 		LOG_ERR("Bad callback");
@@ -325,7 +349,7 @@ int kbs_matrix_init(kbs_matrix_callback callback, u8_t *initial_set)
 	k_timer_init(&typematic_timer, typematic_callback, NULL);
 
 	kbs_callback = callback;
-	scan_code_set = (const u8_t *)initial_set;
+	scan_code_set = (const uint8_t *)initial_set;
 
 	/* Get a keyboard layout instance */
 	keymap_api = keymap_init_interface();
@@ -334,10 +358,22 @@ int kbs_matrix_init(kbs_matrix_callback callback, u8_t *initial_set)
 		return -ENODEV;
 	}
 
+#ifdef CONFIG_EARLY_KEY_SEQUENCE_DETECTION
+	/* CTRL + ALT + SHIFT */
+	keyseq_det[KEYSEQ_TIMEOUT].trigger_key = 0;
+	keyseq_det[KEYSEQ_TIMEOUT].modifiers = KBS_CTRL_DOWN | KBS_SHIFT_DOWN |
+					       KBS_ALT_DOWN;
+	/* ALT + SHIFT + user-defined key */
+	keyseq_det[KEYSEQ_CUSTOM0].trigger_key = CONFIG_EARLY_KEYSEQ_CUSTOM0;
+	keyseq_det[KEYSEQ_CUSTOM0].modifiers = KBS_SHIFT_DOWN | KBS_ALT_DOWN;
+	keyseq_det[KEYSEQ_CUSTOM1].trigger_key = CONFIG_EARLY_KEYSEQ_CUSTOM1;
+	keyseq_det[KEYSEQ_CUSTOM1].modifiers = KBS_SHIFT_DOWN | KBS_ALT_DOWN;
+#endif
+
 	return 0;
 }
 
-void kbs_write_typematic(u8_t data)
+void kbs_write_typematic(uint8_t data)
 {
 	/* Cancel typematic timer before attempting to change settings */
 	k_timer_stop(&typematic_timer);
@@ -351,9 +387,6 @@ void kbs_keyboard_enable(void)
 {
 	kscan_enable_callback(kscan_dev);
 	kbs_write_typematic(dflt_typematic_delay_rate);
-	k_timer_start(&typematic_timer,
-		K_MSEC(typematic_delay[typematic_delay_idx]),
-		K_MSEC(typematic_period[typematic_period_idx]));
 }
 
 void kbs_keyboard_disable(void)
@@ -369,7 +402,7 @@ void kbs_keyboard_set_default(void)
 }
 
 /* This function excludes Fn because it does not produce any scan code */
-static void update_modifier_keys(u8_t key_num, bool pressed)
+static void update_modifier_keys(uint8_t key_num, bool pressed)
 {
 	switch (key_num) {
 	case KM_LCNTRL_KEY:
@@ -393,8 +426,7 @@ static void update_modifier_keys(u8_t key_num, bool pressed)
 	}
 }
 
-static void get_print_screen_scode(struct scan_code *sc2,
-				   bool *typematic, bool pressed,
+static void get_print_screen_scode(struct scan_code *sc2, bool pressed,
 				   bool ctrl_pressed, bool alt_pressed,
 				   bool shift_pressed)
 {
@@ -406,7 +438,7 @@ static void get_print_screen_scode(struct scan_code *sc2,
 			sc2->code[2] = 0xe0U;
 			sc2->code[3] = 0x7cU;
 			sc2->len = 4U;
-			*typematic = true;
+			sc2->typematic = true;
 		} else {
 			sc2->code[0] = 0xe0U;
 			sc2->code[1] = 0xf0U;
@@ -415,39 +447,39 @@ static void get_print_screen_scode(struct scan_code *sc2,
 			sc2->code[4] = 0xf0U;
 			sc2->code[5] = 0x12U;
 			sc2->len = 6U;
-			*typematic = false;
+			sc2->typematic = false;
 		}
 	/* emulation of sys-req */
 	} else if (alt_pressed) {
 		if (pressed) {
 			sc2->code[0] = 0x84U;
 			sc2->len = 1U;
-			*typematic = true;
+			sc2->typematic = true;
 		} else {
 			sc2->code[0] = 0xf0U;
 			sc2->code[1] = 0x84U;
 			sc2->len = 2U;
-			*typematic = false;
+			sc2->typematic = false;
 		}
 	} else { /* ctrl or shift down */
 		if (pressed) {
 			sc2->code[0] = 0xe0U;
 			sc2->code[1] = 0x7cU;
 			sc2->len = 2U;
-			*typematic = true;
+			sc2->typematic = true;
 		} else {
 			sc2->code[0] = 0xf0;
 			sc2->code[1] = 0xe0;
 			sc2->code[2] = 0x7c;
 			sc2->len = 3U;
-			*typematic = false;
+			sc2->typematic = false;
 		}
 	}
 }
 
 /* Pause/break have neither typematic nor break code */
 static void get_pause_scode(struct scan_code *sc2,
-		     bool ctrl_pressed)
+			    bool ctrl_pressed)
 {
 	/* Break scan code 2 */
 	if (ctrl_pressed) {
@@ -469,13 +501,15 @@ static void get_pause_scode(struct scan_code *sc2,
 		sc2->code[7] = 0x77U;
 		sc2->len = 8U;
 	}
+
+	sc2->typematic = false;
 }
 
 /* This function is only exercised in keyboards with numlock button */
-void get_numpad_scode(u8_t key_num, struct scan_code *sc2,
-			       bool *typematic, bool pressed)
+void get_numpad_scode(uint8_t key_num, struct scan_code *sc2,
+		      bool pressed)
 {
-	u8_t scan_code = 0x0U;
+	uint8_t scan_code = 0x0U;
 	/* This switch represents the keys in for keyboards without
 	 * real numeric keys. But I guess the scame scan codes
 	 * can be used with keyboards containing numeric pads
@@ -533,13 +567,13 @@ void get_numpad_scode(u8_t key_num, struct scan_code *sc2,
 		if (pressed) {
 			sc2->code[0] = scan_code;
 			sc2->len++;
-			*typematic = true;
+			sc2->typematic = true;
 
 		} else {
 			sc2->code[0] = 0xF0U;
 			sc2->code[1] = scan_code;
 			sc2->len = 2U;
-			*typematic = false;
+			sc2->typematic = false;
 		}
 	} else {
 		/* User just pressed numlock */
@@ -554,8 +588,7 @@ void get_numpad_scode(u8_t key_num, struct scan_code *sc2,
  * This is an out parameter
  * pressed is either make or break
  */
-static void get_scan_code(u8_t key_num, struct scan_code *sc2,
-			      bool *typematic, bool pressed)
+static void get_scan_code(uint8_t key_num, struct scan_code *sc2, bool pressed)
 {
 
 	update_modifier_keys(key_num, pressed);
@@ -570,8 +603,7 @@ static void get_scan_code(u8_t key_num, struct scan_code *sc2,
 	 */
 
 	if (numlock_on()) {
-		get_numpad_scode(key_num, sc2,
-					  typematic, pressed);
+		get_numpad_scode(key_num, sc2, pressed);
 		/* If the length is zero, then allow the execution
 		 * to continue. This is because numlock may engaged,
 		 * but the user is pressing other keys.
@@ -583,18 +615,16 @@ static void get_scan_code(u8_t key_num, struct scan_code *sc2,
 
 	if (key_num == KM_PRINT_SCREEN) {
 		/* Print screen plus other key combinations */
-		get_print_screen_scode(sc2,
-				       typematic, pressed, ctrl_down,
+		get_print_screen_scode(sc2, pressed, ctrl_down,
 				       alt_down, shift_down);
 	} else if (key_num == KM_PAUSE) {
 		/* Pause/break scancodes */
 		get_pause_scode(sc2, ctrl_down);
-		*typematic = false;
 	} else {
 		/* These are regular keys in the QWERTY key without any
 		 * esoteric key combination
 		 */
-		u8_t i = 0U;
+		uint8_t i = 0U;
 
 		/* Protect against overflow */
 		if (key_num >= MAX_SC2_TABLE_SIZE) {
@@ -605,7 +635,7 @@ static void get_scan_code(u8_t key_num, struct scan_code *sc2,
 
 		if (code->len != 0U) {
 			if (pressed) {
-				*typematic = true;
+				sc2->typematic = true;
 				while (i < code->len) {
 					sc2->code[i] = code->code[i];
 					i++;
@@ -613,7 +643,7 @@ static void get_scan_code(u8_t key_num, struct scan_code *sc2,
 
 				sc2->len = i;
 			} else {
-				*typematic = false;
+				sc2->typematic = false;
 				int j = 0;
 
 				while (i < code->len) {
@@ -638,11 +668,11 @@ static void get_scan_code(u8_t key_num, struct scan_code *sc2,
 	}
 }
 
-static void make_key(u8_t key_num)
+static void make_key(uint8_t key_num)
 {
 	struct scan_code sc2;
 
-	bool typematic = false;
+	sc2.typematic = false;
 
 	/* Stop if we are in a current typematic state and
 	 * a new key has been pressed whitout releasing the
@@ -655,7 +685,25 @@ static void make_key(u8_t key_num)
 		return;
 	}
 
-	get_scan_code(key_num, &sc2, &typematic, true);
+	/* Fn + key presed combination */
+	if (fn_with_valid_keynum(key_num)) {
+		struct fn_data data;
+
+		/* Retrieve data from custom keyboard implementation */
+		keymap_get_fnkey(keymap_api, key_num, &data, true);
+		if (data.type == FN_SCAN_CODE) {
+			sc2 = data.sc;
+			if (sc2.code[0] == SC_UNMAPPED)
+				return;
+		} else {
+			/* Send an SCI. Remember to add 0x80 for SCI break*/
+			LOG_DBG("Sci %x", data.sci_code);
+			g_acpi_tbl.acpi_hotkey_scan = data.sci_code;
+			enqueue_sci(SCI_HOTKEY);
+		}
+	} else { /* Handle ordinary key presses, qwerty keys + numlock */
+		get_scan_code(key_num, &sc2, true);
+	}
 
 	if (sc2.len == 0U) {
 		LOG_DBG("Invalid make code for key num = %d", key_num);
@@ -666,18 +714,17 @@ static void make_key(u8_t key_num)
 	make_tpmatic_code.len = 0U;
 
 	for (int i = 0; i < sc2.len; i++) {
-		u8_t value = sc2.code[i];
+		uint8_t value = sc2.code[i];
 
 		if (translate_key(*scan_code_set, &value) == 0U &&
 		    make_tpmatic_code.len  < MAX_SCAN_CODE_LEN) {
 			make_tpmatic_code.code[make_tpmatic_code.len++] = value;
-
 		}
 	}
 
 	kbs_callback(make_tpmatic_code.code, make_tpmatic_code.len);
 
-	if (typematic) {
+	if (sc2.typematic) {
 		/* Start timer to send scan codes while holding down
 		 * the current key
 		 */
@@ -687,12 +734,12 @@ static void make_key(u8_t key_num)
 	}
 }
 
-static void break_key(u8_t key_num)
+static void break_key(uint8_t key_num)
 {
 	struct scan_code sc2;
 	struct scan_code break_code;
 
-	bool __attribute__ ((unused)) typematic;
+	sc2.typematic = false;
 
 	k_timer_stop(&typematic_timer);
 
@@ -701,7 +748,20 @@ static void break_key(u8_t key_num)
 		return;
 	}
 
-	get_scan_code(key_num, &sc2, &typematic, false);
+	/* Fn + key release combination */
+	if (fn_with_valid_keynum(key_num)) {
+		struct fn_data data;
+
+		/* Retrieve data from custom keyboard implementation */
+		keymap_get_fnkey(keymap_api, key_num, &data, false);
+		if (data.type == FN_SCAN_CODE) {
+			sc2 = data.sc;
+			if (sc2.code[0] == SC_UNMAPPED)
+				return;
+		}
+	} else { /* Handle ordinary key releases, qwerty keys + numlock */
+		get_scan_code(key_num, &sc2, false);
+	}
 
 	if (sc2.len == 0U) {
 		LOG_DBG("Invalid break code for keynum = %d", key_num);
@@ -712,7 +772,7 @@ static void break_key(u8_t key_num)
 	break_code.len = 0U;
 
 	for (int i = 0; i < sc2.len; i++) {
-		u8_t value = sc2.code[i];
+		uint8_t value = sc2.code[i];
 
 		if (translate_key(*scan_code_set, &value) == 0U &&
 		    break_code.len  < MAX_SCAN_CODE_LEN) {
@@ -729,18 +789,128 @@ static void typematic_callback(struct k_timer *timer)
 	kbs_callback(make_tpmatic_code.code, make_tpmatic_code.len);
 }
 
-static void kscan_callback(struct device *dev, u32_t row,
-			   u32_t col, bool pressed)
+#ifdef CONFIG_EARLY_KEY_SEQUENCE_DETECTION
+bool kbs_keyseq_boot_detect(enum kbs_keyseq_type type)
+{
+	LOG_INF("%s type:%d detected: %d", __func__, type,
+		keyseq_det[type].detected);
+
+	return keyseq_det[type].detected;
+}
+
+int kbs_keyseq_define(uint8_t modifiers, uint8_t key,
+		      kbs_key_seq_detected callback)
+{
+	/* We only allow 1 runtime hot-key sequence */
+	if (keyseq_det[KEYSEQ_RUNTIME].trigger_key != 0) {
+		LOG_ERR("%s key trigger already defined", __func__);
+		return -EINVAL;
+	}
+
+	if (keyseq_det[KEYSEQ_RUNTIME].handler != 0) {
+		LOG_ERR("%s callback already registered", __func__);
+		return -EINVAL;
+	}
+
+	LOG_INF("%s %x %d", __func__, modifiers, key);
+	keyseq_det[KEYSEQ_RUNTIME].trigger_key = key;
+	keyseq_det[KEYSEQ_RUNTIME].modifiers = modifiers;
+	keyseq_det[KEYSEQ_RUNTIME].handler = callback;
+
+	return 0;
+}
+
+int kbs_keyseq_register(enum kbs_keyseq_type index,
+			kbs_key_seq_detected callback)
+{
+	/* Only 1 callback allow per key sequence */
+	if (keyseq_det[index].handler != 0) {
+		LOG_ERR("%s callback already registered", __func__);
+		return -EINVAL;
+	}
+
+	keyseq_det[index].handler = callback;
+	return 0;
+}
+
+static bool is_modifier(uint8_t last_key)
+{
+	switch (last_key) {
+	case KM_LCNTRL_KEY:
+	case KM_RCNTRL_KEY:
+	case KM_LALT_KEY:
+	case KM_RALT_KEY:
+	case KM_LSHIFT_KEY:
+	case KM_RSHIFT_KEY:
+	case KM_NUMLOCK_KEY:
+	case KM_SCLOCK_KEY:
+		return true;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+static void fw_hotkeyseq_detection(bool pressed, uint8_t key)
+{
+	static int trigger_key;
+
+	LOG_DBG("flags: %x key: %x press:%d mod:(%d %d %d)", kscan_flags, key,
+		pressed, ctrl_pressed(), alt_pressed(), shift_pressed());
+
+	if (!is_modifier(key)) {
+		trigger_key = key;
+	}
+
+	for (uint8_t i = 0; i < ARRAY_SIZE(keyseq_det); i++) {
+		bool match_mod = ((kscan_flags & keyseq_det[i].modifiers) ==
+				   keyseq_det[i].modifiers);
+
+		/* Undefined runtime hotkey */
+		if (keyseq_det[i].modifiers == 0) {
+			continue;
+		}
+
+		LOG_DBG("exp_modifiers: %x exp_key_num %d",
+			keyseq_det[i].modifiers, keyseq_det[i].trigger_key);
+
+		/* Timeout hotkey is composed of modifier keys only */
+		if (match_mod && i == KEYSEQ_TIMEOUT) {
+			LOG_WRN("%s Timeout keyseq detected ", __func__);
+			keyseq_det[i].detected = true;
+			trigger_key = 0;
+		} else if (trigger_key == keyseq_det[i].trigger_key &&
+			   match_mod) {
+			LOG_INF("%s keyseq %d detected ", __func__, i);
+			keyseq_det[i].detected = true;
+			trigger_key = 0;
+		}
+
+		if (keyseq_det[i].detected && keyseq_det[i].handler) {
+			keyseq_det[i].handler(pressed);
+		}
+	}
+}
+#endif
+
+static void kscan_callback(const struct device *dev, uint32_t row,
+			   uint32_t col, bool pressed)
 {
 	ARG_UNUSED(dev);
 	int last_key =  keymap_get_keynum(keymap_api, col, row);
 
-	LOG_DBG("Keymap:  %d\n", last_key);
+	LOG_DBG("Keymap: %d col: %d row: %d", last_key, col, row);
 
 	if (pressed) {
 		make_key(last_key);
 	} else {
 		break_key(last_key);
 	}
+
+#ifdef CONFIG_EARLY_KEY_SEQUENCE_DETECTION
+	/* Do not consume or alter in any way */
+	fw_hotkeyseq_detection(pressed, last_key);
+#endif
 }
 

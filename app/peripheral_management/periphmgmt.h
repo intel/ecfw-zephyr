@@ -7,7 +7,27 @@
 #ifndef __PERIPH_MGMT_H__
 #define __PERIPH_MGMT_H__
 
-typedef void (*btn_handler_t)(u8_t btn_sts);
+/**
+ * @brief Returns virtual battery presence status.
+ *
+ * @return 1 if virtual battery present otherwise 0.
+ */
+bool is_virtual_battery_prsnt(void);
+
+/**
+ * @brief Returns virtual dock presence status.
+ *
+ * @return 1 if virtual dock present otherwise 0.
+ */
+bool is_virtual_dock_prsnt(void);
+
+/**
+ * @brief update the  virtual bat and doc presence status.
+ *
+ */
+void update_virtual_bat_dock_status(void);
+
+typedef void (*btn_handler_t)(uint8_t btn_sts);
 
 /**
  * @brief Handles the power button and determine the next power state.
@@ -34,6 +54,6 @@ void periph_thread(void *p1, void *p2, void *p3);
  * @param btn_pin the pin number.
  * @param btn_pin the function to be called when there is a button event.
  */
-int periph_register_button(u32_t port_pin, btn_handler_t handler);
+int periph_register_button(uint32_t port_pin, btn_handler_t handler);
 
 #endif /* __PWRBTN_MGMT_H__ */

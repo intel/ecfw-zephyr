@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2020 Intel Corporation.
+ * Copyright (c) 2020 Intel Corporation
  *
+ * SPDX-License-Identifier: Apache-2.0
  */
+
 
 #ifndef __DSW_MODE_H__
 #define __DSW_MODE_H__
@@ -38,14 +40,14 @@ bool dsw_enabled(void);
  *
  * @retval the Deep Sx mode enabled, 0 if none is disabled.
  */
-u8_t dsw_mode(void);
+uint8_t dsw_mode(void);
 
 /**
  * @brief Update DeepSx mode if different than current.
  *
  * @param the new Deep Sx mode.
  */
-void dsw_update_mode(u8_t mode);
+void dsw_update_mode(uint8_t mode);
 
 /**
  * @brief Read Deep Sx mode from EEPROM.

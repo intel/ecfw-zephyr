@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2020 Intel Corporation.
+ * Copyright (c) 2020 Intel Corporation
  *
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <zephyr.h>
@@ -16,10 +17,10 @@ LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 #define DSW_NO_DATA       0x0000
 
 /* Cached configuration data */
-static u8_t dsw_valid_config;
+static uint8_t dsw_valid_config;
 
 /* New configuration data not yet stored */
-static u8_t dsw_tmp_config;
+static uint8_t dsw_tmp_config;
 static bool dsw_mode_update;
 
 bool dsw_enabled(void)
@@ -30,7 +31,7 @@ bool dsw_enabled(void)
 	return dsw_valid_config != 0;
 }
 
-u8_t dsw_mode(void)
+uint8_t dsw_mode(void)
 {
 #ifndef CONFIG_PWRMGMT_DEEPSX
 	return DSW_DISABLED;
@@ -40,7 +41,7 @@ u8_t dsw_mode(void)
 	return dsw_valid_config;
 }
 
-void dsw_update_mode(u8_t mode)
+void dsw_update_mode(uint8_t mode)
 {
 	LOG_DBG("Update DSx mode %x", mode);
 
@@ -51,7 +52,7 @@ void dsw_update_mode(u8_t mode)
 void dsw_read_mode(void)
 {
 	int ret;
-	u16_t value;
+	uint16_t value;
 
 	ret = eeprom_read_word(EEPROM_DSW_OFFSET, &value);
 	if (ret) {
@@ -71,7 +72,7 @@ void dsw_read_mode(void)
 
 void dsw_save_mode(void)
 {
-	u16_t data;
+	uint16_t data;
 
 	if (dsw_mode_update) {
 		dsw_mode_update = false;

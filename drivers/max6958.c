@@ -5,7 +5,7 @@
  */
 
 #include <errno.h>
-#include <drivers/i2c.h>
+#include "i2c_hub.h"
 #include <logging/log.h>
 #include "max6958.h"
 #include "board_config.h"
@@ -35,47 +35,34 @@ LOG_MODULE_REGISTER(max6958, CONFIG_MAX6958_LOG_LEVEL);
 
 #define MAX6958_SCAN_MASK	0x07
 
-static struct device *dev;
-
-int max6958_init(void)
+int max6958_set_decode_mode(uint8_t mode_mask)
 {
-	dev = device_get_binding(I2C_BUS_0);
-	if (!dev) {
-		LOG_WRN("%s not found", I2C_BUS_0);
-		return -EIO;
-	}
+	uint8_t data[] = { MAX6958_DECODE_MODE, mode_mask };
 
-	return 0;
-}
-
-int max6958_set_decode_mode(u8_t mode_mask)
-{
-	u8_t data[] = { MAX6958_DECODE_MODE, mode_mask };
-
-	return i2c_write(dev, data, sizeof(data),
+	return i2c_hub_write(I2C_0, data, sizeof(data),
 				MAX6958_9SEG_DISP_DRIVER_I2C_ADDR);
 }
 
-int max6958_set_brightness(u8_t duty_cycle)
+int max6958_set_brightness(uint8_t duty_cycle)
 {
-	u8_t data[] = { MAX6958_INTENSITY,
+	uint8_t data[] = { MAX6958_INTENSITY,
 			(duty_cycle & MAX6958_MAX_INTENSITY) };
 
-	return i2c_write(dev, data, sizeof(data),
+	return i2c_hub_write(I2C_0, data, sizeof(data),
 				MAX6958_9SEG_DISP_DRIVER_I2C_ADDR);
 }
 
-int max6958_set_digits(u8_t num)
+int max6958_set_digits(uint8_t num)
 {
-	u8_t data[] = { MAX6958_SCAN_LIMIT, (num & MAX6958_SCAN_MASK)};
+	uint8_t data[] = { MAX6958_SCAN_LIMIT, (num & MAX6958_SCAN_MASK)};
 
-	return i2c_write(dev, data, sizeof(data),
+	return i2c_hub_write(I2C_0, data, sizeof(data),
 				MAX6958_9SEG_DISP_DRIVER_I2C_ADDR);
 }
 
 int max6958_set_power(bool power)
 {
-	u8_t data[] = { MAX6958_CONFIG, 0 };
+	uint8_t data[] = { MAX6958_CONFIG, 0 };
 
 	if (power) {
 		data[1] |= MAX6958_SHUTDOWN;
@@ -83,13 +70,13 @@ int max6958_set_power(bool power)
 		data[1] &= ~MAX6958_SHUTDOWN;
 	}
 
-	return i2c_write(dev, data, sizeof(data),
+	return i2c_hub_write(I2C_0, data, sizeof(data),
 				MAX6958_9SEG_DISP_DRIVER_I2C_ADDR);
 }
 
-int max6958_display_digits(u32_t value)
+int max6958_display_digits(uint32_t value)
 {
-	u8_t data[] = { MAX6958_DIGIT0, 0, 0, 0, 0 };
+	uint8_t data[] = { MAX6958_DIGIT0, 0, 0, 0, 0 };
 
 	/* Copy bytes from msb to lsb */
 	data[1] = (value & 0xF000) >> 12;
@@ -97,6 +84,6 @@ int max6958_display_digits(u32_t value)
 	data[3] = (value & 0xF0) >> 4;
 	data[4] = (value & 0x0F);
 
-	return i2c_write(dev, data, sizeof(data),
+	return i2c_hub_write(I2C_0, data, sizeof(data),
 				MAX6958_9SEG_DISP_DRIVER_I2C_ADDR);
 }

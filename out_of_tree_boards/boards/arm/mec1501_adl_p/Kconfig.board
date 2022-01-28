@@ -1,0 +1,6 @@
+# Copyright (c) 2020, Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_MEC1501_ADL_P
+	bool "Intel MEC1501 ADL-P RVP board"
+	depends on SOC_MEC1501_HSZ

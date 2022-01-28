@@ -78,7 +78,7 @@ int fan_power_set(bool power_state);
  *
  * @return 0 if success, otherwise error code.
  */
-int fan_set_duty_cycle(enum fan_type fan_idx, u8_t duty_cycle);
+int fan_set_duty_cycle(enum fan_type fan_idx, uint8_t duty_cycle);
 
 /**
  * @brief  read fan rpm value using tach.
@@ -91,7 +91,7 @@ int fan_set_duty_cycle(enum fan_type fan_idx, u8_t duty_cycle);
  *
  * @return 0 if success, otherwise error code.
  */
-int fan_read_rpm(enum fan_type fan_idx, u16_t *rpm);
+int fan_read_rpm(enum fan_type fan_idx, uint16_t *rpm);
 
 
 #endif	/* __FAN_H__ */

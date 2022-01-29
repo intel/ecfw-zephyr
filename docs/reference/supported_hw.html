@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Supported Hardware &mdash; Zephyr-based Embedded controller firmware 1.10 documentation</title>
+  <title>Supported Hardware &mdash; Zephyr-based Embedded controller firmware 1.51 documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,7 +32,6 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -51,7 +53,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Zephyr-based Embedded controller firmware
+            <a href="../index.html" class="icon icon-home"> Zephyr-based Embedded controller firmware
           
 
           
@@ -61,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                1.51
               </div>
             
           
@@ -98,6 +100,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">EC FW application modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="application_notes.html">EC FW application notes</a></li>
 </ul>
 
             
@@ -138,6 +141,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -149,7 +154,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../_sources/reference/supported_hw.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -165,18 +170,50 @@
             
   <div class="section" id="supported-hardware">
 <span id="id1"></span><h1>Supported Hardware<a class="headerlink" href="#supported-hardware" title="Permalink to this headline">¶</a></h1>
-<p>Intel Tiger lake Reference Validation Platform (RVP) used in conjunction with
-Microchip MEC15xx modular embedded control card (MECC) is currently supported.</p>
-<p>The reference HW used to showcase EC FW open source takes advantage of the Modular
-Embedded controller card (MECC) specification, which defines both pin mapping
-and provides general guidelines to use different Embedded Controller Soc to the
-on-board EC through an add-on card. This allows to evaluate different EC
-in an Intel RVP.</p>
+<p>The main hardware used is Intel Validation Platform (RVP) used in conjunction
+with a modular embedded control card (MECC) or when applicable the
+on-board EC.</p>
+<p>The reference HW used to showcase EC FW open source takes advantage of the
+Modular Embedded controller card (MECC) specification, which defines both
+pin mapping and provides general guidelines to use different Embedded Controller
+Soc to the on-board EC through an add-on card. This allows to evaluate different
+EC in an Intel RVP.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Reworks are required on RVP to be able to control the RVP from MECC
 card. Refer to <a class="reference external" href="https://www.intel.com/content/www/us/en/programmable/documentation/lit-index.html">Platform design guide</a> for details.</p>
 </div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 37%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Board</p></th>
+<th class="head"><p>EC HW configuration</p></th>
+<th class="head"><p>Support</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Alderlake S</p></td>
+<td><p>RVP (on-board EC)</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Alderlake P</p></td>
+<td><p>RVP (on-board EC)</p></td>
+<td><p>Recomended</p></td>
+</tr>
+<tr class="row-even"><td><p>Alderlake S</p></td>
+<td><p>RVP + MECC card</p></td>
+<td><p>Enable other EC vendors</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tigerlake</p></td>
+<td><p>RVP + MECC card</p></td>
+<td><p>Deprecated</p></td>
+</tr>
+</tbody>
+</table>
 <div class="section" id="other-ec-soc">
 <h2>Other EC SoC<a class="headerlink" href="#other-ec-soc" title="Permalink to this headline">¶</a></h2>
 <p>In order to use a different MECC card with a different EC SoC vendor, the vendor
@@ -197,7 +234,8 @@ boot an eSPI-based Intel platform.</p>
 <li><p>PS/2 - for PS/2 devices management</p></li>
 <li><p>Keyscan - for keyboard matrix</p></li>
 </ul>
-<p>These drivers are required to enable features available in upcoming releases:</p>
+<p>These drivers are required to enable advanced features such as thermal and fan
+control.</p>
 <ul class="simple">
 <li><p>PECI - for thermal module</p></li>
 <li><p>TACH - for thermal module</p></li>
@@ -256,81 +294,120 @@ card. Refer to table below for guidance about what can be verified end-to-end.</
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 26%" />
-<col style="width: 37%" />
-<col style="width: 17%" />
-<col style="width: 20%" />
+<col style="width: 38%" />
+<col style="width: 16%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Area</p></th>
 <th class="head"><p>Feature</p></th>
-<th class="head"><p>SW support</p></th>
-<th class="head"><p>HW support
-(TGL + MECC)</p></th>
+<th class="head"><p>TGL + MECC</p></th>
+<th class="head"><p>ADL-S</p></th>
+<th class="head"><p>ADL-P</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Power sequencing</p></td>
 <td><p>ACPI power (Sx)</p></td>
 <td><p>Yes</p></td>
-<td><p>Yes (*)</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
 </tr>
 <tr class="row-odd"><td></td>
 <td><p>Deep sleep (DSx)</p></td>
 <td><p>Yes</p></td>
-<td><p>No</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
 </tr>
-<tr class="row-even"><td><p>Human interface</p></td>
+<tr class="row-even"><td></td>
+<td><p>SAF</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>Human interface</p></td>
 <td><p>Volume buttons</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
-</tr>
-<tr class="row-odd"><td></td>
-<td><p>Power button</p></td>
 <td><p>Yes</p></td>
-<td><p>Yes (*)</p></td>
 </tr>
 <tr class="row-even"><td></td>
+<td><p>Power button</p></td>
+<td><p>Yes (1)</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td></td>
 <td><p>Home button</p></td>
 <td><p>No</p></td>
 <td><p>No</p></td>
+<td><p>Yes</p></td>
 </tr>
-<tr class="row-odd"><td></td>
+<tr class="row-even"><td></td>
 <td><p>Lid switch</p></td>
 <td><p>No</p></td>
 <td><p>Yes</p></td>
+<td><p>Yes</p></td>
 </tr>
-<tr class="row-even"><td><p>PS2/ scan matrix</p></td>
+<tr class="row-odd"><td><p>PS2/ scan matrix</p></td>
 <td><p>PS2 keyboard</p></td>
+<td><p>Yes</p></td>
+<td><p>No</p></td>
+<td><ol class="arabic simple" start="2">
+<li></li>
+</ol>
+</td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p>PS2 mouse</p></td>
+<td><p>Yes</p></td>
+<td><p>No</p></td>
+<td><ol class="arabic simple" start="2">
+<li></li>
+</ol>
+</td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p>Keyboard matrix</p></td>
+<td><p>Yes (3)</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>Debug</p></td>
+<td><p>Port 80</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-odd"><td></td>
-<td><p>PS2 mouse</p></td>
-<td><p>Yes</p></td>
-<td><p>Yes</p></td>
-</tr>
-<tr class="row-even"><td></td>
-<td><p>Keyboard matrix</p></td>
-<td><p>Yes</p></td>
-<td><p>No</p></td>
-</tr>
-<tr class="row-odd"><td><p>Debug</p></td>
-<td><p>Port 80</p></td>
-<td><p>Yes</p></td>
-<td><p>Yes</p></td>
-</tr>
-<tr class="row-even"><td></td>
 <td><p>Serial port (UART)</p></td>
-<td><p>Yes</p></td>
-<td><p>MECC USB</p></td>
+<td><p>Yes (4)</p></td>
+<td colspan="2"><p>Yes   | Yes</p></td>
 </tr>
 </tbody>
 </table>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>(*) Rework on MECC card is required to align to more common configuration
+<p>(1) Rework on MECC card is required to align to more common configuration
 in Intel RVP boards for power button.
 Add a blue wire from TP65 to J50.11 and from TP64 to J50.8</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>(2) There is no PS2 connector on the ADL-P board, instead there is
+1x5 header that allow the connection.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>(3) Intel Tigerlake RVP keyboard matrix connector cannot be used,
+instead need to connect the keyboard matrix directly into the MECC
+card. MEC15xx card allows to use Fujitsu keyboard matrix.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>(4) Intel Tigerlake RVP UART connector cannot be used for EC serial
+logs. Use MECC USB instead.</p>
 </div>
 </div>
 </div>
@@ -340,28 +417,25 @@ Add a blue wire from TP65 to J50.11 and from TP64 to J50.8</p>
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020 Intel Corporation
+        &#169; Copyright 2020 Intel Corporation.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

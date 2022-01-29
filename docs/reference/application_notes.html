@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Overview &mdash; Zephyr-based Embedded controller firmware 1.51 documentation</title>
+  <title>EC FW application notes &mdash; Zephyr-based Embedded controller firmware 1.51 documentation</title>
   
 
   
@@ -38,8 +38,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Getting started" href="getting_started.html" />
-    <link rel="prev" title="Embedded controller firmware documentation" href="../index.html" /> 
+    <link rel="next" title="EC support for Intel SoC Debug" href="soc_debug_awareness/index.html" />
+    <link rel="prev" title="EC support for Intel Download and Execute" href="dnx/index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,15 +90,15 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Documentation Home</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#repository-management">Repository Management</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="supported_hw.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">EC FW application modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="application_notes.html">EC FW application notes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">EC FW application notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="soc_debug_awareness/index.html">EC support for Intel SoC Debug</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_kscan/index.html">Add custom keyboard matrix</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -147,13 +147,13 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Overview</li>
+      <li>EC FW application notes</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/reference/overview.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/reference/application_notes.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -166,41 +166,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="overview">
-<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
-<p>The Embedded Controller firmware (EC) in a system, handles various low-level tasks
-not performed by the operating system like board power sequencing, battery
-management, thermal management, keyboard management, LAN, PCIe reset etc.</p>
-<p>Intel Basic Embedded Controller firmware provides reference code with a subset
-of such capabilities.</p>
-<img alt="../_images/embedded_controller.png" class="align-center" src="../_images/embedded_controller.png" />
-<p>IA system designers, OEMs can leverage the Intel open source EC FW code to use
-as a base and customize for the system requirements.
-The reference code covers all the basic EC functionality required to boot
-Enhanced Serial Peripheral Interface (eSPI) enabled platforms.”</p>
-<p>The reference code will also demonstrate the 3rd party microcontroller role in
-common platform boot sequence as well as the interaction with Intel BIOS.
-Finally, it showcases the management of PC peripherals such as PS/2 devices
-and matrix keyboards.</p>
-<a class="reference internal image-reference" href="../_images/ecfw_zephyr_overview.png"><img alt="../_images/ecfw_zephyr_overview.png" class="align-center" src="../_images/ecfw_zephyr_overview.png" style="width: 600px;" /></a>
-<div class="section" id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
-<p>The reference embedded controller firmware is based on <a class="reference external" href="https://www.zephyrproject.org/">Zephyr RTOS</a>, this
-repository contains only the application source code as depicted below,
-so it must be combined with Zephyr RTOS and the respective EC SoC Board Support
-Package (BSP) and Hardware Abstraction Layer (HAL).</p>
-<a class="reference internal image-reference" href="../_images/ecfw_zephyr_modules.png"><img alt="../_images/ecfw_zephyr_modules.png" class="align-center" src="../_images/ecfw_zephyr_modules.png" style="width: 600px;" /></a>
-</div>
-<div class="section" id="repository-management">
-<h2>Repository Management<a class="headerlink" href="#repository-management" title="Permalink to this headline">¶</a></h2>
-<p>In order to manage the combination of the above repositories and versions, this
-project uses <a class="reference external" href="https://docs.zephyrproject.org/latest/guides/west/">Zephyr’s west</a> (Zephyr’s meta-tool).</p>
-<p>The main repository contains a manifest file (west.yml), that list all the
-dependencies and revisions required for each of the external projects.</p>
-<p>This means the main repo acts as the manifest repository.</p>
-<img alt="../_images/ecfw_zephyr_repos.png" class="align-center" src="../_images/ecfw_zephyr_repos.png" />
-<p>You can find additional information about the repository management and west
-manifest in <a class="reference external" href="https://docs.zephyrproject.org/latest/guides/west/manifest.html">Zephyr’s west manifest</a>.</p>
+  <div class="section" id="ec-fw-application-notes">
+<h1>EC FW application notes<a class="headerlink" href="#ec-fw-application-notes" title="Permalink to this headline">¶</a></h1>
+<p>The embedded controller firmware reference code allows for different extensions.
+These are disabled by default in most cases.</p>
+<p>Each extension is documented in its respective application note including
+main flows, implementation details and configuration options supported.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="soc_debug_awareness/index.html">EC support for Intel SoC Debug</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_kscan/index.html">Add custom keyboard matrix</a></li>
+</ul>
 </div>
 </div>
 

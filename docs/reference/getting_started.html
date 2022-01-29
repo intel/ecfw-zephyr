@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Getting started &mdash; Zephyr-based Embedded controller firmware 1.10 documentation</title>
+  <title>Getting started &mdash; Zephyr-based Embedded controller firmware 1.51 documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,7 +32,6 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -51,7 +53,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Zephyr-based Embedded controller firmware
+            <a href="../index.html" class="icon icon-home"> Zephyr-based Embedded controller firmware
           
 
           
@@ -61,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                1.51
               </div>
             
           
@@ -102,6 +104,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#getting-ec-fw-framework-code">Getting EC FW framework code</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#clone-main-repository">1) Clone main repository</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#obtain-the-dependencies">2) Obtain the dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#apply-back-ported-fixes">3) Apply back-ported fixes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#troubleshoot">Troubleshoot</a></li>
 </ul>
 </li>
@@ -116,6 +119,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="supported_hw.html">Supported Hardware</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">EC FW application modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="application_notes.html">EC FW application notes</a></li>
 </ul>
 
             
@@ -156,6 +160,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -167,7 +173,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../_sources/reference/getting_started.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -204,12 +210,12 @@ to apt-get wget, pip, git.</p>
 </div>
 <div class="section" id="setting-up-zephyr-environment">
 <h2>Setting Up Zephyr environment<a class="headerlink" href="#setting-up-zephyr-environment" title="Permalink to this headline">¶</a></h2>
-<p>Refer to the official <a class="reference external" href="https://docs.zephyrproject.org/2.3.0/getting_started/index.html">Zephyr’s Getting Started Guide</a> while reviewing
+<p>Refer to the official <a class="reference external" href="https://docs.zephyrproject.org/2.5.0/getting_started/index.html">Zephyr’s Getting Started Guide</a> while reviewing
 considerations below during each step.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>EC FW Open source 1.1 project is based on Zephyr v2.3 so need to
-refer to Zephyr v2.3 documentation and use Zephyr SDK 0.11.3.</p>
+<p>EC FW Open source 1.50 project is based on Zephyr v2.5 so need to
+refer to Zephyr v2.5 documentation and use Zephyr SDK 0.12.2.</p>
 </div>
 <div class="section" id="os-selection">
 <h3>1) OS selection<a class="headerlink" href="#os-selection" title="Permalink to this headline">¶</a></h3>
@@ -297,17 +303,17 @@ west init -l
 <tbody>
 <tr class="row-even"><td><p>zephyr</p></td>
 <td><p>zephyr_snapshot</p></td>
-<td><p>v2.3-branch</p></td>
+<td><p>v2.5-branch</p></td>
 <td><p><a class="reference external" href="https://github.com/zephyrproject-rtos/zephyr">https://github.com/zephyrproject-rtos/zephyr</a></p></td>
 </tr>
 <tr class="row-odd"><td><p>cmsis</p></td>
 <td><p>modules/hal/cmsis</p></td>
-<td><p>542b229</p></td>
+<td><p>c3bd209</p></td>
 <td><p><a class="reference external" href="https://github.com/zephyrproject-rtos/cmsis">https://github.com/zephyrproject-rtos/cmsis</a></p></td>
 </tr>
 <tr class="row-even"><td><p>hal_microchip</p></td>
 <td><p>modules/hal/microchip</p></td>
-<td><p>aad89bf</p></td>
+<td><p>a1ec761</p></td>
 <td><p><a class="reference external" href="https://github.com/zephyrproject-rtos/hal_microchip">https://github.com/zephyrproject-rtos/hal_microchip</a></p></td>
 </tr>
 </tbody>
@@ -323,6 +329,22 @@ west init -l
 <span class="o">|</span><span class="n">____zephyr_snapshot</span>         <span class="n">Snapshot</span> <span class="kn">from</span> <span class="nn">Zephyr</span> <span class="n">RTOS</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="apply-back-ported-fixes">
+<h3>3) Apply back-ported fixes<a class="headerlink" href="#apply-back-ported-fixes" title="Permalink to this headline">¶</a></h3>
+<p>Some additional patches are required to be applied to the Zephyr kernel
+for building the open source EC FW application. The latest release is based out
+of Zephyr v2.5 and hence these patches need to be applied on that branch.</p>
+<p>These patches are expected to be part of the future Zephyr releases (if
+they are not already integrated).</p>
+<p>Note: Below steps assume environment has been setup as indicated in the
+main Intel Open source EC FW documentation.</p>
+<p>1) Check out the main branch
+cd ecfw-zephyr
+git checkout master</p>
+<p>2) Apply zephyr patches on to the kernel branch
+cd ../ecfwwork/zephyr_fork
+git am ../../ecfw-zephyr/zephyr_patches/patches_v2_5.patch</p>
 </div>
 <div class="section" id="troubleshoot">
 <h3>Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permalink to this headline">¶</a></h3>
@@ -349,17 +371,33 @@ between them.</p>
 </div>
 <div class="section" id="build-ec-fw">
 <h3>2) Build EC FW<a class="headerlink" href="#build-ec-fw" title="Permalink to this headline">¶</a></h3>
-<p>Go back to ecfw-zephyr main folder and build the application and all its dependencies.</p>
+<p>Go back to ecfw-zephyr main folder and build the application and all its dependencies.
+Below commands indicate details for each board. See Supported hardware section
+for more details.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ~/sandbox/ecfw-zephyr
-west build -c -p auto -b mec1501modular_assy6885
+<span class="c1"># Building for ADL-S (on-board EC)</span>
+west build -c -p auto -b mec1501_adl
+
+<span class="c1"># Building for ADL-P (on-board EC)</span>
+west build -c -p auto -b mec1501_adl_p
+
+<span class="c1"># Building for TGL + MECC card (deprecated)</span>
+west build -c -p always -b mec1501modular_assy6885 -- -DCONFIG_MEC15XX_AIC_ON_TGL<span class="o">=</span>y
+
+<span class="c1"># Building for ADL-S + MECC card (i.e. mec15xx)</span>
+west build -c -p always -b mec1501modular_assy6885 -- -DCONFIG_MEC15XX_AIC_ON_TGL<span class="o">=</span>y
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Above builds EC FW for mec1501modular board, which is the only supported
-HW now. See Supported hardware section for more details.</p>
+<p>Additional EC vendors are enabling their MECC cards in Zephyr.
+Similar build is possible replacing -b &lt;modular board&gt;.</p>
 </div>
-<p>If build is successful, zephyr.bin and spi_image.bin will be generated.</p>
+<p>If build is successful, zephyr.bin and ksc.bin will be generated.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For modular cards this steps generates spi_image.bin instead.</p>
+</div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ls  ~/sandbox/ecfw-zephyr/build/zephyr/*.bin
 </pre></div>
 </div>
@@ -407,28 +445,25 @@ Dediprog. Refer to <a class="reference external" href="https://www.intel.com/con
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020 Intel Corporation
+        &#169; Copyright 2020 Intel Corporation.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

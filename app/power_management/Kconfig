@@ -1,0 +1,49 @@
+# Kconfig - Config options for EC FW power management module
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menu "Power management"
+
+config PWRMGMT
+	bool "Enable EC power management"
+	default y
+	help
+	  Indicate if EC supports power management this includes:
+	  1) ACPI spec system transitions to S3, S4, S5
+	  2) Intel-specific transitions to Sx sub-states during S3/S4/S5
+	  (deep Sx) and or transition to S0ix during S0 (deep sleep)
+
+config PWRMGMT_DEEPSX
+	bool "Enable system deep suspend support"
+	help
+	  Indicate if EC supports deep suspend process. Deep suspend refers
+	  to additional transition during S4, S5 states but reducing power
+	  further since EC loses either context or power.
+
+config PWRMGMT_DEEPSX_S3
+	bool "Support deep suspend during S3 transition"
+	depends on PWRMGMT_DEEPSX
+	help
+	  Indicate if deep suspend is supported in S3 transition in which case
+	  EC loses power.
+
+config PWRMGMT_PG3_EXIT_WAKE_FROM_SX
+	bool "Enable additional wake from Sx after PG3 Exit"
+	help
+	  For PG3 enabled system, when system exits PG3 and lands in Sx state,
+	  enabling this config option allows EC to trigger Sx wake.
+
+config PWRMGMT_DEEPSX_LOG_LEVEL
+	int "Power management deep sx log level"
+	depends on LOG
+	depends on PWRMGMT
+	default 0
+	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
+	help
+	  Set log level for power management module which includes Intel
+	  transitions into deep sx sub-states.
+
+endmenu

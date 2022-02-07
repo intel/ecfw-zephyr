@@ -324,9 +324,9 @@ west init -l
 </div>
 <p>Your directory structure should look like this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sandbox</span>
-<span class="o">|</span><span class="n">____ecfw</span><span class="o">-</span><span class="n">zephyr</span>             <span class="n">This</span> <span class="n">repository</span>
-<span class="o">|</span><span class="n">____modules</span>                 <span class="n">Zephyr</span> <span class="n">RTOS</span> <span class="n">modules</span> <span class="n">includes</span> <span class="n">EC</span> <span class="n">SoC</span> <span class="n">HAL</span>
-<span class="o">|</span><span class="n">____zephyr_snapshot</span>         <span class="n">Snapshot</span> <span class="kn">from</span> <span class="nn">Zephyr</span> <span class="n">RTOS</span>
+<span class="o">|</span><span class="n">____ecfw</span><span class="o">-</span><span class="n">zephyr</span>               <span class="n">This</span> <span class="n">repository</span>
+<span class="o">|</span><span class="n">____ecfwwork</span><span class="o">/</span><span class="n">modules</span>           <span class="n">Zephyr</span> <span class="n">RTOS</span> <span class="n">modules</span> <span class="n">includes</span> <span class="n">EC</span> <span class="n">SoC</span> <span class="n">HAL</span>
+<span class="o">|</span><span class="n">____ecfwwork</span><span class="o">/</span><span class="n">zephyr_snapshot</span>   <span class="n">Snapshot</span> <span class="kn">from</span> <span class="nn">Zephyr</span> <span class="n">RTOS</span>
 </pre></div>
 </div>
 </div>
@@ -339,12 +339,20 @@ of Zephyr v2.5 and hence these patches need to be applied on that branch.</p>
 they are not already integrated).</p>
 <p>Note: Below steps assume environment has been setup as indicated in the
 main Intel Open source EC FW documentation.</p>
-<p>1) Check out the main branch
-cd ecfw-zephyr
-git checkout master</p>
-<p>2) Apply zephyr patches on to the kernel branch
-cd ../ecfwwork/zephyr_fork
-git am ../../ecfw-zephyr/zephyr_patches/patches_v2_5.patch</p>
+<ol class="arabic simple">
+<li><p>Check out the main branch</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ecfw-zephyr
+git checkout master
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Apply zephyr patches on to the kernel branch</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ../ecfwwork/zephyr_fork
+git am ../../ecfw-zephyr/zephyr_patches/patches_v2_5.patch
+</pre></div>
+</div>
 </div>
 <div class="section" id="troubleshoot">
 <h3>Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permalink to this headline">¶</a></h3>

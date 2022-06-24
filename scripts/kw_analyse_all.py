@@ -1,4 +1,5 @@
 import urllib, urllib2, json, sys, os.path, getpass, time
+import ssl
 
 def getToken(host, port, user) :
    ltoken = os.path.normpath(os.path.expanduser("~/.klocwork/ltoken"))
@@ -37,7 +38,7 @@ def from_json(json_object) :
         return Issue(json_object)
     return json_object
 
-host = "klocwork-jf7.devtools.intel.com"
+host = "hf2skwapp002.ed.cps.intel.com"
 port = 8105
 user = "sys_kwzephyr"
 project = "basic-zephyr-ec"
@@ -48,10 +49,16 @@ loginToken = getToken(host, port, user)
 if loginToken is not None :
    values["ltoken"] = loginToken
 
+# New KW server has a SSL certificate issue
+# Until this is fixed, we need to disable verification
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
 values["query"] = "status:Analyze -status:Not a problem module:app"
 data = urllib.urlencode(values)
 req = urllib2.Request(url, data)
-response = urllib2.urlopen(req)
+response = urllib2.urlopen(req, context=ctx)
 
 try:
     f = open("kwloaddb.log", "wb")

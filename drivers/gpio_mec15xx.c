@@ -7,7 +7,9 @@
 #include <zephyr.h>
 #include <device.h>
 #include <errno.h>
+#ifndef CONFIG_PINCTRL
 #include <drivers/pinmux.h>
+#endif
 #include <logging/log.h>
 #include "gpio_ec.h"
 #include "common_mec1501.h"
@@ -22,14 +24,16 @@ struct gpio_device {
 	const struct device *port;
 };
 
+#ifndef CONFIG_PINCTRL
 static struct gpio_device pinmux_ports[] = {
-	{ DT_LABEL(DT_NODELABEL(pinmux_000_036)), NULL},
-	{ DT_LABEL(DT_NODELABEL(pinmux_040_076)), NULL},
-	{ DT_LABEL(DT_NODELABEL(pinmux_100_136)), NULL},
-	{ DT_LABEL(DT_NODELABEL(pinmux_140_176)), NULL},
-	{ DT_LABEL(DT_NODELABEL(pinmux_200_236)), NULL},
-	{ DT_LABEL(DT_NODELABEL(pinmux_240_276)), NULL},
+	{ "pinmux_000_036", DEVICE_DT_GET(DT_NODELABEL(pinmux_000_036)) },
+	{ "pinmux_040_076", DEVICE_DT_GET(DT_NODELABEL(pinmux_040_076)) },
+	{ "pinmux_100_136", DEVICE_DT_GET(DT_NODELABEL(pinmux_100_136)) },
+	{ "pinmux_140_176", DEVICE_DT_GET(DT_NODELABEL(pinmux_140_176)) },
+	{ "pinmux_200_236", DEVICE_DT_GET(DT_NODELABEL(pinmux_200_236)) },
+	{ "pinmux_240_276", DEVICE_DT_GET(DT_NODELABEL(pinmux_240_276)) },
 };
+#endif
 
 static struct gpio_device ports[] = {
 	{ DT_LABEL(DT_NODELABEL(gpio_000_036)), NULL},
@@ -128,17 +132,6 @@ int gpio_init(void)
 		}
 
 		ports[i].port = gpio_dev;
-		LOG_DBG("[Port %c] %p", (i+0x31), gpio_dev);
-	}
-
-	for (int i = 0; i < ARRAY_SIZE(pinmux_ports); i++) {
-		gpio_dev = device_get_binding(pinmux_ports[i].name);
-
-		if (!gpio_dev) {
-			LOG_ERR("Unable to find %s", pinmux_ports[i].name);
-		}
-
-		pinmux_ports[i].port = gpio_dev;
 		LOG_DBG("[Port %c] %p", (i+0x31), gpio_dev);
 	}
 
@@ -340,6 +333,8 @@ int gpio_force_configure_pin(uint32_t port_pin, gpio_flags_t flags)
 	}
 
 	port_idx = gpio_get_port(port_pin);
+
+#ifndef CONFIG_PINCTRL
 	LOG_WRN("%s pinmux port: %d pin: %d ", __func__, port_idx, pp.pin);
 	ret = pinmux_pin_set(pinmux_ports[port_idx].port, pp.pin,
 			     MCHP_GPIO_CTRL_MUX_F0);
@@ -354,6 +349,6 @@ int gpio_force_configure_pin(uint32_t port_pin, gpio_flags_t flags)
 		LOG_ERR("Failed to configure pin %d", pp.pin);
 		return ret;
 	}
-
+#endif
 	return 0;
 }

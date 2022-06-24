@@ -65,46 +65,22 @@ static const struct espi_saf_flash_cfg flash_w25qxxx = {
 				       BLOCK_ERASE_32K_OPCODE,
 				       BLOCK_ERASE_64K_OPCODE,
 				       PAGE_PROGRAM_OPCODE),
-#if (CONFIG_SAF_SPI_CAPACITY == 32)
-	.opc = MCHP_SAF_OPCODE_REG_VAL(FAST_READ_QUAD_IO_4BYTE_OPCODE,
+	.opc = MCHP_SAF_OPCODE_REG_VAL(FAST_READ_QUAD_IO_OPCODE,
 				       EXIT_QPI_OPCODE,
-				       UNKNOWN_OPCODE,
+				       CONTINUOUS_MODE_OPCODE,
 				       READ_STATUS_2_OPCODE),
-#elif (CONFIG_SAF_SPI_CAPACITY == 16)
-	.opc = MCHP_SAF_OPCODE_REG_VAL(FAST_READ_QUAD_IO_3BYTE_OPCODE,
-				       EXIT_QPI_OPCODE,
-				       UNKNOWN_OPCODE,
-				       READ_STATUS_2_OPCODE),
-#else
-#pragma error "Unsupported SPI capacity"
-#endif
 	.cont_prefix = 0U,
 	.cs_cfg_descr_ids = MCHP_CS0_CFG_DESCR_IDX_REG_VAL,
-#if (CONFIG_SAF_SPI_CAPACITY == 32)
-	.poll2_mask = MCHP_W25Q256_POLL2_MASK,
-	.flags = MCHP_FLASH_FLAG_ADDR32,
+	.poll2_mask = SAF_POLL_MASK,
+	.flags = SAF_FLAGS,
 	.descr = {
-		MCHP_W25Q256_CM_RD_D0,
-		MCHP_W25Q256_CM_RD_D1,
-		MCHP_W25Q256_CM_RD_D2,
-		MCHP_W25Q256_ENTER_CM_D0,
-		MCHP_W25Q256_ENTER_CM_D1,
-		MCHP_W25Q256_ENTER_CM_D2
+		SAF_DESCR_CM_RD_D0,
+		SAF_DESCR_CM_RD_D1,
+		SAF_DESCR_CM_RD_D2,
+		SAF_DESCR_ENTER_CM_D0,
+		SAF_DESCR_ENTER_CM_D1,
+		SAF_DESCR_ENTER_CM_D2
 	}
-#elif (CONFIG_SAF_SPI_CAPACITY == 16)
-	.poll2_mask = MCHP_W25Q128_POLL2_MASK,
-	.flags = 0,
-	.descr = {
-		MCHP_W25Q128_CM_RD_D0,
-		MCHP_W25Q128_CM_RD_D1,
-		MCHP_W25Q128_CM_RD_D2,
-		MCHP_W25Q128_ENTER_CM_D0,
-		MCHP_W25Q128_ENTER_CM_D1,
-		MCHP_W25Q128_ENTER_CM_D2
-	}
-#else
-#pragma "Unsupported SPI capacity"
-#endif
 };
 
 static const struct espi_saf_cfg saf_cfg = {
@@ -115,8 +91,8 @@ static const struct espi_saf_cfg saf_cfg = {
 		.qmspi_cpha = MCHP_SAF_HW_CFG_FLAG_CPHA,
 		.flags = 0,
 		.generic_descr = {
-			MCHP_SAF_EXIT_CM_DESCR12,
-			MCHP_SAF_EXIT_CM_DESCR13,
+			SAF_DESCR_EXIT_CM12,
+			SAF_DESCR_EXIT_CM13,
 			MCHP_SAF_POLL_DESCR14,
 			MCHP_SAF_POLL_DESCR15
 		},

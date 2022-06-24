@@ -16,7 +16,6 @@
 #include "system.h"
 #include "acpi.h"
 #include "board_config.h"
-#include "mec_cpu.h"
 #include "fan.h"
 #include "scicodes.h"
 

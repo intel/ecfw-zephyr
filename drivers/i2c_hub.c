@@ -9,7 +9,7 @@
 #include <drivers/i2c.h>
 #include "board_config.h"
 #include <logging/log.h>
-LOG_MODULE_REGISTER(i2c_hub, CONFIG_I2C_LOG_LEVEL);
+LOG_MODULE_REGISTER(i2c_hub, CONFIG_I2C_HUB_LOG_LEVEL);
 
 
 struct i2c_hub_struct {
@@ -33,6 +33,13 @@ static struct i2c_dev_inst i2c_inst[] = {
 		/* Fast speed - 400kHz */
 		.speed = I2C_SPEED_FAST,
 	},
+#ifdef I2C_BUS_2
+	{
+		.i2c_inst = I2C_BUS_2,
+		/* Standard speed - 100kHz */
+		.speed = I2C_SPEED_STANDARD,
+	},
+#endif
 };
 
 #define NUM_OF_I2C_BUS		ARRAY_SIZE(i2c_inst)

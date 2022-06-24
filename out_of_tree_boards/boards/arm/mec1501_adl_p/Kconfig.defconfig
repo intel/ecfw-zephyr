@@ -40,30 +40,10 @@ config SYS_CLOCK_TICKS_PER_SEC
 
 endif # RTOS_TIMER
 
-if PS2
-
-config PS2_XEC_0
-	default y
-
-config PS2_XEC_1
-	default y
-
-endif # PS2
-
 if SPI
 
 config SPI_XEC_QMSPI
 	default y
-
-if SPI_XEC_QMSPI
-
-config SPI_0
-	default y
-
-config SPI_0_OP_MODES
-	default 1
-
-endif # SPI_XEC_QMSPI
 
 endif # SPI
 

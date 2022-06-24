@@ -84,19 +84,19 @@ void led_init(enum led_num idx)
 	if (idx == LED2) {
 
 #if DT_NODE_HAS_STATUS(BAT_LED2, okay)
-		led_dev[LED2] = device_get_binding(DT_PWMS_LABEL(BAT_LED2));
+		led_dev[LED2] = DEVICE_DT_GET(DT_PWMS_CTLR(BAT_LED2));
 #endif
-		if (!led_dev[LED2]) {
+		if (!device_is_ready(led_dev[LED2])) {
 			LOG_WRN("No LED device");
 		}
 
 	} else if (idx == LED_KBD_BKLT) {
 
 #if DT_NODE_HAS_STATUS(KBD_BKLT_LED, okay)
-		led_dev[LED_KBD_BKLT] = device_get_binding(
-				DT_PWMS_LABEL(KBD_BKLT_LED));
+		led_dev[LED_KBD_BKLT] =
+			DEVICE_DT_GET(DT_PWMS_CTLR(KBD_BKLT_LED));
 #endif
-		if (!led_dev[LED_KBD_BKLT]) {
+		if (!device_is_ready(led_dev[LED_KBD_BKLT])) {
 			LOG_WRN("No KBD BKLT LED device");
 		}
 	}

@@ -162,62 +162,51 @@ static int board_pinmux_init(const struct device *dev)
 
 #if DT_NODE_HAS_STATUS(DT_NODELABEL(pinmux_000_036), okay)
 	const struct device *porta =
-		device_get_binding(DT_LABEL(DT_NODELABEL(pinmux_000_036)));
+			DEVICE_DT_GET(DT_NODELABEL(pinmux_000_036));
 
-	if (!porta) {
-		return -ENODEV;
-	}
+	__ASSERT_NO_MSG(device_is_ready(porta));
 
 	pinmux_ports.porta = porta;
 #endif
 #if DT_NODE_HAS_STATUS(DT_NODELABEL(pinmux_040_076), okay)
 	const struct device *portb =
-		device_get_binding(DT_LABEL(DT_NODELABEL(pinmux_040_076)));
+			DEVICE_DT_GET(DT_NODELABEL(pinmux_040_076));
 
-	if (!portb) {
-		return -ENODEV;
-	}
+	__ASSERT_NO_MSG(device_is_ready(portb));
 
 	pinmux_ports.portb = portb;
 #endif
 #if DT_NODE_HAS_STATUS(DT_NODELABEL(pinmux_100_136), okay)
 	const struct device *portc =
-		device_get_binding(DT_LABEL(DT_NODELABEL(pinmux_100_136)));
+			DEVICE_DT_GET(DT_NODELABEL(pinmux_100_136));
 
-	if (!portc) {
-		return -ENODEV;
-	}
+	__ASSERT_NO_MSG(device_is_ready(portc));
 
 	pinmux_ports.portc = portc;
 #endif
 #if DT_NODE_HAS_STATUS(DT_NODELABEL(pinmux_140_176), okay)
 	const struct device *portd =
-		device_get_binding(DT_LABEL(DT_NODELABEL(pinmux_140_176)));
+			DEVICE_DT_GET(DT_NODELABEL(pinmux_140_176));
 
-	if (!portd) {
-		return -ENODEV;
-	}
+	__ASSERT_NO_MSG(device_is_ready(portd));
 
 	pinmux_ports.portd = portd;
 #endif
 #if DT_NODE_HAS_STATUS(DT_NODELABEL(pinmux_200_236), okay)
 	const struct device *porte =
-		device_get_binding(DT_LABEL(DT_NODELABEL(pinmux_200_236)));
+			DEVICE_DT_GET(DT_NODELABEL(pinmux_200_236));
 
-	if (!porte) {
-		return -ENODEV;
-	}
+	__ASSERT_NO_MSG(device_is_ready(porte));
 
 	pinmux_ports.porte = porte;
 #endif
 #if DT_NODE_HAS_STATUS(DT_NODELABEL(pinmux_240_276), okay)
 	const struct device *portf =
-		device_get_binding(DT_LABEL(DT_NODELABEL(pinmux_240_276)));
-	pinmux_ports.portf = portf;
+			DEVICE_DT_GET(DT_NODELABEL(pinmux_240_276));
 
-	if (!portf) {
-		return -ENODEV;
-	}
+	__ASSERT_NO_MSG(device_is_ready(portf));
+
+	pinmux_ports.portf = portf;
 #endif
 
 	/* Configure GPIO bank before usage
@@ -336,7 +325,7 @@ static int board_pinmux_init(const struct device *dev)
 	pinmux_pin_set(portb, MCHP_GPIO_073, MCHP_GPIO_CTRL_MUX_F1);
 #endif
 
-#ifdef CONFIG_PS2_XEC_0
+#if DT_NODE_HAS_STATUS(DT_NODELABEL(ps2_0), okay)
 	/* Set muxing for PS20B*/
 	mchp_pcr_periph_slp_ctrl(PCR_PS2_0, MCHP_PCR_SLEEP_DIS);
 	pinmux_pin_set(porta, MCHP_GPIO_007, MCHP_GPIO_CTRL_MUX_F2 |
@@ -345,7 +334,7 @@ static int board_pinmux_init(const struct device *dev)
 		       MCHP_GPIO_CTRL_BUFT_OPENDRAIN);
 #endif
 
-#ifdef CONFIG_PS2_XEC_1
+#if DT_NODE_HAS_STATUS(DT_NODELABEL(ps2_1), okay)
 	/* Set muxing for PS21B*/
 	mchp_pcr_periph_slp_ctrl(PCR_PS2_1, MCHP_PCR_SLEEP_DIS);
 	pinmux_pin_set(portd, MCHP_GPIO_154, MCHP_GPIO_CTRL_MUX_F2 |

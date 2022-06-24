@@ -634,7 +634,7 @@ static void mouse_callback(uint8_t data)
 static void mtx_keyboard_callback(uint8_t *data, uint8_t len)
 {
 
-	if (cmdbyte_kbd_enabled()) {
+	if (cmdbyte_kbd_enabled() && !kbs_is_hotkey_detected()) {
 		for (int i = 0; i < len; i++) {
 			send_kb_to_host(data[i]);
 		}

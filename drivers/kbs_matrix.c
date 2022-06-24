@@ -18,6 +18,7 @@
 #include "kbs_boot_keyseq.h"
 #endif
 #include <logging/log.h>
+#include <memops.h>
 LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 
 static const struct device *kscan_dev;
@@ -53,6 +54,9 @@ static uint8_t typematic_period_idx;
 /* Delay index before repeating a key
  */
 static uint8_t typematic_delay_idx;
+
+/* Detect Hotkey press event*/
+bool hotkey_detected;
 
 /* Typematic rate and delay values correspond to the data passed after
  * the F3 command (See the 8042 spec online). The typematic rate is calulated
@@ -401,6 +405,11 @@ void kbs_keyboard_set_default(void)
 	kbs_keyboard_enable();
 }
 
+bool kbs_is_hotkey_detected(void)
+{
+	return hotkey_detected;
+}
+
 /* This function excludes Fn because it does not produce any scan code */
 static void update_modifier_keys(uint8_t key_num, bool pressed)
 {
@@ -672,6 +681,7 @@ static void make_key(uint8_t key_num)
 {
 	struct scan_code sc2;
 
+	memsets(&sc2, 0, sizeof(sc2));
 	sc2.typematic = false;
 
 	/* Stop if we are in a current typematic state and
@@ -698,10 +708,12 @@ static void make_key(uint8_t key_num)
 		} else {
 			/* Send an SCI. Remember to add 0x80 for SCI break*/
 			LOG_DBG("Sci %x", data.sci_code);
+			hotkey_detected = true;
 			g_acpi_tbl.acpi_hotkey_scan = data.sci_code;
 			enqueue_sci(SCI_HOTKEY);
 		}
 	} else { /* Handle ordinary key presses, qwerty keys + numlock */
+		hotkey_detected = false;
 		get_scan_code(key_num, &sc2, true);
 	}
 
@@ -739,6 +751,7 @@ static void break_key(uint8_t key_num)
 	struct scan_code sc2;
 	struct scan_code break_code;
 
+	memsets(&sc2, 0, sizeof(sc2));
 	sc2.typematic = false;
 
 	k_timer_stop(&typematic_timer);

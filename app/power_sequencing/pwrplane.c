@@ -33,6 +33,7 @@
 #include "pwrseq_timeouts.h"
 #include "errcodes.h"
 #include "vci.h"
+#include "fan.h"
 #include "kbchost.h"
 #include "task_handler.h"
 #include "softstrap.h"
@@ -140,10 +141,13 @@ static void pwrseq_slp_handler(uint32_t signal, uint32_t status)
 		switch (current_state) {
 		case SYSTEM_S0_STATE:
 			if (signal == ESPI_VWIRE_SIGNAL_SLP_S3) {
+				LOG_DBG("SLP S3 asserted");
 				next_state = SYSTEM_S3_STATE;
 			} else if (signal == ESPI_VWIRE_SIGNAL_SLP_S4) {
+				LOG_DBG("SLP S4 asserted");
 				next_state = SYSTEM_S4_STATE;
 			} else if (signal == ESPI_VWIRE_SIGNAL_SLP_S5) {
+				LOG_DBG("SLP S5 asserted");
 				next_state = SYSTEM_S5_STATE;
 			}
 			break;
@@ -153,13 +157,10 @@ static void pwrseq_slp_handler(uint32_t signal, uint32_t status)
 	}
 }
 
-/* This is required since workaround for DeepSx is not yet removed
- * Even if DSx is enabled, the ACK is not send from deepsx module
- */
 static void pwrseq_sus_handler(uint8_t status)
 {
-	if (!dsw_enabled() || current_state == SYSTEM_G3_STATE ||
-		!dsx_entered()) {
+	/*For PG3, send SUS ACK for SUS WARN*/
+	if (!dsw_enabled()) {
 		LOG_DBG("Send ACK SUS WARN %d", status);
 		espihub_send_vw(ESPI_VWIRE_SIGNAL_SUS_ACK, status);
 	}
@@ -381,6 +382,7 @@ static inline int pwrseq_task_init(void)
 #ifdef CONFIG_DNX_SUPPORT
 	dnx_handle_early_handshake();
 #endif
+
 	/* In MAF mode, manually send the SUS_ACK if automatic ACK
 	 * is diabled in the espi driver. This is because the SUS_WARN
 	 * isr event arrives before the ESPI callbacks are configured
@@ -433,6 +435,7 @@ static void pwrseq_update(void)
 	case SYSTEM_S4_STATE:
 	case SYSTEM_S5_STATE:
 		if (current_state == SYSTEM_S0_STATE) {
+			LOG_DBG("Calling power_off");
 			power_off();
 			valid_sx_transition = true;
 		}
@@ -487,6 +490,11 @@ static void pwrpln_check_power_critical_levels(void)
 	gpio_write_pin(PM_BATLOW, (power_good) ? 1 : 0);
 }
 
+void set_next_state_to_S5(void)
+{
+	next_state = SYSTEM_S5_STATE;
+}
+
 void pwrseq_thread(void *p1, void *p2, void *p3)
 {
 	int level;
@@ -519,6 +527,7 @@ void pwrseq_thread(void *p1, void *p2, void *p3)
 			}
 		}
 		g_pwrflags.pm_rsmrst = level;
+
 		gpio_write_pin(PM_RSMRST, level);
 
 		/* Update AC present ACPI flag */
@@ -532,6 +541,7 @@ void pwrseq_thread(void *p1, void *p2, void *p3)
 		}
 
 		if (g_pwrflags.turn_pwr_off) {
+			LOG_DBG("turn_pwr_off true");
 			next_state = SYSTEM_S5_STATE;
 			/* Indicate power button request has been processed */
 			g_pwrflags.turn_pwr_off = 0;
@@ -630,7 +640,6 @@ static void power_off(void)
 	LOG_DBG("Shutting down %d", level);
 	do {
 		level = gpio_get_pin(PWRBTN_EC_IN_N);
-		LOG_DBG("PWR_RST_STS  %x", PCR_REGS->PWR_RST_STS);
 	} while (!level);
 
 	port80_display_off();
@@ -638,6 +647,7 @@ static void power_off(void)
 	gpio_write_pin(EC_PWRBTN_LED, LOW);
 	LOG_DBG("Power off complete");
 }
+
 
 static int power_on(void)
 {
@@ -656,6 +666,7 @@ static int power_on(void)
 	ret = wait_for_pin(RSMRST_PWRGD,
 			   RSMRST_PWRDG_TIMEOUT, 1);
 	if (ret) {
+		LOG_ERR("RSMRST_PWRGD timeout");
 		pwrseq_error(ERR_RSMRST_PWRGD);
 		return ret;
 	}
@@ -682,14 +693,18 @@ static int power_on(void)
 		return ret;
 	}
 
+
+	LOG_DBG("Waiting for ALL_SYS_PWRGD to go HIGH");
 	ret = wait_for_pin(ALL_SYS_PWRGD,
 			   TIMEOUT_TO_US(sw_strps()->timeouts.all_sys_pwrg),
 			   1);
 	if (ret) {
 		pwrseq_error(ERR_ALL_SYS_PWRGD);
+		LOG_ERR("ALL_SYS_PWRGD timed out\n");
 		return ret;
 	}
 
+	LOG_DBG("ALL_SYS_PWRGD is HIGH");
 	k_busy_wait(VR_ON_RAMP_DELAY_US);
 
 #ifdef VCCST_PWRGD

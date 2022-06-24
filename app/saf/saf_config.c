@@ -255,3 +255,13 @@ int initialize_saf_bridge(void)
 
 	return 0;
 }
+
+int saf_write_flash(struct espi_saf_packet *pckt)
+{
+	return espi_saf_flash_write(saf_dev, pckt);
+}
+
+int saf_erase_flash(struct espi_saf_packet *pckt)
+{
+	return espi_saf_flash_erase(saf_dev, pckt);
+}

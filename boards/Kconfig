@@ -27,6 +27,7 @@ config ATX_SUPPORT
 choice
 	prompt "Select Intel RVP when using EC modular card"
 	default MEC15XX_AIC_ON_ADL_S if BOARD_MEC1501MODULAR_ASSY6885
+	default MEC172X_AIC_ON_ADL_P if BOARD_MEC172XMODULAR_ASSY6930
 	help
 	  Select Intel RVP and modular card combination to be used.
 	  This is required since some peripherals an MECC connector pin
@@ -40,6 +41,24 @@ choice
 		depends on BOARD_MEC1501MODULAR_ASSY6885
 		bool "Use TGL RVP with MECC card"
 
+	config MEC15XX_AIC_ON_ICL
+		depends on BOARD_MEC1501MODULAR_ASSY6885
+		bool "Allow to use ICL with MECC card"
+
+	config MEC172X_AIC_ON_ADL_P
+		depends on BOARD_MEC172XMODULAR_ASSY6930
+		bool "Use ADL-P with MEC17xx card"
+
+	config MEC172X_AIC_ON_ADL_S
+		depends on BOARD_MEC172XMODULAR_ASSY6930
+		bool "Allow to use ADL-S with MECC172x card"
+
 endchoice
+
+config MEC172X_AIC_HW_REV2
+	bool "Use MEC172x HW revision 2"
+	depends on BOARD_MEC172XMODULAR_ASSY6930
+	help
+	  Use MEC172x HW rev 2 gpio configuration
 
 endmenu

@@ -10,10 +10,16 @@
 #include "common_mec1501.h"
 #include "mec15xx_aic_defs.h"
 
-#if CONFIG_MEC15XX_AIC_ON_TGL
+#ifdef CONFIG_MEC15XX_AIC_ON_ICL
+#include "icl_mec1501.h"
+#elif CONFIG_MEC15XX_AIC_ON_TGL
 #include "tgl_mec1501.h"
 #elif CONFIG_MEC15XX_AIC_ON_ADL_S
 #include "mec15xx_aic_on_adl_s.h"
+#elif CONFIG_MEC15XX_AIC_ON_ADL_P
+#include "mec15xx_aic_on_adl_p.h"
+#else
+#error "No RVP supported"
 #endif
 
 

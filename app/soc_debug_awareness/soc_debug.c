@@ -16,7 +16,7 @@
 LOG_MODULE_REGISTER(soc_debug, CONFIG_PWRMGT_LOG_LEVEL);
 
 #ifdef CONFIG_SOC_DEBUG_CONSENT_GPIO
-struct k_delayed_work sampling_work;
+struct k_work_delayable sampling_work;
 static bool sampled;
 
 static void soc_debug_sampling_work_handler(struct k_work *work)
@@ -51,10 +51,10 @@ void soc_debug_init(void)
 
 #ifdef CONFIG_SOC_DEBUG_CONSENT_GPIO
 	sampled = false;
-	k_delayed_work_init(&sampling_work, soc_debug_sampling_work_handler);
+	k_work_init_delayable(&sampling_work, soc_debug_sampling_work_handler);
 
 #ifndef CONFIG_POWER_SEQUENCE_DISABLE_TIMEOUTS
-	k_delayed_work_submit(&sampling_work,
+	k_work_schedule(&sampling_work,
 			      K_MSEC(CONFIG_SOC_GPIO_VALID_AFTER_MS));
 #endif /* CONFIG_POWER_SEQUENCE_DISABLE_TIMEOUTS */
 
@@ -71,7 +71,7 @@ void soc_debug_reset(void)
 	/* Required whenever eSPI reset or other condition requires*/
 	if (sampled) {
 		sampled = false;
-		k_delayed_work_submit(&sampling_work,
+		k_work_schedule(&sampling_work,
 			      K_MSEC(CONFIG_SOC_GPIO_VALID_AFTER_MS));
 	}
 #endif /* SOC_DEBUG_CONSENT_GPIO */

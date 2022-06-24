@@ -175,7 +175,6 @@ static void detect_peci_over_espi_mode(void)
 	en = PECI_OVER_ESPI_MODE;
 #else
 #ifdef PECI_OVER_ESPI
-
 	if (gpio_read_pin(PECI_OVER_ESPI) == 0) {
 		en = PECI_OVER_ESPI_MODE;
 	}
@@ -324,7 +323,7 @@ static int peci_exec_transfer(struct peci_msg *msg)
 	uint8_t rd_len = msg->rx_buffer.len;
 
 	k_mutex_lock(&trans_mutex, K_FOREVER);
-	if (!peci_initialized) {
+	if (!peci_initialized && !is_peci_over_espi_en()) {
 		LOG_ERR("PECI not initialized");
 		k_mutex_unlock(&trans_mutex);
 		return -ENODEV;
@@ -365,7 +364,7 @@ static int peci_exec_transfer_retry(struct peci_msg *msg)
 	uint8_t peci_resp = 0;
 
 	k_mutex_lock(&trans_mutex, K_FOREVER);
-	if (!peci_initialized) {
+	if (!peci_initialized && !is_peci_over_espi_en()) {
 		LOG_ERR("PECI not initialized");
 		k_mutex_unlock(&trans_mutex);
 		return -ENODEV;

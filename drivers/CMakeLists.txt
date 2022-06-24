@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-target_sources_ifdef(CONFIG_ESPI_PERIPHERAL_8042_KBC app
+target_sources_ifdef(CONFIG_PS2_KEYBOARD_AND_MOUSE app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/ps2kbaux.c
     PUBLIC
@@ -68,11 +68,26 @@ target_sources(app
 
 target_sources_ifdef(CONFIG_SOC_FAMILY_MEC app
     PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/led.c
+    PUBLIC
+    )
+
+target_sources_ifdef(CONFIG_SOC_SERIES_MEC1501X app
+    PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/gpio_mec15xx.c
     ${CMAKE_CURRENT_LIST_DIR}/fan_mec15xx.c
-    ${CMAKE_CURRENT_LIST_DIR}/led.c
-    ${CMAKE_CURRENT_LIST_DIR}/vci.c
+    ${CMAKE_CURRENT_LIST_DIR}/vci_mec15xx.c
     ${CMAKE_CURRENT_LIST_DIR}/acpi_mec15xx.c
+    PUBLIC
+    )
+
+target_sources_ifdef(CONFIG_SOC_SERIES_MEC172X app
+    PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/gpio_mec15xx.c
+    ${CMAKE_CURRENT_LIST_DIR}/fan_mec15xx.c
+    # Require Soc-HW access via device tree
+    ${CMAKE_CURRENT_LIST_DIR}/vci_mec172x.c
+    ${CMAKE_CURRENT_LIST_DIR}/acpi_mec172x.c
     PUBLIC
     )
 

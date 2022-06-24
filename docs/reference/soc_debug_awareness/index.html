@@ -332,13 +332,13 @@ system is powered up and allows other EC modules to query about any occurrence.
 Second item disables the EC WDT whenever then predefined hotkey is detected.
 Finally, last item indicate which key will be used. i.e., ALT + SHIFT + ‘D’</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef CONFIG_POWER_SEQUENCE_DISABLE_TIMEOUT_HOTKEY</span>
-<span class="w">     </span><span class="cm">/* Check if key already detected */</span><span class="w"></span>
-<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">pwreq_timeout_disabled</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"></span>
-<span class="w">         </span><span class="n">kbs_keyseq_boot_detect</span><span class="p">(</span><span class="n">KEYSEQ_TIMEOUT</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w"> </span><span class="n">pwrseq_timeout_disabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
-<span class="w"> </span><span class="n">LOG_WRN</span><span class="p">(</span><span class="s">&quot;EC timeout disabled via kbs&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="w"> </span><span class="cp">#endif</span>
+     <span class="cm">/* Check if key already detected */</span>
+     <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pwreq_timeout_disabled</span> <span class="o">&amp;&amp;</span>
+         <span class="n">kbs_keyseq_boot_detect</span><span class="p">(</span><span class="n">KEYSEQ_TIMEOUT</span><span class="p">))</span> <span class="p">{</span>
+ <span class="n">pwrseq_timeout_disabled</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+ <span class="n">LOG_WRN</span><span class="p">(</span><span class="s">&quot;EC timeout disabled via kbs&quot;</span><span class="p">);</span>
+ <span class="p">}</span>
+ <span class="cp">#endif</span>
 </pre></div>
 </div>
 <img alt="../../_images/soc_debug_consent_kbm_flow.png" class="align-center" src="../../_images/soc_debug_consent_kbm_flow.png" />

@@ -204,13 +204,9 @@ card. Refer to <a class="reference external" href="https://www.intel.com/content
 <td><p>RVP (on-board EC)</p></td>
 <td><p>Recommended</p></td>
 </tr>
-<tr class="row-even"><td><p>Alderlake S</p></td>
+<tr class="row-even"><td><p>Alderlake P</p></td>
 <td><p>RVP + MECC card</p></td>
-<td><p>Enable other EC vendors</p></td>
-</tr>
-<tr class="row-odd"><td><p>Tigerlake</p></td>
-<td><p>RVP + MECC card</p></td>
-<td><p>Deprecated</p></td>
+<td><p>Enable other EC vendor</p></td>
 </tr>
 </tbody>
 </table>
@@ -260,7 +256,7 @@ by the app. This is an important delegation to BSP’s where generic app pins
 are not configured.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>For current supported HW, see boards/arm/mec15xx/pinmux.c</p>
+<p>For current supported HW via MECC card, see boards folder.</p>
 </div>
 <p>When a pin is intended to be controlled by the EC FW framework it should be
 mapped under boardname_chipversion.h to corresponding Zephyr GPIO port and pin.</p>
@@ -293,18 +289,21 @@ vendors to adhere to the spec allowing more consistency.</p>
 card. Refer to table below for guidance about what can be verified end-to-end.</p>
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 26%" />
-<col style="width: 38%" />
-<col style="width: 16%" />
-<col style="width: 10%" />
-<col style="width: 10%" />
+<col style="width: 25%" />
+<col style="width: 37%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Area</p></th>
 <th class="head"><p>Feature</p></th>
-<th class="head"><p>TGL + MECC</p></th>
-<th class="head"><p>ADL-S</p></th>
-<th class="head"><p>ADL-P</p></th>
+<th class="head"><p>ADL-P +
+MEC172x</p></th>
+<th class="head"><p>ADL-S
+onboard</p></th>
+<th class="head"><p>ADL-P
+onboard</p></th>
 </tr>
 </thead>
 <tbody>
@@ -316,82 +315,94 @@ card. Refer to table below for guidance about what can be verified end-to-end.</
 </tr>
 <tr class="row-odd"><td></td>
 <td><p>Deep sleep (DSx)</p></td>
-<td><p>Yes</p></td>
-<td><p>Yes</p></td>
-<td><p>Yes</p></td>
-</tr>
-<tr class="row-even"><td></td>
-<td><p>SAF</p></td>
 <td><p>No</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-odd"><td><p>Human interface</p></td>
+<tr class="row-even"><td></td>
+<td><p>Pseudo G3</p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p>SAF</p></td>
+<td><p>No (1)</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>Human interface</p></td>
 <td><p>Volume buttons</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-even"><td></td>
+<tr class="row-odd"><td></td>
 <td><p>Power button</p></td>
-<td><p>Yes (1)</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-odd"><td></td>
+<tr class="row-even"><td></td>
 <td><p>Home button</p></td>
 <td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-even"><td></td>
+<tr class="row-odd"><td></td>
 <td><p>Lid switch</p></td>
 <td><p>No</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-odd"><td><p>PS2/ scan matrix</p></td>
-<td><p>PS2 keyboard</p></td>
+<tr class="row-even"><td><p>Thermal</p></td>
+<td><p>CPU temperature reading</p></td>
 <td><p>Yes</p></td>
-<td><p>No</p></td>
-<td><ol class="arabic simple" start="2">
-<li></li>
-</ol>
-</td>
-</tr>
-<tr class="row-even"><td></td>
-<td><p>PS2 mouse</p></td>
 <td><p>Yes</p></td>
-<td><p>No</p></td>
-<td><ol class="arabic simple" start="2">
-<li></li>
-</ol>
-</td>
+<td><p>Yes</p></td>
 </tr>
 <tr class="row-odd"><td></td>
+<td><p>Fan control</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>PS2/ scan matrix</p></td>
+<td><p>PS2 keyboard</p></td>
+<td><p>No (1)</p></td>
+<td><p>No</p></td>
+<td><p>No (2)</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p>PS2 mouse</p></td>
+<td><p>No (1)</p></td>
+<td><p>No</p></td>
+<td><p>Yes(2)</p></td>
+</tr>
+<tr class="row-even"><td></td>
 <td><p>Keyboard matrix</p></td>
 <td><p>Yes (3)</p></td>
 <td><p>No</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-even"><td><p>Debug</p></td>
+<tr class="row-odd"><td><p>Debug</p></td>
 <td><p>Port 80</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
 </tr>
-<tr class="row-odd"><td></td>
+<tr class="row-even"><td></td>
 <td><p>Serial port (UART)</p></td>
 <td><p>Yes (4)</p></td>
-<td colspan="2"><p>Yes   | Yes</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
 </tr>
 </tbody>
 </table>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>(1) Rework on MECC card is required to align to more common configuration
-in Intel RVP boards for power button.
-Add a blue wire from TP65 to J50.11 and from TP64 to J50.8</p>
+<p>(1) MEC172x HW revision does not allow to exercise PS2 nor SAF,
+but future MEC172x HW revision 2 will support it.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -400,13 +411,13 @@ Add a blue wire from TP65 to J50.11 and from TP64 to J50.8</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>(3) Intel Tigerlake RVP keyboard matrix connector cannot be used,
+<p>(3) Intel Alderlake RVP keyboard matrix connector cannot be used,
 instead need to connect the keyboard matrix directly into the MECC
 card. MEC15xx card allows to use Fujitsu keyboard matrix.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>(4) Intel Tigerlake RVP UART connector cannot be used for EC serial
+<p>(4) Intel Alderlake RVP UART connector cannot be used for EC serial
 logs. Use MECC USB instead.</p>
 </div>
 </div>

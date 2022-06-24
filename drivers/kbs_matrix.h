@@ -73,6 +73,13 @@ void kbs_keyboard_disable(void);
  */
 void kbs_keyboard_set_default(void);
 
+/**
+ * @brief Detecting Hotkey press event.
+ * This routine allows to detect the hotkey press event from kscan driver
+ * @retval 1 on success.
+ **/
+bool kbs_is_hotkey_detected(void);
+
 #ifdef CONFIG_EARLY_KEY_SEQUENCE_DETECTION
 /**
  * @brief Check if any of supported hot key sequences was held at boot.

@@ -133,6 +133,20 @@ config LED_LOG_LEVEL
 	help
 	  Set log level for led driver.
 
+config SPI_NOR_FLASH_LOG_LEVEL
+	int "SPI NOR Flash driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for SPI NOR Flash driver.
+
+config I2C_HUB_LOG_LEVEL
+	int "I2C hub driver log level"
+	depends on LOG
+	default 2
+	help
+	  Set log level for i2c hub driver.
+
 endmenu
 
 menu "EC optional drivers logging control"

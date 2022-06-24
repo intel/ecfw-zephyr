@@ -81,7 +81,6 @@ static void pseudo_g3_enter(void)
 		LOG_DBG("Can not enter Pseudo G3 until sus_pwrdn_ack asserted");
 		return;
 	}
-
 	/* drive Hw signal to enter PG3 */
 	gpio_write_pin(PM_DS3, 1);
 	k_msleep(10);

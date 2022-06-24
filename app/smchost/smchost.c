@@ -22,6 +22,7 @@
 #ifdef CONFIG_DNX_SUPPORT
 #include "dnx.h"
 #endif
+
 LOG_MODULE_REGISTER(smchost, CONFIG_SMCHOST_LOG_LEVEL);
 
 uint8_t host_req[SMCHOST_MAX_BUF_SIZE];
@@ -88,7 +89,7 @@ static void smchost_acpi_handler(void)
 
 			/* Read the command byte */
 			host_req[host_req_len] = acpi_read_idr(ACPI_EC_0);
-			LOG_INF("Rcv EC cmd: %02X",
+			LOG_DBG("Rcv EC cmd: %02X",
 				host_req[host_req_len]);
 
 		} else {
@@ -101,7 +102,7 @@ static void smchost_acpi_handler(void)
 				/* Read the data byte */
 				host_req[host_req_len] =
 				       acpi_read_idr(ACPI_EC_0);
-				LOG_INF("Host Rcvdata[%d] = %02X",
+				LOG_DBG("Host Rcvdata[%d] = %02X",
 					host_req_len, host_req[host_req_len]);
 			} else {
 				LOG_WRN("Exceeds Rcvdata buf size! Ignored");
@@ -243,7 +244,8 @@ static void smchost_virtualdock_handler(uint8_t virdock_sts)
 	if (level < 0) {
 		LOG_ERR("Fail to read virtual dock io expander");
 	} else {
-		level = (level > 0) ? 1:0;
+		level = (level > 0) ?
+			VIRTUAL_DOCK_CONNECTED : VIRTUAL_DOCK_DISCONNECTED;
 		if (g_acpi_tbl.acpi_flags2.pcie_docked != level &&
 			g_acpi_state_flags.acpi_mode) {
 			enqueue_sci(SCI_VIRTDOCK);
@@ -429,7 +431,7 @@ void send_to_host(uint8_t *pdata, uint8_t Len)
 
 	for (i = 0; i < Len; i++) {
 		host_res[i] = *(pdata + i);
-		LOG_INF("Snd data: %02X",  host_res[i]);
+		LOG_DBG("Snd data: %02X",  host_res[i]);
 	}
 
 	host_res_len = Len;
@@ -498,6 +500,7 @@ uint8_t get_pltrst_signal_sts(void)
 	return pltrst_signal_sts;
 }
 
+#ifdef CONFIG_THERMAL_MANAGEMENT
 static void change_peci_access_mode(void)
 {
 #ifndef CONFIG_DEPRECATED_HW_STRAP_BASED_PECI_MODE_SEL
@@ -505,6 +508,7 @@ static void change_peci_access_mode(void)
 	peci_access_mode_config(host_req[1]);
 #endif /* CONFIG_DEPRECATED_HW_STRAP_BASED_PECI_MODE_SEL */
 }
+#endif
 
 static void acpi_burst_ec(void)
 {
@@ -679,9 +683,11 @@ static void smchost_cmd_handler(uint8_t command)
 		break;
 
 	/* Handler for command 3Ch */
+#ifdef CONFIG_THERMAL_MANAGEMENT
 	case SMCHOST_SET_PECI_ACCESS_MODE:
 		change_peci_access_mode();
 		break;
+#endif
 	/* Handlers for commands E0h to EFh */
 	case SMCHOST_READ_ACPI_SPACE:
 		read_acpi_space();

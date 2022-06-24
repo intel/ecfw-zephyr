@@ -67,6 +67,14 @@ void pwrseq_thread(void *p1, void *p2, void *p3);
 void pwrseq_error(uint8_t error_code);
 
 /**
+ * @brief Sets next_state to S5.
+ *
+ * This routines makes the EC transition to S5 by setting the next
+ * state to S5.
+ */
+void set_next_state_to_S5(void);
+
+/**
  * @brief Indicates current system power state.
  *
  * @retval the current power state.

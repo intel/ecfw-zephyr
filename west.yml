@@ -12,15 +12,13 @@ west:
 
 manifest:
   defaults:
-    remote: wss
+    remote: github_restricted
 
   remotes:
     - name: zephyrproject
       url-base: https://github.com/zephyrproject-rtos
-    - name: wss
-      url-base: https://gitlab.devtools.intel.com/wss-pse-io-and-power-delivery
-    - name: wss_tools
-      url-base: https://gitlab.devtools.intel.com/wss-pse-io-and-power-delivery-tools
+    - name: github_restricted
+      url-base: https://github.com/intel-restricted
 
   # The list of dependencies
   #
@@ -30,7 +28,7 @@ manifest:
       repo-path: zephyr.git
       path: ecfwwork/zephyr_fork
       remote: zephyrproject
-      revision: zephyr-v2.5.0
+      revision: v2.7-branch
       clone-depth: 1
       west-commands: scripts/west-commands.yml
 
@@ -42,7 +40,7 @@ manifest:
     - name: hal_microchip
       path: ecfwwork/modules/hal/microchip
       remote: zephyrproject
-      revision: a1ec761014740a08699720298dd37ad4da360840
+      revision: 870d05e6a64ea9548da6b907058b03c8c9420826
 
   self:
     path: ecfwwork

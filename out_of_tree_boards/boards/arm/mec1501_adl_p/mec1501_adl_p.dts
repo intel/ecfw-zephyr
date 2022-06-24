@@ -10,8 +10,8 @@
 
 / {
 	model = "Intel MEC1501_ADL_P development board";
-	compatible = "microchip, mec1501_adl_p",
-		     "microchip,mec1501hsz";
+	compatible = "microchip,mec1501_adl_p",
+		"microchip,mec1501hsz";
 
 	chosen {
 		zephyr,sram = &sram0;
@@ -118,7 +118,7 @@
 	pc_girq = <15>;
 };
 
-&timer3 {
+&timer5 {
 	status = "okay";
 };
 

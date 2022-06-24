@@ -46,6 +46,10 @@
 /* EC identifier */
 #define SMCHOST_MAX_BUF_SIZE		10
 
+/* Virtual Dock Status */
+#define VIRTUAL_DOCK_CONNECTED 0
+#define VIRTUAL_DOCK_DISCONNECTED 1
+
 #include "smchost_extended.h"
 
 enum hid_btn_sci {
@@ -76,10 +80,12 @@ void smchost_thread(void *p1, void *p2, void *p3);
  */
 void send_to_host(uint8_t *pdata, uint8_t len);
 
+#ifdef CONFIG_SMCHOST_EVENT_DRIVEN_TASK
 /**
  * @brief Indicate smchost task there is an event that requires to be processed.
  */
 void smchost_signal_request(void);
+#endif
 
 /**
  * @brief get PLN pin status.

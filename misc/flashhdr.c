@@ -11,7 +11,7 @@
 
 #define KSC_PLAT_ID   1
 #define KSC_MAJOR_VER 1
-#define KSC_MINOR_VER 51
+#define KSC_MINOR_VER 59
 #define KSC_BUILD_VER 0
 
 __in_section(ecfw_info, static, var) struct ksc_img_hdr header = {

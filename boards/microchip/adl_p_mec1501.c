@@ -117,7 +117,7 @@ struct gpio_ec_config mecc1501_cfg_adl_m_divergence[] = {
 	{ C10_GATE_LED,			GPIO_OUTPUT_LOW },
 	{ RST_MECC,				GPIO_OUTPUT_HIGH },
 	{ PM_SLP_S0_EC_N,		GPIO_OUTPUT_HIGH },
-	{ KBC_SCROLL_LOCK,		GPIO_OUTPUT_LOW },
+	{ KBC_SCROLL_LOCK_M,		GPIO_OUTPUT_LOW },
 };
 
 /* APP-owned gpios for ADL-N*/
@@ -143,6 +143,7 @@ struct gpio_ec_config expander_cfg[] = {
 	{ EC_M_2_SSD_PLN,	GPIO_OUTPUT_HIGH },
 	{ RETIMER_BYPASS,	GPIO_INPUT },
 	{ THERM_STRAP,		GPIO_INPUT },
+	{ KBC_SCROLL_LOCK_P,	GPIO_OUTPUT_LOW },
 #endif
 };
 
@@ -277,6 +278,13 @@ int board_init(void)
 		return ret;
 	}
 
+#if DT_NODE_HAS_STATUS(DT_INST(2, microchip_xec_i2c), okay)
+	ret = i2c_hub_config(I2C_2);
+	if (ret) {
+		LOG_ERR("i2c port not configured, Enable i2c port 5 in dts.");
+	} else {
+	}
+#endif
 	ret = read_board_id();
 	if (ret) {
 		LOG_ERR("Failed to fetch brd id: %d", ret);

@@ -90,6 +90,13 @@ void set_pln_pin_sts(uint8_t sts)
 	 * 2 - PLN Pin no change
 	 */
 	pln_pin_sts = sts;
+
+#ifdef CONFIG_SMCHOST_EVENT_DRIVEN_TASK
+	if ((sts == PLN_PIN_ASSERT) ||
+	    (sts == PLN_PIN_DEASSERT)) {
+		smchost_signal_request();
+	}
+#endif
 }
 
 uint8_t get_pln_pin_sts(void)

@@ -24,6 +24,9 @@ LOG_MODULE_REGISTER(pwrmgmt, CONFIG_PWRMGMT_DEEPSX_LOG_LEVEL);
 /* Delay to wait for SUS_WARN after PMIC change */
 #define DEEPSX_SUS_WARN_DELAY      20
 
+#define SUS_WRN_LOW		0
+#define SUS_WRN_HIGH		1
+
 static bool sys_deep_sx;
 static uint8_t slp_m;
 
@@ -46,16 +49,31 @@ bool dsx_entered(void)
 	return sys_deep_sx;
 }
 
-static void ack_deep_sleep_transition(void)
+static int ack_deep_sleep_transition(uint8_t exp_sus_wrn)
 {
 	uint8_t sus_wrn;
 	int ret;
 
-	espihub_retrieve_vw(ESPI_VWIRE_SIGNAL_SUS_WARN, &sus_wrn);
+	ret = espihub_retrieve_vw(ESPI_VWIRE_SIGNAL_SUS_WARN, &sus_wrn);
+	if (ret) {
+		LOG_ERR(" Unable to receive sus_wrn");
+		return ret;
+	}
+
+	if (sus_wrn != exp_sus_wrn) {
+		LOG_ERR(" Received %s instead of %s",
+				sus_wrn?"SUS_WRN_HIGH":"SUS_WRN_LOW",
+				exp_sus_wrn?"SUS_WRN_HIGH":"SUS_WRN_LOW");
+		return -EINVAL;
+	}
+
 	ret = espihub_send_vw(ESPI_VWIRE_SIGNAL_SUS_ACK, sus_wrn);
 	if (ret) {
 		LOG_ERR("Unable to send VW SUS_ACK");
+		return ret;
 	}
+
+	return ret;
 }
 
 #ifdef CONFIG_PWRMGMT_DEEPSX_S3
@@ -72,7 +90,13 @@ static bool enter_deeps3(void)
 	}
 
 	k_msleep(DEEPSX_SUS_WARN_DELAY);
-	ack_deep_sleep_transition();
+	ret = ack_deep_sleep_transition(SUS_WRN_LOW);
+	if (ret) {
+		LOG_WRN("%s:failed ack deep sleep transition %d",
+				__func__, ret);
+		return false;
+	}
+
 	sys_deep_sx = true;
 
 	/* Note this requires to disable automatic SUS_ACK from eSPI driver */
@@ -115,7 +139,12 @@ static bool exit_deeps3(void)
 	gpio_write_pin(PM_RSMRST, 1);
 
 	/* Acknowledge suspend warning */
-	ack_deep_sleep_transition();
+	ret = ack_deep_sleep_transition(SUS_WRN_HIGH);
+	if (ret) {
+		LOG_WRN("%s:failed ack deep sleep transition %d",
+				__func__, ret);
+		return false;
+	}
 
 	return true;
 }
@@ -161,7 +190,14 @@ static bool exit_deeps4(void)
 	}
 
 	/* Acknowledge suspend warning */
-	ack_deep_sleep_transition();
+	ret = ack_deep_sleep_transition(SUS_WRN_HIGH);
+	if (ret) {
+		LOG_WRN("%s:failed ack deep sleep transition %d",
+				__func__, ret);
+		return false;
+	}
+
+	sys_deep_sx = false;
 
 	return true;
 }
@@ -349,17 +385,21 @@ void deep_sx_enter(void)
 
 	espihub_retrieve_vw(ESPI_VWIRE_SIGNAL_SUS_WARN, &sus_wrn);
 	if (espihub_reset_status() && !sus_wrn) {
-		sys_deep_sx = true;
 		gpio_write_pin(PM_DS3, 1);
 
 		vci_enable();
 
-		ack_deep_sleep_transition();
+		ret = ack_deep_sleep_transition(SUS_WRN_LOW);
+		if (ret) {
+			LOG_WRN("%s:failed ack deep sleep transition %d",
+					__func__, ret);
+			return;
+		}
 
 		ret = wait_for_pin_monitor_vwire(PM_SLP_SUS, 0,
 						 PM_SLP_SUS_TIMEOUT,
 						 ESPI_VWIRE_SIGNAL_SUS_WARN,
-						 ESPIHUB_VW_LOW);
+						 ESPIHUB_VW_HIGH);
 		if (ret) {
 			LOG_WRN("wait for deep suspend failed %d", ret);
 			return;
@@ -368,8 +408,8 @@ void deep_sx_enter(void)
 		LOG_DBG("DeepSx enter got Slp Sus");
 		gpio_write_pin(PM_RSMRST, 0);
 
-		if ((dsw_mode() != ENABLE_FF_IN_S4S5_DC) &&
-		    (dsw_mode() != ENABLE_FF_IN_S3S4S5_DC)) {
+		if ((dsw_mode() == ENABLE_IN_S5_DC) ||
+		    (dsw_mode() == ENABLE_IN_S4S5_DC)) {
 			LOG_INF("EC PowerOff");
 			/* Assert A-Rail VR */
 			gpio_write_pin(PM_DS3, 0);
@@ -380,6 +420,7 @@ void deep_sx_enter(void)
 			/* Assert A-Rail VR */
 			gpio_write_pin(PM_DS3, 1);
 		}
+		sys_deep_sx = true;
 	}
 }
 

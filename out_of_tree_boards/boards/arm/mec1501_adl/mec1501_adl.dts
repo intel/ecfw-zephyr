@@ -10,7 +10,7 @@
 
 / {
 	model = "Intel MEC1501_ADL development board";
-	compatible = "microchip, mec1501_adl",
+	compatible = "microchip,mec1501_adl",
 		     "microchip,mec1501hsz";
 
 	chosen {
@@ -82,7 +82,7 @@
 	pc_girq = <15>;
 };
 
-&timer3 {
+&timer5 {
 	status = "okay";
 };
 

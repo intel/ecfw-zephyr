@@ -121,6 +121,7 @@ bool espihub_dnx_status(void)
 
 static void host_warn_handler(uint32_t signal, uint32_t status)
 {
+	LOG_DBG("%s", __func__);
 	switch (signal) {
 	case ESPI_VWIRE_SIGNAL_PLTRST:
 		LOG_INF("PLT_RST changed %d", status);
@@ -136,12 +137,12 @@ static void host_warn_handler(uint32_t signal, uint32_t status)
 		} else {
 			LOG_WRN("No Host rst handler registered");
 		}
-		LOG_DBG("Send ACK HOST RST %d", status);
+		LOG_INF("Send ACK HOST RST %d", status);
 		espi_send_vwire(espi_dev, ESPI_VWIRE_SIGNAL_HOST_RST_ACK,
 				status);
 		break;
 	case ESPI_VWIRE_SIGNAL_OOB_RST_WARN:
-		LOG_DBG("Send OOB_RST_ACK %d", status);
+		LOG_INF("Send OOB_RST_ACK %d", status);
 		espi_send_vwire(espi_dev, ESPI_VWIRE_SIGNAL_OOB_RST_ACK,
 				status);
 		break;
@@ -154,7 +155,7 @@ static void host_warn_handler(uint32_t signal, uint32_t status)
 		break;
 	case ESPI_VWIRE_SIGNAL_DNX_WARN:
 		hub.dnx_mode = status;
-		LOG_DBG("Send DnX WARN %d", status);
+		LOG_INF("Send DnX WARN %d", status);
 		espi_send_vwire(espi_dev, ESPI_VWIRE_SIGNAL_DNX_ACK, status);
 		if (warn_handlers[ESPIHUB_DNX_WARNING]) {
 			warn_handlers[ESPIHUB_DNX_WARNING](status);
@@ -173,6 +174,7 @@ static void espi_reset_handler(const struct device *dev,
 			       struct espi_callback *cb,
 			       struct espi_event event)
 {
+	LOG_WRN("%s", __func__);
 	if (event.evt_type == ESPI_BUS_RESET) {
 		hub.espi_rst_sts = event.evt_data;
 		LOG_INF("eSPI BUS reset %d", event.evt_data);
@@ -192,6 +194,7 @@ static void espi_ch_handler(const struct device *dev, struct espi_callback *cb,
 	int ltr_status;
 #endif
 
+	LOG_DBG("%s", __func__);
 	if (event.evt_type == ESPI_BUS_EVENT_CHANNEL_READY) {
 		if (event.evt_details == ESPI_CHANNEL_VWIRE) {
 			LOG_INF("VW channel ready: %d", event.evt_data);
@@ -220,6 +223,7 @@ static void espi_ch_handler(const struct device *dev, struct espi_callback *cb,
 static void vwire_handler(const struct device *dev, struct espi_callback *cb,
 			  struct espi_event event)
 {
+	LOG_INF("VWire %d sts: %d", event.evt_details, event.evt_data);
 	if (event.evt_type == ESPI_BUS_EVENT_VWIRE_RECEIVED) {
 		switch (event.evt_details) {
 		case ESPI_VWIRE_SIGNAL_PLTRST:
@@ -242,6 +246,9 @@ static void vwire_handler(const struct device *dev, struct espi_callback *cb,
 		case ESPI_VWIRE_SIGNAL_OOB_RST_WARN:
 		case ESPI_VWIRE_SIGNAL_DNX_WARN:
 			host_warn_handler(event.evt_details, event.evt_data);
+			break;
+		default:
+			LOG_WRN("Unhandled VWire %d", event.evt_details);
 			break;
 		}
 	}
@@ -319,11 +326,12 @@ void detect_boot_mode(void)
 	hub.spi_boot_mode = FLASH_BOOT_MODE_G3_SHARING;
 
 	flash_sts = espi_get_channel_status(espi_dev, ESPI_CHANNEL_FLASH);
-	LOG_DBG("Flash channel ready %d", flash_sts);
+	LOG_WRN("Flash channel ready %d", flash_sts);
 	if (flash_sts) {
 		hub.spi_boot_mode = FLASH_BOOT_MODE_MAF;
 	} else {
 		level = gpio_read_pin(G3_SAF_DETECT);
+		LOG_WRN("G3_SAF_DETECT %d", level);
 		if (level < 0) {
 			LOG_WRN("Fail to read HW strap");
 			return;
@@ -366,6 +374,7 @@ int espihub_init(void)
 		return -ENODEV;
 	}
 
+	LOG_DBG("About to configure eSPI device %s", __func__);
 	ret = espi_config(espi_dev, &cfg);
 	if (ret) {
 		LOG_ERR("eSPI slave configured failed");
@@ -402,7 +411,9 @@ int espihub_init(void)
 
 	hub.host_vw_ready = espi_get_channel_status(espi_dev,
 						    ESPI_CHANNEL_VWIRE);
+	hub.espi_rst_sts = gpio_read_pin(ESPI_RESET_MAF);
 
+	LOG_DBG("%s hub.host_vw_ready: %d", __func__, hub.host_vw_ready);
 	return ret;
 }
 
@@ -410,6 +421,7 @@ static int handle_vw_ack(enum espi_vwire_signal signal, uint8_t value)
 {
 	int ret;
 
+	LOG_DBG("%s", __func__);
 	switch (signal) {
 	case ESPI_VWIRE_SIGNAL_SUS_WARN:
 		ret = espi_send_vwire(espi_dev, ESPI_VWIRE_SIGNAL_SUS_ACK,
@@ -516,6 +528,10 @@ int wait_for_pin_monitor_vwire(uint32_t port_pin, uint32_t exp_sts,
 int espihub_retrieve_vw(enum espi_vwire_signal signal,
 			enum espihub_vw_level *level)
 {
+	if (!hub.host_vw_ready) {
+		LOG_ERR("eSPI host not ready to receive VWs");
+	}
+
 	return espi_receive_vwire(espi_dev, signal, level);
 }
 

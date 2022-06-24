@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) 2022, Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modify as needed for development with custom I2C port numbers
+ * Usage:
+ *       west build -c -p <BOARD> -- -DDTC_OVERLAY_FILE=enable-i2csmb2.overlay
+ *
+ * Depending upon the port selected, it is possible some of the functionalities
+ * are compromised. For e.g. if I2C port7 is enabled on MEC15xx platforms, SAF
+ * mode will not work.
+ *
+ * The sda-scl gpio configuration is dependent upon the port selected. Below
+ * are 2 examples.
+ *      port_sel = <4>;
+ *      sda-gpios = <&gpio_140_176 3 0>;
+ *      scl-gpios = <&gpio_140_176 4 0>;
+ *
+ *      port_sel = <5>;
+ *      sda-gpios = <&gpio_140_176 1 0>;
+ *      scl-gpios = <&gpio_140_176 2 0>;
+ */
+
+&i2c_smb_2 {
+	status = "okay";
+	label = "I2C7";
+	port_sel = <7>;
+
+	sda-gpios = <&gpio_000_036 12 0>;
+	scl-gpios = <&gpio_000_036 13 0>;
+};

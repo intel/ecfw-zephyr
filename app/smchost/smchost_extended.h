@@ -22,8 +22,6 @@ void smchost_cmd_info_handler(uint8_t command);
  */
 void smchost_cmd_pm_handler(uint8_t command);
 
-
-
 #ifdef CONFIG_THERMAL_MANAGEMENT
 /**
  * @brief Handle extended SMC commands for thermal management.
@@ -56,7 +54,6 @@ void smchost_pwrbtn_pln_handler(uint8_t pwrbtn_sts);
  * @brief platform reset deassert notification for pln.
  */
 void smchost_pln_pltreset_handler(void);
-
 
 
 #endif /* __SMCHOST_EXTENDED_H__ */

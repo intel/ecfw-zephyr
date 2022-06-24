@@ -99,9 +99,11 @@ static void smc_mode(void)
 		res[SMC_CAPS_INDEX] |= BIT(ACPI_MODE);
 	}
 
+#ifdef CONFIG_THERMAL_MANAGEMENT
 	if (peci_access_mode == PECI_OVER_ESPI_MODE) {
 		res[SMC_CAPS_INDEX] |= BIT(PECI_ACCESS_MODE_POS);
 	}
+#endif
 
 	send_to_host(res, sizeof(res));
 }

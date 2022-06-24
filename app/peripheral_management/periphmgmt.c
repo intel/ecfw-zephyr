@@ -13,6 +13,8 @@
 #include "periphmgmt.h"
 #include "pwrbtnmgmt.h"
 #include "board_config.h"
+#include "acpi_region.h"
+#include "smchost.h"
 LOG_MODULE_DECLARE(periph, CONFIG_PERIPHERAL_LOG_LEVEL);
 
 /* Debouncing is performed in 1 ms intervals.
@@ -209,7 +211,9 @@ void update_virtual_bat_dock_status(void)
 	if (level < 0) {
 		LOG_ERR("Fail to read virtual dock io expander");
 	} else {
-		g_acpi_tbl.acpi_flags2.pcie_docked = (level > 0) ? level : 0;
+		g_acpi_tbl.acpi_flags2.pcie_docked =
+			(level > 0) ?
+			VIRTUAL_DOCK_CONNECTED : VIRTUAL_DOCK_DISCONNECTED;
 	}
 }
 

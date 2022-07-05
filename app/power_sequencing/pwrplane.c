@@ -627,7 +627,7 @@ static void power_off(void)
 
 	g_pwrflags.pwr_sw_enabled = 1;
 
-	level = gpio_get_pin(PWRBTN_EC_IN_N);
+	level = gpio_read_pin(PWRBTN_EC_IN_N);
 	if (level < 0) {
 		LOG_ERR("Fail to read pwr_btn %d", level);
 	}
@@ -639,7 +639,7 @@ static void power_off(void)
 
 	LOG_DBG("Shutting down %d", level);
 	do {
-		level = gpio_get_pin(PWRBTN_EC_IN_N);
+		level = gpio_read_pin(PWRBTN_EC_IN_N);
 	} while (!level);
 
 	port80_display_off();

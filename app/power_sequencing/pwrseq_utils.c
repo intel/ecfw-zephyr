@@ -61,7 +61,9 @@ void ec_reset(void)
 
 	gpio_write_pin(SYS_PWROK, 0);
 	gpio_write_pin(PCH_PWROK, 0);
+#ifdef CONFIG_POSTCODE_MANAGEMENT
 	port80_display_off();
+#endif
 	/* The busy wait is required to block the execution
 	 * and to ramp down the above signals. Ideally, these should
 	 * not be altered by any other thread.

@@ -288,7 +288,9 @@ void pwrseq_error(uint8_t error_code)
 	LOG_ERR("%s: %d", __func__, error_code);
 
 	pwrseq_failure = true;
+#ifdef CONFIG_POSTCODE_MANAGEMENT
 	update_error(error_code);
+#endif
 	k_msleep(100);
 	gpio_write_pin(PCH_PWROK, 0);
 	gpio_write_pin(SYS_PWROK, 0);
@@ -300,8 +302,10 @@ void pwrseq_reset(void)
 
 	pwrseq_failure = false;
 
+#ifdef CONFIG_POSTCODE_MANAGEMENT
 	/* Clear port 80 */
 	update_error(ERR_NONE);
+#endif
 }
 
 static inline int pwrseq_task_init(void)
@@ -642,7 +646,9 @@ static void power_off(void)
 		level = gpio_get_pin(PWRBTN_EC_IN_N);
 	} while (!level);
 
+#ifdef CONFIG_POSTCODE_MANAGEMENT
 	port80_display_off();
+#endif
 
 	gpio_write_pin(EC_PWRBTN_LED, LOW);
 	LOG_DBG("Power off complete");
@@ -677,7 +683,9 @@ static int power_on(void)
 		return ret;
 	}
 
+#ifdef CONFIG_POSTCODE_MANAGEMENT
 	port80_display_on();
+#endif
 
 	/* Check for SLPS5#, SLPS4#, SLPS3# signals */
 	ret = check_slp_signals();
@@ -759,7 +767,9 @@ static void suspend(void)
 	gpio_write_pin(PCH_PWROK, 0);
 	gpio_write_pin(SYS_PWROK, 0);
 	board_suspend();
+#ifdef CONFIG_POSTCODE_MANAGEMENT
 	port80_display_off();
+#endif
 }
 
 static int resume(void)

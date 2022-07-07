@@ -387,7 +387,9 @@ void deep_sx_enter(void)
 	if (espihub_reset_status() && !sus_wrn) {
 		gpio_write_pin(PM_DS3, 1);
 
+#if defined (CONFIG_SOC_FAMILY_MEC)
 		vci_enable();
+#endif
 
 		ret = ack_deep_sleep_transition(SUS_WRN_LOW);
 		if (ret) {
@@ -426,6 +428,7 @@ void deep_sx_enter(void)
 
 void deep_sx_exit(void)
 {
+#if defined (CONFIG_SOC_FAMILY_MEC)
 	switch (vci_wake_reason()) {
 	case VCI_POWER_BUTTON:
 		/* If power button press detected by VCI, wake the system */
@@ -439,4 +442,7 @@ void deep_sx_exit(void)
 		LOG_WRN("DSx wake not supported");
 		break;
 	}
+#else
+	LOG_WRN("DSx wake not supported");
+#endif
 }

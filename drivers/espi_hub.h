@@ -27,8 +27,13 @@
 #define MAX_PERIPH_HANDLERS       2u
 
 /* TODO: Check if we can replace these macros */
+#ifdef CONFIG_SOC_FAMILY_MEC
 #define KBC_IBF_DATA(x)           (((x) >> E8042_ISR_DATA_POS) & 0xFFU)
 #define KBC_CMD_DATA(x)           ((x) & 0xFU)
+#else	/* struct espi_evt_data_kbc */
+#define KBC_IBF_DATA(x)           (((x) >> 8) & 0xFFU)	/* .data */
+#define KBC_CMD_DATA(x)           ((x) & 0xFU)	/* .type */
+#endif
 
 /* TODO: Replace these macros with Zephyr byte order */
 #define ESPI_PERIPHERAL_TYPE(x)   ((x) & 0x0000FFFF)

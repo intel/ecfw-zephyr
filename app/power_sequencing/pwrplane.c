@@ -19,11 +19,15 @@
 #include "pwrplane.h"
 #include "pwrseq_utils.h"
 #include "board_config.h"
+#ifdef CONFIG_POSTCODE_MANAGEMENT
 #include "postcodemgmt.h"
 #include "port80display.h"
+#endif
+#ifdef CONFIG_SMCHOST
 #include "sci.h"
 #include "smc.h"
 #include "scicodes.h"
+#endif
 #include "deepsx.h"
 #include "dswmode.h"
 #include "pseudog3.h"
@@ -321,8 +325,10 @@ static inline int pwrseq_task_init(void)
 	dnx_ec_assisted_init();
 #endif
 
+#ifdef CONFIG_SMCHOST
 	/* the charger type as of now is updated with a static value */
 	g_acpi_tbl.acpi_ctype_value = CTYPE_NVDC;
+#endif
 
 	/* SW strap always takes precedence */
 #ifdef CONFIG_POWER_SEQUENCE_DISABLE_TIMEOUTS
@@ -343,8 +349,10 @@ static inline int pwrseq_task_init(void)
 	handle_spi_sharing(espihub_boot_mode());
 	gpio_write_pin(PM_PWRBTN, 1);
 
+#if defined (CONFIG_SOC_FAMILY_MEC)
 	/* Disable VBAT powered VCI logic */
 	vci_disable();
+#endif
 
 	ret = wait_for_pin(RSMRST_PWRGD,
 			   RSMRST_PWRDG_TIMEOUT, 1);
@@ -533,10 +541,10 @@ void pwrseq_thread(void *p1, void *p2, void *p3)
 		g_pwrflags.pm_rsmrst = level;
 
 		gpio_write_pin(PM_RSMRST, level);
-
+#ifdef CONFIG_SMCHOST
 		/* Update AC present ACPI flag */
 		g_acpi_tbl.acpi_flags.ac_prsnt = gpio_read_pin(BC_ACOK);
-
+#endif
 		/* Check if power button was pressed */
 		if (g_pwrflags.turn_pwr_on) {
 			next_state = SYSTEM_S0_STATE;
@@ -597,9 +605,9 @@ void therm_shutdown(void)
 			/* Rotate fan and toggle leds until pwr btn pressed */
 			break;
 		}
-
+#ifdef CONFIG_THERMAL_MANAGEMENT
 		fan_set_duty_cycle(FAN_CPU, 50);
-
+#endif
 		/* EC initiated shutdown is indicated by flashing of NUM and
 		 * CAPS lock LEDs alternatively.
 		 */
@@ -781,7 +789,9 @@ static int resume(void)
 	/* Perform power on sequence. If no errors, notify BIOS */
 	ret = power_on();
 	if (!ret) {
+#if CONFIG_SMCHOST
 		enqueue_sci(SCI_RESUME);
+#endif
 	}
 
 	board_resume();

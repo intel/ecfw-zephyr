@@ -153,6 +153,7 @@ struct gpio_ec_config mecc1501_cfg_sus[] =  {
 struct gpio_ec_config mecc1501_cfg_res[] =  {
 };
 
+#ifdef CONFIG_THERMAL_MANAGEMENT
 /**
  * @brief Fan device table.
  *
@@ -205,6 +206,7 @@ void board_fan_dev_tbl_init(uint8_t *pmax_fan, struct fan_dev **pfan_tbl)
 	*pmax_fan = ARRAY_SIZE(fan_tbl);
 }
 
+#endif /* CONFIG_THERMAL_MANAGEMENT */
 
 void update_platform_sku_type(void)
 {

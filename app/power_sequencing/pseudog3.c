@@ -69,11 +69,13 @@ static void pseudo_g3_enter(void)
 		return;
 	}
 
+#ifdef CONFIG_SMCHOST
 	/* If system is in Virtual battery mode enter PG3 */
 	if (ac_prsnt && !is_virtual_battery_prsnt()) {
 		LOG_DBG("Can not enter Pseudo G3 until AC present.");
 		return;
 	}
+#endif
 
 	espihub_retrieve_vw(ESPI_VWIRE_SIGNAL_SUS_PWRDN_ACK, &sus_pwrdn_ack);
 

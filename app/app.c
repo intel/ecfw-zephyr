@@ -36,11 +36,13 @@ void main(void)
 	 * because we must query the boot mode before assigning functions
 	 * to certain pins
 	 */
+#ifdef CONFIG_ESPI
 	ret = espihub_init();
 	if (ret) {
 		LOG_ERR("Failed to init espi %d", ret);
 		return;
 	}
+#endif
 
 	ret = board_init();
 	if (ret) {

@@ -106,6 +106,7 @@ struct gpio_ec_config mecc1501_cfg_sus[] =  {
 struct gpio_ec_config mecc1501_cfg_res[] =  {
 };
 
+#ifdef CONFIG_THERMAL_MANAGEMENT
 /**
  * @brief Fan device table.
  *
@@ -116,7 +117,6 @@ static struct fan_dev fan_tbl[] = {
 /*	PWM_CH_##	TACH_CH_##  */
 	{ PWM_CH_00,	TACH_CH_00 }, /* CPU Fan */
 };
-
 
 /**
  * @brief Thermal sensor table.
@@ -165,6 +165,8 @@ void board_fan_dev_tbl_init(uint8_t *pmax_fan, struct fan_dev **pfan_tbl)
 	*pfan_tbl = fan_tbl;
 	*pmax_fan = ARRAY_SIZE(fan_tbl);
 }
+
+#endif /* CONFIG_THERMAL_MANAGEMENT */
 
 void board_config_io_buffer(void)
 {

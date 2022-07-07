@@ -10,7 +10,9 @@
 #include <device.h>
 #include "board.h"
 #include "board_config.h"
+#ifdef CONFIG_POSTCODE_MANAGEMENT
 #include "port80display.h"
+#endif
 LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 
 /* This reset delay value is finalized as per the debug experiments

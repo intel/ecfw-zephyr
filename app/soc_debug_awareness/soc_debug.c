@@ -13,7 +13,8 @@
 #include "periphmgmt.h"
 #include "pwrseq_utils.h"
 #include "kbs_matrix.h"
-LOG_MODULE_REGISTER(soc_debug, CONFIG_PWRMGT_LOG_LEVEL);
+
+LOG_MODULE_REGISTER(soc_debug, CONFIG_BOARD_LOG_LEVEL);
 
 #ifdef CONFIG_SOC_DEBUG_CONSENT_GPIO
 struct k_work_delayable sampling_work;

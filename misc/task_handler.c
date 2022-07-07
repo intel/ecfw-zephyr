@@ -20,7 +20,7 @@
 #include "thermalmgmt.h"
 #endif
 
-LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
+LOG_MODULE_DECLARE(thrdmgmt, CONFIG_EC_LOG_LEVEL);
 
 #define EC_TASK_STACK_SIZE	1024
 
@@ -53,21 +53,29 @@ K_THREAD_DEFINE(postcode_thrd_id, EC_TASK_STACK_SIZE, postcode_thread,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 #endif
 
+#ifdef CONFIG_PERIPHERAL_MANAGEMENT
 K_THREAD_DEFINE(periph_thrd_id, EC_TASK_STACK_SIZE, periph_thread,
 		&periph_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
+#endif
 
+#ifdef CONFIG_PWRMGMT
 K_THREAD_DEFINE(pwrseq_thrd_id, EC_TASK_STACK_SIZE, pwrseq_thread,
 		&pwrseq_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
+#endif
 
+#ifdef CONFIG_ESPI
 K_THREAD_DEFINE(oobmngr_thrd_id, EC_TASK_STACK_SIZE, oobmngr_thread,
 		NULL, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
+#endif
 
+#ifdef CONFIG_SMCHOST
 K_THREAD_DEFINE(smchost_thrd_id, EC_TASK_STACK_SIZE, smchost_thread,
 		&smchost_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
+#endif
 
 #ifdef CONFIG_THERMAL_MANAGEMENT
 const uint32_t thermal_thrd_period = 250;
@@ -99,17 +107,25 @@ static struct task_info tasks[] = {
 	  .tagname = "POST" },
 #endif
 
+#if CONFIG_PERIPHERAL_MANAGEMENT
 	{ .thread_id = periph_thrd_id, .can_suspend = false,
 	  .tagname = "PERIPH" },
+#endif
 
+#ifdef CONFIG_PWRMGMT
 	{ .thread_id = pwrseq_thrd_id, .can_suspend = true,
 	  .tagname = "PWR" },
+#endif
 
+#ifdef CONFIG_ESPI
 	{ .thread_id = oobmngr_thrd_id, .can_suspend = false,
 	  .tagname = "OOB" },
+#endif
 
+#ifdef CONFIG_SMCHOST
 	{ .thread_id = smchost_thrd_id, .can_suspend = false,
 	  .tagname = "SMC" },
+#endif
 
 #ifdef CONFIG_THERMAL_MANAGEMENT
 	{ .thread_id = thermal_thrd_id, .can_suspend = false,

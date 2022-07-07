@@ -196,6 +196,8 @@ int periph_register_button(uint32_t port_pin, btn_handler_t handler)
 	return ret;
 }
 
+#ifdef CONFIG_SMCHOST
+
 void update_virtual_bat_dock_status(void)
 {
 	int level;
@@ -226,6 +228,8 @@ bool is_virtual_dock_prsnt(void)
 {
 	return g_acpi_tbl.acpi_flags2.pcie_docked;
 }
+
+#endif	/* CONFIG_SMCHOST */
 
 void periph_thread(void *p1, void *p2, void *p3)
 {

@@ -16,7 +16,11 @@ config POSTCODE_LOG_LEVEL
 	int "Debug Port80 log level"
 	depends on LOG
 	depends on POSTCODE_MANAGEMENT
+	default 2 if EC_DEBUG_LOG_LEVEL
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for debug Port 80 log level.
+
+config ESPI_PERIPHERAL_DEBUG_PORT_80
+	default y if POSTCODE_MANAGEMENT
+	default n

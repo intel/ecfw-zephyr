@@ -526,7 +526,7 @@ int wait_for_pin_monitor_vwire(uint32_t port_pin, uint32_t exp_sts,
 }
 
 int espihub_retrieve_vw(enum espi_vwire_signal signal,
-			enum espihub_vw_level *level)
+			uint8_t *level)
 {
 	if (!hub.host_vw_ready) {
 		LOG_ERR("eSPI host not ready to receive VWs");

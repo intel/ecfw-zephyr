@@ -240,7 +240,7 @@ int espihub_add_postcode_handler(espi_postcode_handler_t handler);
  * @retval -EINVAL if eSPI channel is not ready or 0 if success.
  */
 int espihub_retrieve_vw(enum espi_vwire_signal signal,
-			enum espihub_vw_level *level);
+			uint8_t *level);
 
 /**
  * @brief Send a virtual wire ensuring the eSPI channel is ready.

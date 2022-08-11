@@ -210,12 +210,12 @@ to apt-get wget, pip, git.</p>
 </div>
 <div class="section" id="setting-up-zephyr-environment">
 <h2>Setting Up Zephyr environment<a class="headerlink" href="#setting-up-zephyr-environment" title="Permalink to this headline">¶</a></h2>
-<p>Refer to the official <a class="reference external" href="https://docs.zephyrproject.org/2.5.0/getting_started/index.html">Zephyr’s Getting Started Guide</a> while reviewing
+<p>Refer to the official <a class="reference external" href="https://docs.zephyrproject.org/2.7.0/getting_started/index.html">Zephyr’s Getting Started Guide</a> while reviewing
 considerations below during each step.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>EC FW Open source 1.50 project is based on Zephyr v2.5 so need to
-refer to Zephyr v2.5 documentation and use Zephyr SDK 0.12.2.</p>
+<p>EC FW Open source 1.50 project is based on Zephyr v2.7 so need to
+refer to Zephyr v2.7 documentation and use Zephyr SDK 0.12.2.</p>
 </div>
 <div class="section" id="os-selection">
 <h3>1) OS selection<a class="headerlink" href="#os-selection" title="Permalink to this headline">¶</a></h3>
@@ -303,7 +303,7 @@ west init -l
 <tbody>
 <tr class="row-even"><td><p>zephyr</p></td>
 <td><p>zephyr_snapshot</p></td>
-<td><p>v2.5-branch</p></td>
+<td><p>v2.7-branch</p></td>
 <td><p><a class="reference external" href="https://github.com/zephyrproject-rtos/zephyr">https://github.com/zephyrproject-rtos/zephyr</a></p></td>
 </tr>
 <tr class="row-odd"><td><p>cmsis</p></td>
@@ -313,7 +313,7 @@ west init -l
 </tr>
 <tr class="row-even"><td><p>hal_microchip</p></td>
 <td><p>modules/hal/microchip</p></td>
-<td><p>a1ec761</p></td>
+<td><p>870d05e</p></td>
 <td><p><a class="reference external" href="https://github.com/zephyrproject-rtos/hal_microchip">https://github.com/zephyrproject-rtos/hal_microchip</a></p></td>
 </tr>
 </tbody>
@@ -334,7 +334,7 @@ west init -l
 <h3>3) Apply back-ported fixes<a class="headerlink" href="#apply-back-ported-fixes" title="Permalink to this headline">¶</a></h3>
 <p>Some additional patches are required to be applied to the Zephyr kernel
 for building the open source EC FW application. The latest release is based out
-of Zephyr v2.5 and hence these patches need to be applied on that branch.</p>
+of Zephyr v2.7 and hence these patches need to be applied on that branch.</p>
 <p>These patches are expected to be part of the future Zephyr releases (if
 they are not already integrated).</p>
 <p>Note: Below steps assume environment has been setup as indicated in the
@@ -350,7 +350,7 @@ git checkout master
 <li><p>Apply zephyr patches on to the kernel branch</p></li>
 </ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ../ecfwwork/zephyr_fork
-git am ../../ecfw-zephyr/zephyr_patches/patches_v2_5.patch
+git am ../../ecfw-zephyr/zephyr_patches/patches_v2_7.patch
 </pre></div>
 </div>
 </div>

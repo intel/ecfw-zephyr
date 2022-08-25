@@ -1,0 +1,63 @@
+[SPI]
+SPISizeMegabits = 4
+Flashmap = true
+FlshmapAddr = 0
+
+[DEVICE]
+TagAddr0 = 0xD0
+BoardID = 0x316
+
+[IMAGE "0"]
+ImageLocation = 0x100
+SpiFreqMHz = 24
+SpiReadCommand = Dual
+SpiDriveStrength = 1
+SpiSlewFast = false
+SpiSignalControl = 0x00
+FwBinFile = zephyr.bin
+ImageRevision = 0x56
+FwOffset = 0
+FwLoadAddress = 0xE0000
+FwEntryAddress = 0
+UseECDSA = false
+AuthenticateKeySelt = 5
+AutoKeyRevEn = false
+KeyRevPermission = 0x11223344
+AutoRollBackProtEn = false
+RollbackProtPerm031000 = 0x11223344
+RollbackProtPerm063032 = 0x55667788
+RollbackProtPerm095063 = 0
+RollbackProtPerm127096 = 0xDDEEFF99
+ECDSAPrivKeyFile = ECC384r.pem 
+ECDSAPrivKeyPassword = MCHPECC384r
+FwEncrypt = false
+AesGenECPubKeyFile = ECC384r_crt.pem
+VTR1pinSrc18 = false
+VTR2pinSrc18 = false
+VTR3pinSrc18 = false
+
+[IMAGE "1"]
+ImageLocation = 0x40000
+SpiFreqMHz = 24
+SpiReadCommand = Dual
+SpiDriveStrength = 1
+SpiSlewFast = false
+SpiSignalControl = 0x00
+FwBinFile = zephyr.bin
+ImageRevision = 5
+FwOffset = 0
+FwLoadAddress = 0xE0000
+FwEntryAddress = 0
+UseECDSA = false
+AuthenticateKeySelt = 5
+;ECDSAPrivKeyFile = ecprivkey001.pem 
+;ECDSAPrivKeyPassword = ECPRIVKEY001
+ECDSAPrivKeyFile = ECC384r.pem 
+ECDSAPrivKeyPassword = MCHPECC384r
+FwEncrypt = false
+;AesGenECPubKeyFile = ecpubkey002_crt.pem
+AesGenECPubKeyFile = ECC384r_crt.pem
+VTR1pinSrc18 = false
+VTR2pinSrc18 = false
+VTR3pinSrc18 = false
+

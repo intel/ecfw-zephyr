@@ -14,7 +14,7 @@ git checkout main
 
 2) Apply zephyr patches on to the kernel branch
 cd ../ecfwwork/zephyr_fork
-git am ../../ecfw-zephyr/zephyr_patches/patches_v2_7.patch
+git am ../../ecfw-zephyr/zephyr_patches/zephyr_v2_7_oe_1_65.patch
 
 3) Building the code for ADL-S (for e.g)
 cd ../../ecfw-zephyr

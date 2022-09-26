@@ -10,6 +10,7 @@
 #include "smc.h"
 #include "smchost.h"
 #include "smchost_commands.h"
+#include "pwrplane.h"
 
 #include "espi_hub.h"
 #include "system.h"
@@ -145,12 +146,14 @@ static void smc_get_fab_id(void)
 
 static void read_revision(void)
 {
-	uint8_t version[2] = {0};
+	uint8_t version[4] = {0};
 
 	version[0] = major_version();
 	version[1] = minor_version();
+	version[2] = patch_id();
+	version[3] = qs_build_version();
 
-	send_to_host((uint8_t *)&version, 2);
+	send_to_host((uint8_t *)&version, 4);
 }
 
 static void read_platform_signature(void)
@@ -160,6 +163,14 @@ static void read_platform_signature(void)
 	send_to_host((uint8_t *)value, 8);
 }
 
+static void get_shutdown_reason(void)
+{
+	uint8_t shutdown_status = read_shutdown_reason();
+
+	send_to_host((uint8_t *)&shutdown_status, sizeof(shutdown_status));
+}
+
+
 void smchost_cmd_info_handler(uint8_t command)
 {
 	switch (command) {
@@ -168,6 +179,11 @@ void smchost_cmd_info_handler(uint8_t command)
 		query_system_status();
 		break;
 #endif
+	case SMCHOST_GET_PSR_SHUTDOWN_REASON:
+		get_shutdown_reason();
+		/* Clear shutodown reason */
+		set_shutdown_reason(SHUTDOWN_REASON_DEFAULT);
+		break;
 	case SMCHOST_GET_SMC_MODE:
 		smc_mode();
 		break;

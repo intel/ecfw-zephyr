@@ -27,6 +27,12 @@ config SAF_SPI_FREQ_MHZ
 	help
 	  Indicate SPI flash devices frequency in MHz.
 
+config SAF_ENABLE_XIP
+	bool "Enable XIP when supported"
+	depends on ESPI_SAF
+	help
+	  Indicate SPI flash has no continuous read enabled by default.
+
 choice
 	prompt "Select your SAF SPI flash device"
 	default SAF_SPI_WINBOND

@@ -196,7 +196,7 @@ card. Refer to <a class="reference external" href="https://www.intel.com/content
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Alderlake S</p></td>
+<tr class="row-even"><td><p>Meteorlake S</p></td>
 <td><p>RVP (on-board EC)</p></td>
 <td></td>
 </tr>
@@ -300,7 +300,7 @@ card. Refer to table below for guidance about what can be verified end-to-end.</
 <th class="head"><p>Feature</p></th>
 <th class="head"><p>ADL-P +
 MEC172x</p></th>
-<th class="head"><p>ADL-S
+<th class="head"><p>MTL-S
 onboard</p></th>
 <th class="head"><p>ADL-P
 onboard</p></th>
@@ -317,17 +317,17 @@ onboard</p></th>
 <td><p>Deep sleep (DSx)</p></td>
 <td><p>No</p></td>
 <td><p>Yes</p></td>
-<td><p>Yes</p></td>
+<td><p>No</p></td>
 </tr>
 <tr class="row-even"><td></td>
 <td><p>Pseudo G3</p></td>
 <td><p>No</p></td>
-<td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-odd"><td></td>
 <td><p>SAF</p></td>
-<td><p>No (1)</p></td>
+<td><p>No</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
 </tr>
@@ -351,8 +351,8 @@ onboard</p></th>
 </tr>
 <tr class="row-odd"><td></td>
 <td><p>Lid switch</p></td>
-<td><p>No</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-even"><td><p>Thermal</p></td>
@@ -369,9 +369,9 @@ onboard</p></th>
 </tr>
 <tr class="row-even"><td><p>PS2/ scan matrix</p></td>
 <td><p>PS2 keyboard</p></td>
-<td><p>No (1)</p></td>
-<td><p>No</p></td>
-<td><p>No (2)</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes(2)</p></td>
 </tr>
 <tr class="row-odd"><td></td>
 <td><p>PS2 mouse</p></td>
@@ -381,8 +381,8 @@ onboard</p></th>
 </tr>
 <tr class="row-even"><td></td>
 <td><p>Keyboard matrix</p></td>
-<td><p>Yes (3)</p></td>
-<td><p>No</p></td>
+<td><p>Yes(3)</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 </tr>
 <tr class="row-odd"><td><p>Debug</p></td>
@@ -393,7 +393,7 @@ onboard</p></th>
 </tr>
 <tr class="row-even"><td></td>
 <td><p>Serial port (UART)</p></td>
-<td><p>Yes (4)</p></td>
+<td><p>Yes(4)</p></td>
 <td><p>Yes</p></td>
 <td><p>Yes</p></td>
 </tr>
@@ -401,8 +401,8 @@ onboard</p></th>
 </table>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>(1) MEC172x HW revision does not allow to exercise PS2 nor SAF,
-but future MEC172x HW revision 2 will support it.</p>
+<p>(1) MEC172x HW revision 2 supports PS2 Keyboard on PortA and PS2 Mouse
+on PortB. Mouse has not been verified though.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -413,7 +413,7 @@ but future MEC172x HW revision 2 will support it.</p>
 <p class="admonition-title">Note</p>
 <p>(3) Intel Alderlake RVP keyboard matrix connector cannot be used,
 instead need to connect the keyboard matrix directly into the MECC
-card. MEC15xx card allows to use Fujitsu keyboard matrix.</p>
+card. MEC15xx/MEC17xx cards allow to use Fujitsu keyboard matrix.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>

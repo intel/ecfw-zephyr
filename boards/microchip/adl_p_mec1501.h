@@ -160,12 +160,12 @@ enum platform_skus {
 #define VIRTUAL_BAT			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x06)
 #define VIRTUAL_DOCK			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x07)
 /* IO expander pin mapping is in hex decimal format instead of octal*/
+/* Net name TP_ESPI_TESTCRD_DET */
+#define THERM_STRAP			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x08)
 #define KBC_SCROLL_LOCK_P		EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x0D)
 
 /* Net name TP_RETIMER_BYPASS_STRAP */
 #define RETIMER_BYPASS			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x06)
-/* Net name TP_ESPI_TESTCRD_DET */
-#define THERM_STRAP			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x07)
 
 #define KBC_SCROLL_LOCK_M		EC_GPIO_245	/* ADL-M */
 #define KBC_SCROLL_LOCK		((platformskutype == PLATFORM_ADL_M_SKUs) ? \
@@ -241,5 +241,15 @@ enum platform_skus {
  * LSB byte represent Minor version
  */
 #define USB_PD_VERSION 0x0200
+
+/* TIPD UCSI version details
+ * UCSI Version format is 0xJJMN (2 Bytes)
+ * JJ – Manjor Version
+ * M – Minor Version
+ * N – Sub Minor Version
+ */
+#define TIPD_UCSI_MAJOR_VERSION 0x01
+#define TIPD_UCSI_MINOR_VERSION 0x2
+#define TIPD_UCSI_SUB_MINOR_VERSION 0x0
 
 #endif /* __ADL_P_MEC1501_H__ */

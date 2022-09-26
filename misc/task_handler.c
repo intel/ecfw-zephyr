@@ -36,7 +36,8 @@ const uint32_t pwrseq_thrd_period = 10;
 const uint32_t smchost_thrd_period = 10;
 
 #if defined(CONFIG_ESPI_PERIPHERAL_8042_KBC) && \
-	defined(CONFIG_PS2_KEYBOARD_AND_MOUSE) || defined(CONFIG_KSCAN_EC)
+	(defined(CONFIG_PS2_KEYBOARD) || defined(CONFIG_PS2_MOUSE) || \
+	defined(CONFIG_KSCAN_EC))
 
 #define KBC_TASK_STACK_SIZE	320
 #define KB_TASK_STACK_SIZE	384
@@ -61,7 +62,8 @@ K_THREAD_DEFINE(pwrseq_thrd_id, EC_TASK_STACK_SIZE, pwrseq_thread,
 		&pwrseq_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 
-K_THREAD_DEFINE(oobmngr_thrd_id, EC_TASK_STACK_SIZE, oobmngr_thread,
+#define OOBMNGR_TASK_STACK_SIZE		512U
+K_THREAD_DEFINE(oobmngr_thrd_id, OOBMNGR_TASK_STACK_SIZE, oobmngr_thread,
 		NULL, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 
@@ -76,6 +78,7 @@ K_THREAD_DEFINE(thermal_thrd_id, EC_TASK_STACK_SIZE, thermalmgmt_thread,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 #endif
 
+
 struct task_info {
 	k_tid_t thread_id;
 	bool can_suspend;
@@ -85,7 +88,8 @@ struct task_info {
 static struct task_info tasks[] = {
 
 #if defined(CONFIG_ESPI_PERIPHERAL_8042_KBC) && \
-	defined(CONFIG_PS2_KEYBOARD_AND_MOUSE) || defined(CONFIG_KSCAN_EC)
+	(defined(CONFIG_PS2_KEYBOARD) || defined(CONFIG_PS2_MOUSE) || \
+	defined(CONFIG_KSCAN_EC))
 
 	{ .thread_id = kbc_thrd_id, .can_suspend = false,
 	  .tagname = "KBC" },

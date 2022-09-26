@@ -210,12 +210,12 @@ to apt-get wget, pip, git.</p>
 </div>
 <div class="section" id="setting-up-zephyr-environment">
 <h2>Setting Up Zephyr environment<a class="headerlink" href="#setting-up-zephyr-environment" title="Permalink to this headline">¶</a></h2>
-<p>Refer to the official <a class="reference external" href="https://docs.zephyrproject.org/2.5.0/getting_started/index.html">Zephyr’s Getting Started Guide</a> while reviewing
+<p>Refer to the official <a class="reference external" href="https://docs.zephyrproject.org/2.7.0/getting_started/index.html">Zephyr’s Getting Started Guide</a> while reviewing
 considerations below during each step.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>EC FW Open source 1.50 project is based on Zephyr v2.5 so need to
-refer to Zephyr v2.5 documentation and use Zephyr SDK 0.12.2.</p>
+<p>Latest EC FW Open source project is based on Zephyr v2.7 so need to
+refer to Zephyr v2.7 documentation and use Zephyr SDK 0.13.2.</p>
 </div>
 <div class="section" id="os-selection">
 <h3>1) OS selection<a class="headerlink" href="#os-selection" title="Permalink to this headline">¶</a></h3>
@@ -250,17 +250,18 @@ Dediprog.</p>
 <p class="admonition-title">Note</p>
 <p>A toolchain is needed in some cases to compile for a specific EC SoC.
 Zephyr SDK already contains several toolchains.
-Supported HW by this project uses Microchip MEC15xx which is an arm-based
-microcontroller, gnu arm-eabi toolchain included in SDK can be used.</p>
+This project uses Microchip MEC15xx/MEC172x which is an arm-based
+microcontroller, so gnu arm-eabi toolchain included in SDK can be used.</p>
 </div>
 </div>
 <div class="section" id="ec-soc-vendor-specific-setup">
 <h3>5) EC SoC vendor-specific setup<a class="headerlink" href="#ec-soc-vendor-specific-setup" title="Permalink to this headline">¶</a></h3>
-<p>Currently only MEC15xx is supported.
-Perform steps 1 to 3 from Setup section in <a class="reference external" href="https://docs.zephyrproject.org/latest/boards/arm/mec1501modular_assy6885/doc/index.html#programming-and-debugging">MEC15xx EVB Setup guide</a></p>
+<p>Currently only MEC15xx and MEC172x are supported.
+Perform steps 1 to 3 from Setup section in <a class="reference external" href="https://docs.zephyrproject.org/latest/boards/arm/mec1501modular_assy6885/doc/index.html#programming-and-debugging">MEC15xx EVB Setup guide</a> and
+steps 2 to 4 from Setup section in <a class="reference external" href="https://docs.zephyrproject.org/latest/boards/arm/mec172xevb_assy6906/doc/index.html#programming-and-debugging">MEC172x EVB Setup guide</a></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>GitHub repo root folder is <a class="reference external" href="https://github.com/MicrochipTech/CPGZephyrDocs">MEC15xx SPI generator tools</a></p>
+<p>GitHub repo root folder is <a class="reference external" href="https://github.com/MicrochipTech/CPGZephyrDocs">MEC SPI generator tools</a></p>
 </div>
 </div>
 </div>
@@ -302,8 +303,8 @@ west init -l
 </thead>
 <tbody>
 <tr class="row-even"><td><p>zephyr</p></td>
-<td><p>zephyr_snapshot</p></td>
-<td><p>v2.5-branch</p></td>
+<td><p>zephyr_fork</p></td>
+<td><p>v2.7-branch</p></td>
 <td><p><a class="reference external" href="https://github.com/zephyrproject-rtos/zephyr">https://github.com/zephyrproject-rtos/zephyr</a></p></td>
 </tr>
 <tr class="row-odd"><td><p>cmsis</p></td>
@@ -313,7 +314,7 @@ west init -l
 </tr>
 <tr class="row-even"><td><p>hal_microchip</p></td>
 <td><p>modules/hal/microchip</p></td>
-<td><p>a1ec761</p></td>
+<td><p>870d05e</p></td>
 <td><p><a class="reference external" href="https://github.com/zephyrproject-rtos/hal_microchip">https://github.com/zephyrproject-rtos/hal_microchip</a></p></td>
 </tr>
 </tbody>
@@ -325,8 +326,8 @@ west init -l
 <p>Your directory structure should look like this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sandbox</span>
 <span class="o">|</span><span class="n">____ecfw</span><span class="o">-</span><span class="n">zephyr</span>               <span class="n">This</span> <span class="n">repository</span>
-<span class="o">|</span><span class="n">____ecfwwork</span><span class="o">/</span><span class="n">modules</span>           <span class="n">Zephyr</span> <span class="n">RTOS</span> <span class="n">modules</span> <span class="n">includes</span> <span class="n">EC</span> <span class="n">SoC</span> <span class="n">HAL</span>
-<span class="o">|</span><span class="n">____ecfwwork</span><span class="o">/</span><span class="n">zephyr_snapshot</span>   <span class="n">Snapshot</span> <span class="kn">from</span> <span class="nn">Zephyr</span> <span class="n">RTOS</span>
+<span class="o">|</span><span class="n">____ecfwwork</span><span class="o">/</span><span class="n">modules</span>          <span class="n">Zephyr</span> <span class="n">RTOS</span> <span class="n">modules</span> <span class="n">includes</span> <span class="n">EC</span> <span class="n">SoC</span> <span class="n">HAL</span>
+<span class="o">|</span><span class="n">____ecfwwork</span><span class="o">/</span><span class="n">zephyr_fork</span>      <span class="n">Snapshot</span> <span class="kn">from</span> <span class="nn">Zephyr</span> <span class="n">RTOS</span>
 </pre></div>
 </div>
 </div>
@@ -334,7 +335,7 @@ west init -l
 <h3>3) Apply back-ported fixes<a class="headerlink" href="#apply-back-ported-fixes" title="Permalink to this headline">¶</a></h3>
 <p>Some additional patches are required to be applied to the Zephyr kernel
 for building the open source EC FW application. The latest release is based out
-of Zephyr v2.5 and hence these patches need to be applied on that branch.</p>
+of Zephyr v2.7 and hence these patches need to be applied on that branch.</p>
 <p>These patches are expected to be part of the future Zephyr releases (if
 they are not already integrated).</p>
 <p>Note: Below steps assume environment has been setup as indicated in the
@@ -350,7 +351,7 @@ git checkout master
 <li><p>Apply zephyr patches on to the kernel branch</p></li>
 </ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ../ecfwwork/zephyr_fork
-git am ../../ecfw-zephyr/zephyr_patches/patches_v2_5.patch
+git am ../../ecfw-zephyr/zephyr_patches/patches_v2.7.patch
 </pre></div>
 </div>
 </div>
@@ -366,13 +367,13 @@ west installation. It’s safe to delete/backup pre-existing “.west” folder<
 <div class="section" id="set-zephyr-environment-variables">
 <h3>1) Set zephyr environment variables<a class="headerlink" href="#set-zephyr-environment-variables" title="Permalink to this headline">¶</a></h3>
 <p>Run the following command to indicate to Zephyr SDK tool active Zephyr path.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ~/sandbox/zephyr_snapshot
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ~/sandbox/zephyr_fork
 <span class="nb">source</span> zephyr-env.sh
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Multiple zephyr snapshots can coexist under same environment, setting
+<p>Multiple zephyr trees can coexist under same environment, setting
 ZEPHYR_BASE environment variable through this script allows to switch
 between them.</p>
 </div>

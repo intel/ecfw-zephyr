@@ -90,43 +90,25 @@ static struct fan_dev fan_tbl[] = {
 	{ PWM_CH_00,	TACH_CH_00 }, /* CPU Fan */
 };
 
-/**
- * @brief Thermal sensor table.
- *
- * This table lists the thermal sensors connected to the board and their
- * respective ACPI location field it is mapped to update the temperature value.
- */
-static struct therm_sensor therm_sensor_tbl[] = {
-};
-
-static struct therm_sensor therm_sensor_tbl_tgl[] = {
-/*      ADC_CH_##	ACPI_LOC		dtt_threshold */
-	{ ADC_CH_00,	ACPI_THRM_SEN_VR,	{0} },
-	{ ADC_CH_03,	ACPI_THRM_SEN_AMBIENT,	{0} },
-	{ ADC_CH_04,	ACPI_THRM_SEN_SKIN,	{0} },
-	{ ADC_CH_05,	ACPI_THRM_SEN_DDR,	{0} },
-};
-
-void board_therm_sensor_tbl_init(uint8_t *p_max_adc_sensors,
-		struct therm_sensor **p_therm_sensor_tbl)
-{
-	switch (get_board_id()) {
-	case BRD_ID_TGL_U_ERB:
-	case BRD_ID_TGL_U_CRB:
-		*p_therm_sensor_tbl = therm_sensor_tbl_tgl;
-		*p_max_adc_sensors = ARRAY_SIZE(therm_sensor_tbl_tgl);
-		break;
-	default:
-		*p_therm_sensor_tbl = therm_sensor_tbl;
-		*p_max_adc_sensors = ARRAY_SIZE(therm_sensor_tbl);
-		break;
-	}
-}
-
 void board_fan_dev_tbl_init(uint8_t *pmax_fan, struct fan_dev **pfan_tbl)
 {
 	*pfan_tbl = fan_tbl;
 	*pmax_fan = ARRAY_SIZE(fan_tbl);
+}
+
+void board_therm_sensor_list_init(uint8_t therm_sensors[])
+{
+	switch (get_board_id()) {
+	case BRD_ID_TGL_U_ERB:
+	case BRD_ID_TGL_U_CRB:
+		therm_sensors[ACPI_THRM_SEN_2] = ADC_CH_04;
+		therm_sensors[ACPI_THRM_SEN_3] = ADC_CH_03;
+		therm_sensors[ACPI_THRM_SEN_4] = ADC_CH_00;
+		therm_sensors[ACPI_THRM_SEN_5] = ADC_CH_05;
+		break;
+	default:
+		break;
+	}
 }
 #endif
 

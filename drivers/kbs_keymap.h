@@ -15,6 +15,8 @@
 #include <zephyr.h>
 
 /* Keymaps for generic key stations */
+#define KM_VOL_DN_KEY		24U
+#define KM_VOL_UP_KEY		25U
 #define KM_LCNTRL_KEY		58U
 #define KM_RCNTRL_KEY		0U
 #define KM_LSHIFT_KEY		44U

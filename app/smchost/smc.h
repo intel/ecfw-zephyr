@@ -12,28 +12,26 @@
 
 /** Number of loops to wait for host in burst */
 #define BURST_TIMEOUT        20ul
+#define WAKE_HID_EVENT_BIT	0
+#define WAKE_S3_TIMEOUT_BIT	1
 
 /**
  * @brief Thermal sensor list index in ACPI table.
  */
 enum acpi_thrm_sens_idx {
-	ACPI_THRM_SEN_PCH,
-	ACPI_THRM_SEN_SKIN,
-	ACPI_THRM_SEN_AMBIENT,
-	ACPI_THRM_SEN_VR,
-	ACPI_THRM_SEN_DDR,
-	ACPI_THRM_SEN_TOTAL,
-	ACPI_THERM_SEN_UNDEF,
-};
+	/* Sen 1: pch */
+	ACPI_THRM_SEN_1,
+	/* Sen 2: skin */
+	ACPI_THRM_SEN_2,
+	/* Sen 3: Ambient */
+	ACPI_THRM_SEN_3,
+	/* Sen 4: VR */
+	ACPI_THRM_SEN_4,
+	/* Sen 5: DDR */
+	ACPI_THRM_SEN_5,
 
-/**
- * @brief Wake reasons for BIOS.
- */
-enum wake_reason_bios {
-	/* Wake due to power button or HID Event */
-	WAKE_HID_EVENT = BIT(0),
-	/* Wake due to S3 timeout */
-	WAKE_S3_TIMEOUT = BIT(1),
+	ACPI_THRM_SEN_TOTAL,
+	ACPI_THERM_SEN_UNDEF = 0xFF,
 };
 
 /**

@@ -6,6 +6,7 @@
 
 #include "kbs_keymap.h"
 #include <sys/printk.h>
+#include <logging/log.h>
 
 /* Below is the keymap for the fujitsu keyboard we borrowed from MCHP */
 
@@ -68,6 +69,8 @@
 /* This should be aligned with Kconfig MAX row/columns */
 #define MAX_MTX_KEY_COLS	16U
 #define MAX_MTX_KEY_ROWS	8U
+
+LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 
 struct km_api *fujitsu_init(void);
 int fujitsu_get_keynum(uint8_t col, uint8_t row);

@@ -11,6 +11,7 @@
 #include "gpio_ec.h"
 #include "espi_hub.h"
 #include "kbs_matrix.h"
+#include "pwrplane.h"
 #include "board_config.h"
 #include <logging/log.h>
 LOG_MODULE_REGISTER(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
@@ -56,7 +57,7 @@ K_MSGQ_DEFINE(from_host_queue, sizeof(struct host_byte), 8, 4);
 K_MSGQ_DEFINE(to_host_kb_queue, sizeof(uint8_t), TO_HOST_LEN, 4);
 K_SEM_DEFINE(kb_p60_sem, 0, 1);
 K_MUTEX_DEFINE(led_mutex);
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#ifdef CONFIG_PS2_MOUSE
 static atomic_t ps2_reset;
 #endif
 static int kbc_init(void);
@@ -140,7 +141,7 @@ static int process_keyboard_command(uint8_t command, uint8_t *output)
 {
 	uint8_t out_len = 0;
 
-#if !defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if !defined(CONFIG_PS2_MOUSE)
 	if (command == KBC_8042_DIS_MOUSE || command == KBC_8042_ENA_MOUSE ||
 	    command == KBC_8042_TEST_MOUSE) {
 		return out_len;
@@ -157,7 +158,7 @@ static int process_keyboard_command(uint8_t command, uint8_t *output)
 	case KBC_8042_TEST_PASSWORD:
 		output[out_len++] = NO_PASSWORD;
 		break;
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_MOUSE)
 	case KBC_8042_DIS_MOUSE:
 		cmdbyte_disable_mb();
 		break;
@@ -284,14 +285,14 @@ static int process_keyboard_data(uint8_t data, uint8_t *output)
 		data_port_state = DEFAULT_STATE;
 		break;
 	case ECHO_MOUSE_STATE:
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD) || defined(CONFIG_PS2_MOUSE)
 		/* Echo sends back data to host through aux register */
 		espihub_kbc_write(E8042_WRITE_MB_CHAR, data);
 #endif
 		data_port_state = DEFAULT_STATE;
 		break;
 	case SEND_TO_MOUSE_STATE:
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#ifdef CONFIG_PS2_MOUSE
 		if (data == KBC_8042_RESET) {
 			atomic_set(&ps2_reset, 1U);
 			int attempt = 0;
@@ -319,7 +320,7 @@ static int process_keyboard_data(uint8_t data, uint8_t *output)
 	case SET_LEDS_STATE:
 		/* Control RVP leds */
 		kbc_set_leds(data);
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 		/*  Send the byte to keyboard */
 		ps2_keyboard_write(data);
 #endif
@@ -336,7 +337,7 @@ static int process_keyboard_data(uint8_t data, uint8_t *output)
 		} else {
 			purge_kb_queue();
 			current_scan_code = data;
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 			ps2_keyboard_write(data);
 #endif
 		}
@@ -345,7 +346,7 @@ static int process_keyboard_data(uint8_t data, uint8_t *output)
 	case SET_TYPEMATIC_RATE_STATE:
 		output[out_len++] = KBC_8042_ACK;
 
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 		ps2_keyboard_write(data);
 #endif
 #if defined(CONFIG_KSCAN_EC)
@@ -363,7 +364,7 @@ static int process_keyboard_data(uint8_t data, uint8_t *output)
 			output[out_len++] = KBC_8042_ECHO_KEYBOARD;
 			break;
 		case KBC_8042_SET_LEDS:
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 			ps2_keyboard_write(data);
 #endif
 			output[out_len++] = KBC_8042_ACK;
@@ -386,7 +387,7 @@ static int process_keyboard_data(uint8_t data, uint8_t *output)
 			break;
 		case KBC_8042_EN_KEYBOARD:
 			purge_kb_queue();
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 			ps2_keyboard_write(data);
 #endif
 			output[out_len] = KBC_8042_ACK;
@@ -396,7 +397,7 @@ static int process_keyboard_data(uint8_t data, uint8_t *output)
 			output[out_len++] = KBC_8042_ACK;
 			current_scan_code = KBC_8042_DEFAULT_SCAN_CODE;
 			purge_kb_queue();
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 			ps2_keyboard_write(data);
 #endif
 #if defined(CONFIG_KSCAN_EC)
@@ -408,7 +409,7 @@ static int process_keyboard_data(uint8_t data, uint8_t *output)
 			output[out_len++] = KBC_8042_ACK;
 			current_scan_code = KBC_8042_DEFAULT_SCAN_CODE;
 			purge_kb_queue();
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 			ps2_keyboard_write(data);
 #endif
 #if defined(CONFIG_KSCAN_EC)
@@ -424,7 +425,7 @@ static int process_keyboard_data(uint8_t data, uint8_t *output)
 		case KBC_8042_RESET:
 			espihub_kbc_write(E8042_CLEAR_OBF, 0);
 			purge_kb_queue();
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 			ps2_keyboard_write(data);
 #endif
 #if defined(CONFIG_KSCAN_EC)
@@ -568,6 +569,12 @@ void to_host_kb_thread(void *p1, void *p2, void *p3)
 					}
 					k_msleep(TOHOST_RETRY_PERIOD);
 				} else {
+					/* Wake the Host if system is in S3 on
+					 * detection of first key press.
+					 */
+					if (pwrseq_system_state() == SYSTEM_S3_STATE) {
+						smc_generate_wake(WAKE_KBC_EVENT);
+					}
 					/* Send more kb data to the host */
 					k_msgq_get(&to_host_kb_queue,
 						   &kb_data, K_NO_WAIT);
@@ -584,7 +591,7 @@ void to_host_kb_thread(void *p1, void *p2, void *p3)
 	}
 }
 
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 /* Callback passed to the PS2 instance handling the keyboard */
 static void keyboard_callback(uint8_t data)
 {
@@ -600,7 +607,9 @@ static void keyboard_callback(uint8_t data)
 		send_kb_to_host(data);
 	}
 }
+#endif
 
+#if defined(CONFIG_PS2_MOUSE)
 /* Callback passed to the PS2 instance handling the mouse */
 static void mouse_callback(uint8_t data)
 {
@@ -644,21 +653,23 @@ static void mtx_keyboard_callback(uint8_t *data, uint8_t len)
 
 static int kbc_init(void)
 {
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
-	int ps2_mb_err;
-	int ps2_kb_err;
+	int ps2_kb_err = 0;
+	int ps2_mb_err = 0;
 
+#if defined(CONFIG_PS2_MOUSE)
 	ps2_mb_err = ps2_mouse_init(mouse_callback);
+#endif
+
+#if defined(CONFIG_PS2_KEYBOARD)
 	ps2_kb_err = ps2_keyboard_init(keyboard_callback,
 				       &current_scan_code);
-
+#endif
 	/* In case of a problem with one of the PS2 devices
 	 * report it back to the calller
 	 */
 	if (ps2_mb_err || ps2_kb_err) {
 		return -ENOTSUP;
 	}
-#endif
 
 #if defined(CONFIG_KSCAN_EC)
 	int mtx_kb_err;
@@ -680,8 +691,10 @@ int kbc_disable_interface(void)
 	cmdbyte_disable_kbd();
 	cmdbyte_disable_mb();
 
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 	ps2_keyboard_disable();
+#endif
+#if defined(CONFIG_PS2_MOUSE)
 	ps2_mouse_disable();
 #endif
 #if defined(CONFIG_KSCAN_EC)
@@ -704,8 +717,10 @@ int kbc_enable_interface(void)
 	cmdbyte_enable_kbd();
 	cmdbyte_enable_mb();
 
-#if defined(CONFIG_PS2_KEYBOARD_AND_MOUSE)
+#if defined(CONFIG_PS2_KEYBOARD)
 	ps2_keyboard_enable();
+#endif
+#if defined(CONFIG_PS2_MOUSE)
 	ps2_mouse_enable();
 #endif
 #if defined(CONFIG_KSCAN_EC)
@@ -748,10 +763,14 @@ void kbc_handler(uint8_t data, uint8_t cmd_data)
 
 void kbc_set_leds(uint8_t leds)
 {
+	int ret = 0;
+
 	k_mutex_lock(&led_mutex, K_FOREVER);
 
-#if defined(KBC_SCROLL_LOCK)
-	if (gpio_write_pin(KBC_SCROLL_LOCK, GET_SCROLL_LOCK(leds))) {
+#if defined(KBC_SCROLL_LOCK) && !defined(CONFIG_DEBUG_LED)
+	ret = gpio_write_pin(KBC_SCROLL_LOCK, GET_SCROLL_LOCK(leds));
+#endif
+	if (ret) {
 		LOG_ERR("Unable to write scroll lock led");
 	} else {
 		if (GET_SCROLL_LOCK(leds)) {
@@ -760,10 +779,11 @@ void kbc_set_leds(uint8_t leds)
 			current_leds_state &= ~BIT(SCROLL_LOCK_POS);
 		}
 	}
-#endif
 
-#if defined(KBC_NUM_LOCK)
-	if (gpio_write_pin(KBC_NUM_LOCK, GET_NUM_LOCK(leds))) {
+#if defined(KBC_NUM_LOCK) && !defined(CONFIG_DEBUG_LED)
+	ret = gpio_write_pin(KBC_NUM_LOCK, GET_NUM_LOCK(leds));
+#endif
+	if (ret) {
 		LOG_ERR("Unable to write num lock led");
 	} else {
 		if (GET_NUM_LOCK(leds)) {
@@ -772,10 +792,11 @@ void kbc_set_leds(uint8_t leds)
 			current_leds_state &= ~BIT(NUM_LOCK_POS);
 		}
 	}
-#endif
 
-#if defined(KBC_CAPS_LOCK)
-	if (gpio_write_pin(KBC_CAPS_LOCK, GET_CAPS_LOCK(leds))) {
+#if defined(KBC_CAPS_LOCK) && !defined(CONFIG_DEBUG_LED)
+	ret = gpio_write_pin(KBC_CAPS_LOCK, GET_CAPS_LOCK(leds));
+#endif
+	if (ret) {
 		LOG_ERR("Unable to write caps lock led");
 	} else {
 		if (GET_CAPS_LOCK(leds)) {
@@ -784,7 +805,7 @@ void kbc_set_leds(uint8_t leds)
 			current_leds_state &= ~BIT(CAPS_LOCK_POS);
 		}
 	}
-#endif
+
 	k_mutex_unlock(&led_mutex);
 
 #if !defined(KBC_SCROLL_LOCK) &&  !defined(KBC_NUM_LOCK) \

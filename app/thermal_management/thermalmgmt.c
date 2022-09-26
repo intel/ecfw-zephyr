@@ -8,7 +8,7 @@
 #include <logging/log.h>
 #include "thermalmgmt.h"
 #include "fan.h"
-#include "thermal_sensor.h"
+#include "adc_sensors.h"
 #include "board_config.h"
 #include "smc.h"
 #include "sci.h"
@@ -20,20 +20,11 @@
 #include "memops.h"
 #include "gpio_ec.h"
 #include "task_handler.h"
+#ifdef CONFIG_DTT_SUPPORT_THERMALS
+#include "dtt.h"
+#endif
 
 LOG_MODULE_REGISTER(thermal, CONFIG_THERMAL_MGMT_LOG_LEVEL);
-
-/**
- * DTT threshold default values upon init in degree celsius:
- * - low trip temp = 95c
- * - high trip temp = 100c
- * - temp hysteresis = 2c
- *
- * Note: All values are expressed in centigrades.
- */
-#define DTT_LOW_TRIP_DEFAULT			950U
-#define	DTT_HIGH_TRIP_DEFAULT			1000U
-#define	DTT_TEMP_HYST_DEFAULT			20U
 
 /* PECI is prone to fail during initial boot to S0.
  * Hence allow 1 sec time before reading temperature from peci.
@@ -71,9 +62,9 @@ LOG_MODULE_REGISTER(thermal, CONFIG_THERMAL_MGMT_LOG_LEVEL);
  */
 #define GET_FAN_SPEED_FOR_TEMP(temp)		(temp & (~0x7))
 
-struct therm_sensor *therm_sensor_tbl;
+static uint8_t therm_sensors[ACPI_THRM_SEN_TOTAL] = {
+	[0 ... ACPI_THRM_SEN_TOTAL-1] = ADC_CH_UNDEF};
 struct fan_dev *fan_dev_tbl;
-static uint8_t max_adc_sensors;
 static uint8_t max_fan_dev;
 static bool thermal_initialized;
 static bool peci_initialized;
@@ -94,75 +85,6 @@ void host_update_crit_temp(uint8_t crit_temp)
 /* Set default BSOD thermal thresholds */
 struct therm_bsod_override_thrsd_acpi therm_bsod_override_acpi = {
 	TEMP_OVERRIDE_ACPI, FAN_OVERRIDE_ACPI, false, false };
-
-void init_dtt_threshold_limits(void)
-{
-	for (uint8_t idx = 0; idx < max_adc_sensors; idx++) {
-		struct dtt_threshold *thrd = &therm_sensor_tbl[idx].thrd;
-
-		thrd->low_temp = DTT_LOW_TRIP_DEFAULT;
-		thrd->high_temp = DTT_HIGH_TRIP_DEFAULT;
-		thrd->temp_hyst = DTT_TEMP_HYST_DEFAULT;
-		thrd->status = BIT(DTT_THRD_STATUS_BIT_INIT);
-	}
-}
-
-void smc_update_dtt_threshold_limits(enum acpi_thrm_sens_idx acpi_sen_idx,
-				     struct dtt_threshold thrd)
-{
-	for (uint8_t idx = 0; idx < max_adc_sensors; idx++) {
-		if (therm_sensor_tbl[idx].acpi_loc == acpi_sen_idx) {
-			struct dtt_threshold *thr = &therm_sensor_tbl[idx].thrd;
-
-			thr->high_temp = thrd.high_temp;
-			thr->low_temp = thrd.low_temp;
-			thr->temp_hyst = thrd.temp_hyst;
-		}
-	}
-}
-
-void sys_therm_sensor_trip(void)
-{
-	uint16_t acpi_thrm_stat = 0;
-
-	for (uint8_t idx = 0; idx < max_adc_sensors; idx++) {
-
-		struct dtt_threshold *thrd = &therm_sensor_tbl[idx].thrd;
-		/* Current sensor temperature */
-		int16_t snstemp = adc_temp_val[therm_sensor_tbl[idx].adc_ch];
-		bool tripped;
-		int16_t triplimit;
-		uint8_t old_status = thrd->status;
-
-		/* Low temperature trip check */
-		tripped = thrd->status & BIT(DTT_THRD_STATUS_BIT_LOW_TRIP);
-		triplimit = (tripped ? (thrd->low_temp + thrd->temp_hyst) :
-			(thrd->low_temp));
-
-		if (snstemp < triplimit) {
-			thrd->status |= BIT(DTT_THRD_STATUS_BIT_LOW_TRIP);
-		} else {
-			thrd->status &= ~BIT(DTT_THRD_STATUS_BIT_LOW_TRIP);
-		}
-
-		/* High temperature trip check */
-		tripped = thrd->status & BIT(DTT_THRD_STATUS_BIT_HIGH_TRIP);
-		triplimit = (tripped ? (thrd->high_temp - thrd->temp_hyst) :
-			(thrd->high_temp));
-
-		if (snstemp > triplimit) {
-			thrd->status |= BIT(DTT_THRD_STATUS_BIT_HIGH_TRIP);
-		} else {
-			thrd->status &= ~BIT(DTT_THRD_STATUS_BIT_HIGH_TRIP);
-		}
-
-		if (thrd->status ^ old_status) {
-			acpi_thrm_stat |= BIT(therm_sensor_tbl[idx].acpi_loc);
-		}
-	}
-
-	smc_update_therm_trip_status(acpi_thrm_stat);
-}
 
 void get_hw_peripherals_status(uint8_t *hw_peripherals_sts)
 {
@@ -196,8 +118,10 @@ void get_hw_peripherals_status(uint8_t *hw_peripherals_sts)
 	}
 
 	/* Update thermal sensors status */
-	for (idx = 0; idx < max_adc_sensors; idx++) {
-		hw_peripherals_sts[1] |= BIT(therm_sensor_tbl[idx].acpi_loc);
+	for (idx = 0; idx < ACPI_THRM_SEN_TOTAL; idx++) {
+		if (therm_sensors[idx] < ADC_CH_TOTAL) {
+			hw_peripherals_sts[1] |= BIT(idx);
+		}
 	}
 }
 
@@ -237,26 +161,24 @@ static void init_therm_sensors(void)
 {
 	uint8_t adc_ch_bits = 0;
 
-	board_therm_sensor_tbl_init(&max_adc_sensors, &therm_sensor_tbl);
+	board_therm_sensor_list_init(therm_sensors);
 
-	LOG_INF("Num of thermal sensors: %d", max_adc_sensors);
-
-	for (uint8_t idx = 0; idx < max_adc_sensors; idx++) {
-		LOG_INF("adc ch: %d, for acpi sen: %d",
-			therm_sensor_tbl[idx].adc_ch,
-			therm_sensor_tbl[idx].acpi_loc);
-
-		adc_ch_bits |= BIT(therm_sensor_tbl[idx].adc_ch);
+	for (uint8_t idx = 0; idx < ACPI_THRM_SEN_TOTAL; idx++) {
+		if (therm_sensors[idx] < ADC_CH_TOTAL) {
+			adc_ch_bits |= BIT(therm_sensors[idx]);
+		}
 	}
 
 	LOG_INF("adc ch sensors bit: %x", adc_ch_bits);
-	if (thermal_sensors_init(adc_ch_bits)) {
+	if (adc_sensors_init(adc_ch_bits)) {
 		LOG_WRN("Thermal Sensor module init failed!");
 	} else {
 		thermal_initialized = true;
 	}
 
-	init_dtt_threshold_limits();
+#ifdef CONFIG_DTT_SUPPORT_THERMALS
+	dtt_init_thermals(therm_sensors);
+#endif
 }
 
 bool is_fan_controlled_by_host(void)
@@ -372,15 +294,17 @@ static void manage_thermal_sensors(void)
 		return;
 	}
 
-	thermal_sensors_update();
+	adc_sensors_read_all();
 
-	for (uint8_t idx = 0; idx < max_adc_sensors; idx++) {
-		smc_update_thermal_sensor(
-			therm_sensor_tbl[idx].acpi_loc,
-			adc_temp_val[therm_sensor_tbl[idx].adc_ch]);
+	for (uint8_t idx = 0; idx < ACPI_THRM_SEN_TOTAL; idx++) {
+		if (therm_sensors[idx] < ADC_CH_TOTAL) {
+			smc_update_thermal_sensor(idx, adc_temp_val[therm_sensors[idx]]);
+		}
 	}
 
-	sys_therm_sensor_trip();
+#ifdef CONFIG_DTT_SUPPORT_THERMALS
+	dtt_therm_sensor_trip();
+#endif
 }
 
 K_TIMER_DEFINE(peci_delay_timer, NULL, NULL);

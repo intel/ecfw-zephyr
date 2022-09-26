@@ -816,23 +816,23 @@ void smc_generate_wake(uint8_t wake_reason)
 void smc_update_thermal_sensor(enum acpi_thrm_sens_idx idx, int16_t temp)
 {
 	switch (idx) {
-	case ACPI_THRM_SEN_PCH:
+	case ACPI_THRM_SEN_1:
 		g_acpi_tbl.acpi_sen1 = temp;
 		break;
 
-	case ACPI_THRM_SEN_SKIN:
+	case ACPI_THRM_SEN_2:
 		g_acpi_tbl.acpi_sen2 = temp;
 		break;
 
-	case ACPI_THRM_SEN_AMBIENT:
+	case ACPI_THRM_SEN_3:
 		g_acpi_tbl.acpi_sen3 = temp;
 		break;
 
-	case ACPI_THRM_SEN_VR:
+	case ACPI_THRM_SEN_4:
 		g_acpi_tbl.acpi_sen4 = temp;
 		break;
 
-	case ACPI_THRM_SEN_DDR:
+	case ACPI_THRM_SEN_5:
 		g_acpi_tbl.acpi_sen5 = temp;
 		break;
 

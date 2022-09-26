@@ -437,7 +437,7 @@ static int handle_vw_ack(enum espi_vwire_signal signal, uint8_t value)
 
 
 int espihub_wait_for_vwire(enum espi_vwire_signal signal, uint16_t timeout,
-		   enum espihub_vw_level exp_level, bool ack_required)
+		   uint8_t exp_level, bool ack_required)
 {
 	int ret;
 	uint8_t level;
@@ -494,7 +494,7 @@ int espihub_wait_for_espi_reset(uint8_t exp_sts, uint16_t timeout)
 int wait_for_pin_monitor_vwire(uint32_t port_pin, uint32_t exp_sts,
 			       uint16_t timeout,
 			       enum espi_vwire_signal signal,
-			       enum espihub_vw_level abort_sts)
+			       uint8_t abort_sts)
 {
 	int loop_cnt = timeout;
 	uint8_t vw_level;
@@ -535,7 +535,7 @@ int espihub_retrieve_vw(enum espi_vwire_signal signal,
 	return espi_receive_vwire(espi_dev, signal, level);
 }
 
-int espihub_send_vw(enum espi_vwire_signal signal, enum espihub_vw_level level)
+int espihub_send_vw(enum espi_vwire_signal signal, uint8_t level)
 {
 	/* Per SoC spec need to ensure that eSPI host is ready */
 	if (!hub.host_vw_ready) {

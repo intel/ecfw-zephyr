@@ -31,5 +31,18 @@ uint8_t major_version(void);
  */
 uint8_t minor_version(void);
 
+/**
+ * @brief Gets the patch ID.
+ *
+ * @retval byte representing the patch ID.
+ */
+uint8_t patch_id(void);
+
+/**
+ * @brief Gets EC FW QS build version.
+ *
+ * @retval byte representing the EC FW QS build version.
+ */
+uint8_t qs_build_version(void);
 
 #endif /* __FLASH_IMG_HDR_H__ */

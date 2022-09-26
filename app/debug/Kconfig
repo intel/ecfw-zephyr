@@ -14,9 +14,9 @@ config POSTCODE_MANAGEMENT
 
 config POSTCODE_LOG_LEVEL
 	int "Debug Port80 log level"
-	depends on LOG
 	depends on POSTCODE_MANAGEMENT
-	default 2 if EC_DEBUG_LOG_LEVEL
+	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
 	help
 	  Set log level for debug Port 80 log level.
@@ -24,3 +24,9 @@ config POSTCODE_LOG_LEVEL
 config ESPI_PERIPHERAL_DEBUG_PORT_80
 	default y if POSTCODE_MANAGEMENT
 	default n
+
+config DEBUG_LED
+	bool "Enable generic debug support via keyboard leds"
+	help
+	  Repurpose keyboard LEDs to use as debug marker for timing
+	  analysis. This prevents keyboard LEDs mirroring.

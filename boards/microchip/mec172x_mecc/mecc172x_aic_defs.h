@@ -54,7 +54,13 @@
  */
 #define ESPI_RESET_MAF			EC_GPIO_061
 #define PCH_PWROK			EC_GPIO_106
+
+#ifndef CONFIG_MEC172X_AIC_HW_REV2
 #define FAN_PWR_DISABLE_N		EC_GPIO_141
+#else
+#define FAN_PWR_DISABLE_N		EC_GPIO_201
+#endif
+
 #define BC_ACOK				EC_GPIO_156
 #define SYS_PWROK			EC_GPIO_202
 /* Not used across all boards */
@@ -106,7 +112,7 @@
 #define I2C_BUS_0			DT_LABEL(DT_NODELABEL(i2c_smb_0))
 #define I2C_BUS_1			DT_LABEL(DT_NODELABEL(i2c_smb_1))
 #define PS2_KEYBOARD			DT_LABEL(DT_NODELABEL(ps2_0))
-#define PS2_MOUSE			DT_LABEL(DT_NODELABEL(ps2_1))
+#define PS2_MOUSE			DT_LABEL(DT_NODELABEL(ps2_0))
 #define ESPI_0				DT_LABEL(DT_NODELABEL(espi0))
 #define ESPI_SAF_0			DT_LABEL(DT_NODELABEL(espi_saf0))
 #define SPI_0				DT_LABEL(DT_NODELABEL(spi0))

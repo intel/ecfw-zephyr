@@ -7,7 +7,7 @@
 #ifndef __SAF_SPI_TRANSACTION_H__
 #define __SAF_SPI_TRANSACTION_H__
 
-#define SAF_SPI_TRANS_MAX_PAYLOAD_SIZE  2U
+#define SAF_SPI_TRANS_MAX_PAYLOAD_SIZE  6U
 
 /*
  * The SAFS Bridge assumes SPI flash device in certain state.
@@ -26,6 +26,9 @@ enum saf_command_index {
 	 * address mode
 	 */
 	FOUR_BYTE_CMD_INDEX,
+	WRITE_ENABLE_INDEX,
+	WRITE_NV_REGISTER_INDEX,
+	READ_NV_REGISTER_INDEX,
 };
 
 /**

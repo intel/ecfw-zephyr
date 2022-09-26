@@ -1,0 +1,33 @@
+# Kconfig - Config options for EC FW DTT module
+#
+# Copyright (c) 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menuconfig DTT_SUPPORT
+	bool "DTT (Dynamic Thermal Tuning) framework support"
+	default y
+	help
+	  Indicate if EC supports Intel Dynamic Thermal Tuning framework.
+
+if DTT_SUPPORT
+
+config DTT_SUPPORT_THERMALS
+	bool "DTT support for thermal management"
+	default y if THERMAL_MANAGEMENT
+	help
+	  Indicate if EC supports DTT thermal management.
+	  DTT monitors thermal sensors, and needs trip notifications from
+	  EC whenever threshold limits set by DTT are crossed.
+
+config DTT_MODULE_LOG_LEVEL
+	int "DTT power management log level"
+	depends on DTT_SUPPORT
+	depends on LOG
+	default 2 if EC_DEBUG_LOG
+	default 0
+	help
+	  Set log level for DTT module.
+
+endif # DTT_SUPPORT

@@ -43,7 +43,23 @@ static struct saf_spi_transaction winbond_qspi_cmds[] = {
 		.tx_len = 1,
 		.rx_len = 0,
 	},
-
+	[WRITE_ENABLE_INDEX] = {
+		.buf = { WRITE_ENABLE_OPCODE,  },
+		.tx_len = 1,
+		.rx_len = 0,
+	},
+	/* XIP register address 0x000006, new value 0xFE */
+	[WRITE_NV_REGISTER_INDEX] = {
+		.buf = { WRITE_VOLATILE_CFG_OPCODE, 0x00, 0x00, 0x06, 0xFE },
+		.tx_len = 5,
+		.rx_len = 0,
+	},
+	/* Buffer data smaller than tx_len, so driver transmit dummy clocks */
+	[READ_NV_REGISTER_INDEX] = {
+		.buf = { READ_VOLATILE_CFG_OPCODE, 0x00, 0x00, 0x06 },
+		.tx_len = 5,
+		.rx_len = 1,
+	},
 };
 
 /* SAF bridge Windbond configuration
@@ -56,6 +72,9 @@ static struct saf_spi_transaction winbond_qspi_cmds[] = {
  *
  */
 static const struct espi_saf_flash_cfg flash_w25qxxx = {
+#ifdef CONFIG_SOC_SERIES_MEC172X
+	.version = MCHP_SAF_VER_2,
+#endif
 	.flashsz = W25Q_CAPACITY_BYTES,
 	.opa = MCHP_SAF_OPCODE_REG_VAL(WRITE_ENABLE_OPCODE,
 				       ERASE_SUSPEND_OPCODE,
@@ -65,10 +84,16 @@ static const struct espi_saf_flash_cfg flash_w25qxxx = {
 				       BLOCK_ERASE_32K_OPCODE,
 				       BLOCK_ERASE_64K_OPCODE,
 				       PAGE_PROGRAM_OPCODE),
-	.opc = MCHP_SAF_OPCODE_REG_VAL(FAST_READ_QUAD_IO_OPCODE,
+	.opc = MCHP_SAF_OPCODE_REG_VAL(FAST_READ_IO_OPCODE,
 				       EXIT_QPI_OPCODE,
 				       CONTINUOUS_MODE_OPCODE,
 				       READ_STATUS_2_OPCODE),
+#ifdef CONFIG_SOC_SERIES_MEC172X
+	.opd = MCHP_SAF_OPCODE_REG_VAL(POWER_DOWN,
+				       RELEASE_POWER_DOWN,
+				       0U,
+				       0U),
+#endif
 	.cont_prefix = 0U,
 	.cs_cfg_descr_ids = MCHP_CS0_CFG_DESCR_IDX_REG_VAL,
 	.poll2_mask = SAF_POLL_MASK,
@@ -86,9 +111,12 @@ static const struct espi_saf_flash_cfg flash_w25qxxx = {
 static const struct espi_saf_cfg saf_cfg = {
 	.nflash_devices = CONFIG_SAF_SPI_DEVICES_COUNT,
 	.hwcfg = {
-		.qmspi_freq_hz = CONFIG_SAF_SPI_FREQ_MHZ,
+#ifdef CONFIG_SOC_SERIES_MEC172X
+		.version = MCHP_SAF_VER_2,
+#else
 		.qmspi_cs_timing = MCHP_SAF_QMSPI_CS_TIMING,
 		.qmspi_cpha = MCHP_SAF_HW_CFG_FLAG_CPHA,
+#endif
 		.flags = 0,
 		.generic_descr = {
 			SAF_DESCR_EXIT_CM12,

@@ -23,9 +23,9 @@ config PERIPHERAL_DEBOUNCE_TIME
 
 config PERIPHERAL_LOG_LEVEL
 	int "Peripheral log level"
-	depends on LOG
 	depends on PERIPHERAL_MANAGEMENT
+	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for peripheral module.

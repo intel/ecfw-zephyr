@@ -24,6 +24,8 @@
 #define PEAK_CUR_175_IOC_2MS	175
 #define PEAK_CUR_150_IOC_10MS	150
 
+#define SHUTDOWN_REASON_DEFAULT			0x0
+#define SHUTDOWN_REASON_CRTITICAL_THERMAL	0x1
 /**
  * @brief Power control flags.
  */
@@ -103,6 +105,15 @@ bool atx_detect(void);
  */
 void therm_shutdown(void);
 
-extern struct pwr_flags g_pwrflags;
+/**
+ * @brief API to read shutdown reason.
+ *
+ * This is called by smc host task to know the shutdown reason.
+ *
+ */
+uint8_t read_shutdown_reason(void);
 
+void set_shutdown_reason(uint8_t reason);
+
+extern struct pwr_flags g_pwrflags;
 #endif /* __PWRPLANE_H__ */

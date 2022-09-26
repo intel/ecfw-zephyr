@@ -15,6 +15,11 @@ include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/debug)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/kbchost)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/saf)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/soc_debug_awareness)
+if (CONFIG_DTT_SUPPORT)
+include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/dtt)
+endif()
+
+#
 
 target_sources_ifdef(CONFIG_PERIPHERAL_MANAGEMENT app
     PRIVATE
@@ -100,6 +105,17 @@ target_sources_ifdef(CONFIG_ESPI_PERIPHERAL_8042_KBC app
     ${CMAKE_CURRENT_LIST_DIR}/kbchost/kbchost.h
     ${CMAKE_CURRENT_LIST_DIR}/kbchost/keyboard_utility.h
     )
+
+if (CONFIG_DTT_SUPPORT)
+    target_sources_ifdef(CONFIG_DTT_SUPPORT_THERMALS app
+        PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/dtt/dtt_thermals.c
+        )
+    target_sources(app
+        PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/dtt/dtt.h
+        )
+endif()
 
 target_sources_ifdef(CONFIG_ESPI_SAF app
     PRIVATE

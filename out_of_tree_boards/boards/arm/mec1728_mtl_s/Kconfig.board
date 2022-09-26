@@ -1,0 +1,7 @@
+# Copyright (c) 2022, Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_MEC1728_MTL_S
+	bool "Intel MEC1728 MTL S RVP board"
+	depends on SOC_MEC172X_NSZ
+

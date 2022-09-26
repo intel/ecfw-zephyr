@@ -153,6 +153,7 @@ struct gpio_ec_config mecc1501_cfg_sus[] =  {
 struct gpio_ec_config mecc1501_cfg_res[] =  {
 };
 
+#ifdef CONFIG_THERMAL_MANAGEMENT
 /**
  * @brief Fan device table.
  *
@@ -164,46 +165,28 @@ static struct fan_dev fan_tbl[] = {
 	{ PWM_CH_00,	TACH_CH_00 }, /* CPU Fan */
 };
 
-
-/**
- * @brief Thermal sensor table.
- *
- * This table lists the thermal sensors connected to the board and their
- * respective ACPI location field it is mapped to update the temperature value.
- */
-static struct therm_sensor therm_sensor_tbl[] = {
-};
-
-static struct therm_sensor therm_sensor_tbl_adl_p[] = {
-/*      ADC_CH_##	ACPI_LOC		dtt_threshold */
-	{ADC_CH_04,	ACPI_THRM_SEN_AMBIENT,	{0} },	/* ADC_AMBIENT */
-	{ADC_CH_05,	ACPI_THRM_SEN_VR,	{0} },	/* ADC_VR */
-	{ADC_CH_06,	ACPI_THRM_SEN_DDR,	{0} },	/* ADC_DDR*/
-	{ADC_CH_07,	ACPI_THRM_SEN_SKIN,	{0} },	/* ADC_SKIN */
-};
-
-void board_therm_sensor_tbl_init(uint8_t *p_max_adc_sensors,
-		struct therm_sensor **p_therm_sensor_tbl)
-{
-	switch (platformskutype) {
-	case PLATFORM_ADL_P_SKUs:
-	case PLATFORM_ADL_M_SKUs:
-	case PLATFORM_ADL_N_SKUs:
-		*p_therm_sensor_tbl = therm_sensor_tbl_adl_p;
-		*p_max_adc_sensors = ARRAY_SIZE(therm_sensor_tbl_adl_p);
-		break;
-	default:
-		*p_therm_sensor_tbl = therm_sensor_tbl;
-		*p_max_adc_sensors = ARRAY_SIZE(therm_sensor_tbl);
-		break;
-	}
-}
-
 void board_fan_dev_tbl_init(uint8_t *pmax_fan, struct fan_dev **pfan_tbl)
 {
 	*pfan_tbl = fan_tbl;
 	*pmax_fan = ARRAY_SIZE(fan_tbl);
 }
+
+void board_therm_sensor_list_init(uint8_t therm_sensors[])
+{
+	switch (platformskutype) {
+	case PLATFORM_ADL_P_SKUs:
+	case PLATFORM_ADL_M_SKUs:
+	case PLATFORM_ADL_N_SKUs:
+		therm_sensors[ACPI_THRM_SEN_2] = ADC_CH_07;
+		therm_sensors[ACPI_THRM_SEN_3] = ADC_CH_04;
+		therm_sensors[ACPI_THRM_SEN_4] = ADC_CH_05;
+		therm_sensors[ACPI_THRM_SEN_5] = ADC_CH_06;
+		break;
+	default:
+		break;
+	}
+}
+#endif
 
 
 void update_platform_sku_type(void)

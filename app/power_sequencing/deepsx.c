@@ -12,14 +12,16 @@
 #include "board_config.h"
 #include "deepsx.h"
 #include "dswmode.h"
+#ifdef CONFIG_SOC_FAMILY_MEC
 #include "vci.h"
+#endif
 #include "system.h"
 #include "espi_hub.h"
 #include "pwrplane.h"
 #include "pwrbtnmgmt.h"
 #include "pwrseq_timeouts.h"
 #include <logging/log.h>
-LOG_MODULE_REGISTER(pwrmgmt, CONFIG_PWRMGMT_DEEPSX_LOG_LEVEL);
+LOG_MODULE_REGISTER(deepsx, CONFIG_PWRMGMT_DEEPSX_LOG_LEVEL);
 
 /* Delay to wait for SUS_WARN after PMIC change */
 #define DEEPSX_SUS_WARN_DELAY      20
@@ -301,8 +303,6 @@ bool check_s5_battonly_condition(void)
 
 bool check_s5_alwayson_condition(void)
 {
-	int ac_prsnt;
-
 	LOG_DBG("%s", __func__);
 
 	/* Check for correct state */
@@ -311,24 +311,8 @@ bool check_s5_alwayson_condition(void)
 		return false;
 	}
 
-	ac_prsnt = gpio_read_pin(BC_ACOK);
-	if (ac_prsnt < 0) {
-		LOG_ERR("%s fail to read BC_ACOK", __func__);
-		return false;
-	}
-
 	if (slp_m) {
 		LOG_DBG("Invalid sleep signal status: %d", slp_m);
-		return false;
-	}
-
-	/* Check for additional conditions when power supply does matter */
-	if ((atx_detect())) {
-		LOG_DBG("Invalid ATX status: %d", atx_detect());
-		return false;
-	}
-
-	if (!ac_prsnt) {
 		return false;
 	}
 
@@ -349,29 +333,10 @@ bool check_s4s5_battonly_condition(void)
 
 bool check_s4s5_alwayson_condition(void)
 {
-	int ac_prsnt;
-
 	LOG_DBG("%s", __func__);
-
-	ac_prsnt = gpio_read_pin(BC_ACOK);
-	if (ac_prsnt < 0) {
-		LOG_ERR("%s fail to read BC_ACOK", __func__);
-		return false;
-	}
 
 	if (slp_m) {
 		LOG_DBG("Invalid sleep signal status: %d", slp_m);
-		return false;
-	}
-
-	/* Check for additional conditions when power supply does matter */
-	if (atx_detect()) {
-		LOG_DBG("DSx ATX power condition not met");
-		return false;
-	}
-
-	if (!ac_prsnt) {
-		LOG_DBG("DSx AC power condition not met");
 		return false;
 	}
 
@@ -387,7 +352,9 @@ void deep_sx_enter(void)
 	if (espihub_reset_status() && !sus_wrn) {
 		gpio_write_pin(PM_DS3, 1);
 
+		#ifdef CONFIG_SOC_FAMILY_MEC
 		vci_enable();
+		#endif
 
 		ret = ack_deep_sleep_transition(SUS_WRN_LOW);
 		if (ret) {
@@ -426,6 +393,7 @@ void deep_sx_enter(void)
 
 void deep_sx_exit(void)
 {
+	#ifdef CONFIG_SOC_FAMILY_MEC
 	switch (vci_wake_reason()) {
 	case VCI_POWER_BUTTON:
 		/* If power button press detected by VCI, wake the system */
@@ -439,4 +407,5 @@ void deep_sx_exit(void)
 		LOG_WRN("DSx wake not supported");
 		break;
 	}
+	#endif
 }

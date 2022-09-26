@@ -57,6 +57,22 @@ int i2c_hub_write(uint8_t instance, const uint8_t *buf, uint32_t num_bytes,
 		  uint16_t addr);
 
 /**
+ * @brief Read a set amount of data from an I2C device.
+ *
+ * This routine reads a set amount of data synchronously.
+ *
+ * @param instance I2C port number to be used for reading.
+ * @param buf Memory pool to which the data is transferred.
+ * @param num_bytes Number of bytes to read..
+ * @param addr Address to the target I2C device for reading.
+ *
+ * @retval 0 If successful.
+ * @retval -EIO General input / output error.
+ */
+int i2c_hub_read(uint8_t instance, uint8_t *buf, uint32_t num_bytes,
+		  uint16_t addr);
+
+/**
  * @brief Write then read data from an I2C device.
  *
  * This supports the common operation "this is what I want", "now give

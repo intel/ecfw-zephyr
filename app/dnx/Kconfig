@@ -16,8 +16,8 @@ config DNX_SUPPORT
 config DNX_LOG_LEVEL
 	int "EC DnX module log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Define log level for EC DnX module.
 

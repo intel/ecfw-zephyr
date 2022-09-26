@@ -39,10 +39,10 @@ config PECI_ACCESS_DISABLE_IN_CS
 
 config THERMAL_MGMT_LOG_LEVEL
 	int "Thermal management log level"
-	depends on LOG
 	depends on THERMAL_MANAGEMENT
+	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for thermal management module.
 

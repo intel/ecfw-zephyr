@@ -31,6 +31,13 @@ void pseudo_g3_enable(bool state);
 bool pseudo_g3_get_state(void);
 
 /**
+ * @brief Get the previous state of Pseudo G3.
+ *
+ * @return true if system is in pseudo g3 otherwise false.
+ */
+bool pseudo_g3_get_prev_state(void);
+
+/**
  * @brief Program counter value for respective Pseudo G3 counter.
  *
  * @param counter pg3_counter to be programmed.

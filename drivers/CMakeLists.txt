@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
-target_sources_ifdef(CONFIG_PS2_KEYBOARD_AND_MOUSE app
+if (CONFIG_PS2_KEYBOARD OR CONFIG_PS2_MOUSE)
+target_sources(app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/ps2kbaux.c
     PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/ps2kbaux.h
     )
+endif()
 
 target_sources_ifdef(CONFIG_KSCAN_EC app
     PRIVATE
@@ -15,7 +17,7 @@ target_sources_ifdef(CONFIG_KSCAN_EC app
     ${CMAKE_CURRENT_LIST_DIR}/kbs_keymap.h
     )
 
-if (CONFIG_KSCAN_EC OR CONFIG_PS2_KEYBOARD_AND_MOUSE)
+if (CONFIG_KSCAN_EC OR CONFIG_PS2_KEYBOARD)
     if (CONFIG_EC_GTECH_KEYBOARD)
         target_sources(app
         PRIVATE
@@ -41,10 +43,10 @@ target_sources_ifdef(CONFIG_POSTCODE_MANAGEMENT app
 
 target_sources_ifdef(CONFIG_THERMAL_MANAGEMENT app
     PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/thermal_sensor.c
+    ${CMAKE_CURRENT_LIST_DIR}/adc_sensors.c
     ${CMAKE_CURRENT_LIST_DIR}/peci_hub.c
     PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/thermal_sensor.h
+    ${CMAKE_CURRENT_LIST_DIR}/adc_sensors.h
     ${CMAKE_CURRENT_LIST_DIR}/peci_hub.h
     )
 

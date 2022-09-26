@@ -67,7 +67,7 @@ void smchost_pwrbtn_handler(uint8_t pwrbtn_sts)
 	switch (pwrseq_system_state()) {
 	case SYSTEM_S3_STATE:
 	case SYSTEM_S4_STATE:
-		legacy_wake_status |= WAKE_HID_EVENT;
+		legacy_wake_status |= BIT(WAKE_HID_EVENT_BIT);
 		if (pwrbtn_notify) {
 			enqueue_sci(SCI_PWRBTN);
 		}

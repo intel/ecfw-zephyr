@@ -27,15 +27,17 @@
 #define MAX_PERIPH_HANDLERS       2u
 
 /* TODO: Check if we can replace these macros */
+#ifdef CONFIG_SOC_FAMILY_MEC
 #define KBC_IBF_DATA(x)           (((x) >> E8042_ISR_DATA_POS) & 0xFFU)
 #define KBC_CMD_DATA(x)           ((x) & 0xFU)
+#endif
 
 /* TODO: Replace these macros with Zephyr byte order */
 #define ESPI_PERIPHERAL_TYPE(x)   ((x) & 0x0000FFFF)
 #define ESPI_PERIPHERAL_INDEX(x)  (((x) & 0xFFFF0000) >> 16)
 
 /* Map port to OCB index */
-#define ESPI_VW_SIGNAL_OCB_USBC_INDEX(x)	(ESPI_VWIRE_SIGNAL_OCB_0 | x)
+#define ESPI_VW_SIGNAL_OCB_USBC_INDEX(x)	(ESPI_VWIRE_SIGNAL_OCB_0 + x)
 
 typedef void (*espi_acpi_handler_t)(void);
 typedef void (*espi_warn_handler_t)(uint8_t status);
@@ -43,10 +45,8 @@ typedef void (*espi_state_handler_t)(uint32_t signal, uint32_t status);
 typedef void (*espi_kbc_handler_t)(uint8_t data, uint8_t status);
 typedef void (*espi_postcode_handler_t)(uint8_t port_index, uint8_t code);
 
-enum espihub_vw_level {
-	ESPIHUB_VW_LOW,
-	ESPIHUB_VW_HIGH,
-};
+#define	ESPIHUB_VW_LOW	0
+#define	ESPIHUB_VW_HIGH	1
 
 enum espihub_handler {
 	ESPIHUB_RESET_WARNING,
@@ -141,7 +141,7 @@ int espihub_wait_for_espi_reset(uint8_t exp_sts, uint16_t timeout);
  * @retval -ETIMEDOUT or success.
  */
 int espihub_wait_for_vwire(enum espi_vwire_signal signal, uint16_t timeout,
-		   enum espihub_vw_level exp_level, bool ack_required);
+		   uint8_t exp_level, bool ack_required);
 
 /**
  * @brief Poll signal while monitoring eSPI virtual wire.
@@ -159,7 +159,7 @@ int espihub_wait_for_vwire(enum espi_vwire_signal signal, uint16_t timeout,
 int wait_for_pin_monitor_vwire(uint32_t port_pin, uint32_t exp_sts,
 			       uint16_t timeout,
 			       enum espi_vwire_signal signal,
-			       enum espihub_vw_level abort_sts);
+			       uint8_t abort_sts);
 
 /**
  * @brief Add a system state handler.
@@ -251,7 +251,7 @@ int espihub_retrieve_vw(enum espi_vwire_signal signal,
  * @retval -EINVAL if eSPI channel is not ready or 0 if success.
  */
 int espihub_send_vw(enum espi_vwire_signal signal,
-		    enum espihub_vw_level level);
+		    uint8_t level);
 
 /**
  * @brief Retrieve an OOB packet ensuring the eSPI OOB channel is ready.

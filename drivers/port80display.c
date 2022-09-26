@@ -13,6 +13,9 @@ LOG_MODULE_REGISTER(port80, CONFIG_POSTCODE_LOG_LEVEL);
 /* Scan Display digits 0-3 */
 #define PORT80_DISPLAY_DIGITS  3
 
+/* Maximum retries in case of an I2C failure */
+#define MAX_RETRIES	3
+
 int port80_display_init(void)
 {
 	int ret;
@@ -41,12 +44,18 @@ int port80_display_init(void)
 
 int port80_display_on(void)
 {
-	int ret;
+	int ret, retries = 0;
 
-	ret = max6958_set_power(true);
-	if (ret) {
+	do {
+		LOG_DBG("Setting display power on");
+		ret = max6958_set_power(true);
+		if (!ret) {
+			break;
+		}
+
 		LOG_ERR("Failed to power on display: %d", ret);
-	}
+		retries++;
+	} while (retries <= MAX_RETRIES);
 
 	return ret;
 }

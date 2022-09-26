@@ -7,7 +7,9 @@
 #include <zephyr.h>
 #include <device.h>
 #include <errno.h>
-#ifndef CONFIG_PINCTRL
+#ifdef CONFIG_PINCTRL
+#include <drivers/pinctrl.h>
+#else
 #include <drivers/pinmux.h>
 #endif
 #include <logging/log.h>
@@ -58,24 +60,9 @@ struct gpio_port_pin {
 	gpio_pin_t pin;
 };
 
-static uint32_t convert_decimal_to_octal(uint32_t decimal_num)
-{
-	uint32_t octal_num = 0, i = 1;
-
-	while (decimal_num != 0) {
-		octal_num += (decimal_num % OCTAL_BASE) * i;
-		decimal_num /= OCTAL_BASE;
-		i *= 10;
-	}
-
-	return octal_num;
-}
-
 uint32_t get_absolute_gpio_num(uint32_t port_pin)
 {
-	return convert_decimal_to_octal(MAX_PINS_PER_PORT *
-					gpio_get_port(port_pin) +
-					gpio_get_pin(port_pin));
+	return (MAX_PINS_PER_PORT * gpio_get_port(port_pin) + gpio_get_pin(port_pin));
 }
 
 static int validate_device(uint32_t port_pin, struct gpio_port_pin *pp)
@@ -334,7 +321,21 @@ int gpio_force_configure_pin(uint32_t port_pin, gpio_flags_t flags)
 
 	port_idx = gpio_get_port(port_pin);
 
-#ifndef CONFIG_PINCTRL
+#ifdef CONFIG_PINCTRL
+	pinctrl_soc_pin_t pin = {
+		.pinmux = MCHP_XEC_PINMUX(
+				get_absolute_gpio_num(port_pin), MCHP_GPIO),
+	};
+
+	LOG_WRN("%s pinctrl port: %d pin: %d EC_GPIO_%o",
+		__func__, port_idx, pp.pin, get_absolute_gpio_num(port_pin));
+	ret = pinctrl_configure_pins(&pin, 1, PINCTRL_REG_NONE);
+	if (ret) {
+		LOG_ERR("Failed to configure pin control for GPIO %o",
+				get_absolute_gpio_num(port_pin));
+		return ret;
+	}
+#else
 	LOG_WRN("%s pinmux port: %d pin: %d ", __func__, port_idx, pp.pin);
 	ret = pinmux_pin_set(pinmux_ports[port_idx].port, pp.pin,
 			     MCHP_GPIO_CTRL_MUX_F0);
@@ -342,13 +343,13 @@ int gpio_force_configure_pin(uint32_t port_pin, gpio_flags_t flags)
 		LOG_ERR("Failed to switch muxing %d", pp.pin);
 		return ret;
 	}
-
+#endif
 	ret = gpio_pin_configure(pp.gpio_dev, pp.pin, flags);
 
 	if (ret) {
 		LOG_ERR("Failed to configure pin %d", pp.pin);
 		return ret;
 	}
-#endif
+
 	return 0;
 }

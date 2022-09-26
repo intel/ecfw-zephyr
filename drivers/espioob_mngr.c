@@ -253,6 +253,52 @@ int oob_send_async(struct espi_oob_packet *req, oob_rx_callback_handler_t cb)
 	return 0;
 }
 
+
+int oob_respond_master(struct espi_oob_packet *tx)
+{
+	int ret;
+	struct oob_msg *master;
+
+#ifndef CONFIG_OOBMNGR_SUPPORT
+	return -ENOTSUP;
+#endif
+
+	if (tx == NULL) {
+		return -ENODATA;
+	}
+
+	ret = verify_oob_tx_pckt(tx);
+	if (ret) {
+		LOG_ERR("OOB Tx packet verification failed %d", ret);
+		return ret;
+	}
+
+	master = get_oob_master(tx->buf[OOB_IDX_DEST_SLV_ADDR]);
+
+	if (master == NULL) {
+		return -EINVAL;
+	}
+
+	if (k_mutex_lock(&master->txn_lock, K_NO_WAIT)) {
+		LOG_ERR("OOB tx lock timeout");
+		return -EBUSY;
+	}
+
+	master->tx = tx;
+
+	ret = espihub_send_oob(master->tx);
+	if (ret) {
+		LOG_ERR("Error sending OOB %d", ret);
+		ret = -EIO;
+	} else {
+		LOG_DBG("OOB Tx Successful");
+	}
+
+	k_mutex_unlock(&master->txn_lock);
+	return ret;
+}
+
+
 /* Intended to be handled as in ISR - No Lengthy routines */
 static void oob_rx_handler(struct espi_oob_packet *rx)
 {

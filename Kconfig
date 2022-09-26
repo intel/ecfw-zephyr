@@ -20,6 +20,7 @@ menu "EC optional features"
 
 rsource "app/power_management/Kconfig"
 rsource "app/dnx/Kconfig"
+rsource "app/dtt/Kconfig"
 rsource "app/soc_debug_awareness/Kconfig"
 rsource "boards/Kconfig"
 
@@ -27,8 +28,8 @@ endmenu
 
 menu "EC logging control"
 
-config EC_DEBUG_LOG_LEVEL
-	bool "Embedded controller minimum log level"
+config EC_DEBUG_LOG
+	bool "Embedded controller logs"
 	depends on LOG
 	default y
 	help
@@ -37,16 +38,16 @@ config EC_DEBUG_LOG_LEVEL
 config EC_LOG_LEVEL
 	int "Embedded controller application log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for EC FW app modules.
 
 config BOARD_LOG_LEVEL
 	int "Board initialization log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for board initialization module.
 

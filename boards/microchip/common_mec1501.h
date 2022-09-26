@@ -8,7 +8,7 @@
 #include "mec150x_pin.h"
 
 #ifndef __COMMON_MEC1501_H__
-#define __COMMN_MEC1501_H__
+#define __COMMON_MEC1501_H__
 
 
 
@@ -24,4 +24,4 @@
 /* Dummy gpio default high */
 #define EC_DUMMY_GPIO_HIGH	EC_GPIO_PORT_PIN(EC_DUMMY_GPIO_PORT, 0x01)
 
-#endif	/* __COMMN_MEC1501_H__ */
+#endif	/* __COMMON_MEC1501_H__ */

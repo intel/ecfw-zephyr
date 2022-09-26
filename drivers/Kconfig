@@ -7,7 +7,7 @@
 
 menu "Keyboard matrix driver"
 
-if KSCAN_EC || PS2_KEYBOARD_AND_MOUSE
+if KSCAN_EC || PS2_KEYBOARD
 choice
 	prompt "Select your keyboard"
 	default EC_GTECH_KEYBOARD
@@ -73,77 +73,72 @@ menu "EC basic drivers logging control"
 config MAX6958_LOG_LEVEL
 	int "MAX6958 driver log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for MAX5958 LED driver.
 
 config EEPROM_LOG_LEVEL
 	int "EEPROM driver log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for EEPROM driver.
 
 config GPIO_EC_LOG_LEVEL
 	int "GPIO EC driver log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for GPIO wrapper driver.
 
 config ESPIHUB_LOG_LEVEL
 	int "eSPI hub driver log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for eSPI hub.
 
 config ESPIOOB_MNGR_LOG_LEVEL
 	int "eSPI OOB manager driver log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for eSPI OOB manager.
 
 config PECIHUB_LOG_LEVEL
 	int "peci hub log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for peci hub interface.
 
 config FAN_LOG_LEVEL
 	int "Fan driver log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for fan driver.
 
 config LED_LOG_LEVEL
 	int "Led driver log level"
 	depends on LOG
-	default 2
+	default 2 if EC_DEBUG_LOG
+	default 0
 	help
 	  Set log level for led driver.
-
-config SPI_NOR_FLASH_LOG_LEVEL
-	int "SPI NOR Flash driver log level"
-	depends on LOG
-	default 2
-	help
-	  Set log level for SPI NOR Flash driver.
 
 config I2C_HUB_LOG_LEVEL
 	int "I2C hub driver log level"
 	depends on LOG
-	default 2
+	default 2 if EC_DEBUG_LOG
+	default 0
 	help
 	  Set log level for i2c hub driver.
 
@@ -151,11 +146,11 @@ endmenu
 
 menu "EC optional drivers logging control"
 
-config THERMAL_SENSOR_LOG_LEVEL
-	int "Thermal sensor driver log level"
+config ADC_SENSORS_LOG_LEVEL
+	int "ADC thermal sensor driver log level"
 	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for thermal sensor driver.
 

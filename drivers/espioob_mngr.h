@@ -156,6 +156,31 @@ typedef void (*oob_rx_callback_handler_t) (struct espi_oob_packet *rx,
 int oob_send_async(struct espi_oob_packet *req, oob_rx_callback_handler_t cb);
 
 /**
+ * @brief Send OOB message as response to the master initiated request.
+ *
+ * This allows a caller to send eSPI OOB message to the master. Caller can be
+ * within a thread or an ISR.
+ * This API to be used for cases where only upstream OOB need to be send, and
+ * there would be no response back.
+ *
+ * @param tx eSPI OOB packet to be sent.
+ *
+ * @return 0 if successful, otherwise below error code.
+ *
+ * @return -ENOTSUP Function call not supported.
+ * @return -EINVAL Invalid packet due to one of the following reasons:
+ *		   - invalid source or slave address.
+ *		   - invalid byte count field.
+ *		   - invalid len if less than espi header size (4) or more than
+ *		     max OOB packet buf size (75)
+ * @return -ENODATA when tx buffer is null.
+ * @return -EBUSY when eSPI OOB channel is busy with an ongoing transaction for
+ *		  the same master address.
+ * @return -EIO General input / output error, failed to send over the bus.
+ */
+int oob_respond_master(struct espi_oob_packet *tx);
+
+/**
  * @brief Callback handler for downstream OOB messages.
  *
  * @note This function is executed within ISR, and only intended for eSPI_hub to

@@ -59,8 +59,8 @@ struct acpi_concept_flags {
 	uint8_t acpi_cs_dbg_led_en:1;
 	uint8_t acpi_winb_pwr_btn_en:1;
 	uint8_t unused2:1;
-	uint8_t unused3:1;
-	uint8_t unused4:1;
+	uint8_t pg3_exit_after_counter_exp:1;
+	uint8_t pg3_entered_successfully:1;
 	uint8_t unused5:1;
 	uint8_t unused6:1;
 	uint8_t unused7:1;

@@ -613,6 +613,7 @@ static void smchost_cmd_handler(uint8_t command)
 #ifdef CONFIG_DEPRECATED_SMCHOST_CMD
 	case SMCHOST_QUERY_SYSTEM_STS:
 #endif
+	case SMCHOST_GET_PSR_SHUTDOWN_REASON:
 	case SMCHOST_GET_SMC_MODE:
 	case SMCHOST_GET_SWITCH_STS:
 	case SMCHOST_GET_FAB_ID:
@@ -647,9 +648,10 @@ static void smchost_cmd_handler(uint8_t command)
 		break;
 
 #ifdef CONFIG_THERMAL_MANAGEMENT
+#ifdef CONFIG_DTT_SUPPORT_THERMALS
 	case SMCHOST_SET_TMP_THRESHOLD:
+#endif /* CONFIG_DTT_SUPPORT_THERMALS */
 	case SMCHOST_UPDATE_PWM:
-		/* fall through */
 	case SMCHOST_BIOS_FAN_CONTROL:
 	case SMCHOST_SET_SHDWN_THRESHOLD:
 	case SMCHOST_SET_OS_ACTIVE_TRIP:

@@ -98,12 +98,12 @@ enum platform_skus {
 #define VIRTUAL_BAT			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x06)
 #define VIRTUAL_DOCK			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x07)
 /* IO expander pin mapping is in hex decimal format instead of octal*/
+/* Net name TP_ESPI_TESTCRD_DET */
+#define THERM_STRAP			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x08)
 #define KBC_SCROLL_LOCK			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x0D)
 
 /* Net name TP_RETIMER_BYPASS_STRAP */
 #define RETIMER_BYPASS			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x06)
-/* Net name TP_ESPI_TESTCRD_DET */
-#define THERM_STRAP			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x07)
 #endif /* __MECC172X_AIC_ON_ADL_P_H__ */
 #define PM_BAT_STATUS_LED2_PWM_CHANNEL	8
 

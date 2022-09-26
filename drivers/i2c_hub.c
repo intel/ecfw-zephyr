@@ -119,6 +119,25 @@ int i2c_hub_write(uint8_t instance, const uint8_t *buf,
 	return ret;
 }
 
+int i2c_hub_read(uint8_t instance, uint8_t *buf,
+		  uint32_t num_bytes, uint16_t addr)
+{
+	int ret;
+
+	if (instance >= NUM_OF_I2C_BUS) {
+		return -ENODEV;
+	}
+	if (!i2c_dev[instance].device) {
+		return -ENODEV;
+	}
+
+	k_mutex_lock(&i2c_dev[instance].mutex, K_FOREVER);
+	ret = i2c_read(i2c_dev[instance].device, buf, num_bytes, addr);
+	k_mutex_unlock(&i2c_dev[instance].mutex);
+
+	return ret;
+}
+
 int i2c_hub_write_read(uint8_t instance, uint16_t addr, const void *write_buf,
 		       size_t num_write, void *read_buf, size_t num_read)
 {

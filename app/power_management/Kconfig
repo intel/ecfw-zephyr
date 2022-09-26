@@ -38,10 +38,10 @@ config PWRMGMT_PG3_EXIT_WAKE_FROM_SX
 
 config PWRMGMT_DEEPSX_LOG_LEVEL
 	int "Power management deep sx log level"
-	depends on LOG
 	depends on PWRMGMT
+	depends on LOG
+	default 2 if EC_DEBUG_LOG
 	default 0
-	default 2 if CONFIG_EC_DEBUG_LOG_LEVEL
 	help
 	  Set log level for power management module which includes Intel
 	  transitions into deep sx sub-states.

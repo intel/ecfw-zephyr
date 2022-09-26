@@ -17,6 +17,7 @@
 
 LOG_MODULE_REGISTER(saf_config, CONFIG_ESPIHUB_LOG_LEVEL);
 
+#define SPI_RESET_DELAY_US             40U
 #define MHZ_TO_HZ(x)                   ((x) * 1000000U)
 #define MAX_SPI_RESPONSE               10U
 
@@ -32,12 +33,25 @@ LOG_MODULE_REGISTER(saf_config, CONFIG_ESPIHUB_LOG_LEVEL);
 #pragma error "Unsupported SAF SPI flash device"
 #endif
 
+#if DT_NODE_HAS_STATUS(DT_NODELABEL(spi0), disabled)
+#pragma error "spi hw block not enabled"
+#else
+#define DT_SPI_INST	DT_NODELABEL(spi0)
+#endif
+
+#if DT_PROP(DT_SPI_INST, lines) == 4
+#define SPI_IO_LINES	SPI_LINES_QUAD
+#else
+#define SPI_IO_LINES	SPI_LINES_DUAL
+#endif
+
 static const struct espi_saf_cfg *get_saf_cfg(void)
 {
 #ifdef CONFIG_SAF_SPI_WINBOND
 	return windbond_saf_cfg();
 #else
 #pragma error "Unsupported SAF SPI flash device"
+	return NULL;
 #endif
 }
 
@@ -47,6 +61,7 @@ static struct saf_spi_transaction *spi_cmd(enum saf_command_index command)
 	return windbond_qspi_cmd(command);
 #else
 #pragma error "Unsupported SAF SPI flash device"
+	return NULL;
 #endif
 }
 
@@ -62,9 +77,9 @@ static int spi_send_cmd(uint8_t slave_index, struct saf_spi_transaction *cmd,
 	struct spi_buf rx;
 	struct spi_buf tx;
 	struct spi_buf_set rx_bufs = {
-		.buffers = &rx,
-		.count = 1,
-		};
+		.buffers = NULL,
+		.count = 0,
+	};
 
 	struct spi_buf_set tx_bufs = {
 		.buffers = &tx,
@@ -75,6 +90,14 @@ static int spi_send_cmd(uint8_t slave_index, struct saf_spi_transaction *cmd,
 	tx.len = cmd->tx_len;
 	rx.buf = data;
 	rx.len = cmd->rx_len;
+
+	/* Increase SPI driver compatibility, do not indicate RX buffer despite
+	 * of the buffers been empty
+	 */
+	if (cmd->rx_len) {
+		rx_bufs.buffers = &rx;
+		rx_bufs.count = 1;
+	}
 
 	spi_cfg.operation = SPI_OP_MODE_MASTER | SPI_TRANSFER_MSB
 			    | SPI_WORD_SET(8) | mode;
@@ -92,6 +115,7 @@ static int spi_send_cmd(uint8_t slave_index, struct saf_spi_transaction *cmd,
 static int qspi_read_status(uint8_t slave_index)
 {
 	int ret;
+	struct saf_spi_transaction *spi_command;
 
 	LOG_DBG("%s ", __func__);
 
@@ -100,32 +124,81 @@ static int qspi_read_status(uint8_t slave_index)
 		RD_STS1_CMD_INDEX, RD_STS1_CMD_INDEX
 	};
 
+
 	for (int i = 0; i < ARRAY_SIZE(cmds); i++) {
-		ret = spi_send_cmd(slave_index, spi_cmd(cmds[i]),
-				 SPI_LINES_SINGLE);
-		if (ret) {
-			return ret;
+		spi_command = spi_cmd(cmds[i]);
+		if (spi_command != NULL) {
+			ret = spi_send_cmd(slave_index, spi_command,
+					 SPI_LINES_SINGLE);
+			if (ret) {
+				return ret;
+			}
+		} else {
+			return -EINVAL;
 		}
+
 	}
 
 	return 0;
 }
 
+#ifdef CONFIG_SAF_ENABLE_XIP
+int qspi_enable_xip(uint8_t slave_index)
+{
+	int ret = 0;
+	struct saf_spi_transaction *spi_command;
+
+	LOG_INF("%s", __func__);
+	enum saf_command_index cmds[] = { WRITE_ENABLE_INDEX,
+		WRITE_NV_REGISTER_INDEX,
+		READ_NV_REGISTER_INDEX };
+
+	for (int i = 0; i < ARRAY_SIZE(cmds); i++) {
+		spi_command = spi_cmd(cmds[i]);
+		if (spi_command != NULL) {
+			ret = spi_send_cmd(slave_index, spi_command,
+				 SPI_LINES_SINGLE);
+			if (ret) {
+				LOG_ERR("SPI command failed %d", ret);
+				return ret;
+			}
+		} else {
+			LOG_ERR("Invalid command");
+			return -EINVAL;
+		}
+	}
+
+	return 0;
+}
+#endif
+
 static int qspi_reset_spi_flash_device(uint8_t slave_index)
 {
 	int ret;
+	struct saf_spi_transaction *spi_command;
 
 	LOG_DBG("%s", __func__);
 
-	enum saf_command_index cmds[] = { EN_RST_CMD_INDEX, RST_CMD_INDEX};
+	enum saf_command_index cmds[] = { EN_RST_CMD_INDEX, RST_CMD_INDEX };
 
 	for (int i = 0; i < ARRAY_SIZE(cmds); i++) {
-		ret = spi_send_cmd(slave_index, spi_cmd(cmds[i]),
-				 SPI_LINES_QUAD);
-		if (ret) {
-			return ret;
+		spi_command = spi_cmd(cmds[i]);
+		if (spi_command != NULL) {
+			ret = spi_send_cmd(slave_index, spi_command,
+					SPI_IO_LINES);
+			if (ret) {
+				return ret;
+			}
+		} else {
+			return -EINVAL;
 		}
 	}
+
+	k_busy_wait(SPI_RESET_DELAY_US);
+
+#ifdef CONFIG_SAF_ENABLE_XIP
+	qspi_enable_xip(slave_index);
+#endif
 
 	/* For SPI flash devices with capacity over 16MB, need to enable
 	 * 4-byte address mode
@@ -133,7 +206,6 @@ static int qspi_reset_spi_flash_device(uint8_t slave_index)
 #if (CONFIG_SAF_SPI_CAPACITY == 32)
 	ret = spi_send_cmd(slave_index, spi_cmd(FOUR_BYTE_CMD_INDEX),
 	     SPI_LINES_SINGLE);
-
 #endif
 
 	return ret;
@@ -142,12 +214,12 @@ static int qspi_reset_spi_flash_device(uint8_t slave_index)
 static int qspi_exit_continuous_mode(uint8_t slave_index)
 {
 	int ret;
-	struct spi_buf rx;
 	struct spi_buf tx;
+
 	struct spi_buf_set rx_bufs = {
-		.buffers = &rx,
-		.count = 1,
-		};
+		.buffers = NULL,
+		.count = 0,
+	};
 
 	struct spi_buf_set tx_bufs = {
 		.buffers = &tx,
@@ -157,11 +229,9 @@ static int qspi_exit_continuous_mode(uint8_t slave_index)
 	LOG_DBG("%s", __func__);
 	tx.buf = NULL;
 	tx.len = 9;
-	rx.buf = NULL;
-	rx.len = 0;
 
 	spi_cfg.operation = SPI_OP_MODE_MASTER | SPI_TRANSFER_MSB
-			    | SPI_WORD_SET(8) | SPI_LINES_QUAD;
+			    | SPI_WORD_SET(8) | SPI_IO_LINES;
 	spi_cfg.slave = slave_index;
 
 	ret = spi_transceive(spi_dev, &spi_cfg, &tx_bufs, &rx_bufs);

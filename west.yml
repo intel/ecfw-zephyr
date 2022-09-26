@@ -42,5 +42,10 @@ manifest:
       remote: zephyrproject
       revision: 870d05e6a64ea9548da6b907058b03c8c9420826
 
+    - name: tinycrypt
+      path: ecfwwork/modules/crypto/tinycrypt
+      remote: zephyrproject
+      revision: 3e9a49d2672ec01435ffbf0d788db6d95ef28de0
+
   self:
     path: ecfwwork

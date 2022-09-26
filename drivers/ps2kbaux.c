@@ -26,6 +26,8 @@ LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 #define KEY_RELEASED_POS		7U
 #define SC1_WITHOUT_MAKE_BREAK		0x7FU
 #define LEFT_CTRL			0x1DU
+#define VOL_DN_SC1			0x24U
+#define VOL_UP_SC1			0x25U
 #define LEFT_ALT			0x38U
 #define LEFT_SHIFT			0x2AU
 #define ESCAPE_CODE			0xE0U
@@ -105,6 +107,12 @@ static int convert_sc1_to_keynumber(uint8_t sc1, uint8_t *key_num)
 	case F12_SC1:
 		*key_num = KM_F12_KEY;
 		break;
+	case VOL_DN_SC1:
+		*key_num = KM_VOL_DN_KEY;
+		break;
+	case VOL_UP_SC1:
+		*key_num = KM_VOL_UP_KEY;
+		break;
 	default:
 		return -EINVAL;
 	}
@@ -179,6 +187,7 @@ static void ps2_keyboard_callback(const struct device *dev, uint8_t value)
 			struct fn_data data;
 			/* Convert scan code to IBM key number */
 			convert_sc1_to_keynumber(key_sc, &key_num);
+
 			/* Use key number to retrieve FN functionality
 			 * from custom keyboard
 			 */
@@ -205,9 +214,15 @@ static void ps2_keyboard_callback(const struct device *dev, uint8_t value)
 			} else {
 				if (data.sci_code != 0U) {
 					LOG_DBG("sci: %x", data.sci_code);
-					g_acpi_tbl.acpi_hotkey_scan =
-						data.sci_code;
-					enqueue_sci(SCI_HOTKEY);
+					if (ctrl_alt_shift_sc1(value)) {
+						g_acpi_tbl.cas_hotkey =
+							data.sci_code;
+						enqueue_sci(SCI_HOTKEY_CAS);
+					} else {
+						g_acpi_tbl.acpi_hotkey_scan =
+							data.sci_code;
+						enqueue_sci(SCI_HOTKEY);
+					}
 				}
 			}
 		}

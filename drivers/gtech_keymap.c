@@ -5,6 +5,7 @@
  */
 
 #include "kbs_keymap.h"
+#include <logging/log.h>
 
 /****************************************************************************/
 /*  Gtech keyboard                                                          */
@@ -64,11 +65,15 @@
 
 #define KM_GTECH_PAUSE_KEY 76U
 
+LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
+
 int gtech_get_fn_key(uint8_t key_num, struct fn_data *data, bool pressed);
 
 #ifdef CONFIG_KSCAN_EC
+#ifdef CONFIG_SOC_FAMILY_MEC
 #define MAX_MTX_KEY_COLS CONFIG_KSCAN_XEC_COLUMN_SIZE
 #define MAX_MTX_KEY_ROWS CONFIG_KSCAN_XEC_ROW_SIZE
+#endif
 /* 64 is not assigned. We marked as KM_RSVD in the first column */
 /* 0 in the first column  _, - is also marked as KM_RSVD */
 
@@ -262,7 +267,6 @@ int gtech_get_fn_key(uint8_t key_num, struct fn_data *data,
 		} else {
 			data->sci_code = 0U;
 		}
-		data->type = SCI_CODE;
 		break;
 	/* SCI: Airplane mode */
 	case KM_F11_KEY:
@@ -272,7 +276,6 @@ int gtech_get_fn_key(uint8_t key_num, struct fn_data *data,
 		} else {
 			data->sci_code = 0U;
 		}
-		data->type = SCI_CODE;
 		break;
 	/* Scan code set 2: Scroll lock */
 	case KM_F12_KEY:
@@ -371,6 +374,24 @@ int gtech_get_fn_key(uint8_t key_num, struct fn_data *data,
 			data->sc.len = 1U;
 		}
 		break;
+	case KM_VOL_DN_KEY:
+		data->type = SCI_CODE;
+		if (pressed) {
+			data->sci_code = 0x24U;
+		} else {
+			data->sci_code = 0U;
+		}
+		break;
+
+	case KM_VOL_UP_KEY:
+		data->type = SCI_CODE;
+		if (pressed) {
+			data->sci_code = 0x25U;
+		} else {
+			data->sci_code = 0U;
+		}
+		break;
+
 	default:
 		return -EINVAL;
 	}

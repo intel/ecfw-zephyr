@@ -143,4 +143,14 @@
 #define VIRTUAL_BAT_INIT_POS		1
 #define VIRTUAL_DOCK_INIT_POS		1
 
+/* TIPD UCSI version details
+ * UCSI Version format is 0xJJMN (2 Bytes)
+ * JJ – Manjor Version
+ * M – Minor Version
+ * N – Sub Minor Version
+ */
+#define TIPD_UCSI_MAJOR_VERSION 0x01
+#define TIPD_UCSI_MINOR_VERSION 0x2
+#define TIPD_UCSI_SUB_MINOR_VERSION 0x0
+
 #endif /* __ADL_MEC1501_H__ */

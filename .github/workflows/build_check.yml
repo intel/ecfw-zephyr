@@ -1,5 +1,4 @@
 name: build_check
-run_name: Building ${{ github.actor }}
 on: [push]
 jobs:
   build-cancel:

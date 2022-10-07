@@ -1,0 +1,74 @@
+name: build_check
+run_name: Building ${{ github.actor }}
+on: [push]
+jobs:
+  build-cancel:
+    runs-on: ubuntu-20.04
+    if: github.repository == 'zephyrproject-rtos/zephyr'
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.6.0
+        with:
+          access_token: ${{ github.token }}
+  build:
+    runs-on: ubuntu-20.04
+    if: github.repository == 'zephyrproject-rtos/zephyr'
+    needs: build-cancel
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:v0.24.3
+      options: '--entrypoint /bin/bash'
+    strategy:
+      fail-fast: false
+    env:
+      ZEPHYR_SDK_INSTALL_DIR: /opt/toolchains/zephyr-sdk-0.13.0
+      ZEPHYR_TOOLCHAIN_VARIANT: zephyr
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.6.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Apply container owner mismatch workaround
+        run: |
+          # FIXME: The owner UID of the GITHUB_WORKSPACE directory may not
+          #        match the container user UID because of the way GitHub
+          #        Actions runner is implemented. Remove this workaround when
+          #        GitHub comes up with a fundamental fix for this problem.
+          git config --global --add safe.directory ${GITHUB_WORKSPACE}
+
+      - name: Update PATH for west
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: west setup
+        run: |
+          west init -l . || true
+          west config --global update.narrow true
+          west update 2>&1 1> west.update.log || west update 2>&1 1> west.update.log
+
+      - name: Detect Changes in Footprint
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          CI_EC_SCRIPTS: ".gitlab-ci-functions"
+        run: |
+          export ZEPHYR_BASE=${PWD}
+          git config --global user.email "actions@zephyrproject.org"
+          git config --global user.name "Github Actions"
+          git remote -v
+          git rebase origin/${BASE_REF}
+          git checkout -b this_pr
+          west -V
+          west init -l
+          west -v update
+          if [ -z ${ZEPHYR_BASE} ]; then
+             cd ../ecfwwork/zephyr_fork && ZEPHYR_PATH=${PWD}
+          fi
+          cd ${ZEPHYR_PATH} && source zephyr-env.sh
+          west config --global zephyr.base-prefer env
+          west build -c -p always -b mec1501_adl_p -- -G'Unix Makefiles'

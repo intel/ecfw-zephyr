@@ -28,7 +28,7 @@ manifest:
       repo-path: zephyr.git
       path: ecfwwork/zephyr_fork
       remote: zephyrproject
-      revision: v2.7-branch
+      revision: v2.7.3
       clone-depth: 1
       west-commands: scripts/west-commands.yml
 

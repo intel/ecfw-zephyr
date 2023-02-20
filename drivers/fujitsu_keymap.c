@@ -137,6 +137,7 @@ int fujitsu_get_fn_key(uint8_t key_num, struct fn_data *data,
 			data->sc.code[0] = 0xE0U;
 			data->sc.code[1] = 0x21U;
 			data->sc.len = 2U;
+			data->sc.typematic = true;
 		} else {
 			data->sc.code[0] = 0xE0U;
 			data->sc.code[1] = 0xF0U;
@@ -151,6 +152,7 @@ int fujitsu_get_fn_key(uint8_t key_num, struct fn_data *data,
 			data->sc.code[0] = 0xE0U;
 			data->sc.code[1] = 0x32U;
 			data->sc.len = 2U;
+			data->sc.typematic = true;
 		} else {
 			data->sc.code[0] = 0xE0U;
 			data->sc.code[1] = 0xF0U;

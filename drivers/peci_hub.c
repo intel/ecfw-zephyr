@@ -287,7 +287,7 @@ static int espioob_peci_transfer(struct peci_msg *msg)
 	resp_pckt.buf = (uint8_t *)&oob_resp;
 	resp_pckt.len = sizeof(oob_resp);
 
-	ret = oob_send_sync(&req_pckt, &resp_pckt, OOB_MSG_SYNC_WAIT_TIME_DFLT);
+	ret = oob_send_sync(&req_pckt, &resp_pckt, OOB_TX_HAS_RX, OOB_MSG_SYNC_WAIT_TIME_DFLT);
 	if (ret) {
 		LOG_ERR("PECI OOB Txn failed %d", ret);
 		return ret;

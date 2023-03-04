@@ -34,7 +34,7 @@ int pmc_reset_soc(enum pmc_request req_type)
 	req_pckt.buf = buf;
 	req_pckt.len = sizeof(buf);
 
-	if (oob_send_async(&req_pckt, NULL)) {
+	if (oob_send_async(&req_pckt, NULL, OOB_TX_HAS_RX)) {
 		LOG_ERR("PMC request failed");
 		return -EIO;
 	}

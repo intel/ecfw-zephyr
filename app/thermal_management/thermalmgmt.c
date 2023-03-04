@@ -439,7 +439,7 @@ static void manage_pch_temperature(void)
 	struct espi_oob_packet req = {.buf = pchtemp, .len = 4};
 	struct espi_oob_packet resp = {.buf = pchtemp, .len = sizeof(pchtemp)};
 
-	if (!oob_send_sync(&req, &resp, OOB_MSG_SYNC_WAIT_TIME_DFLT)) {
+	if (!oob_send_sync(&req, &resp, OOB_TX_HAS_RX, OOB_MSG_SYNC_WAIT_TIME_DFLT)) {
 		struct oob_msg_str *msg = (struct oob_msg_str *) resp.buf;
 
 		LOG_DBG("PCH Temp = %d", msg->payload[0]);

@@ -37,9 +37,10 @@ static oob_rx_callback_handler_t csme_msg_hndlr;
 static oob_rx_callback_handler_t pmc_msg_hndlr;
 
 struct async_msb {
-	uint8_t buf[MAX_OOB_BUF_SIZE];
 	uint16_t len;
+	uint8_t buf[MAX_OOB_BUF_SIZE];
 	uint8_t from;
+	bool exp_rx;
 	oob_rx_callback_handler_t fn;
 };
 
@@ -149,9 +150,7 @@ static inline struct oob_msg *get_oob_master(uint8_t addr_byte)
 	}
 }
 
-
-int oob_send_sync(struct espi_oob_packet *req, struct espi_oob_packet *resp,
-		  int timeout)
+int oob_send_sync(struct espi_oob_packet *tx, struct espi_oob_packet *rx, bool exp_rx, int timeout)
 {
 	int ret = 0;
 	struct oob_msg *master;
@@ -162,41 +161,51 @@ int oob_send_sync(struct espi_oob_packet *req, struct espi_oob_packet *resp,
 	return -ENOTSUP;
 #endif
 
-	if ((req == NULL) || (resp == NULL)) {
+	if (tx == NULL) {
 		return -ENODATA;
 	}
 
-	ret = verify_oob_tx_pckt(req);
+	if (exp_rx && (rx == NULL)) {
+		return -ENOBUFS;
+	}
+
+	ret = verify_oob_tx_pckt(tx);
 	if (ret) {
 		LOG_ERR("OOB Tx packet verification failed %d", ret);
 		return ret;
 	}
 
-	master = get_oob_master(req->buf[OOB_IDX_DEST_SLV_ADDR]);
+	master = get_oob_master(tx->buf[OOB_IDX_DEST_SLV_ADDR]);
 
 	if (master == NULL) {
 		return -EINVAL;
 	}
 
-	if (k_mutex_lock(&master->txn_lock,
-			 K_MSEC(MIN_WAIT_TIME_FOR_OOB_IN_MS))) {
+	if (k_mutex_lock(&master->txn_lock, K_MSEC(MIN_WAIT_TIME_FOR_OOB_IN_MS))) {
 		LOG_ERR("OOB tx lock timeout");
 		return -EBUSY;
 	}
 
-	master->tx = req;
-	master->rx = resp;
-	k_sem_reset(&master->txn_sync);
+	master->tx = tx;
 
 	ret = espihub_send_oob(master->tx);
 	if (ret) {
 		LOG_ERR("Error sending OOB %d", ret);
 		k_mutex_unlock(&master->txn_lock);
-		k_sem_give(&master->txn_sync);
 		return -EIO;
 	}
 
 	LOG_DBG("OOB Tx Successful");
+
+	if (!exp_rx) {
+		/* No response expected, release txn_lock, and return SUCCESS */
+		k_mutex_unlock(&master->txn_lock);
+		return 0;
+	}
+
+	/* Response expected from master */
+	master->rx = rx;
+	k_sem_reset(&master->txn_sync);
 
 	/* Wait till OOB response, txn_sync semaphore released by rx handler */
 	ret = k_sem_take(&master->txn_sync, K_MSEC(wait_time));
@@ -220,44 +229,10 @@ int oob_send_sync(struct espi_oob_packet *req, struct espi_oob_packet *resp,
 }
 
 
-int oob_send_async(struct espi_oob_packet *req, oob_rx_callback_handler_t cb)
+int oob_send_async(struct espi_oob_packet *tx, oob_rx_callback_handler_t cb, bool exp_rx)
 {
 	int ret;
 	struct async_msb msg;
-
-#ifndef CONFIG_OOBMNGR_SUPPORT
-	return -ENOTSUP;
-#endif
-
-	if (req == NULL) {
-		return -ENODATA;
-	}
-
-	ret = verify_oob_tx_pckt(req);
-	if (ret) {
-		LOG_ERR("OOB Tx packet verification failed %d", ret);
-		return ret;
-	}
-
-	msg.len = req->len;
-	memcpys(msg.buf, req->buf, req->len);
-	msg.fn = cb;
-	msg.from = OOB_SLAVE_ADDR_EC;
-
-	ret = k_msgq_put(&async_msgq, &msg, K_NO_WAIT);
-	if (ret) {
-		LOG_ERR("Async msg request enque failed %d", ret);
-		return -ENOBUFS;
-	}
-
-	return 0;
-}
-
-
-int oob_respond_master(struct espi_oob_packet *tx)
-{
-	int ret;
-	struct oob_msg *master;
 
 #ifndef CONFIG_OOBMNGR_SUPPORT
 	return -ENOTSUP;
@@ -273,31 +248,20 @@ int oob_respond_master(struct espi_oob_packet *tx)
 		return ret;
 	}
 
-	master = get_oob_master(tx->buf[OOB_IDX_DEST_SLV_ADDR]);
+	msg.len = tx->len;
+	memcpys(msg.buf, tx->buf, tx->len);
+	msg.fn = cb;
+	msg.from = OOB_SLAVE_ADDR_EC;
+	msg.exp_rx = exp_rx;
 
-	if (master == NULL) {
-		return -EINVAL;
-	}
-
-	if (k_mutex_lock(&master->txn_lock, K_NO_WAIT)) {
-		LOG_ERR("OOB tx lock timeout");
-		return -EBUSY;
-	}
-
-	master->tx = tx;
-
-	ret = espihub_send_oob(master->tx);
+	ret = k_msgq_put(&async_msgq, &msg, K_NO_WAIT);
 	if (ret) {
-		LOG_ERR("Error sending OOB %d", ret);
-		ret = -EIO;
-	} else {
-		LOG_DBG("OOB Tx Successful");
+		LOG_ERR("Async msg request enque failed %d", ret);
+		return -ENOBUFS;
 	}
 
-	k_mutex_unlock(&master->txn_lock);
-	return ret;
+	return 0;
 }
-
 
 /* Intended to be handled as in ISR - No Lengthy routines */
 static void oob_rx_handler(struct espi_oob_packet *rx)
@@ -405,8 +369,7 @@ void oobmngr_thread(void *p1, void *p2, void *p3)
 			struct espi_oob_packet resp = {
 				.buf = msg.buf, .len = sizeof(msg.buf)};
 
-			ret = oob_send_sync(&req, &resp,
-					    OOB_MSG_SYNC_WAIT_TIME_DFLT);
+			ret = oob_send_sync(&req, &resp, msg.exp_rx, OOB_MSG_SYNC_WAIT_TIME_DFLT);
 
 			LOG_DBG("Async msg processed, status: %d", ret);
 

@@ -14,7 +14,6 @@
 
 #include <zephyr/drivers/espi.h>
 
-
 enum oob_pckt_idx {
 	OOB_IDX_DEST_SLV_ADDR,
 	OOB_IDX_CMD_CODE,
@@ -62,6 +61,9 @@ struct oob_msg_str {
 #define OOB_BYTE_CNT_HW_REQ_MSG		0x01U
 #define OOB_BYTE_CNT_PMC_PWR_MGMT_EVT	0x02U
 
+/* OOB Transaction types */
+#define OOB_TX_HAS_RX			true
+#define OOB_TX_ONLY			false
 
 /*
  * Macros for wait time
@@ -94,11 +96,13 @@ void oobmngr_thread(void *p1, void *p2, void *p3);
 /**
  * @brief Synchronous OOB txn request.
  *
- * This allows a thread to send eSPI OOB request, and get back the response
- * from master within caller's thread context.
+ * This allows a thread to send eSPI OOB packet, and get back the response from master if there is
+ * one, within caller's thread context.
  *
- * @param req eSPI OOB request packet.
- * @param resp eSPI OOB response packet.
+ * @param tx eSPI OOB packet to send.
+ * @param rx eSPI OOB packet to be collected as response from master.
+ * @param exp_rx whether transmitted oob packet expects a response or not.
+ *		 Some OOB messages are simply tx only, for eg. response to the master request.
  * @param timeout max wait time in miliseconds for receiving OOB response.
  * @return 0 if successful, otherwise below error code.
  *
@@ -117,8 +121,7 @@ void oobmngr_thread(void *p1, void *p2, void *p3);
  *
  * @note Can only be run from thread.
  */
-int oob_send_sync(struct espi_oob_packet *req, struct espi_oob_packet *resp,
-	int timeout);
+int oob_send_sync(struct espi_oob_packet *tx, struct espi_oob_packet *rx, bool exp_rx, int timeout);
 
 /**
  * @brief Function pointer definition for handling asynchronous OOB response.
@@ -127,19 +130,20 @@ int oob_send_sync(struct espi_oob_packet *req, struct espi_oob_packet *resp,
  * @param err 0 if successful, otherwise handler function be notified with one
  *	      of the error codes for @fn oob_send_sync.
  */
-typedef void (*oob_rx_callback_handler_t) (struct espi_oob_packet *rx,
-		int err);
+typedef void (*oob_rx_callback_handler_t) (struct espi_oob_packet *rx, int err);
 
 /**
  * @brief Asynchronous OOB txn request, which can be sent from ISR.
  *
- * This function allows caller to send OOB reqest from ISR.
- * This function enqueues OOB request to the message queue, and responds to the
- * caller in callback routine.
+ * This function allows caller to send OOB packet from ISR.
+ * This function enqueues OOB packet to be sent in the message queue, and responds to the
+ * caller in callback routine, if there is one.
  *
- * @param req eSPI OOB request packet.
+ * @param tx eSPI OOB packet to send.
  * @param cb callback routine to be called when response for the requested OOB
  * message received from master.
+ * @param exp_rx whether transmitted oob packet expects a response or not.
+ *		 Some OOB messages are simply tx only, for eg. response to the master request.
  *
  * @return 0 if successful, otherwise below error code.
  *
@@ -153,32 +157,7 @@ typedef void (*oob_rx_callback_handler_t) (struct espi_oob_packet *rx,
  * @return -ENOBUFS when too many OOB requests are queued and no space available
  *		    to queue another one.
  */
-int oob_send_async(struct espi_oob_packet *req, oob_rx_callback_handler_t cb);
-
-/**
- * @brief Send OOB message as response to the master initiated request.
- *
- * This allows a caller to send eSPI OOB message to the master. Caller can be
- * within a thread or an ISR.
- * This API to be used for cases where only upstream OOB need to be send, and
- * there would be no response back.
- *
- * @param tx eSPI OOB packet to be sent.
- *
- * @return 0 if successful, otherwise below error code.
- *
- * @return -ENOTSUP Function call not supported.
- * @return -EINVAL Invalid packet due to one of the following reasons:
- *		   - invalid source or slave address.
- *		   - invalid byte count field.
- *		   - invalid len if less than espi header size (4) or more than
- *		     max OOB packet buf size (75)
- * @return -ENODATA when tx buffer is null.
- * @return -EBUSY when eSPI OOB channel is busy with an ongoing transaction for
- *		  the same master address.
- * @return -EIO General input / output error, failed to send over the bus.
- */
-int oob_respond_master(struct espi_oob_packet *tx);
+int oob_send_async(struct espi_oob_packet *tx, oob_rx_callback_handler_t cb, bool exp_rx);
 
 /**
  * @brief Callback handler for downstream OOB messages.

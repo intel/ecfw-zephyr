@@ -187,6 +187,11 @@ int oob_send_sync(struct espi_oob_packet *tx, struct espi_oob_packet *rx, bool e
 	}
 
 	master->tx = tx;
+	if (exp_rx) {
+		/* Response expected from master. */
+		master->rx = rx;
+		k_sem_reset(&master->txn_sync);
+	}
 
 	ret = espihub_send_oob(master->tx);
 	if (ret) {
@@ -202,10 +207,6 @@ int oob_send_sync(struct espi_oob_packet *tx, struct espi_oob_packet *rx, bool e
 		k_mutex_unlock(&master->txn_lock);
 		return 0;
 	}
-
-	/* Response expected from master */
-	master->rx = rx;
-	k_sem_reset(&master->txn_sync);
 
 	/* Wait till OOB response, txn_sync semaphore released by rx handler */
 	ret = k_sem_take(&master->txn_sync, K_MSEC(wait_time));

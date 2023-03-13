@@ -31,6 +31,8 @@ struct oob_msg_str {
 	uint8_t payload[];
 };
 
+#define MAX_OOB_BUF_SIZE		75U
+
 /* All the masters & slave addresses are defined 7 bits, these are bits[7:1]*/
 #define OOB_MASTER_ADDR_HW		0x01U
 #define OOB_MASTER_ADDR_CSME		0x08U

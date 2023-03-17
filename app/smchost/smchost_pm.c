@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <logging/log.h>
-#include <device.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/device.h>
 #include "port80display.h"
 #include "board.h"
 #include "board_config.h"
@@ -213,6 +213,7 @@ static void enable_cs_lpm_mode(void)
 
 static void cs_entry(void)
 {
+	LOG_WRN("%s %d", __func__, cs_low_pwr_mode);
 	if (!cs_low_pwr_mode) {
 		return;
 	}
@@ -229,6 +230,7 @@ static void cs_entry(void)
 
 static void cs_exit(void)
 {
+	LOG_WRN("%s", __func__);
 #ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
 	if (g_acpi_tbl.acpi_concept_flags1.acpi_cs_dbg_led_en) {
 		kbc_set_leds(prev_led_values);

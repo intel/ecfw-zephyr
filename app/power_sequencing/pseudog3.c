@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include "gpio_ec.h"
 #include "board.h"
 #include "board_config.h"
@@ -14,7 +14,7 @@
 #include "espi_hub.h"
 #include "periphmgmt.h"
 #include "pwrbtnmgmt.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 
 /*

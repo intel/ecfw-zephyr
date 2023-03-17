@@ -5,11 +5,11 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 #include "pmc.h"
 #include "espi_hub.h"
 #include "espioob_mngr.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "memops.h"
 LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 

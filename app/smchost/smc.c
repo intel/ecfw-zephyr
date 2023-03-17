@@ -5,11 +5,11 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <soc.h>
 #include "gpio_ec.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "smc.h"
 #include "sci.h"
 #include "smchost.h"
@@ -217,7 +217,7 @@ static const bool acpi_tbl_attr[256] = {
 	/* [63 / 3F] uint8_t acpi_new_card_dt_st; */
 	ACPI_ATTR_READ_ONLY,
 
-	/* [64 / 40] uint8_t acpi_periph_cntrl; */
+	/* [64 / 40] uint8_t acpi_fan_capability; */
 	ACPI_ATTR_READ_WRITE,
 
 	/* [65 / 41] uint8_t acpi_fan_idx; */
@@ -235,28 +235,28 @@ static const bool acpi_tbl_attr[256] = {
 	/* [69 / 45] uint8_t acpi_pwm_step; */
 	ACPI_ATTR_READ_WRITE,
 
-	/* [70 / 46] uint8_t acpi_tm_kbc_irq_data; */
+	/* [70 / 46] uint8_t acpi_fan_opr_mode; */
+	ACPI_ATTR_READ_WRITE,
+
+	/* [71 / 47] uint16_t acpi_fan_rpm_high_threshold [LSB]; */
+	ACPI_ATTR_READ_WRITE,
+
+	/* [72 / 48] uint16_t acpi_fan_rpm_high_threshold [MSB]; */
+	ACPI_ATTR_READ_WRITE,
+
+	/* [73 / 49] uint16_t acpi_fan_rpm_low_threshold [LSB]; */
+	ACPI_ATTR_READ_WRITE,
+
+	/* [74 / 4A] uint16_t acpi_fan_rpm_low_threshold [MSB]; */
+	ACPI_ATTR_READ_WRITE,
+
+	/* [75 / 4B] uint8_t fan_rpm_trip_status; */
+	ACPI_ATTR_READ_WRITE,
+
+	/* [76 / 4C] uint16_t free1; [LSB] */
 	ACPI_ATTR_READ_ONLY,
 
-	/* [71 / 47] uint8_t acpi_cpu_pwr_l; */
-	ACPI_ATTR_READ_ONLY,
-
-	/* [72 / 48] uint8_t acpi_cpu_pwr_h; */
-	ACPI_ATTR_READ_ONLY,
-
-	/* [73 / 49] uint8_t acpi_mch_pwr_l; */
-	ACPI_ATTR_READ_ONLY,
-
-	/* [74 / 4A] uint8_t acpi_mch_pwr_h; */
-	ACPI_ATTR_READ_ONLY,
-
-	/* [75 / 4B] uint8_t acpi_system_pwr_l; */
-	ACPI_ATTR_READ_ONLY,
-
-	/* [76 / 4C] uint8_t acpi_system_pwr_h; */
-	ACPI_ATTR_READ_ONLY,
-
-	/* [77 / 4D] uint8_t free1; */
+	/* [77 / 4D] uint16_t free1; [MSB] */
 	ACPI_ATTR_READ_ONLY,
 
 	/* [78 / 4E] struct acpi_power_source acpi_pwr_src; */
@@ -856,6 +856,11 @@ void smc_update_pch_dts_temperature(int temp)
 	g_acpi_tbl.acpi_pch_dts_temp = temp;
 }
 
+void smc_update_fan_capability(uint8_t fan_capability_val)
+{
+	g_acpi_tbl.acpi_fan_capability = fan_capability_val;
+}
+
 void smc_update_fan_tach(uint8_t fan_idx, uint16_t rpm)
 {
 	switch (fan_idx) {
@@ -883,6 +888,21 @@ void smc_update_therm_trip_status(uint16_t status)
 			g_acpi_tbl.acpi_therm_snsr_sts);
 		g_acpi_tbl.acpi_therm_snsr_sts |= status;
 		enqueue_sci(SCI_THERMTRIP);
+	}
+}
+
+void smc_update_rpm_trip_status(uint8_t status)
+{
+	if (status) {
+		/* Send RPM_trip SCI only when local copy of RPM trip
+		 * status changes i.e a non zero status.
+		 * ACPI RPM status can be read & modified by the host.
+		 * Typically DTT clears the status right after its read.
+		 */
+		LOG_WRN("Trip stat %x %x", status,
+			g_acpi_tbl.fan_rpm_trip_status);
+		g_acpi_tbl.fan_rpm_trip_status |= status;
+		enqueue_sci(SCI_RPMTRIP);
 	}
 }
 

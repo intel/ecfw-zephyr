@@ -7,7 +7,7 @@
 #ifndef __GPIO_DRIVER_H__
 #define __GPIO_DRIVER_H__
 
-#include <drivers/gpio.h>
+#include <zephyr/drivers/gpio.h>
 
 /**
  * @brief GPIO driver wrapper APIS.

@@ -7,6 +7,16 @@
 #ifndef __PERIPH_MGMT_H__
 #define __PERIPH_MGMT_H__
 
+/* GET_SWITCH_STS definitions */
+#define SWITCH_STATUS_LEGACY_POS	7u
+#define SWITCH_STATUS_TESTCRD_DET_POS	6u
+#define SWITCH_STATUS_VIRTUAL_DOCK_POS	5u
+#define SWITCH_STATUS_AC_POWER_POS	4u
+#define SWITCH_STATUS_HOME_BTN_POS	3u
+#define SWITCH_STATUS_NMI_POS		2u
+#define SWITCH_STATUS_VIRTUAL_BATT_POS	1u
+#define SWITCH_STATUS_LEGACY_LID	0u
+
 /**
  * @brief Returns virtual battery presence status.
  *
@@ -26,6 +36,18 @@ bool is_virtual_dock_prsnt(void);
  *
  */
 void update_virtual_bat_dock_status(void);
+
+/**
+ * @brief update the switch status of virtual bat, dock and therm strap.
+ *
+ */
+void  update_switch_status(void);
+
+/**
+ * @brief Returns the switch status.
+ *
+ */
+uint8_t read_io_switch_status(void);
 
 typedef void (*btn_handler_t)(uint8_t btn_sts);
 

@@ -5,11 +5,11 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <soc.h>
-#include <drivers/espi.h>
-#include <logging/log.h>
+#include <zephyr/drivers/espi.h>
+#include <zephyr/logging/log.h>
 #include "board_config.h"
 #include "espi_hub.h"
 #include "pwrplane.h"

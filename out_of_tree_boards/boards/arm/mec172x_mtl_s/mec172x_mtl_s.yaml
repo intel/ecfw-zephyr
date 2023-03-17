@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-identifier: mec1728_mtl_s
-name: MEC1728 MTLS
+identifier: mec172x_mtl_s
+name: MEC172X MTLS
 type: mcu
 arch: arm
 toolchain:
@@ -19,7 +19,7 @@ supported:
   - espi
   - gpio
   - i2c
-  - pinmux
+  - pinctrl
   - pwm
   - watchdog
   - ps2

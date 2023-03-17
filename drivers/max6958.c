@@ -6,7 +6,7 @@
 
 #include <errno.h>
 #include "i2c_hub.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "max6958.h"
 #include "board_config.h"
 LOG_MODULE_REGISTER(max6958, CONFIG_MAX6958_LOG_LEVEL);

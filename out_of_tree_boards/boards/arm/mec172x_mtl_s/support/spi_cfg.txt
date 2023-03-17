@@ -1,4 +1,4 @@
-; MEC1727 SPI Image Generator configuration file for internal 512KB flash
+; MEC172x SPI Image Generator configuration file for internal 512KB flash
 [SPI]
 SPISizeMegabits = 4
 Flashmap = false

@@ -5,10 +5,10 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <soc.h>
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "pwrseq_timeouts.h"
 #include "softstrap.h"
 LOG_MODULE_DECLARE(ecfw, CONFIG_EC_LOG_LEVEL);

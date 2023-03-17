@@ -42,7 +42,11 @@ static inline int memcpys(void *dst, const void *src, int len)
 		return -EINVAL;
 	}
 
+#if defined(CONFIG_DEBUG_OPTIMIZATIONS)
+	memcpy(dst, src, len);
+#else
 	__builtin___memcpy_chk(dst, src, len, dst_sz);
+#endif
 
 	return 0;
 }
@@ -67,11 +71,27 @@ static inline int memsets(void *dst, int c, int len)
 		return -EINVAL;
 	}
 
+#if defined(CONFIG_DEBUG_OPTIMIZATIONS)
+	memset(dst, c, len);
+#else
 	__builtin___memset_chk(dst, c, len, dst_sz);
+#endif
 
 	return 0;
 }
 
+#else
+static inline int memcpys(void *dst, const void *src, int len)
+{
+	memcpy(dst, src, len);
+	return 0;
+}
+
+static inline int memsets(void *dst, int c, int len)
+{
+	memset(dst, c, len);
+	return 0;
+}
 #endif
 #endif /* __MEMOPS__ */
 

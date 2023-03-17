@@ -5,10 +5,10 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
-#include <device.h>
-#include <drivers/espi.h>
-#include <logging/log.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/espi.h>
+#include <zephyr/logging/log.h>
 #include "gpio_ec.h"
 #include "espi_hub.h"
 #include "espioob_mngr.h"
@@ -62,6 +62,9 @@ LOG_MODULE_REGISTER(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 
 /* PM_RSMRST_ should be released 200 ms after PM_RSMRST_PWRGD */
 #define PM_RSMRST_DELAY        200U
+
+/* Wait time for global reset after pulling PCH_PWROK : 2 sec*/
+#define GLOBAL_RESET_WAIT_TIME_CNT	20000U
 
 /* Different types of chargers that will be used to indicate over 0x89.
  * 0x01 -> Traditional Type
@@ -192,26 +195,37 @@ static void pwrseq_sus_handler(uint8_t status)
 	}
 }
 
+void espi_bus_reset_handler(uint8_t status)
+{
+#ifdef CONFIG_DNX_SUPPORT
+	dnx_espi_bus_reset_handler(status);
+#endif
+
+	LOG_DBG("ESPI RST status: %d", status);
+
+	if (!status) {
+		set_next_state_to_S5();
+	}
+}
+
 static void handle_spi_sharing(uint8_t boot_mode)
 {
 	switch (boot_mode) {
 	case FLASH_BOOT_MODE_SAF:
 		LOG_DBG("Booted in SAF mode");
-		/* TODO: set FET HIGH, not possible in MECC card */
 #ifdef CONFIG_ESPI_SAF
 		initialize_saf_bridge();
 #endif
 		break;
 	case FLASH_BOOT_MODE_G3_SHARING:
 		LOG_DBG("Booted in G3 mode");
-		/* TODO: set FET LOW, not possible in MECC card */
 		break;
 	case FLASH_BOOT_MODE_MAF:
 		boot_mode_maf = 1;
 		LOG_DBG("Booted in MAF mode");
 		break;
 	default:
-		LOG_DBG("Boot in %x mode", boot_mode);
+		LOG_ERR("Boot in %x mode", boot_mode);
 		break;
 	}
 }
@@ -436,6 +450,7 @@ static inline int pwrseq_task_init(void)
 #endif
 	espihub_add_state_handler(pwrseq_slp_handler);
 	espihub_add_warn_handler(ESPIHUB_SUSPEND_WARNING, pwrseq_sus_handler);
+	espihub_add_warn_handler(ESPIHUB_BUS_RESET, espi_bus_reset_handler);
 
 	return ret;
 }
@@ -725,7 +740,9 @@ void therm_shutdown(void)
 	gpio_write_pin(SYS_PWROK, 0);
 	gpio_write_pin(PCH_PWROK, 0);
 
-	k_busy_wait(PM_PWROFF_DELAY_US);
+	espihub_wait_for_espi_reset(LOW, GLOBAL_RESET_WAIT_TIME_CNT);
+
+	set_next_state_to_S5();
 
 	/* Assert RSMRST */
 	gpio_write_pin(PM_RSMRST, LOW);
@@ -789,14 +806,14 @@ static void power_off(void)
 #endif
 	board_suspend();
 
+#ifdef CONFIG_POSTCODE_MANAGEMENT
+	port80_display_off();
+#endif
+
 	LOG_DBG("Shutting down %d", level);
 	do {
 		level = gpio_read_pin(PWRBTN_EC_IN_N);
 	} while (!level);
-
-#ifdef CONFIG_POSTCODE_MANAGEMENT
-	port80_display_off();
-#endif
 
 	gpio_write_pin(EC_PWRBTN_LED, LOW);
 	LOG_DBG("Power off complete");

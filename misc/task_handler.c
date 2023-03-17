@@ -5,10 +5,10 @@
  */
 
 #include <errno.h>
-#include <kernel.h>
-#include <zephyr.h>
-#include <device.h>
-#include <logging/log.h>
+#include <zephyr/kernel.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/logging/log.h>
 #include "pwrplane.h"
 #include "espioob_mngr.h"
 #include "postcodemgmt.h"
@@ -39,7 +39,7 @@ const uint32_t smchost_thrd_period = 10;
 	(defined(CONFIG_PS2_KEYBOARD) || defined(CONFIG_PS2_MOUSE) || \
 	defined(CONFIG_KSCAN_EC))
 
-#define KBC_TASK_STACK_SIZE	320
+#define KBC_TASK_STACK_SIZE	500
 #define KB_TASK_STACK_SIZE	384
 K_THREAD_DEFINE(kbc_thrd_id, KBC_TASK_STACK_SIZE, to_from_host_thread,
 		NULL, NULL, NULL, EC_TASK_PRIORITY, 0, EC_WAIT_FOREVER);
@@ -77,6 +77,8 @@ K_THREAD_DEFINE(thermal_thrd_id, EC_TASK_STACK_SIZE, thermalmgmt_thread,
 		&thermal_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 #endif
+
+
 
 
 struct task_info {
@@ -119,7 +121,6 @@ static struct task_info tasks[] = {
 	{ .thread_id = thermal_thrd_id, .can_suspend = false,
 	  .tagname = THRML_MGMT_TASK_NAME },
 #endif
-
 };
 
 void start_all_tasks(void)
@@ -128,6 +129,7 @@ void start_all_tasks(void)
 		if (tasks[i].thread_id) {
 #ifdef CONFIG_THREAD_NAME
 			k_thread_name_set(tasks[i].thread_id, tasks[i].tagname);
+			LOG_DBG("%s %s", __func__, tasks[i].tagname);
 #endif
 			k_thread_start(tasks[i].thread_id);
 		}

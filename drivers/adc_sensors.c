@@ -5,14 +5,17 @@
  */
 
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 #include <soc.h>
-#include <logging/log.h>
-#include <drivers/adc.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/drivers/adc.h>
 #include "adc_sensors.h"
 #include "board_config.h"
-
 LOG_MODULE_REGISTER(adcsens, CONFIG_ADC_SENSORS_LOG_LEVEL);
+
+/* For cases where ADC failure occurs during LPM exit, PLL takes 3ms to lock */
+#define MAX_ADC_READ_RETRIES 3
+#define ADC_RETRY_DELAY_MS   1
 
 /* ADC device */
 static const struct device *adc_dev;
@@ -236,10 +239,10 @@ int adc_sensors_init(uint8_t adc_channel_bits)
 		return -ENOTSUP;
 	}
 
-	adc_dev = device_get_binding(ADC_CH_BASE);
+	adc_dev = DEVICE_DT_GET(ADC_CH_BASE);
 
-	if (!adc_dev) {
-		LOG_ERR("%s Sensor device Invalid", ADC_CH_BASE);
+	if (!device_is_ready(adc_dev)) {
+		LOG_ERR("Sensor device not ready");
 		return -ENOTSUP;
 	}
 
@@ -288,10 +291,20 @@ void adc_sensors_read_all(void)
 		.resolution	= 10,
 	};
 
-	ret = adc_read(adc_dev, &sequence);
+	int retries = 0;
+
+	do {
+		ret = adc_read(adc_dev, &sequence);
+		if (ret) {
+			LOG_WRN("ADC Sensor reading failed %d", ret);
+			k_msleep(ADC_RETRY_DELAY_MS);
+		}
+
+		retries++;
+	} while (retries < MAX_ADC_READ_RETRIES && ret);
 
 	if (ret) {
-		LOG_WRN("ADC Sensor reading failed %d", ret);
+		LOG_ERR("ADC Sensor reading failed %d", ret);
 	}
 
 	for (ch = ADC_CH_00; ch < ADC_CH_TOTAL; ch++) {

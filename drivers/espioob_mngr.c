@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <logging/log.h>
-#include <drivers/espi.h>
+#include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/drivers/espi.h>
 #include "espi_hub.h"
 #include "espioob_mngr.h"
 #include "memops.h"

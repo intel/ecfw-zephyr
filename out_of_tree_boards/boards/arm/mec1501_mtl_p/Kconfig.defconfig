@@ -1,0 +1,54 @@
+# Copyright (c) 2020 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+if BOARD_MEC1501_MTL_P
+
+config BOARD
+	default "mec1501_mtl_p"
+
+
+#PS/2 driver is compiled in terms of this flag.
+config ESPI_PERIPHERAL_8042_KBC
+	default y
+	depends on ESPI_XEC
+
+if RTOS_TIMER
+
+# XEC RTOS timer HW frequency is fixed at 32768
+# The driver requires tickless mode and ticks per
+# second to be 32768 for accurate operation.
+
+config SYS_CLOCK_HW_CYCLES_PER_SEC
+	default 32768
+
+config SYS_CLOCK_TICKS_PER_SEC
+	default 32768
+
+endif # RTOS_TIMER
+
+if !RTOS_TIMER
+
+# If RTOS timer is not enabled we use ARM Cortex-M
+# SYSTICK. SYSTICK frequency is 48MHz divided by
+# SOC_MEC1501_PROC_CLK_DIV.
+
+config SYS_CLOCK_HW_CYCLES_PER_SEC
+	default 48000000
+
+config SYS_CLOCK_TICKS_PER_SEC
+	default 1000
+
+endif # RTOS_TIMER
+
+if SPI
+
+config SPI_XEC_QMSPI
+	default y
+
+endif # SPI
+
+config TACH_XEC
+	default y
+	depends on SENSOR
+
+endif # BOARD_MEC1501_MTL

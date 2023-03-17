@@ -8,8 +8,8 @@
 #define I2C_HUB_H_
 
 #include <zephyr/types.h>
-#include <device.h>
-#include <drivers/i2c.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/i2c.h>
 
 enum i2c_bus_num {
 	I2C_0,
@@ -150,7 +150,7 @@ int i2c_hub_burst_write(uint8_t instance, uint16_t dev_addr,
  * @retval -EIO General input / output error.
  * @retval -ENOTSUP If slave mode is not supported
  */
-int i2c_hub_slave_register(uint8_t instance, struct i2c_slave_config *cfg);
+int i2c_hub_slave_register(uint8_t instance, struct i2c_target_config *cfg);
 
 /**
  * @brief Unregisters the provided config as Slave device
@@ -167,5 +167,5 @@ int i2c_hub_slave_register(uint8_t instance, struct i2c_slave_config *cfg);
  * @retval -EINVAL If parameters are invalid
  * @retval -ENOTSUP If slave mode is not supported
  */
-int i2c_hub_slave_unregister(uint8_t instance, struct i2c_slave_config *cfg);
+int i2c_hub_slave_unregister(uint8_t instance, struct i2c_target_config *cfg);
 #endif

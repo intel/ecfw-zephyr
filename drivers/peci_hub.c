@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <device.h>
-#include <drivers/peci.h>
-#include <logging/log.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/peci.h>
+#include <zephyr/logging/log.h>
 #include "board_config.h"
 #include "errno.h"
 #include <soc.h>
@@ -813,9 +813,9 @@ int peci_init(void)
 	detect_peci_over_espi_mode();
 #endif /* CONFIG_DEPRECATED_HW_STRAP_BASED_PECI_MODE_SEL */
 
-	peci_dev = device_get_binding(PECI_0_INST);
-	if (!peci_dev) {
-		LOG_ERR("PECI device not found");
+	peci_dev = DEVICE_DT_GET(PECI_0_INST);
+	if (!device_is_ready(peci_dev)) {
+		LOG_ERR("PECI device not ready");
 		return -ENODEV;
 	}
 
@@ -837,3 +837,4 @@ int peci_init(void)
 	gpu_tjmax = 0;
 	return 0;
 }
+

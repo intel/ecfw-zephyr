@@ -5,17 +5,16 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <soc.h>
 #include "i2c_hub.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "gpio_ec.h"
 #include "board_config.h"
 #include "board.h"
-#include "errcodes.h"
-#include "pwrplane.h"
 #include "flashhdr.h"
+#include "errcodes.h"
 
 LOG_MODULE_REGISTER(board, CONFIG_BOARD_LOG_LEVEL);
 

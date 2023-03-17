@@ -1,12 +1,10 @@
 
 &i2c_smb_0 {
 	status = "okay";
-	label = "I2C0";
 	port_sel = <0>;
 
 	pca9555@22 {
 		compatible = "nxp,pca95xx";
-		label = "GPIO_P0";
 
 		/* Address depends on 0100<A2=0><A1=1><A0=0><R/W>b. */
 		reg = <0x22>;
@@ -16,7 +14,6 @@
 
 	pca9555@25 {
 		compatible = "nxp,pca95xx";
-		label = "GPIO_P1";
 
 		/* Address depends on 0100<A2=1><A1=0><A0=1><R/W>b. */
 		reg = <0x25>;
@@ -34,4 +31,15 @@
 	port_sel = <0>;
 	chip_select = <0>;
 	lines = <4>;
+};
+
+&espi_saf0 {
+	status = "okay";
+};
+
+&spi0 {
+	pinctrl-0 = < &shd_cs0_n_gpio055 &shd_clk_gpio056
+			&shd_io0_gpio223 &shd_io1_gpio224
+			&shd_io2_gpio227 &shd_io3_gpio016 >;
+	pinctrl-names = "default";
 };

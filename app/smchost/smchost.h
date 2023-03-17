@@ -23,15 +23,6 @@
 #define PECI_ACCESS_MODE_POS		1u
 #define ACPI_MODE			0u
 
-/*  SMCHOST_GET_SWITCH_STS definitions */
-#define SWITCH_STATUS_LEGACY_POS	7u
-#define SWITCH_STATUS_VIRTUAL_DOCK_POS	5u
-#define SWITCH_STATUS_AC_POWER_POS	4u
-#define SWITCH_STATUS_HOME_BTN_POS	3u
-#define SWITCH_STATUS_NMI_POS		2u
-#define SWITCH_STATUS_VIRTUAL_BATT_POS	1u
-#define SWITCH_STATUS_LEGACY_LID	0u
-
 /* PLN definitions */
 #define PLN_PIN_ASSERT			0u
 #define PLN_PIN_DEASSERT		1u
@@ -129,5 +120,6 @@ extern uint8_t host_req_len;
 extern uint8_t host_res_len;
 extern uint8_t host_res_idx;
 extern uint8_t peci_access_mode;
+
 
 #endif /* __SMCHOST_H__ */

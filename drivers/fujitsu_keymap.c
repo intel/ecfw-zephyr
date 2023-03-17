@@ -5,8 +5,8 @@
  */
 
 #include "kbs_keymap.h"
-#include <sys/printk.h>
-#include <logging/log.h>
+#include <zephyr/sys/printk.h>
+#include <zephyr/logging/log.h>
 
 /* Below is the keymap for the fujitsu keyboard we borrowed from MCHP */
 
@@ -52,7 +52,7 @@
 /*|  (43) |  (76) |  (75) | (123) |       |       |  (83) |  (89) | (KEY #) */
 /*|-------+-------+-------+-------+-------+-------+-------+-------|         */
 /*|       | R-WIN |       |       |       |       | L-WIN |   Fn  | Scan 12 */
-/*|       |  (87) |       |       |       |       |  (59) | (255) | (KEY #) */
+/*|       |  (127 |       |       |       |       | (127) | (255) | (KEY #) */
 /*|-------+-------+-------+-------+-------+-------+-------+-------|         */
 /*|       |       |       | RShift| LShift|       |       |       | Scan 13 */
 /*|       |       |       |  (57) |  (44) |       |       |       | (KEY #) */
@@ -96,8 +96,8 @@ const uint8_t keymap[MAX_MTX_KEY_COLS][MAX_MTX_KEY_ROWS] = {
 	{KEY_RSVD, KEY_RSVD, KEY_RSVD, KEY_RSVD, 26, 90, 126, 121},
 	{84, 71, KEY_RSVD, KEY_RSVD, 54, 122, 29, 15},
 	{89, 83, KEY_RSVD, KEY_RSVD, 123, 75, 76, 43},
-	{255, 59, KEY_RSVD, KEY_RSVD, KEY_RSVD, KEY_RSVD, 87, KEY_RSVD},
-	{KEY_RSVD, KEY_RSVD, 44, 57, KEY_RSVD, KEY_RSVD, KEY_RSVD},
+	{255, 127, KEY_RSVD, KEY_RSVD, KEY_RSVD, KEY_RSVD, 127, KEY_RSVD},
+	{KEY_RSVD, KEY_RSVD, KEY_RSVD, 44, 57, KEY_RSVD, KEY_RSVD, KEY_RSVD},
 	{62, 60, KEY_RSVD, KEY_RSVD, KEY_RSVD, KEY_RSVD, KEY_RSVD, KEY_RSVD},
 	{KEY_RSVD, KEY_RSVD, 58, KEY_RSVD, KEY_RSVD, KEY_RSVD, KEY_RSVD, 64},
 };
@@ -229,7 +229,7 @@ int fujitsu_get_fn_key(uint8_t key_num, struct fn_data *data,
 	case KM_F9_KEY:
 		data->type = SCI_CODE;
 		if (pressed) {
-			data->sci_code = 0x40U;
+			data->sci_code = 0x43U;
 			data->sc.len = 1U;
 		} else {
 			/* Clients must do nothng with braek code */
@@ -240,7 +240,7 @@ int fujitsu_get_fn_key(uint8_t key_num, struct fn_data *data,
 	case KM_F10_KEY:
 		data->type = SCI_CODE;
 		if (pressed) {
-			data->sci_code = 0x41U;
+			data->sci_code = 0x44U;
 			data->sc.len = 1U;
 		} else {
 			/* Clients must do nothng with braek code */

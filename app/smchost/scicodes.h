@@ -133,5 +133,7 @@
 #define SCI_THERMAL             0xF0
 /* Thermal trip point transition */
 #define SCI_THERMTRIP           0xF1
+/* RPM Trip point transition */
+#define SCI_RPMTRIP             0xF2
 
 #endif /* SCI_CODES_H_ */

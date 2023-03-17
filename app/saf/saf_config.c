@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <soc.h>
-#include <drivers/spi.h>
-#include <drivers/espi.h>
-#include <drivers/espi_saf.h>
-#include <logging/log.h>
+#include <zephyr/drivers/spi.h>
+#include <zephyr/drivers/espi.h>
+#include <zephyr/drivers/espi_saf.h>
+#include <zephyr/logging/log.h>
 #include "board_config.h"
 #include "saf_spi_transaction.h"
 #include "saf_config.h"
@@ -249,9 +249,9 @@ int spi_flash_init(uint8_t slave_index)
 
 	LOG_DBG("%s", __func__);
 
-	spi_dev = device_get_binding(SPI_0);
-	if (!spi_dev) {
-		LOG_ERR("Failed to bind %s", SPI_0);
+	spi_dev = DEVICE_DT_GET(SPI_0);
+	if (!device_is_ready(spi_dev)) {
+		LOG_ERR("SPI device not ready");
 		return -ENODEV;
 	};
 
@@ -287,9 +287,9 @@ int initialize_saf_bridge(void)
 	int ret;
 	bool saf_ready;
 
-	saf_dev = device_get_binding(ESPI_SAF_0);
-	if (!saf_dev) {
-		LOG_ERR("%s not found", ESPI_SAF_0);
+	saf_dev = DEVICE_DT_GET(ESPI_SAF_0);
+	if (!device_is_ready(saf_dev)) {
+		LOG_ERR("ESPI SAF device not ready");
 		return -ENODEV;
 	}
 

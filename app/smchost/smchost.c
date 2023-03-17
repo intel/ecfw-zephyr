@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "board.h"
 #include "board_config.h"
 #include "smc.h"
@@ -22,6 +22,7 @@
 #ifdef CONFIG_DNX_SUPPORT
 #include "dnx.h"
 #endif
+
 
 LOG_MODULE_REGISTER(smchost, CONFIG_SMCHOST_LOG_LEVEL);
 
@@ -648,9 +649,6 @@ static void smchost_cmd_handler(uint8_t command)
 		break;
 
 #ifdef CONFIG_THERMAL_MANAGEMENT
-#ifdef CONFIG_DTT_SUPPORT_THERMALS
-	case SMCHOST_SET_TMP_THRESHOLD:
-#endif /* CONFIG_DTT_SUPPORT_THERMALS */
 	case SMCHOST_UPDATE_PWM:
 	case SMCHOST_BIOS_FAN_CONTROL:
 	case SMCHOST_SET_SHDWN_THRESHOLD:
@@ -710,3 +708,5 @@ static void handle_kb_backlight_pwm(void)
 		prev_kb_bklt_pwm_duty = g_acpi_tbl.kb_bklt_pwm_duty;
 	}
 }
+
+

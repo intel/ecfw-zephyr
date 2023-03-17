@@ -5,10 +5,10 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <soc.h>
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "gpio_ec.h"
 #include "periphmgmt.h"
 #include "pwrbtnmgmt.h"
@@ -61,6 +61,7 @@ static struct btn_info btn_lst[] = {
 
 static int debouncing_ongoing;
 static struct k_sem btn_debounce_lock;
+static uint8_t io_sw_status;
 
 static void notify_btn_handlers(uint8_t btn_idx)
 {
@@ -217,6 +218,29 @@ void update_virtual_bat_dock_status(void)
 	}
 }
 
+void update_switch_status(void)
+{
+	io_sw_status = 0;
+	WRITE_BIT(io_sw_status, SWITCH_STATUS_TESTCRD_DET_POS,
+		  gpio_read_pin(THERM_STRAP));
+	WRITE_BIT(io_sw_status, SWITCH_STATUS_VIRTUAL_DOCK_POS,
+		  gpio_read_pin(VIRTUAL_DOCK));
+	WRITE_BIT(io_sw_status, SWITCH_STATUS_AC_POWER_POS,
+		  gpio_read_pin(BC_ACOK));
+	WRITE_BIT(io_sw_status, SWITCH_STATUS_HOME_BTN_POS,
+		  (gpio_read_pin(HOME_BUTTON) == LOW));
+	WRITE_BIT(io_sw_status, SWITCH_STATUS_VIRTUAL_BATT_POS,
+		  gpio_read_pin(VIRTUAL_BAT));
+	WRITE_BIT(io_sw_status, SWITCH_STATUS_LEGACY_LID,
+		  gpio_read_pin(SMC_LID));
+	LOG_DBG("%s io_sw_status:0x%X", __func__, io_sw_status);
+}
+
+uint8_t read_io_switch_status(void)
+{
+	return io_sw_status;
+}
+
 bool is_virtual_battery_prsnt(void)
 {
 	return g_acpi_tbl.acpi_flags2.vb_sw_closed ? false : true;
@@ -232,6 +256,9 @@ void periph_thread(void *p1, void *p2, void *p3)
 	uint32_t period = *(uint32_t *)p1;
 
 	pwrbtn_init();
+
+	/* Update the switch status */
+	update_switch_status();
 
 	k_sem_init(&btn_debounce_lock, 0, 1);
 	while (true) {

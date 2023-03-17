@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include "i2c_hub.h"
 #include "board.h"
 #include "board_config.h"
 #include "eeprom.h"
 #include "memops.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(eeprom, CONFIG_EEPROM_LOG_LEVEL);
 
 /* LAN enable/disable status */

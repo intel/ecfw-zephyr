@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <drivers/pwm.h>
-#include <logging/log.h>
+#include <zephyr/kernel.h>
+#include <zephyr/drivers/pwm.h>
+#include <zephyr/logging/log.h>
 #include "board_config.h"
 #include "led.h"
 
@@ -70,7 +70,7 @@ void led_blink(enum led_num idx, uint8_t duty_cycle)
 		break;
 	}
 
-	ret = pwm_pin_set_cycles(led_dev[idx], 0,
+	ret = pwm_set_cycles(led_dev[idx], 0,
 			pwm_multiplier * MAX_DUTY_CYCLE,
 			pwm_multiplier * duty_cycle, 0);
 
@@ -85,19 +85,21 @@ void led_init(enum led_num idx)
 
 #if DT_NODE_HAS_STATUS(BAT_LED2, okay)
 		led_dev[LED2] = DEVICE_DT_GET(DT_PWMS_CTLR(BAT_LED2));
-#endif
+
 		if (!device_is_ready(led_dev[LED2])) {
-			LOG_WRN("No LED device");
+			LOG_WRN("LED device not ready");
 		}
+#endif
 
 	} else if (idx == LED_KBD_BKLT) {
 
 #if DT_NODE_HAS_STATUS(KBD_BKLT_LED, okay)
 		led_dev[LED_KBD_BKLT] =
 			DEVICE_DT_GET(DT_PWMS_CTLR(KBD_BKLT_LED));
-#endif
+
 		if (!device_is_ready(led_dev[LED_KBD_BKLT])) {
-			LOG_WRN("No KBD BKLT LED device");
+			LOG_WRN("KBD BKLT LED device not ready");
 		}
+#endif
 	}
 }

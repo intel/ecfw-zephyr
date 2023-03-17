@@ -24,7 +24,6 @@
 
 &i2c_smb_2 {
 	status = "okay";
-	label = "I2C7";
 	port_sel = <7>;
 
 	sda-gpios = <&gpio_000_036 12 0>;

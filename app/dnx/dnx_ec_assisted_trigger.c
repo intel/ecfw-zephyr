@@ -5,10 +5,10 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
-#include <device.h>
-#include <drivers/espi.h>
-#include <logging/log.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/espi.h>
+#include <zephyr/logging/log.h>
 #include "board_config.h"
 #include "gpio_ec.h"
 #include "dnx.h"

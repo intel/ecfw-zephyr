@@ -148,4 +148,5 @@ void peci_access_mode_config(uint8_t mode);
  */
 int peci_update_pl4_offset(uint32_t pl4_value);
 
+
 #endif /* __PECI_HUB_H__ */

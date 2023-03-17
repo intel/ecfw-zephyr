@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 #include "keyboard_utility.h"
 
 #define START_BREAK_CODE		0xf0U

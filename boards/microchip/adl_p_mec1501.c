@@ -5,9 +5,9 @@
  */
 
 #include <soc.h>
-#include <drivers/gpio.h>
+#include <zephyr/drivers/gpio.h>
 #include "i2c_hub.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "gpio_ec.h"
 #include "espi_hub.h"
 #include "board.h"
@@ -265,7 +265,6 @@ int board_init(void)
 	ret = i2c_hub_config(I2C_2);
 	if (ret) {
 		LOG_ERR("i2c port not configured, Enable i2c port 5 in dts.");
-	} else {
 	}
 #endif
 	ret = read_board_id();

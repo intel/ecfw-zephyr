@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <logging/log.h>
+#include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
 #include "thermalmgmt.h"
 #include "fan.h"
 #include "adc_sensors.h"
@@ -20,9 +20,6 @@
 #include "memops.h"
 #include "gpio_ec.h"
 #include "task_handler.h"
-#ifdef CONFIG_DTT_SUPPORT_THERMALS
-#include "dtt.h"
-#endif
 
 LOG_MODULE_REGISTER(thermal, CONFIG_THERMAL_MGMT_LOG_LEVEL);
 
@@ -73,8 +70,10 @@ static bool fan_override;
 static bool bios_fan_override;
 static uint8_t bios_fan_speed;
 static uint8_t fan_duty_cycle[FAN_DEV_TOTAL];
+static uint16_t fan_rpm[FAN_DEV_TOTAL];
 static bool fan_duty_cycle_change;
 static int cpu_temp;
+static uint8_t fan_en_bits;
 
 void host_update_crit_temp(uint8_t crit_temp)
 {
@@ -111,11 +110,7 @@ void get_hw_peripherals_status(uint8_t *hw_peripherals_sts)
 	 */
 
 	/* Update fans status */
-	for (idx = 0; idx < max_fan_dev; idx++) {
-		if (fan_dev_tbl[idx].pwm_ch != PWM_CH_UNDEF) {
-			hw_peripherals_sts[0] |= BIT(idx);
-		}
-	}
+	hw_peripherals_sts[0] = fan_en_bits;
 
 	/* Update thermal sensors status */
 	for (idx = 0; idx < ACPI_THRM_SEN_TOTAL; idx++) {
@@ -128,6 +123,8 @@ void get_hw_peripherals_status(uint8_t *hw_peripherals_sts)
 static void init_fans(void)
 {
 	int ret;
+
+#ifdef CONFIG_HW_STRAP_BASED_FAN_CONTROL
 	int level;
 
 	/* Initialize override */
@@ -138,6 +135,7 @@ static void init_fans(void)
 		fan_override = !level;
 		LOG_WRN("Fan HW override enable: %d", fan_override);
 	}
+#endif
 
 #ifdef CONFIG_THERMAL_FAN_OVERRIDE
 	fan_override = true;
@@ -155,6 +153,14 @@ static void init_fans(void)
 
 	fan_duty_cycle[FAN_CPU] = CONFIG_THERMAL_FAN_OVERRIDE_VALUE;
 	fan_duty_cycle_change = 1;
+
+	/* Update status of enabled fans */
+	for (uint8_t idx = 0; idx < max_fan_dev; idx++) {
+		if (fan_dev_tbl[idx].pwm_ch != PWM_CH_UNDEF) {
+			fan_en_bits |= BIT(idx);
+		}
+	}
+
 }
 
 static void init_therm_sensors(void)
@@ -176,23 +182,20 @@ static void init_therm_sensors(void)
 		thermal_initialized = true;
 	}
 
-#ifdef CONFIG_DTT_SUPPORT_THERMALS
-	dtt_init_thermals(therm_sensors);
-#endif
 }
 
 bool is_fan_controlled_by_host(void)
 {
+	/* Fan PWM value is mostly in EC control, except when overridden with BIOS setup option.*/
 	if (bios_fan_override) {
-		return 1;
+		return true;
 	}
 
-	if (!is_system_in_acpi_mode()) {
-		LOG_DBG("Fan control is over-ridden when not in ACPI mode.");
-		return 0;
+	if (is_system_in_acpi_mode()) {
+		return true;
 	}
 
-	return 1;
+	return false;
 }
 
 void host_set_bios_fan_override(bool en, uint8_t speed)
@@ -222,8 +225,33 @@ void host_update_fan_speed(enum fan_type idx, uint8_t duty_cycle)
 	}
 }
 
+/**
+ * @brief Manage Fan
+ *
+ * When system is in S0, the fan speed can be controlled with PWM by EC or the host.
+ * Depending upon the override options, fan speed can be controlled in the priority order as below:
+ *
+ * 1. HW strap:
+ *    The THERM_STRAP gpio is used to dynamically override fan speed at set constant speed.
+ * 2. SW strap:
+ *    With Kconfig option 'CONFIG_THERMAL_FAN_OVERRIDE' set, fan speed set to run at constant speed.
+ * 3. BIOS fan override:
+ *    Host can take control of fan speed to run at desired constant PWM duty cycle.
+ * 4. EC / Host control:
+ *    If none of the above override options set, then fan speed is controlled with dynamic PWM
+ *    values by either EC or the host, depending upon fan operating mode set by the host (DTT).
+ *
+ *    A. Host control:
+ *       Only in ACPI mode, host can control the fan speed when DTT fan operating mode is set to
+ *       default (legacy mode). This is the only mode where active trip points, or BSOD trip point
+ *       set by the host will be honored.
+ *    B. EC control:
+ *       EC defines own fan speed table to control the fan at variable CPU temperature.
+ */
 static void manage_fan(void)
 {
+	uint8_t cpu_fan_speed = 0;
+
 	/* Disable power to fan in S5/4/3 and in CS,
 	 * else continue with fan management.
 	 */
@@ -237,8 +265,7 @@ static void manage_fan(void)
 
 	if (!is_fan_controlled_by_host()) {
 		/* EC Self control fan based on CPU thermal info */
-		uint8_t cpu_fan_speed = GET_FAN_SPEED_FOR_TEMP(cpu_temp);
-
+		cpu_fan_speed = GET_FAN_SPEED_FOR_TEMP(cpu_temp);
 		if (fan_duty_cycle[FAN_CPU] != cpu_fan_speed) {
 			fan_duty_cycle[FAN_CPU] = cpu_fan_speed;
 			fan_duty_cycle_change = 1;
@@ -265,8 +292,10 @@ static void manage_fan(void)
 		uint16_t rpm;
 
 		fan_read_rpm(idx, &rpm);
+		fan_rpm[idx] = rpm;
 		smc_update_fan_tach(idx, rpm);
 	}
+
 
 	/* EC assumes OS is hung/BSOD occurred and takes override actions
 	 * if current CPU temperature crossed above and fan running below
@@ -302,9 +331,6 @@ static void manage_thermal_sensors(void)
 		}
 	}
 
-#ifdef CONFIG_DTT_SUPPORT_THERMALS
-	dtt_therm_sensor_trip();
-#endif
 }
 
 K_TIMER_DEFINE(peci_delay_timer, NULL, NULL);

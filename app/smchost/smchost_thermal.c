@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "board.h"
 #include "board_config.h"
 #include "smc.h"
@@ -14,16 +14,33 @@
 #include "sci.h"
 #include "acpi.h"
 #include "thermalmgmt.h"
-#ifdef CONFIG_DTT_SUPPORT_THERMALS
-#include "dtt.h"
-#endif
 
 LOG_MODULE_DECLARE(smchost, CONFIG_SMCHOST_LOG_LEVEL);
 
-#define ACPI_DTT_SENSOR_IDX_MASK	0x0F
-#define ACPI_DTT_HYSTERESIS_MASK	0xF0
-#define ACPI_DTT_HYSTERESIS_OFFSET	4u
-#define ACPI_DTT_HYSTERESIS_MULTIPLIER	10u
+/**
+ * @brief Get the acpi fan idx object
+ *
+ * Host sends bit field value for fan index. This function converts it to local defined enumeration.
+ *
+ * @return enum fan_type
+ */
+static inline enum fan_type get_acpi_fan_idx(void)
+{
+	switch (g_acpi_tbl.acpi_fan_idx) {
+	case BIT(FAN_CPU):
+		return FAN_CPU;
+	case BIT(FAN_REAR):
+		return FAN_REAR;
+	case BIT(FAN_GFX):
+		return FAN_GFX;
+	case BIT(FAN_PCH):
+		return FAN_PCH;
+
+	default: /* Any other value defaulted to CPU fan */
+		LOG_WRN("Host to ensure correct fan index used");
+		return FAN_CPU;
+	}
+}
 
 static void set_shutdown_threshold(void)
 {
@@ -35,48 +52,11 @@ static void set_os_active_trip(void)
 	host_set_bios_bsod_override(host_req[1], host_req[2]);
 }
 
-#ifdef CONFIG_DTT_SUPPORT_THERMALS
-static void dtt_set_tmp_threshold(void)
-{
-	uint8_t sns, hyst;
-	struct dtt_threshold thrd;
-
-	sns = g_acpi_tbl.acpi_temp_snsr_select & ACPI_DTT_SENSOR_IDX_MASK;
-
-	hyst = g_acpi_tbl.acpi_temp_snsr_select & ACPI_DTT_HYSTERESIS_MASK;
-	hyst = (hyst >> ACPI_DTT_HYSTERESIS_OFFSET);
-	thrd.temp_hyst = hyst * ACPI_DTT_HYSTERESIS_MULTIPLIER;
-
-	thrd.low_temp = g_acpi_tbl.acpi_temp_low_thrshld;
-	thrd.high_temp = g_acpi_tbl.acpi_temp_high_thrshld;
-
-	smc_update_dtt_threshold_limits(sns, thrd);
-}
-#endif /* CONFIG_DTT_SUPPORT_THERMALS */
 
 static void update_pwm(void)
 {
 #ifndef CONFIG_THERMAL_FAN_OVERRIDE
-
-	switch (g_acpi_tbl.acpi_fan_idx) {
-	case FAN_CPU:	/* For sake of backward compatibility, CPU fan allowed to run at index 0*/
-	case BIT(FAN_CPU):
-		host_update_fan_speed(FAN_CPU, g_acpi_tbl.acpi_pwm_end_val);
-		break;
-	case BIT(FAN_REAR):
-		host_update_fan_speed(FAN_REAR, g_acpi_tbl.acpi_pwm_end_val);
-		break;
-	case BIT(FAN_GFX):
-		host_update_fan_speed(FAN_GFX, g_acpi_tbl.acpi_pwm_end_val);
-		break;
-	case BIT(FAN_PCH):
-		host_update_fan_speed(FAN_PCH, g_acpi_tbl.acpi_pwm_end_val);
-		break;
-	default:
-		LOG_WRN("Invalid fan index, BIOS must send only one bit set per fan index");
-		break;
-	}
-
+	host_update_fan_speed(get_acpi_fan_idx(), g_acpi_tbl.acpi_pwm_end_val);
 #endif
 }
 
@@ -105,11 +85,6 @@ void smchost_cmd_thermal_handler(uint8_t command)
 	case SMCHOST_SET_OS_ACTIVE_TRIP:
 		set_os_active_trip();
 		break;
-#ifdef CONFIG_DTT_SUPPORT_THERMALS
-	case SMCHOST_SET_TMP_THRESHOLD:
-		dtt_set_tmp_threshold();
-		break;
-#endif /* CONFIG_DTT_SUPPORT_THERMALS */
 	case SMCHOST_SET_SHDWN_THRESHOLD:
 		set_shutdown_threshold();
 		break;

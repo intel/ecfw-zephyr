@@ -71,16 +71,16 @@
 #define VIRTUAL_BAT_INIT_POS		1
 
 /* Device instance names */
-#define I2C_BUS_0			DT_LABEL(DT_NODELABEL(i2c_smb_0))
-#define I2C_BUS_1			DT_LABEL(DT_NODELABEL(i2c_smb_1))
-#define PS2_KEYBOARD			DT_LABEL(DT_NODELABEL(ps2_0))
-#define PS2_MOUSE			DT_LABEL(DT_NODELABEL(ps2_1))
-#define ESPI_0				DT_LABEL(DT_NODELABEL(espi0))
-#define ESPI_SAF_0			DT_LABEL(DT_NODELABEL(espi_saf0))
-#define SPI_0				DT_LABEL(DT_NODELABEL(spi0))
-#define ADC_CH_BASE			DT_LABEL(DT_NODELABEL(adc0))
-#define PECI_0_INST			DT_LABEL(DT_NODELABEL(peci0))
-#define WDT_0				DT_LABEL(DT_NODELABEL(wdog))
-#define KSCAN_MATRIX			DT_LABEL(DT_NODELABEL(kscan0))
+#define I2C_BUS_0			DT_NODELABEL(i2c_smb_0)
+#define I2C_BUS_1			DT_NODELABEL(i2c_smb_1)
+#define PS2_KEYBOARD			DT_NODELABEL(ps2_0)
+#define PS2_MOUSE			DT_NODELABEL(ps2_1)
+#define ESPI_0				DT_NODELABEL(espi0)
+#define ESPI_SAF_0			DT_NODELABEL(espi_saf0)
+#define SPI_0				DT_NODELABEL(spi0)
+#define ADC_CH_BASE			DT_NODELABEL(adc0)
+#define PECI_0_INST			DT_NODELABEL(peci0)
+#define WDT_0				DT_NODELABEL(wdog)
+#define KSCAN_MATRIX			DT_NODELABEL(kscan0)
 
 #endif /* __MEC15XX_AIC_DEFS_H__ */

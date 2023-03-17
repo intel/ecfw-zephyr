@@ -18,12 +18,16 @@ extern uint8_t boot_mode_maf;
 #include "mec15xx_aic_rvp_selection.h"
 #elif CONFIG_BOARD_MEC172XMODULAR_ASSY6930
 #include "mecc172x_aic_rvp_selection.h"
+#elif defined(CONFIG_BOARD_MEC1501_EUCLID)
+#include "euclid_mec1501.h"
 #elif defined(CONFIG_BOARD_MEC1501_ADL)
 #include "adl_mec1501.h"
 #elif defined(CONFIG_BOARD_MEC1501_ADL_P)
 #include "adl_p_mec1501.h"
-#elif defined(CONFIG_BOARD_MEC1728_MTL_S)
-#include "mtl_s_mec1728.h"
+#elif defined(CONFIG_BOARD_MEC1501_MTL_P)
+#include "mtl_p_mec1501.h"
+#elif defined(CONFIG_BOARD_MEC172X_MTL_S)
+#include "mtl_s_mec172x.h"
 #else
 #error "Platform not supported"
 #endif /* CONFIG_BOARD_MEC1501MODULAR_ASSY6885 */

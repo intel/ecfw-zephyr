@@ -75,6 +75,14 @@ uint8_t smc_get_wake_sts(void);
 void smc_update_thermal_sensor(enum acpi_thrm_sens_idx idx, int16_t temp);
 
 /**
+ * @brief Update fan capability value in ACPI table.
+ *
+ * @param fan_capability_val byte value for all bit-fields of @ref
+ *	  fan_capability_support.
+ */
+void smc_update_fan_capability(uint8_t fan_capability_val);
+
+/**
  * @brief Update the fan rpm (rotation per minute) value for given fan device.
  *
  * @param fan_idx fan device index.
@@ -85,12 +93,21 @@ void smc_update_fan_tach(uint8_t fan_idx, uint16_t rpm);
 /**
  * @brief Update thermal sensor trip status.
  *
- * @param status is bit-field value indicating sensor number tripped.
+ * @param status is bit-field value indicating sensor number trip change event.
  *	  e.g. status = 0x5 = 0000 0101b -> indicates, sensor number 1
- *	  and sensor number 3 got tripped.
+ *	  and sensor number 3 got changes in trip status.
  *
  */
 void smc_update_therm_trip_status(uint16_t status);
+
+/**
+ * @brief Update fan RPM sensor trip status.
+ *
+ * @param status is bit-field value indicating fan RPM number trip change event.
+ *	  e.g. status = 0x5 = 0000 0101b -> indicates, fan number 1
+ *	  and fan number 3 have change in RPM trip status.
+ */
+void smc_update_rpm_trip_status(uint8_t status);
 
 /**
  * @brief Update cpu temperature value to ACPI offset acpi_remote_temp.

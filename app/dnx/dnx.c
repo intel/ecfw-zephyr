@@ -5,10 +5,10 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
-#include <device.h>
-#include <drivers/espi.h>
-#include <logging/log.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/espi.h>
+#include <zephyr/logging/log.h>
 #include "gpio_ec.h"
 #include "espi_hub.h"
 #include "pwrseq_utils.h"
@@ -27,7 +27,7 @@ void dnx_warn_handler(uint8_t status)
 	}
 }
 
-void espi_bus_reset_handler(uint8_t status)
+void dnx_espi_bus_reset_handler(uint8_t status)
 {
 	LOG_DBG("%s espi_rst=%d while dnx=%d", __func__, status, dnx_entered);
 
@@ -51,5 +51,4 @@ void dnx_handle_early_handshake(void)
 
 	/* Register for other eSPI relevant notifications */
 	espihub_add_warn_handler(ESPIHUB_DNX_WARNING, dnx_warn_handler);
-	espihub_add_warn_handler(ESPIHUB_BUS_RESET, espi_bus_reset_handler);
 }

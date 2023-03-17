@@ -5,7 +5,7 @@
  */
 
 #include "kbs_keymap.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 
 /****************************************************************************/
 /*  Gtech keyboard                                                          */
@@ -157,6 +157,7 @@ int gtech_get_fn_key(uint8_t key_num, struct fn_data *data,
 			data->sc.code[0] = 0xE0U;
 			data->sc.code[1] = 0x21U;
 			data->sc.len = 2U;
+			data->sc.typematic = true;
 		} else {
 			data->sc.code[0] = 0xE0U;
 			data->sc.code[1] = 0xF0U;
@@ -172,6 +173,7 @@ int gtech_get_fn_key(uint8_t key_num, struct fn_data *data,
 			data->sc.code[0] = 0xE0U;
 			data->sc.code[1] = 0x32U;
 			data->sc.len = 2U;
+			data->sc.typematic = true;
 		} else {
 			data->sc.code[0] = 0xE0U;
 			data->sc.code[1] = 0xF0U;
@@ -374,24 +376,6 @@ int gtech_get_fn_key(uint8_t key_num, struct fn_data *data,
 			data->sc.len = 1U;
 		}
 		break;
-	case KM_VOL_DN_KEY:
-		data->type = SCI_CODE;
-		if (pressed) {
-			data->sci_code = 0x24U;
-		} else {
-			data->sci_code = 0U;
-		}
-		break;
-
-	case KM_VOL_UP_KEY:
-		data->type = SCI_CODE;
-		if (pressed) {
-			data->sci_code = 0x25U;
-		} else {
-			data->sci_code = 0U;
-		}
-		break;
-
 	default:
 		return -EINVAL;
 	}

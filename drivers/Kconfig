@@ -68,6 +68,22 @@ config ENABLE_ESPI_LTR
 
 endmenu
 
+choice
+	prompt "Select the vendor of the SPI Flash"
+	default SPI_VENDOR_WINBOND
+	help
+	  Select the vendor for the SPI Flash on the
+	  board. The SPI access functions may have differences
+	  based on the vendor selected.
+
+	config SPI_VENDOR_WINBOND
+	bool "WINBOND SPI Flash"
+
+	config SPI_VENDOR_GIGADEVICE
+	bool "GIGADEVICE SPI FLASH"
+
+endchoice
+
 menu "EC basic drivers logging control"
 
 config MAX6958_LOG_LEVEL

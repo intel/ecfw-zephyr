@@ -5,9 +5,9 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
-#include <device.h>
-#include <drivers/ps2.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/ps2.h>
 #include "board_config.h"
 #include "keyboard_utility.h"
 #include "ps2kbaux.h"
@@ -15,7 +15,7 @@
 #include "sci.h"
 #include "scicodes.h"
 #include "smc.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 
 #define SCAN_CODE_SET_TWO		2U
@@ -26,8 +26,6 @@ LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 #define KEY_RELEASED_POS		7U
 #define SC1_WITHOUT_MAKE_BREAK		0x7FU
 #define LEFT_CTRL			0x1DU
-#define VOL_DN_SC1			0x24U
-#define VOL_UP_SC1			0x25U
 #define LEFT_ALT			0x38U
 #define LEFT_SHIFT			0x2AU
 #define ESCAPE_CODE			0xE0U
@@ -106,12 +104,6 @@ static int convert_sc1_to_keynumber(uint8_t sc1, uint8_t *key_num)
 		break;
 	case F12_SC1:
 		*key_num = KM_F12_KEY;
-		break;
-	case VOL_DN_SC1:
-		*key_num = KM_VOL_DN_KEY;
-		break;
-	case VOL_UP_SC1:
-		*key_num = KM_VOL_UP_KEY;
 		break;
 	default:
 		return -EINVAL;
@@ -194,7 +186,17 @@ static void ps2_keyboard_callback(const struct device *dev, uint8_t value)
 			ret = keymap_get_fnkey(keymap_api, key_num, &data,
 					 (value & BIT(KEY_RELEASED_POS)) == 0U);
 			if (ret) {
-				LOG_ERR("Invalid FN key");
+				/* No Fn Key is pressed along with CAS.
+				 * Since send CAS + Key Value.
+				 */
+				if (value & BIT(KEY_RELEASED_POS)) {
+					g_acpi_tbl.acpi_hotkey_scan = 0U;
+				} else {
+					g_acpi_tbl.cas_hotkey = key_sc;
+				}
+				LOG_DBG("Sending CAS Key SCI for %x",
+						g_acpi_tbl.cas_hotkey);
+				enqueue_sci(SCI_HOTKEY_CAS);
 				return;
 			}
 
@@ -213,14 +215,11 @@ static void ps2_keyboard_callback(const struct device *dev, uint8_t value)
 				}
 			} else {
 				if (data.sci_code != 0U) {
-					LOG_DBG("sci: %x", data.sci_code);
 					if (ctrl_alt_shift_sc1(value)) {
-						g_acpi_tbl.cas_hotkey =
-							data.sci_code;
-						enqueue_sci(SCI_HOTKEY_CAS);
-					} else {
 						g_acpi_tbl.acpi_hotkey_scan =
 							data.sci_code;
+					LOG_DBG("Sending HOT Key SCI for %x",
+						g_acpi_tbl.acpi_hotkey_scan);
 						enqueue_sci(SCI_HOTKEY);
 					}
 				}
@@ -246,10 +245,10 @@ int ps2_keyboard_init(const ps2_callback callback, uint8_t *initial_set)
 		return -EINVAL;
 	}
 
-	keyboard_dev = device_get_binding(PS2_KEYBOARD);
+	keyboard_dev = DEVICE_DT_GET(PS2_KEYBOARD);
 
-	if (!keyboard_dev) {
-		LOG_ERR("PS2 kbd binding failed");
+	if (!device_is_ready(keyboard_dev)) {
+		LOG_ERR("PS2 kbd device not ready");
 		return -EIO;
 	}
 
@@ -299,10 +298,10 @@ int ps2_mouse_init(ps2_callback callback)
 		return -EINVAL;
 	}
 
-	mouse_dev = device_get_binding(PS2_MOUSE);
+	mouse_dev = DEVICE_DT_GET(PS2_MOUSE);
 
-	if (!mouse_dev) {
-		LOG_ERR("PS/2 mb binding failed");
+	if (!device_is_ready(mouse_dev)) {
+		LOG_ERR("PS2 mouse device not ready");
 		return -EIO;
 	}
 
@@ -310,13 +309,6 @@ int ps2_mouse_init(ps2_callback callback)
 	if (ret) {
 		LOG_ERR("PS/2 mb config failed: %d", ret);
 		return ret;
-	}
-
-	/* Get a keyboard layout instance */
-	keymap_api = keymap_init_interface();
-	if (!keymap_api) {
-		LOG_ERR("Custom keyboard layout init failed");
-		return -ENODEV;
 	}
 
 	mouse_callback = callback;

@@ -8,10 +8,11 @@
 #include "mec172x_pin.h"
 #include "common_mec172x.h"
 
-#ifndef __MTL_S_MEC1728_H__
-#define __MTL_S_MEC1728_H__
+#ifndef __MEC172x_MTL_S__
+#define __MEC172x_MTL_S__
 
 #define KSC_PLAT_NAME                   "MTLS"
+extern uint8_t platformskutype;
 
 #define PLATFORM_DATA(x, y)  ((x) | ((y) << 8))
 
@@ -28,7 +29,8 @@
 
 /* Support RPL skus */
 enum platform_skus {
-	PLATFORM_MTL_S_SKUs = 0,
+	PLATFORM_MTL_S_ERB_SKUs = 0,
+	PLATFORM_MTL_S_CRB_SKUs = 1,
 };
 
 /* Support board ids */
@@ -37,9 +39,11 @@ enum platform_skus {
 #define BRD_ID_MTL_S_UDIMM_2DPC_ERB		0x22u
 #define BRD_ID_MTL_S_SODIMM_1DPC_ERB		0x23u
 #define BRD_ID_MTL_S_SODIMM_1DPC_CRB		0x24u
-#define BRD_ID_MTL_S_OC_RVP		0x25u
-#define BRD_ID_MTL_S_HSIO_RVP		0x26u
-
+#define BRD_ID_MTL_S_OC_ERB		0x25u
+#define BRD_ID_MTL_S_OC_EV_CRB		0x26u
+#define BRD_ID_MTL_S_HSIO_RVP		0x27u
+#define BRD_ID_MTL_S_SODIMM_2DPC_CRB		0x29u
+#define BRD_ID_MTL_S_uATX_6L_CRB		0x2A
 
 /* I2C addresses */
 #define EEPROM_DRIVER_I2C_ADDR          0x50
@@ -58,8 +62,8 @@ enum platform_skus {
 					 RSMRST_PWRGD_G3SAF_P)
 
 #define ATX_DETECT			EC_GPIO_013
-#define KBD_BKLT_CTRL			EC_GPIO_014
-#define POWER_STATE			EC_GPIO_020
+
+#define POWER_STATE			EC_GPIO_022
 #define RECOVERY_INDICATOR_N		EC_GPIO_023
 #define SYS_PWROK			EC_GPIO_043
 #define SLP_S0_PLT_EC_N			EC_GPIO_051
@@ -77,36 +81,52 @@ enum platform_skus {
  */
 #define ESPI_RESET_MAF			EC_GPIO_061
 #define KBC_SCROLL_LOCK			EC_GPIO_062
-
+#define PWRBTN_EC_IN_N			EC_GPIO_067
 #define PCH_PWROK			EC_GPIO_106
 #define PS2_MB_DATA			EC_GPIO_115
-#define WAKE_SCI			EC_GPIO_155
-#define DNX_FORCE_RELOAD_EC		EC_GPIO_226
 #define KBC_CAPS_LOCK			EC_GPIO_127
 #define TYPEC_EC_SMBUS_ALERT_0_R	EC_GPIO_143
-#define PM_BATLOW			EC_DUMMY_GPIO_HIGH
 #define CATERR_LED_DRV			EC_GPIO_153
+#define WAKE_SCI			EC_GPIO_155
 #define CS_INDICATE_LED			EC_GPIO_156
 #define PS_ON_IN_EC_N			EC_GPIO_157
 #define PECI_MUX_CTRL			EC_GPIO_162
-#define PWRBTN_EC_IN_N			EC_GPIO_107
-#define BC_ACOK				EC_GPIO_172
+#define PROCHOT				EC_GPIO_171
+#define BC_ACOK				EC_DUMMY_GPIO_HIGH
 #define PS_ON_OUT			EC_GPIO_175
 
 #define CPU_C10_GATE			EC_GPIO_204
 #define EC_SMI				EC_GPIO_207
 #define PM_SLP_S0_CS			EC_GPIO_221
 #define SLATE_MODE			EC_GPIO_222
+
+#define DNX_FORCE_RELOAD_EC		EC_GPIO_226
+
+#define PM_BATLOW			EC_DUMMY_GPIO_HIGH
+
+
 #define PM_DS3				EC_DUMMY_GPIO_LOW
+#define EC_S0IX_ENTRY_REQ		EC_GPIO_240
 #define WAKE_CLK			EC_GPIO_241
 #define VOL_UP				EC_GPIO_242
 #define TOP_SWAP_OVERRIDE_GPIO		EC_GPIO_244
 #define VOL_DOWN			EC_GPIO_246
-#define PM_PWRBTN			EC_GPIO_047
-#define PROCHOT				EC_GPIO_253
-#define EC_M_2_SSD_PLN			EC_GPIO_254
-#define KBC_NUM_LOCK			EC_GPIO_255
+#define PM_PWRBTN_ERB			EC_GPIO_047
+#define PM_PWRBTN_CRB			EC_GPIO_165
+#define PM_PWRBTN			((platformskutype == PLATFORM_MTL_S_ERB_SKUs) ? \
+					 PM_PWRBTN_ERB : \
+					 PM_PWRBTN_CRB)
 
+#define EC_M_2_SSD_PLN			EC_GPIO_254
+#define EC_S0IX_ENTRY_ACK		EC_GPIO_255
+
+#define KBC_NUM_LOCK_ERB		EC_GPIO_255
+#define KBC_NUM_LOCK_CRB		EC_GPIO_161
+#define KBC_NUM_LOCK			((platformskutype == PLATFORM_MTL_S_ERB_SKUs) ? \
+					 KBC_NUM_LOCK_ERB : \
+					 KBC_NUM_LOCK_CRB)
+
+#define KBD_BKLT_CTRL			EC_DUMMY_GPIO_HIGH
 #define STD_ADP_PRSNT			EC_DUMMY_GPIO_LOW
 #define EC_PG3_EXIT			EC_DUMMY_GPIO_LOW
 #define VIRTUAL_BAT			EC_DUMMY_GPIO_LOW
@@ -135,16 +155,16 @@ enum platform_skus {
 #define PECI_OVER_ESPI			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x0D)
 
 /* Device instance names */
-#define I2C_BUS_0			DT_LABEL(DT_NODELABEL(i2c_smb_0))
-#define I2C_BUS_1			DT_LABEL(DT_NODELABEL(i2c_smb_1))
-#define PS2_KEYBOARD			DT_LABEL(DT_NODELABEL(ps2_0))
-#define PS2_MOUSE			DT_LABEL(DT_NODELABEL(ps2_0))
-#define ESPI_0				DT_LABEL(DT_NODELABEL(espi0))
-#define ESPI_SAF_0			DT_LABEL(DT_NODELABEL(espi_saf0))
-#define SPI_0				DT_LABEL(DT_NODELABEL(spi0))
-#define ADC_CH_BASE			DT_LABEL(DT_NODELABEL(adc0))
-#define PECI_0_INST			DT_LABEL(DT_NODELABEL(peci0))
-#define WDT_0				DT_LABEL(DT_NODELABEL(wdog))
+#define I2C_BUS_0			DT_NODELABEL(i2c_smb_0)
+#define I2C_BUS_1			DT_NODELABEL(i2c_smb_1)
+#define PS2_KEYBOARD			DT_NODELABEL(ps2_0)
+#define PS2_MOUSE			DT_NODELABEL(ps2_0)
+#define ESPI_0				DT_NODELABEL(espi0)
+#define ESPI_SAF_0			DT_NODELABEL(espi_saf0)
+#define SPI_0				DT_NODELABEL(spi0)
+#define ADC_CH_BASE			DT_NODELABEL(adc0)
+#define PECI_0_INST			DT_NODELABEL(peci0)
+#define WDT_0				DT_NODELABEL(wdog)
 
 /* Button/Switch Initial positions */
 #define PWR_BTN_INIT_POS		1
@@ -175,4 +195,4 @@ enum platform_skus {
 #define TIPD_UCSI_MINOR_VERSION 0x0
 #define TIPD_UCSI_SUB_MINOR_VERSION 0x0
 
-#endif /* __MTL_S_MEC1728_H__ */
+#endif /* __MEC172x_MTL_S__ */

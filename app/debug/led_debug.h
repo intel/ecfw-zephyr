@@ -7,7 +7,7 @@
 #ifndef __LED_DEBUG_H__
 #define __LED_DEBUG_H__
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 #include "gpio_ec.h"
 #include "board_config.h"
 

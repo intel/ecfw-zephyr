@@ -13,5 +13,5 @@ include(${CMAKE_CURRENT_LIST_DIR}/misc/CMakeLists.txt)
 #Note : The target named "app" is the target name expected by Zephyr RTOS
 include_directories(ecfw_app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-zephyr_compile_options(-Werror)
+zephyr_compile_options(-Werror -Wno-address-of-packed-member)
 zephyr_linker_sources(SECTIONS linker/custom-sections.ld)

@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <soc.h>
-#include <drivers/spi.h>
-#include <drivers/espi.h>
-#include <drivers/espi_saf.h>
+#include <zephyr/drivers/spi.h>
+#include <zephyr/drivers/espi.h>
+#include <zephyr/drivers/espi_saf.h>
 #include "saf_spi_transaction.h"
 #include "saf_spi_winbond.h"
 
@@ -62,6 +62,7 @@ static struct saf_spi_transaction winbond_qspi_cmds[] = {
 	},
 };
 
+
 /* SAF bridge Windbond configuration
  *
  * SAF bridge translates eSPI flash requests into SPI bus transactions
@@ -91,7 +92,7 @@ static const struct espi_saf_flash_cfg flash_w25qxxx = {
 #ifdef CONFIG_SOC_SERIES_MEC172X
 	.opd = MCHP_SAF_OPCODE_REG_VAL(POWER_DOWN,
 				       RELEASE_POWER_DOWN,
-				       0U,
+				       SAF_RPMC_STATUS_DATA_OPCODE,
 				       0U),
 #endif
 	.cont_prefix = 0U,

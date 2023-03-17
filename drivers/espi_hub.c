@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <logging/log.h>
-#include <drivers/espi.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/drivers/espi.h>
 #include "espi_hub.h"
 #include "pwrseq_utils.h"
 #include "board_config.h"
@@ -361,16 +361,17 @@ int espihub_init(void)
 				ESPI_CHANNEL_OOB | ESPI_CHANNEL_FLASH,
 		.max_freq = MIN_ESPI_FREQ,
 #else
-		.io_caps = ESPI_IO_MODE_SINGLE_LINE | ESPI_IO_MODE_QUAD_LINES,
+		.io_caps = ESPI_IO_MODE_SINGLE_LINE | ESPI_IO_MODE_QUAD_LINES |
+				ESPI_IO_MODE_DUAL_LINES,
 		.channel_caps = ESPI_CHANNEL_VWIRE | ESPI_CHANNEL_PERIPHERAL |
 				ESPI_CHANNEL_OOB | ESPI_CHANNEL_FLASH,
 		.max_freq = MAX_ESPI_FREQ,
 #endif
 	};
 
-	espi_dev = device_get_binding(ESPI_0);
-	if (!espi_dev) {
-		LOG_ERR("%s not found", ESPI_0);
+	espi_dev = DEVICE_DT_GET(ESPI_0);
+	if (!device_is_ready(espi_dev)) {
+		LOG_ERR("ESPI device not ready");
 		return -ENODEV;
 	}
 

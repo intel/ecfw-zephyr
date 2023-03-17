@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <device.h>
-#include <drivers/kscan.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/kscan.h>
 #include "kbs_keymap.h"
 #include "kbs_matrix.h"
 #include "board_config.h"
@@ -17,7 +17,7 @@
 #ifdef CONFIG_EARLY_KEY_SEQUENCE_DETECTION
 #include "kbs_boot_keyseq.h"
 #endif
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include <memops.h>
 LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 
@@ -341,9 +341,9 @@ int kbs_matrix_init(kbs_matrix_callback callback, uint8_t *initial_set)
 		return -EINVAL;
 	}
 
-	kscan_dev = device_get_binding(KSCAN_MATRIX);
-	if (!kscan_dev) {
-		LOG_ERR("kscan device %s not found", KSCAN_MATRIX);
+	kscan_dev = DEVICE_DT_GET(KSCAN_MATRIX);
+	if (!device_is_ready(kscan_dev)) {
+		LOG_ERR("kscan device not ready");
 		return -ENODEV;
 	}
 

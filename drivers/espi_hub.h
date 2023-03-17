@@ -12,7 +12,7 @@
 #ifndef __ESPI_HUB_H__
 #define __ESPI_HUB_H__
 
-#include <drivers/espi.h>
+#include <zephyr/drivers/espi.h>
 #include "system.h"
 
 #define ESPI_WAIT_TRUE            1u

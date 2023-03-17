@@ -5,9 +5,9 @@
  */
 
 #include <soc.h>
-#include <drivers/gpio.h>
+#include <zephyr/drivers/gpio.h>
 #include "i2c_hub.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "gpio_ec.h"
 #include "espi_hub.h"
 #include "vci.h"

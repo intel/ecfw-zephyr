@@ -12,7 +12,7 @@
 #ifndef __ESPIOOB_MNGR_H_
 #define __ESPIOOB_MNGR_H_
 
-#include <drivers/espi.h>
+#include <zephyr/drivers/espi.h>
 
 
 enum oob_pckt_idx {

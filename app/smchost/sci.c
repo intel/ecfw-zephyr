@@ -5,10 +5,10 @@
  */
 
 #include <errno.h>
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <soc.h>
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "sci.h"
 #include "smc.h"
 #include "smchost.h"

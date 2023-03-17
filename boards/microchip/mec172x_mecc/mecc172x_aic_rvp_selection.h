@@ -14,6 +14,8 @@
 #include "mecc172x_aic_on_adl_s.h"
 #elif CONFIG_MEC172X_AIC_ON_ADL_P
 #include "mecc172x_aic_on_adl_p.h"
+#elif CONFIG_MEC172X_AIC_ON_MTL_P
+#include "mecc172x_aic_on_mtl_p.h"
 #else
 #error "No RVP selected for MEC172x AIC"
 #endif

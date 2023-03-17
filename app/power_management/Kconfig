@@ -16,6 +16,9 @@ config PWRMGMT
 	  2) Intel-specific transitions to Sx sub-states during S3/S4/S5
 	  (deep Sx) and or transition to S0ix during S0 (deep sleep)
 
+config IDLE_STACK_SIZE
+	default 512 if EC_DEBUG_LOG
+
 config PWRMGMT_DEEPSX
 	bool "Enable system deep suspend support"
 	help

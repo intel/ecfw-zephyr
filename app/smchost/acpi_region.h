@@ -124,8 +124,8 @@ struct acpi_tbl {
 	uint8_t acpi_als_raw_ch1;
 	/* [63/3F] New card detect bits */
 	uint8_t acpi_new_card_dt_st;
-	/* [64/40] Peripheral control bits */
-	uint8_t acpi_periph_cntrl;
+	/* [64/40] fan capability */
+	uint8_t acpi_fan_capability;
 	/* [65/41] fan device index select */
 	uint8_t acpi_fan_idx;
 	uint8_t free0;
@@ -134,16 +134,16 @@ struct acpi_tbl {
 	uint8_t acpi_pwm_end_val;
 	/* [69/45] ms delay between PWM steps */
 	uint8_t acpi_pwm_step;
-	/* [70/46] TMKBC IRQ level selection */
-	uint8_t acpi_tm_kbc_irq_data;
-	/* [71/47] CPU power in mW */
-	uint16_t acpi_cpu_pwr;
-	/* [73/49] MCH power in mW */
-	uint16_t acpi_mch_pwr;
-	/* [75/4B] System power in 0.01 W */
-	uint16_t acpi_system_pwr;
-	/* [77/4D] */
-	uint8_t free1;
+	/* [70/46] fan operating mode */
+	uint8_t acpi_fan_opr_mode;
+	/* [71/47] Fan RPM high threshold */
+	uint16_t acpi_fan_rpm_high_threshold;
+	/* [73/49] Fan RPM low threshold */
+	uint16_t acpi_fan_rpm_low_threshold;
+	/* [75/4B] Fan RPM Trip status */
+	uint8_t fan_rpm_trip_status;
+	/* [76/4c] Free */
+	uint16_t free1;
 	/* [78/4E] ACPI power source */
 	struct acpi_power_source acpi_pwr_src;
 	/* [80/50] Select thermal sensor */

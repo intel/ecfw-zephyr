@@ -5,14 +5,14 @@
  */
 
 #include <soc.h>
-#include <drivers/gpio.h>
+#include <zephyr/drivers/gpio.h>
 #include "i2c_hub.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "gpio_ec.h"
 #include "espi_hub.h"
 #include "board.h"
 #include "board_config.h"
-#include "mtl_s_mec1728.h"
+#include "mtl_s_mec172x.h"
 #include "vci.h"
 
 uint8_t platformskutype;
@@ -31,7 +31,7 @@ LOG_MODULE_DECLARE(board, CONFIG_BOARD_LOG_LEVEL);
  */
 
 /* APP-owned gpios */
-struct gpio_ec_config mecc1728_cfg[] = {
+struct gpio_ec_config mecc172x_cfg[] = {
 	{ PM_SLP_SUS,		GPIO_INPUT },
 	{ EC_SPI_CS1_N,		GPIO_OUTPUT_HIGH},
 	{ EC_GPIO_011,		GPIO_INPUT },
@@ -44,10 +44,8 @@ struct gpio_ec_config mecc1728_cfg[] = {
 	{ EC_GPIO_023,		GPIO_INPUT },
 	{ EC_GPIO_025,		GPIO_INPUT },
 	{ SMC_LID,		GPIO_INPUT },
-	{ EC_GPIO_035,		GPIO_INPUT },
 	{ EC_GPIO_036,		GPIO_INPUT },
 	{ SYS_PWROK,		GPIO_OUTPUT_LOW | GPIO_OPEN_DRAIN },
-	{ EC_GPIO_050,		GPIO_INPUT },
 	{ SLP_S0_PLT_EC_N,	GPIO_INPUT },
 	{ EC_GPIO_052,		GPIO_INPUT },
 	{ ALL_SYS_PWRGD,	GPIO_INPUT },
@@ -55,7 +53,6 @@ struct gpio_ec_config mecc1728_cfg[] = {
 	{ KBC_SCROLL_LOCK,	GPIO_OUTPUT_LOW },
 	{ EC_GPIO_067,		GPIO_INPUT },
 	{ EC_GPIO_100,		GPIO_INPUT },
-	{ EC_GPIO_104,		GPIO_INPUT },
 	{ PCH_PWROK,		GPIO_OUTPUT_LOW },
 	{ WAKE_SCI,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
 	{ DNX_FORCE_RELOAD_EC,	GPIO_INPUT },
@@ -65,12 +62,10 @@ struct gpio_ec_config mecc1728_cfg[] = {
 	{ PM_BATLOW,		GPIO_INPUT },
 	{ CATERR_LED_DRV,	GPIO_INPUT },
 	{ CS_INDICATE_LED,	GPIO_OUTPUT_LOW },
-	{ PS_ON_IN_EC_N,		GPIO_OUTPUT_HIGH },
-	{ EC_GPIO_161,		GPIO_INPUT },
+	{ PS_ON_IN_EC_N,	GPIO_INPUT },
 	{ PECI_MUX_CTRL,	GPIO_OUTPUT_LOW },
 	{ PWRBTN_EC_IN_N,	GPIO_INPUT | GPIO_INT_EDGE_BOTH },
-	{ BC_ACOK,		GPIO_INPUT },
-	{ PS_ON_OUT,		GPIO_INPUT },
+	{ PS_ON_OUT,		GPIO_OUTPUT_HIGH },
 	{ CPU_C10_GATE,		GPIO_INPUT },
 	{ EC_SMI,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
 	{ PM_SLP_S0_CS,		GPIO_INPUT },
@@ -82,11 +77,25 @@ struct gpio_ec_config mecc1728_cfg[] = {
 	{ VOL_UP,		GPIO_INPUT | GPIO_INT_EDGE_BOTH},
 	{ TOP_SWAP_OVERRIDE_GPIO,	GPIO_OUTPUT },
 	{ VOL_DOWN,		GPIO_INPUT | GPIO_INT_EDGE_BOTH},
-	{ PM_PWRBTN,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
 	{ PROCHOT,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
 	{ EC_M_2_SSD_PLN,	GPIO_OUTPUT_HIGH },
-	{ KBC_NUM_LOCK,		GPIO_OUTPUT_LOW },
+	{ EC_S0IX_ENTRY_REQ,		GPIO_INPUT},
+	{ EC_S0IX_ENTRY_ACK,		GPIO_OUTPUT_HIGH},
+	{ EC_GPIO_036,		GPIO_DISCONNECTED },
 };
+
+/* APP-owned GPIOs for MTL-S CRB */
+struct gpio_ec_config mecc172x_cfg_mtl_s_crb_divergence[] = {
+	{ PM_PWRBTN_CRB,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
+	{ KBC_NUM_LOCK_CRB,		GPIO_OUTPUT_LOW },
+};
+
+/* APP-owned GPIOs for MTL-P DDR5 SBS*/
+struct gpio_ec_config mecc172x_cfg_mtl_s_erb_divergence[] = {
+	{ PM_PWRBTN_ERB,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
+	{ KBC_NUM_LOCK_ERB,		GPIO_OUTPUT_LOW },
+};
+
 
 /* Any IO expanders pins should be defined here */
 struct gpio_ec_config expander_cfg[] = {
@@ -106,10 +115,10 @@ struct gpio_ec_config expander_cfg[] = {
 #endif
 };
 
-struct gpio_ec_config mecc1728_cfg_sus[] =  {
+struct gpio_ec_config mecc172x_cfg_sus[] =  {
 };
 
-struct gpio_ec_config mecc1728_cfg_res[] =  {
+struct gpio_ec_config mecc172x_cfg_res[] =  {
 };
 
 #ifdef CONFIG_THERMAL_MANAGEMENT
@@ -133,7 +142,8 @@ void board_fan_dev_tbl_init(uint8_t *pmax_fan, struct fan_dev **pfan_tbl)
 void board_therm_sensor_list_init(uint8_t therm_sensors[])
 {
 	switch (platformskutype) {
-	case PLATFORM_MTL_S_SKUs:
+	case PLATFORM_MTL_S_ERB_SKUs:
+	case PLATFORM_MTL_S_CRB_SKUs:
 		therm_sensors[ACPI_THRM_SEN_4] = ADC_CH_05;
 		therm_sensors[ACPI_THRM_SEN_5] = ADC_CH_06;
 		break;
@@ -164,14 +174,22 @@ void update_platform_sku_type(void)
 	switch (get_board_id()) {
 	/* MTL S ERB PO */
 	case BRD_ID_MTL_S_UDIMM_1DPC_ERB:
+		platformskutype = PLATFORM_MTL_S_ERB_SKUs;
+		break;
+
 	case BRD_ID_MTL_S_UDIMM_1DPC_CRB:
 	case BRD_ID_MTL_S_UDIMM_2DPC_ERB:
 	case BRD_ID_MTL_S_SODIMM_1DPC_ERB:
 	case BRD_ID_MTL_S_SODIMM_1DPC_CRB:
-	case BRD_ID_MTL_S_OC_RVP:
+	case BRD_ID_MTL_S_OC_ERB:
+	case BRD_ID_MTL_S_OC_EV_CRB:
 	case BRD_ID_MTL_S_HSIO_RVP:
+	case BRD_ID_MTL_S_SODIMM_2DPC_CRB:
+	case BRD_ID_MTL_S_uATX_6L_CRB:
+		platformskutype = PLATFORM_MTL_S_CRB_SKUs;
+		break;
 	default:
-		platformskutype = PLATFORM_MTL_S_SKUs;
+		platformskutype = PLATFORM_MTL_S_CRB_SKUs;
 		break;
 	}
 }
@@ -219,7 +237,7 @@ int board_init(void)
 
 	detect_boot_mode();
 
-	ret = gpio_configure_array(mecc1728_cfg, ARRAY_SIZE(mecc1728_cfg));
+	ret = gpio_configure_array(mecc172x_cfg, ARRAY_SIZE(mecc172x_cfg));
 	if (ret) {
 		LOG_ERR("%s: %d", __func__, ret);
 		return ret;
@@ -235,6 +253,19 @@ int board_init(void)
 		gpio_configure_pin(PM_RSMRST_G3SAF_P, GPIO_OUTPUT_LOW);
 	}
 
+	switch (platformskutype) {
+	case PLATFORM_MTL_S_ERB_SKUs:
+		gpio_configure_array(mecc172x_cfg_mtl_s_erb_divergence,
+			  ARRAY_SIZE(mecc172x_cfg_mtl_s_erb_divergence));
+		break;
+	case PLATFORM_MTL_S_CRB_SKUs:
+		gpio_configure_array(mecc172x_cfg_mtl_s_crb_divergence,
+			  ARRAY_SIZE(mecc172x_cfg_mtl_s_crb_divergence));
+		break;
+	default:
+		break;
+	}
+
 	board_config_io_buffer();
 
 	return 0;
@@ -244,8 +275,8 @@ int board_suspend(void)
 {
 	int ret;
 
-	ret = gpio_configure_array(mecc1728_cfg_sus,
-				   ARRAY_SIZE(mecc1728_cfg_sus));
+	ret = gpio_configure_array(mecc172x_cfg_sus,
+				   ARRAY_SIZE(mecc172x_cfg_sus));
 	if (ret) {
 		LOG_ERR("%s: %d", __func__, ret);
 		return ret;
@@ -258,8 +289,8 @@ int board_resume(void)
 {
 	int ret;
 
-	ret = gpio_configure_array(mecc1728_cfg_res,
-				   ARRAY_SIZE(mecc1728_cfg_res));
+	ret = gpio_configure_array(mecc172x_cfg_res,
+				   ARRAY_SIZE(mecc172x_cfg_res));
 	if (ret) {
 		LOG_ERR("%s: %d", __func__, ret);
 		return ret;

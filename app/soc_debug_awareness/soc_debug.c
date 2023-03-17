@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <soc.h>
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "board_config.h"
 #include "gpio_ec.h"
 #include "periphmgmt.h"

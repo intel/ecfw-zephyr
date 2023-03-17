@@ -1,12 +1,12 @@
-.. _mec1728_mtl_s:
+.. _mec172X_mtl_s:
 
-MEC1728 MTL_S
+MEC172X MTL_S
 ##############
 
 Overview
 ********
 
-The MEC1728 MTL-S is Intel referance platform for Meteorlake.
+The MEC172X MTL-S is Intel referance platform for Meteorlake.
 
 Hardware
 ********
@@ -32,7 +32,7 @@ For more information about the SOC please see the `MEC1723 Reference Manual`_
 Supported Features
 ==================
 
-The mec1728_mtl_s board configuration supports the following hardware
+The mec172x_mtl_s board configuration supports the following hardware
 features:
 
 +-----------+------------+-------------------------------------+
@@ -48,7 +48,7 @@ features:
 +-----------+------------+-------------------------------------+
 | I2C       | on-chip    | i2c                                 |
 +-----------+------------+-------------------------------------+
-| PINCTRL    | on-chip    | pinctrl                              |
+| PINCTRL   | on-chip    | pinctrl                             |
 +-----------+------------+-------------------------------------+
 | PS/2      | on-chip    | ps2                                 |
 +-----------+------------+-------------------------------------+
@@ -57,7 +57,7 @@ features:
 Other hardware features are not currently supported by Zephyr (at the moment)
 
 The default configuration can be found in the
-:zephyr_file:`boards/arm/mec1728_mtl_s/mec1728_mtl_s_defconfig`
+:zephyr_file:`boards/arm/mec172x_mtl_s/mec172x_mtl_s_defconfig`
 Kconfig file.
 
 Connections and IOs
@@ -80,7 +80,7 @@ UART0 is configured for serial logs.
 
 Building
 ========
-#west build -c -p auto -b mec1728_mtl_s
+#west build -c -p auto -b mec172x_mtl_s
 
 References
 **********

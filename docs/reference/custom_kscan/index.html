@@ -1,92 +1,47 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Add custom keyboard matrix &mdash; Zephyr-based Embedded controller firmware 1.51 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="prev" title="EC support for Intel SoC Debug" href="../soc_debug_awareness/index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home"> Zephyr-based Embedded controller firmware
           
-
-          
+          <a href="../../index.html" class="icon icon-home">
+            Zephyr-based Embedded controller firmware
           </a>
-
-          
-            
-            
               <div class="version">
                 1.51
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Documentation Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
@@ -110,76 +65,34 @@
 </li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Zephyr-based Embedded controller firmware</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../application_notes.html">EC FW application notes</a> &raquo;</li>
-        
-      <li>Add custom keyboard matrix</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../application_notes.html">EC FW application notes</a></li>
+      <li class="breadcrumb-item active">Add custom keyboard matrix</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../../_sources/reference/custom_kscan/index.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="add-custom-keyboard-matrix">
-<span id="custom-keyboard-matrix"></span><h1>Add custom keyboard matrix<a class="headerlink" href="#add-custom-keyboard-matrix" title="Permalink to this headline">¶</a></h1>
-<div class="contents local topic" id="contents">
+             
+  <section id="add-custom-keyboard-matrix">
+<span id="custom-keyboard-matrix"></span><h1>Add custom keyboard matrix<a class="headerlink" href="#add-custom-keyboard-matrix" title="Permalink to this heading">¶</a></h1>
+<nav class="contents local" id="contents">
 <ul class="simple">
 <li><p><a class="reference internal" href="#introduction" id="id1">Introduction</a></p></li>
 <li><p><a class="reference internal" href="#overview" id="id2">Overview</a></p></li>
@@ -191,9 +104,9 @@
 </ul>
 </li>
 </ul>
-</div>
-<div class="section" id="introduction">
-<h2><a class="toc-backref" href="#id1">Introduction</a><a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+</nav>
+<section id="introduction">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Introduction</a><a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
 <p>This application note describes the requirements and implementation details to
 use a custom keyboard matrix.</p>
 <div class="admonition note">
@@ -204,9 +117,9 @@ Currently 2 keyboards are supported. Fujitsu keyboard can be
 connected in MECC card and be used in Tigerlake RVP, meanwhile Gtech
 keyboard can be used with Intel ADL-P RVP</p>
 </div>
-</div>
-<div class="section" id="overview">
-<h2><a class="toc-backref" href="#id2">Overview</a><a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="overview">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
 <p>The keyboard scan matrix state and data are represented in this reference code
 as an application module. The module depends on Keyboard System Controller Host
 to receive configuration commands and to send keyboard events back to the host.</p>
@@ -224,28 +137,28 @@ queue used for sending PS/2 scan codes. See the image below for more details.</p
 <blockquote>
 <div><img alt="../../_images/kscan_event_flow.png" class="align-center" src="../../_images/kscan_event_flow.png" />
 </div></blockquote>
-</div>
-<div class="section" id="how-to-implement-a-new-keyboard">
-<h2><a class="toc-backref" href="#id3">How to implement a new keyboard</a><a class="headerlink" href="#how-to-implement-a-new-keyboard" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="how-to-implement-a-new-keyboard">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">How to implement a new keyboard</a><a class="headerlink" href="#how-to-implement-a-new-keyboard" title="Permalink to this heading">¶</a></h2>
 <p>This section indicates specific step-by-step instructions to add a new keyboard
 to the EC application for custom board. It covers how to introduce specific key
 map for a different keyboard vendor as well as how to define custom FN+FX keys.</p>
-<div class="section" id="adding-a-new-keyboard-to-the-build-system">
-<h3><a class="toc-backref" href="#id4">Adding a new keyboard to the build system</a><a class="headerlink" href="#adding-a-new-keyboard-to-the-build-system" title="Permalink to this headline">¶</a></h3>
+<section id="adding-a-new-keyboard-to-the-build-system">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Adding a new keyboard to the build system</a><a class="headerlink" href="#adding-a-new-keyboard-to-the-build-system" title="Permalink to this heading">¶</a></h3>
 <p>Every new keyboard must implement the keyboard API. Refer to kbs_keymap.h.
 The map instantiation is done through a factory function, so the new keyboard
 must be added there.</p>
 <blockquote>
 <div><img alt="../../_images/keymap_api.png" class="align-center" src="../../_images/keymap_api.png" />
 </div></blockquote>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>inline struct km_api *keymap_init_interface<span class="o">(</span>void<span class="o">)</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>inline<span class="w"> </span>struct<span class="w"> </span>km_api<span class="w"> </span>*keymap_init_interface<span class="o">(</span>void<span class="o">)</span>
 <span class="o">{</span>
 <span class="c1">#if defined(CONFIG_EC_GTECH_KEYBOARD)</span>
-    <span class="k">return</span> gtech_init<span class="o">()</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span>gtech_init<span class="o">()</span><span class="p">;</span>
 <span class="c1">#elif defined(CONFIG_EC_FUJITSU_KEYBOARD)</span>
-    <span class="k">return</span> fujitsu_init<span class="o">()</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span>fujitsu_init<span class="o">()</span><span class="p">;</span>
 <span class="c1">#else</span>
-    <span class="k">return</span> NULL<span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span>NULL<span class="p">;</span>
 <span class="c1">#endif</span>
 </pre></div>
 </div>
@@ -256,45 +169,45 @@ several keyboard brands using the interactive menu if desired.</p>
 <div><img alt="../../_images/keymap_menu.png" class="align-center" src="../../_images/keymap_menu.png" />
 </div></blockquote>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>choice
-    prompt <span class="s2">&quot;Select your keyboard&quot;</span>
-    default EC_GTECH_KEYBOARD
-    <span class="nb">help</span>
-     Select your keyboard implementation which is going
-     to allow you to handle variations specially <span class="k">in</span>
-     alternate functions.
+<span class="w">    </span>prompt<span class="w"> </span><span class="s2">&quot;Select your keyboard&quot;</span>
+<span class="w">    </span>default<span class="w"> </span>EC_GTECH_KEYBOARD
+<span class="w">    </span><span class="nb">help</span>
+<span class="w">     </span>Select<span class="w"> </span>your<span class="w"> </span>keyboard<span class="w"> </span>implementation<span class="w"> </span>which<span class="w"> </span>is<span class="w"> </span>going
+<span class="w">     </span>to<span class="w"> </span>allow<span class="w"> </span>you<span class="w"> </span>to<span class="w"> </span>handle<span class="w"> </span>variations<span class="w"> </span>specially<span class="w"> </span><span class="k">in</span>
+<span class="w">     </span>alternate<span class="w"> </span>functions.
 
-    config EC_GTECH_KEYBOARD
-    bool <span class="s2">&quot;Gtech keyboard&quot;</span>
+<span class="w">    </span>config<span class="w"> </span>EC_GTECH_KEYBOARD
+<span class="w">    </span>bool<span class="w"> </span><span class="s2">&quot;Gtech keyboard&quot;</span>
 
-    config EC_FUJITSU_KEYBOARD
-    bool <span class="s2">&quot;Fujitsu keyboard&quot;</span>
+<span class="w">    </span>config<span class="w"> </span>EC_FUJITSU_KEYBOARD
+<span class="w">    </span>bool<span class="w"> </span><span class="s2">&quot;Fujitsu keyboard&quot;</span>
 </pre></div>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="o">(</span>CONFIG_KSCAN_EC OR CONFIG_PS2_KEYBOARD_AND_MOUSE<span class="o">)</span>
-    <span class="k">if</span> <span class="o">(</span>CONFIG_EC_GTECH_KEYBOARD<span class="o">)</span>
-        target_sources<span class="o">(</span>app
-        PRIVATE
-        <span class="si">${</span><span class="nv">CMAKE_CURRENT_LIST_DIR</span><span class="si">}</span>/gtech_keymap.c
-        <span class="o">)</span>
-    endif<span class="o">()</span>
-    <span class="k">if</span> <span class="o">(</span>CONFIG_EC_FUJITSU_KEYBOARD<span class="o">)</span>
-        target_sources<span class="o">(</span>app
-        PRIVATE
-        <span class="si">${</span><span class="nv">CMAKE_CURRENT_LIST_DIR</span><span class="si">}</span>/fujitsu_keymap.c
-        <span class="o">)</span>
-    endif<span class="o">()</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="o">(</span>CONFIG_KSCAN_EC<span class="w"> </span>OR<span class="w"> </span>CONFIG_PS2_KEYBOARD_AND_MOUSE<span class="o">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">(</span>CONFIG_EC_GTECH_KEYBOARD<span class="o">)</span>
+<span class="w">        </span>target_sources<span class="o">(</span>app
+<span class="w">        </span>PRIVATE
+<span class="w">        </span><span class="si">${</span><span class="nv">CMAKE_CURRENT_LIST_DIR</span><span class="si">}</span>/gtech_keymap.c
+<span class="w">        </span><span class="o">)</span>
+<span class="w">    </span>endif<span class="o">()</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">(</span>CONFIG_EC_FUJITSU_KEYBOARD<span class="o">)</span>
+<span class="w">        </span>target_sources<span class="o">(</span>app
+<span class="w">        </span>PRIVATE
+<span class="w">        </span><span class="si">${</span><span class="nv">CMAKE_CURRENT_LIST_DIR</span><span class="si">}</span>/fujitsu_keymap.c
+<span class="w">        </span><span class="o">)</span>
+<span class="w">    </span>endif<span class="o">()</span>
 endif<span class="o">()</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="map-row-column-to-ibm-key-numbers">
-<h3><a class="toc-backref" href="#id5">Map row/column to IBM key numbers</a><a class="headerlink" href="#map-row-column-to-ibm-key-numbers" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="map-row-column-to-ibm-key-numbers">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Map row/column to IBM key numbers</a><a class="headerlink" href="#map-row-column-to-ibm-key-numbers" title="Permalink to this heading">¶</a></h3>
 <p>This mapping is keyboard specific and it is required for every keyboard,
 the array is filled like an inverted matrix to simplify read 8 KSIs.
 The map must be exposed using the function pointer get_keynum.</p>
-</div>
-<div class="section" id="map-fn-fx-or-fn-any-key">
-<h3><a class="toc-backref" href="#id6">Map FN + FX or FN + Any key</a><a class="headerlink" href="#map-fn-fx-or-fn-any-key" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="map-fn-fx-or-fn-any-key">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Map FN + FX or FN + Any key</a><a class="headerlink" href="#map-fn-fx-or-fn-any-key" title="Permalink to this heading">¶</a></h3>
 <p>This is also keyboard specific and it is required when need to assign a
 function pointer get_fnkey to generate keyboard specific scan codes or
 SCI codes for the host. Refer to SMC module for details in SCI codes.
@@ -310,52 +223,36 @@ to identify configuration errors.</p>
 In general, it is possible to generate any desired FN+ key combination,
 this is not limited to the top row or the arrow keys.
 You can implement custom behaviors in for the EC using FN functions as well.</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020 Intel Corporation.
-
-    </p>
+    <p>&#169; Copyright 2020 Intel Corporation.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

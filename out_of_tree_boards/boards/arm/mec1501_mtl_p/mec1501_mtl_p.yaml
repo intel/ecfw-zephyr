@@ -1,0 +1,27 @@
+#
+# Copyright (c) 2020, Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+identifier: mec1501_mtl_p
+name: MEC1501 MTL_P
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+ram: 32
+flash: 224
+supported:
+  - adc
+  - counter
+  - espi
+  - gpio
+  - i2c
+  - pinctrl
+  - pwm
+  - watchdog
+  - ps2
+  - peci
+  - kscan
+  - sensor

@@ -12,16 +12,16 @@
 /* Following blue wires are required
  */
 
-#ifndef CONFIG_MEC172X_AIC_HW_REV2
-#define PROCHOT				EC_GPIO_002
-#else
+#ifdef CONFIG_MEC172X_AIC_HW_REV2
 #define PROCHOT				EC_GPIO_243
+#else
+#define PROCHOT				EC_GPIO_002
 #endif
 
-#ifndef CONFIG_MEC172X_AIC_HW_REV2
-#define RSMRST_PWRGD_G3SAF_P		EC_GPIO_221
-#else
+#ifdef CONFIG_MEC172X_AIC_HW_REV2
 #define RSMRST_PWRGD_G3SAF_P		EC_GPIO_011
+#else
+#define RSMRST_PWRGD_G3SAF_P		EC_GPIO_221
 #endif
 
 #define RSMRST_PWRGD_MAF_P		EC_GPIO_227
@@ -33,10 +33,10 @@
  * This in addition to SHD_IO2 and SHD_IO3 not routed to flash
  * prevents SAF Quad mode. This is fixed in MEC172x HW revision #2.
  */
-#ifndef CONFIG_MEC172X_AIC_HW_REV2
-#define PM_PWRBTN			EC_GPIO_016
-#else
+#ifdef CONFIG_MEC172X_AIC_HW_REV2
 #define PM_PWRBTN			EC_GPIO_245
+#else
+#define PM_PWRBTN			EC_GPIO_016
 #endif
 
 #define VOL_UP				EC_GPIO_036
@@ -55,10 +55,10 @@
 #define ESPI_RESET_MAF			EC_GPIO_061
 #define PCH_PWROK			EC_GPIO_106
 
-#ifndef CONFIG_MEC172X_AIC_HW_REV2
-#define FAN_PWR_DISABLE_N		EC_GPIO_141
-#else
+#ifdef CONFIG_MEC172X_AIC_HW_REV2
 #define FAN_PWR_DISABLE_N		EC_GPIO_201
+#else
+#define FAN_PWR_DISABLE_N		EC_GPIO_141
 #endif
 
 #define BC_ACOK				EC_GPIO_156
@@ -75,26 +75,26 @@
  * This causes re-configuration since this is also RSMRST_PWRGD
  * in MAF mode.
  */
-#ifndef CONFIG_MEC172X_AIC_HW_REV2
-#define PM_SLP_SUS			EC_DUMMY_GPIO_HIGH
-#else
+#ifdef CONFIG_MEC172X_AIC_HW_REV2
 #define PM_SLP_SUS			EC_GPIO_067
+#else
+#define PM_SLP_SUS			EC_DUMMY_GPIO_HIGH
 #endif
 #define PWRBTN_EC_IN_N			EC_GPIO_246
 #define VOL_DOWN			EC_GPIO_254
 
-#ifndef CONFIG_MEC172X_AIC_HW_REV2
+#ifdef CONFIG_MEC172X_AIC_HW_REV2
 /* VCI_IN0 */
-#define PM_SLP_S0_CS			EC_DUMMY_GPIO_HIGH
-#else
 #define PM_SLP_S0_CS			EC_GPIO_154
+#else
+#define PM_SLP_S0_CS			EC_DUMMY_GPIO_HIGH
 #endif
 
-#ifndef CONFIG_MEC172X_AIC_HW_REV2
+#ifdef CONFIG_MEC172X_AIC_HW_REV2
 /* VCI_OUT2 */
-#define PM_DS3				EC_DUMMY_GPIO_HIGH
-#else
 #define PM_DS3				EC_GPIO_025
+#else
+#define PM_DS3				EC_DUMMY_GPIO_HIGH
 #endif
 
 /* Button/Switch Initial positions */
@@ -109,16 +109,16 @@
 #define VIRTUAL_BAT_INIT_POS		1
 
 /* Device instance names */
-#define I2C_BUS_0			DT_LABEL(DT_NODELABEL(i2c_smb_0))
-#define I2C_BUS_1			DT_LABEL(DT_NODELABEL(i2c_smb_1))
-#define PS2_KEYBOARD			DT_LABEL(DT_NODELABEL(ps2_0))
-#define PS2_MOUSE			DT_LABEL(DT_NODELABEL(ps2_0))
-#define ESPI_0				DT_LABEL(DT_NODELABEL(espi0))
-#define ESPI_SAF_0			DT_LABEL(DT_NODELABEL(espi_saf0))
-#define SPI_0				DT_LABEL(DT_NODELABEL(spi0))
-#define ADC_CH_BASE			DT_LABEL(DT_NODELABEL(adc0))
-#define PECI_0_INST			DT_LABEL(DT_NODELABEL(peci0))
-#define WDT_0				DT_LABEL(DT_NODELABEL(wdog))
-#define KSCAN_MATRIX			DT_LABEL(DT_NODELABEL(kscan0))
+#define I2C_BUS_0			DT_NODELABEL(i2c_smb_0)
+#define I2C_BUS_1			DT_NODELABEL(i2c_smb_1)
+#define PS2_KEYBOARD			DT_NODELABEL(ps2_0)
+#define PS2_MOUSE			DT_NODELABEL(ps2_0)
+#define ESPI_0				DT_NODELABEL(espi0)
+#define ESPI_SAF_0			DT_NODELABEL(espi_saf0)
+#define SPI_0				DT_NODELABEL(spi0)
+#define ADC_CH_BASE			DT_NODELABEL(adc0)
+#define PECI_0_INST			DT_NODELABEL(peci0)
+#define WDT_0				DT_NODELABEL(wdog)
+#define KSCAN_MATRIX			DT_NODELABEL(kscan0)
 
 #endif /* __MEC172X_AIC_DEFS_H__ */

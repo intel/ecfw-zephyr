@@ -8,7 +8,7 @@
 #define __SAF_CONFIG_H__
 
 #include <soc.h>
-#include <drivers/espi_saf.h>
+#include <zephyr/drivers/espi_saf.h>
 
 /**
  * @brief Performs eSPI controller initialization.

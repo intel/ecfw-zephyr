@@ -1,10 +1,10 @@
 # Copyright (c) 2021 Microchip Technology Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-if BOARD_MEC1728_MTL_S
+if BOARD_MEC172X_MTL_S
 
 config BOARD
-	default "mec1728_mtl_s"
+	default "mec172x_mtl_s"
 
 if RTOS_TIMER
 
@@ -40,4 +40,4 @@ config TACH_XEC
 	default y
 	depends on SENSOR
 
-endif # BOARD_MEC1728_MTL_S
+endif # BOARD_MEC172X_MTL_S

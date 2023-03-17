@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 #include "board.h"
 #include "board_config.h"
 #include "smc.h"
 #include "smchost.h"
 #include "smchost_commands.h"
 #include "pwrplane.h"
-
+#include "periphmgmt.h"
 #include "espi_hub.h"
 #include "system.h"
 #include "flashhdr.h"
@@ -121,20 +121,10 @@ static void smc_mode(void)
  */
 static void get_switch_status(void)
 {
-	uint8_t sw_status = 0;
-
-	WRITE_BIT(sw_status, SWITCH_STATUS_VIRTUAL_DOCK_POS,
-		  gpio_read_pin(VIRTUAL_DOCK));
-	WRITE_BIT(sw_status, SWITCH_STATUS_AC_POWER_POS,
-		  gpio_read_pin(BC_ACOK));
-	WRITE_BIT(sw_status, SWITCH_STATUS_HOME_BTN_POS,
-		  (gpio_read_pin(HOME_BUTTON) == LOW));
-	WRITE_BIT(sw_status, SWITCH_STATUS_VIRTUAL_BATT_POS,
-		  gpio_read_pin(VIRTUAL_BAT));
-	WRITE_BIT(sw_status, SWITCH_STATUS_LEGACY_LID,
-		  gpio_read_pin(SMC_LID));
+	uint8_t sw_status = read_io_switch_status();
 
 	send_to_host(&sw_status, 1);
+	LOG_DBG("%s sw_status:0x%X", __func__, sw_status);
 }
 
 static void smc_get_fab_id(void)

@@ -37,6 +37,12 @@ config PECI_ACCESS_DISABLE_IN_CS
 	  Indicate if PECI access disabled in connected standby to achieve
 	  infinite C10 residency.
 
+config HW_STRAP_BASED_FAN_CONTROL
+	bool "Enable HW STRAP based fan control"
+	default y
+	help
+	  Enables HW Strap based fan control.
+
 config THERMAL_MGMT_LOG_LEVEL
 	int "Thermal management log level"
 	depends on THERMAL_MANAGEMENT

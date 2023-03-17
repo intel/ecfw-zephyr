@@ -4,53 +4,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <device.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <errno.h>
-#ifdef CONFIG_PINCTRL
-#include <drivers/pinctrl.h>
-#else
-#include <drivers/pinmux.h>
-#endif
-#include <logging/log.h>
+#include <zephyr/drivers/pinctrl.h>
+#include <zephyr/logging/log.h>
 #include "gpio_ec.h"
 #include "common_mec1501.h"
 
 LOG_MODULE_REGISTER(gpio_ec, CONFIG_GPIO_EC_LOG_LEVEL);
 
+#define DT_DRV_COMPAT   nxp_pca95xx
+
 #define MAX_PINS_PER_PORT	32
 #define OCTAL_BASE		8
 
-struct gpio_device {
-	char name[Z_DEVICE_MAX_NAME_LEN];
-	const struct device *port;
-};
-
-#ifndef CONFIG_PINCTRL
-static struct gpio_device pinmux_ports[] = {
-	{ "pinmux_000_036", DEVICE_DT_GET(DT_NODELABEL(pinmux_000_036)) },
-	{ "pinmux_040_076", DEVICE_DT_GET(DT_NODELABEL(pinmux_040_076)) },
-	{ "pinmux_100_136", DEVICE_DT_GET(DT_NODELABEL(pinmux_100_136)) },
-	{ "pinmux_140_176", DEVICE_DT_GET(DT_NODELABEL(pinmux_140_176)) },
-	{ "pinmux_200_236", DEVICE_DT_GET(DT_NODELABEL(pinmux_200_236)) },
-	{ "pinmux_240_276", DEVICE_DT_GET(DT_NODELABEL(pinmux_240_276)) },
-};
-#endif
-
-static struct gpio_device ports[] = {
-	{ DT_LABEL(DT_NODELABEL(gpio_000_036)), NULL},
-	{ DT_LABEL(DT_NODELABEL(gpio_040_076)), NULL},
-	{ DT_LABEL(DT_NODELABEL(gpio_100_136)), NULL},
-	{ DT_LABEL(DT_NODELABEL(gpio_140_176)), NULL},
-	{ DT_LABEL(DT_NODELABEL(gpio_200_236)), NULL},
-	{ DT_LABEL(DT_NODELABEL(gpio_240_276)), NULL},
+static const struct device *ports[] = {
+	DEVICE_DT_GET(DT_NODELABEL(gpio_000_036)),
+	DEVICE_DT_GET(DT_NODELABEL(gpio_040_076)),
+	DEVICE_DT_GET(DT_NODELABEL(gpio_100_136)),
+	DEVICE_DT_GET(DT_NODELABEL(gpio_140_176)),
+	DEVICE_DT_GET(DT_NODELABEL(gpio_200_236)),
+	DEVICE_DT_GET(DT_NODELABEL(gpio_240_276)),
 	/* Handle 1 or more IO expanders */
 #ifdef CONFIG_GPIO_PCA95XX
-#if DT_NODE_HAS_STATUS(DT_INST(0, nxp_pca95xx), okay)
-	{ DT_LABEL(DT_INST(0, nxp_pca95xx)), NULL},
+#if DT_NODE_HAS_STATUS(DT_DRV_INST(0), okay)
+	DEVICE_DT_INST_GET(0),
 #endif
-#if DT_NODE_HAS_STATUS(DT_INST(1, nxp_pca95xx), okay)
-	{ DT_LABEL(DT_INST(1, nxp_pca95xx)), NULL},
+#if DT_NODE_HAS_STATUS(DT_DRV_INST(1), okay)
+	DEVICE_DT_INST_GET(1),
 #endif
 #endif
 };
@@ -80,15 +62,15 @@ static int validate_device(uint32_t port_pin, struct gpio_port_pin *pp)
 		return -EINVAL;
 	}
 
-	if (!ports[port_idx].port) {
-		LOG_ERR("Invalid gpio dev");
+	if (!device_is_ready(ports[port_idx])) {
+		LOG_ERR("%s gpio dev %d not ready", __func__, port_idx);
 		return -ENODEV;
 	}
 
 	LOG_DBG("%s: port idx: %d port ptr: %p pin: %d",
-		__func__, port_idx, ports[port_idx].port, pin);
+		__func__, port_idx, ports[port_idx], pin);
 
-	pp->gpio_dev = ports[port_idx].port;
+	pp->gpio_dev = ports[port_idx];
 	pp->pin = pin;
 
 	return 0;
@@ -109,19 +91,13 @@ static bool gpio_read_dummy_pin(uint32_t port_pin)
 
 int gpio_init(void)
 {
-	const struct device *gpio_dev;
-
 	for (int i = 0; i < ARRAY_SIZE(ports); i++) {
-		gpio_dev = device_get_binding(ports[i].name);
-
-		if (!gpio_dev) {
-			LOG_ERR("Unable to find %s", ports[i].name);
+		if (!device_is_ready(ports[i])) {
+			LOG_ERR("GPIO port %c not ready", (i+0x31));
 		}
 
-		ports[i].port = gpio_dev;
-		LOG_DBG("[Port %c] %p", (i+0x31), gpio_dev);
+		LOG_DBG("[Port %c] %p", (i+0x31), ports[i]);
 	}
-
 	return 0;
 }
 
@@ -321,7 +297,6 @@ int gpio_force_configure_pin(uint32_t port_pin, gpio_flags_t flags)
 
 	port_idx = gpio_get_port(port_pin);
 
-#ifdef CONFIG_PINCTRL
 	pinctrl_soc_pin_t pin = {
 		.pinmux = MCHP_XEC_PINMUX(
 				get_absolute_gpio_num(port_pin), MCHP_GPIO),
@@ -335,15 +310,7 @@ int gpio_force_configure_pin(uint32_t port_pin, gpio_flags_t flags)
 				get_absolute_gpio_num(port_pin));
 		return ret;
 	}
-#else
-	LOG_WRN("%s pinmux port: %d pin: %d ", __func__, port_idx, pp.pin);
-	ret = pinmux_pin_set(pinmux_ports[port_idx].port, pp.pin,
-			     MCHP_GPIO_CTRL_MUX_F0);
-	if (ret) {
-		LOG_ERR("Failed to switch muxing %d", pp.pin);
-		return ret;
-	}
-#endif
+
 	ret = gpio_pin_configure(pp.gpio_dev, pp.pin, flags);
 
 	if (ret) {

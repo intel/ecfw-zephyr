@@ -5,8 +5,8 @@
  */
 
 #include <errno.h>
-#include <logging/log_ctrl.h>
-#include <logging/log.h>
+#include <zephyr/logging/log_ctrl.h>
+#include <zephyr/logging/log.h>
 #include "espi_hub.h"
 #include "postcodemgmt.h"
 #include "port80display.h"

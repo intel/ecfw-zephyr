@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
-#include <drivers/espi.h>
+#include <zephyr/kernel.h>
+#include <zephyr/drivers/espi.h>
 #include "kbchost.h"
 #include "ps2kbaux.h"
 #include "gpio_ec.h"
@@ -13,7 +13,7 @@
 #include "kbs_matrix.h"
 #include "pwrplane.h"
 #include "board_config.h"
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 
 #define MAX_HOST_REQ_SIZE 4

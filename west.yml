@@ -28,24 +28,19 @@ manifest:
       repo-path: zephyr.git
       path: ecfwwork/zephyr_fork
       remote: zephyrproject
-      revision: v2.7.3
+      revision: v3.2.0
       clone-depth: 1
       west-commands: scripts/west-commands.yml
 
     - name: cmsis
       path: ecfwwork/modules/hal/cmsis
       remote: zephyrproject
-      revision: c3bd2094f92d574377f7af2aec147ae181aa5f8e
+      revision: 093de61c2a7d12dc9253daf8692f61f793a9254a
 
     - name: hal_microchip
       path: ecfwwork/modules/hal/microchip
       remote: zephyrproject
-      revision: 870d05e6a64ea9548da6b907058b03c8c9420826
-
-    - name: tinycrypt
-      path: ecfwwork/modules/crypto/tinycrypt
-      remote: zephyrproject
-      revision: 3e9a49d2672ec01435ffbf0d788db6d95ef28de0
+      revision: 5d079f1683a00b801373bbbbf5d181d4e33b30d5
 
   self:
     path: ecfwwork

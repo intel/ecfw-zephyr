@@ -1,6 +1,6 @@
 Some additional patches are required to be applied to the Zephyr kernel
-for building the open source EC App. The current EC App is based out of
-Zephyr v2.7 and hence these patches need to be applied on that branch.
+for building the Basic ECFW App. The current EC App is based out of
+Zephyr v3.2 and hence these patches need to be applied on that branch.
 These patches are expected to be part of the future Zephyr releases (if
 they are not already integrated).
 
@@ -14,8 +14,8 @@ git checkout main
 
 2) Apply zephyr patches on to the kernel branch
 cd ../ecfwwork/zephyr_fork
-git am ../../ecfw-zephyr/zephyr_patches/zephyr_v2_7_oe_1_65.patch
+git am ../../ecfw-zephyr/zephyr_patches/patches_v3_2.patch
 
-3) Building the code for ADL-S (for e.g)
+3) Building the code for MTL-S (for e.g)
 cd ../../ecfw-zephyr
-west build  -c -p always -b mec1501_adl
+west build  -c -p always -b mec172x_mtl_s

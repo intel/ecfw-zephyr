@@ -1,0 +1,5651 @@
+From dd56f27bf0c71f2a377849332d7742ef1cb5d893 Mon Sep 17 00:00:00 2001
+From: Venkataramana Kotakonda <venkataramana.kotakonda@intel.com>
+Date: Mon, 30 Mar 2020 10:32:05 -0400
+Subject: [PATCH 01/21] drivers: espi: Clear virtual wire interrupt before
+ calling handler
+
+Clearing virtual wire interrupt after calling handler may cause next
+interrupt miss if the same virtual wire changes due to action in handler.
+As the interrupt source is read from register, it can be cleared before
+calling handler to avoid next interrupt miss due to action/delay in the
+callback handler.
+
+Signed-off-by: Venkataramana Kotakonda <venkataramana.kotakonda@intel.com>
+---
+ drivers/espi/espi_mchp_xec.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/espi/espi_mchp_xec.c b/drivers/espi/espi_mchp_xec.c
+index f04c910fe1..1a3c65d9f3 100644
+--- a/drivers/espi/espi_mchp_xec.c
++++ b/drivers/espi/espi_mchp_xec.c
+@@ -1371,6 +1371,7 @@ static void espi_xec_vw_isr(const struct device *dev)
+ 	uint32_t girq_result;
+ 
+ 	girq_result = MCHP_GIRQ_RESULT(config->vw_girq_ids[0]);
++	MCHP_GIRQ_SRC(config->vw_girq_ids[0]) = girq_result;
+ 
+ 	for (int i = 0; i < m2s_vwires_isr_cnt; i++) {
+ 		struct espi_isr entry = m2s_vwires_isr[i];
+@@ -1381,8 +1382,6 @@ static void espi_xec_vw_isr(const struct device *dev)
+ 			}
+ 		}
+ 	}
+-
+-	REG32(MCHP_GIRQ_SRC_ADDR(config->vw_girq_ids[0])) = girq_result;
+ }
+ 
+ #if DT_INST_PROP_HAS_IDX(0, vw_girqs, 1)
+-- 
+2.17.1
+
+
+From a61f87606b50455c2c61b0a0be4ace418c83726c Mon Sep 17 00:00:00 2001
+From: Kunal Shah <kunal.a.shah@intel.com>
+Date: Wed, 3 Mar 2021 17:06:31 +0530
+Subject: [PATCH 02/21] espi:driver: espi ltr support
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+LTR stands for “Latency Tolerance Report”.
+This feature allows the EC slave to declare an upper bound on
+latency through the chipset. The effect of setting a Latency Tolerance
+is to restrict the low-power states that the chipset may enter.
+
+LTR needs to be programmed only after Bus Mastering is enabled by eSPI master
+using peripheral configuration message.
+
+This patch will send LTR message to the eSPI Master and also provides callback
+on reception of bus master enabling from espi master.
+
+Signed-off-by: Kunal Shah <kunal.a.shah@intel.com>
+---
+ drivers/espi/espi_mchp_xec.c  | 38 ++++++++++++++++++++--
+ include/zephyr/drivers/espi.h | 60 +++++++++++++++++++++++++++++++++++
+ 2 files changed, 96 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/espi/espi_mchp_xec.c b/drivers/espi/espi_mchp_xec.c
+index 1a3c65d9f3..027c1b1033 100644
+--- a/drivers/espi/espi_mchp_xec.c
++++ b/drivers/espi/espi_mchp_xec.c
+@@ -434,7 +434,26 @@ static int espi_xec_write_lpc_request(const struct device *dev,
+ 
+ 	return 0;
+ }
++static int espi_xec_send_ltr(const struct device *dev, struct ltr_cfg_pkt *req)
++{
++	if (!(ESPI_PC_REGS->PC_STATUS & MCHP_ESPI_PC_STS_BM_EN)) {
++		return -ENOTSUP;
++	}
++
++	if (req->ltr_req) {
++		ESPI_LTR_REGS->LTR_MSG = MCHP_ESPI_LTR_MSG_REQ_VAL |
++				(req->latency << MCHP_ESPI_LTR_MSG_VAL_POS) |
++				(req->ltr_scale << MCHP_ESPI_LTR_MSG_SC_POS);
++	} else {
++		/* set infinite latency tolrated */
++		ESPI_LTR_REGS->LTR_MSG = MCHP_ESPI_LTR_MSG_REQ_INF;
++	}
+ 
++	/* Send LTR Packet */
++	ESPI_LTR_REGS->LTR_CTRL = MCHP_ESPI_LTR_CTRL_START;
++
++	return 0;
++}
+ static int espi_xec_send_vwire(const struct device *dev,
+ 			       enum espi_vwire_signal signal, uint8_t level)
+ {
+@@ -965,6 +984,10 @@ static void setup_espi_io_config(const struct device *dev,
+ static void espi_pc_isr(const struct device *dev)
+ {
+ 	uint32_t status = ESPI_PC_REGS->PC_STATUS;
++	struct espi_event evt = { .evt_type = ESPI_BUS_EVENT_CHANNEL_READY,
++				  .evt_details = ESPI_CHANNEL_PERIPHERAL,
++				  .evt_data = 0 };
++	struct espi_xec_data *data = (struct espi_xec_data *)(dev->data);
+ 
+ 	if (status & MCHP_ESPI_PC_STS_EN_CHG) {
+ 		if (status & MCHP_ESPI_PC_STS_EN) {
+@@ -972,6 +995,13 @@ static void espi_pc_isr(const struct device *dev)
+ 		}
+ 
+ 		ESPI_PC_REGS->PC_STATUS = MCHP_ESPI_PC_STS_EN_CHG;
++	} else if (status & MCHP_ESPI_PC_STS_BM_EN_CHG) {
++		if (status & MCHP_ESPI_PC_STS_BM_EN) {
++			evt.evt_data = ESPI_PC_EVT_BUS_MASTER_ENABLE;
++			espi_send_callbacks(&data->callbacks, dev, evt);
++		}
++
++		ESPI_PC_REGS->PC_STATUS = MCHP_ESPI_PC_STS_BM_EN_CHG;
+ 	}
+ }
+ 
+@@ -1453,6 +1483,7 @@ static const struct espi_driver_api espi_xec_driver_api = {
+ 	.manage_callback = espi_xec_manage_callback,
+ 	.read_lpc_request = espi_xec_read_lpc_request,
+ 	.write_lpc_request = espi_xec_write_lpc_request,
++	.send_ltr = espi_xec_send_ltr,
+ };
+ 
+ static struct espi_xec_data espi_xec_data;
+@@ -1526,8 +1557,11 @@ static int espi_xec_init(const struct device *dev)
+ 	/* Clear reset interrupt status and enable interrupts */
+ 	ESPI_CAP_REGS->ERST_STS = MCHP_ESPI_RST_ISTS;
+ 	ESPI_CAP_REGS->ERST_IEN |= MCHP_ESPI_RST_IEN;
+-	ESPI_PC_REGS->PC_STATUS = MCHP_ESPI_PC_STS_EN_CHG;
+-	ESPI_PC_REGS->PC_IEN |= MCHP_ESPI_PC_IEN_EN_CHG;
++	ESPI_PC_REGS->PC_STATUS |= MCHP_ESPI_PC_STS_EN_CHG |
++				 MCHP_ESPI_PC_STS_BM_EN_CHG;
++	ESPI_PC_REGS->PC_IEN |= MCHP_ESPI_PC_IEN_EN_CHG |
++				MCHP_ESPI_PC_IEN_BM_EN_CHG;
++
+ 
+ 	/* Enable VWires interrupts */
+ 	for (int i = 0; i < sizeof(vw_wires_int_en); i++) {
+diff --git a/include/zephyr/drivers/espi.h b/include/zephyr/drivers/espi.h
+index e16ebca5ab..6a37b7ff65 100644
+--- a/include/zephyr/drivers/espi.h
++++ b/include/zephyr/drivers/espi.h
+@@ -115,6 +115,20 @@ enum espi_bus_event {
+ 	ESPI_BUS_PERIPHERAL_NOTIFICATION    = BIT(4),
+ };
+ 
++/**
++ * @brief eSPI LTR Scale
++ *
++ * eSPI LTR scale value used for LTR register programming
++ */
++enum espi_ltr_scale {
++	ESPI_LTR_SCALE_1NSEC = 0,
++	ESPI_LTR_SCALE_32NSEC = BIT(0),
++	ESPI_LTR_SCALE_1024NSEC = BIT(1),
++	ESPI_LTR_SCALE_32USEC = BIT(0) | BIT(1),
++	ESPI_LTR_SCALE_1MSEC = BIT(2),
++	ESPI_LTR_SCALE_33MSEC = BIT(0) | BIT(2),
++};
++
+ /**
+  * @brief eSPI peripheral channel events.
+  *
+@@ -359,6 +373,18 @@ struct espi_flash_packet {
+ 	uint16_t len;
+ };
+ 
++/**
++ * @brief eSPI LTR configuration parameters
++ */
++struct ltr_cfg_pkt {
++	/** Latency scale */
++	enum espi_ltr_scale ltr_scale;
++	/** Latency value in unit of scale */
++	uint16_t latency;
++	/** LTR Required bit 1-ltr as per scale, 0 -Infinite latency */
++	uint8_t ltr_req;
++};
++
+ struct espi_callback;
+ 
+ /**
+@@ -421,6 +447,8 @@ typedef int (*espi_api_lpc_read_request)(const struct device *dev,
+ typedef int (*espi_api_lpc_write_request)(const struct device *dev,
+ 					  enum lpc_peripheral_opcode op,
+ 					  uint32_t *data);
++typedef int (*espi_api_ltr_write_request)(const struct device *dev,
++					  struct ltr_cfg_pkt *req);
+ /* Logical Channel 1 APIs */
+ typedef int (*espi_api_send_vwire)(const struct device *dev,
+ 				   enum espi_vwire_signal vw,
+@@ -452,6 +480,7 @@ __subsystem struct espi_driver_api {
+ 	espi_api_write_request write_request;
+ 	espi_api_lpc_read_request read_lpc_request;
+ 	espi_api_lpc_write_request write_lpc_request;
++	espi_api_ltr_write_request send_ltr;
+ 	espi_api_send_vwire send_vwire;
+ 	espi_api_receive_vwire receive_vwire;
+ 	espi_api_send_oob send_oob;
+@@ -674,6 +703,37 @@ static inline int z_impl_espi_write_lpc_request(const struct device *dev,
+ 	return api->write_lpc_request(dev, op, data);
+ }
+ 
++
++/**
++ * @brief Send LTR request to eSPI host which generates an eSPI transaction.
++ *
++ * This routine provides a generic interface to send ltr value to eSPI host
++ * which triggers an eSPI transaction. The eSPI packet is assembled by the
++ * hardware block.
++ *
++ * @param dev Pointer to the device structure for the driver instance.
++ * @param req Address of a structure representing LTR configuration request.
++ *
++ * @retval 0 If successful.
++ * @retval -ENOTSUP espi master has not enabled LTR.
++ */
++__syscall int espi_send_ltr(const struct device *dev,
++			    struct ltr_cfg_pkt *req);
++
++static inline int z_impl_espi_send_ltr(const struct device *dev,
++				       struct ltr_cfg_pkt *req)
++{
++	const struct espi_driver_api *api =
++		(const struct espi_driver_api *)dev->api;
++
++	if (!api->send_ltr) {
++		return -ENOTSUP;
++	}
++
++	return api->send_ltr(dev, req);
++}
++
++
+ /**
+  * @brief Sends system/platform signal as a virtual wire packet.
+  *
+-- 
+2.17.1
+
+
+From 4fc8dffc2ea93eef8c211f7c1b68bb557e7338ae Mon Sep 17 00:00:00 2001
+From: Frances Wu <frances.wu@microchip.com>
+Date: Thu, 24 Mar 2022 14:28:00 -0700
+Subject: [PATCH 03/21] [BACKPORTED][UNDER REVIEW] mec172xmodular_assy6930: add
+ board support
+
+Add board files for mec172xmodular_assy6930.  This is for
+MEC172x Modular Card support.
+
+Signed-off-by: Frances Wu <frances.wu@microchip.com>
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ boards/arm/mec172xevb_assy6906/CMakeLists.txt |   2 -
+ .../mec172xmodular_assy6930/CMakeLists.txt    |  33 +++
+ .../arm/mec172xmodular_assy6930/Kconfig.board |   6 +
+ .../mec172xmodular_assy6930/Kconfig.defconfig |  43 ++++
+ .../arm/mec172xmodular_assy6930/board.cmake   |  11 +
+ .../mec172xmodular_assy6930.dts               | 219 ++++++++++++++++++
+ .../mec172xmodular_assy6930.yaml              |  19 ++
+ .../mec172xmodular_assy6930_defconfig         |  22 ++
+ .../support/spi_cfg.txt                       |  54 +++++
+ .../support/spi_cfg_128MBit.txt               |  50 ++++
+ .../support/spi_cfg_4MBit.txt                 |  54 +++++
+ 11 files changed, 511 insertions(+), 2 deletions(-)
+ create mode 100644 boards/arm/mec172xmodular_assy6930/CMakeLists.txt
+ create mode 100644 boards/arm/mec172xmodular_assy6930/Kconfig.board
+ create mode 100644 boards/arm/mec172xmodular_assy6930/Kconfig.defconfig
+ create mode 100644 boards/arm/mec172xmodular_assy6930/board.cmake
+ create mode 100644 boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.dts
+ create mode 100644 boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.yaml
+ create mode 100644 boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930_defconfig
+ create mode 100644 boards/arm/mec172xmodular_assy6930/support/spi_cfg.txt
+ create mode 100644 boards/arm/mec172xmodular_assy6930/support/spi_cfg_128MBit.txt
+ create mode 100644 boards/arm/mec172xmodular_assy6930/support/spi_cfg_4MBit.txt
+
+diff --git a/boards/arm/mec172xevb_assy6906/CMakeLists.txt b/boards/arm/mec172xevb_assy6906/CMakeLists.txt
+index b220461649..2f594e415d 100644
+--- a/boards/arm/mec172xevb_assy6906/CMakeLists.txt
++++ b/boards/arm/mec172xevb_assy6906/CMakeLists.txt
+@@ -4,8 +4,6 @@
+ # SPDX-License-Identifier: Apache-2.0
+ #
+ 
+-zephyr_library()
+-
+ if(DEFINED ENV{MEC172X_SPI_GEN})
+   # Grab it from environment variable if defined
+   set(MEC172X_SPI_GEN $ENV{MEC172X_SPI_GEN})
+diff --git a/boards/arm/mec172xmodular_assy6930/CMakeLists.txt b/boards/arm/mec172xmodular_assy6930/CMakeLists.txt
+new file mode 100644
+index 0000000000..f6e76b8a60
+--- /dev/null
++++ b/boards/arm/mec172xmodular_assy6930/CMakeLists.txt
+@@ -0,0 +1,33 @@
++#
++# Copyright (c) 2021 Microchip Technology Inc.
++#
++# SPDX-License-Identifier: Apache-2.0
++#
++
++#Allow users to pre-specify the tool using '-DMEC172X_SPI_GEN=<path-to-tool>/toolname'
++if (NOT DEFINED MEC172X_SPI_GEN)
++  set(MEC172X_SPI_GEN $ENV{MEC172X_SPI_GEN})
++endif()
++find_program (MEC172X_SPI_GEN NAMES mec172x_spi_gen_lin_x86_64 mec172x_spi_gen)
++if(MEC172X_SPI_GEN STREQUAL MEC172X_SPI_GEN-NOTFOUND)
++  message(WARNING "Microchip SPI Image Generation tool is not available. SPI Image will not be generated.")
++endif()
++
++if (NOT DEFINED MEC172X_SPI_CFG)
++  set(MEC172X_SPI_CFG $ENV{MEC172X_SPI_CFG})
++endif()
++find_file (MEC172X_SPI_CFG NAMES spi_cfg_4MBit.txt spi_cfg_128MBit.txt spi_cfg.txt PATHS ${BOARD_DIR}/support)
++if(MEC172X_SPI_CFG STREQUAL MEC172X_SPI_CFG-NOTFOUND)
++  message(WARNING "Microchip SPI Image Generation tool configuration file is not available. SPI Image will not be generated.")
++endif()
++
++if (NOT MEC172X_SPI_GEN STREQUAL MEC172X_SPI_GEN-NOTFOUND AND NOT MEC172X_SPI_CFG STREQUAL MEC172X_SPI_CFG-NOTFOUND)
++  set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
++    COMMAND ${MEC172X_SPI_GEN}
++    -i ${MEC172X_SPI_CFG}
++    -o ${PROJECT_BINARY_DIR}/${SPI_IMAGE_NAME}
++  )
++
++  unset(MEC172X_SPI_GEN)
++  unset(MEC172X_SPI_CFG)
++endif()
+diff --git a/boards/arm/mec172xmodular_assy6930/Kconfig.board b/boards/arm/mec172xmodular_assy6930/Kconfig.board
+new file mode 100644
+index 0000000000..0b91640dcb
+--- /dev/null
++++ b/boards/arm/mec172xmodular_assy6930/Kconfig.board
+@@ -0,0 +1,6 @@
++# Copyright (c) 2021, Microchip Technology Inc.
++# SPDX-License-Identifier: Apache-2.0
++
++config BOARD_MEC172XMODULAR_ASSY6930
++	bool "Microchip MEC172X MODULAR ASSY 6930 Development board"
++	depends on SOC_MEC172X_NSZ
+diff --git a/boards/arm/mec172xmodular_assy6930/Kconfig.defconfig b/boards/arm/mec172xmodular_assy6930/Kconfig.defconfig
+new file mode 100644
+index 0000000000..da62421fd5
+--- /dev/null
++++ b/boards/arm/mec172xmodular_assy6930/Kconfig.defconfig
+@@ -0,0 +1,43 @@
++# Copyright (c) 2021 Microchip Technology Inc.
++# SPDX-License-Identifier: Apache-2.0
++
++if BOARD_MEC172XMODULAR_ASSY6930
++
++config BOARD
++	default "mec172xmodular_assy6930"
++
++if RTOS_TIMER
++
++# XEC RTOS timer HW frequency is fixed at 32768 Hz.
++# The driver requires tickless mode and ticks per second to be 32768 for
++# accurate operation.
++
++config SYS_CLOCK_HW_CYCLES_PER_SEC
++	default 32768
++
++config SYS_CLOCK_TICKS_PER_SEC
++	default 32768
++
++endif # RTOS_TIMER
++
++if !RTOS_TIMER
++
++# If RTOS timer is not enabled we use ARM Cortex-M
++# SYSTICK. SYSTICK frequency is 96 MHz divided down by the MEC172x PCR
++# processor clock divider register. We assume PCR processor clock divider
++# is set to 1. Refer to SOC_MEC172X_PROC_CLK_DIV
++#
++
++config SYS_CLOCK_HW_CYCLES_PER_SEC
++	default 96000000
++
++config SYS_CLOCK_TICKS_PER_SEC
++	default 1000
++
++endif # RTOS_TIMER
++
++config TACH_XEC
++	default y
++	depends on SENSOR
++
++endif # BOARD_MEC172XMODULAR_ASSY6930
+diff --git a/boards/arm/mec172xmodular_assy6930/board.cmake b/boards/arm/mec172xmodular_assy6930/board.cmake
+new file mode 100644
+index 0000000000..0378852531
+--- /dev/null
++++ b/boards/arm/mec172xmodular_assy6930/board.cmake
+@@ -0,0 +1,11 @@
++# SPDX-License-Identifier: Apache-2.0
++
++set(SPI_IMAGE_NAME spi_image.bin)
++
++board_set_flasher_ifnset(dediprog)
++
++# --vcc=0 - use 3.5V to flash
++board_finalize_runner_args(dediprog
++  "--spi-image=${PROJECT_BINARY_DIR}/${SPI_IMAGE_NAME}"
++  "--vcc=0"
++)
+diff --git a/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.dts b/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.dts
+new file mode 100644
+index 0000000000..440bf315a4
+--- /dev/null
++++ b/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.dts
+@@ -0,0 +1,219 @@
++/*
++ * Copyright (c) 2021, Microchip Technology Inc.
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++/dts-v1/;
++
++#include <microchip/mec172xnsz.dtsi>
++#include <microchip/mec172x/mec172xnsz-pinctrl.dtsi>
++
++/ {
++	model = "Microchip MEC172XMODULAR_ASSY6930 evaluation board";
++	compatible = "microchip,mec172xmodular_assy6930", "microchip,mec172xnsz";
++
++	chosen {
++		zephyr,sram = &sram0;
++		zephyr,flash = &flash0;
++		zephyr,console = &uart1;
++	};
++
++	aliases {
++		led0 = &led4;
++		led1 = &led3;
++		i2c0 = &i2c_smb_0;
++		i2c-0 = &i2c_smb_0;
++		i2c1 = &i2c_smb_1;
++		i2c7 = &i2c_smb_2;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++		led4: led_0 {
++			/* GPIO241/CMP_VOUT0/PWM0_ALT on schematic,
++			 * LED4 on silkscreen.
++			 */
++			gpios = <&gpio_240_276 1 GPIO_ACTIVE_HIGH>;
++			label = "LED 4";
++		};
++		led3: led_1 {
++			/* GPIO175/CMP_VOUT1/PWM8_ALT on schematic,
++			 * LED5 on silkscreen.
++			 */
++			gpios = <&gpio_140_176 29 GPIO_ACTIVE_HIGH>;
++			label = "LED 5";
++		};
++	};
++};
++
++&cpu0 {
++	clock-frequency = <96000000>;
++	status = "okay";
++};
++
++/* Initialize ECIA. Does not initialize child devices */
++&ecia {
++	status = "okay";
++};
++
++/* Enable aggregated GIRQ24 and GIRQ25 for eSPI virtual wires interrupts */
++&girq24 {
++	status = "okay";
++};
++
++&girq25 {
++	status = "okay";
++};
++
++&rtimer {
++	status = "okay";
++};
++
++&pcr {
++	status = "okay";
++};
++
++&uart1 {
++	status = "okay";
++	current-speed = <115200>;
++	pinctrl-0 = <&uart1_tx_gpio170 &uart1_rx_gpio171>;
++	pinctrl-names = "default";
++};
++
++&adc0 {
++	status = "okay";
++	pinctrl-0 = <&adc00_gpio200 &adc03_gpio203
++		     &adc04_gpio204 &adc05_gpio205>;
++	pinctrl-names = "default";
++};
++
++&espi0 {
++	status = "okay";
++	pinctrl-0 = < &espi_reset_n_gpio061 &espi_cs_n_gpio066
++		      &espi_alert_n_gpio063 &espi_clk_gpio065
++		      &espi_io0_gpio070 &espi_io1_gpio071
++		      &espi_io2_gpio072 &espi_io3_gpio073 >;
++	pinctrl-names = "default";
++};
++
++/* enable various eSPI child devices (host facing) */
++&kbc0 {
++	status = "okay";
++};
++
++&acpi_ec0 {
++	status = "okay";
++};
++
++&acpi_ec1 {
++	status = "okay";
++};
++
++&emi0 {
++	status = "okay";
++};
++
++&p80bd0 {
++	status = "okay";
++};
++
++/* I2C */
++&i2c_smb_0 {
++	status = "okay";
++	label = "I2C0";
++	port_sel = <0>;
++
++	pinctrl-0 = < &i2c00_scl_gpio004 &i2c00_sda_gpio003 >;
++	pinctrl-names = "default";
++};
++
++&i2c00_scl_gpio004 {
++	drive-open-drain;
++	output-high;
++};
++
++&i2c00_sda_gpio003 {
++	drive-open-drain;
++	output-high;
++};
++
++&i2c_smb_1 {
++	status = "okay";
++	label = "I2C1";
++	port_sel = <1>;
++	pinctrl-0 = <&i2c01_scl_gpio131 &i2c01_sda_gpio130>;
++	pinctrl-names = "default";
++};
++
++&i2c01_scl_gpio131 {
++	drive-open-drain;
++	output-high;
++};
++
++&i2c01_sda_gpio130 {
++	drive-open-drain;
++	output-high;
++};
++
++&i2c_smb_2 {
++	status = "okay";
++	label = "I2C7";
++	port_sel = <7>;
++	pinctrl-0 = <&i2c07_scl_gpio013 &i2c07_sda_gpio012>;
++	pinctrl-names = "default";
++};
++
++&i2c07_scl_gpio013 {
++	drive-open-drain;
++	output-high;
++};
++
++&i2c07_sda_gpio012 {
++	drive-open-drain;
++	output-high;
++};
++
++&spi0 {
++	status = "okay";
++	clock-frequency = <4000000>;
++	lines = <4>;
++	chip-select = <0>;
++	port-sel = <0>; /* Shared SPI */
++
++	pinctrl-0 = < &shd_cs0_n_gpio055
++		      &shd_clk_gpio056
++		      &shd_io0_gpio223
++		      &shd_io1_gpio224
++		      &shd_io2_gpio227
++		      &shd_io3_gpio016 >;
++	pinctrl-names = "default";
++};
++
++&kscan0 {
++	status = "okay";
++
++	pinctrl-0 = < &ksi0_gpio017
++		      &ksi1_gpio020
++		      &ksi2_gpio021
++		      &ksi3_gpio026
++		      &ksi4_gpio027
++		      &ksi5_gpio030
++		      &ksi6_gpio031
++		      &ksi7_gpio032
++		      &kso00_gpio040
++		      &kso01_gpio045
++		      &kso02_gpio046
++		      &kso03_gpio047
++		      &kso04_gpio107
++		      &kso05_gpio112
++		      &kso06_gpio113
++		      &kso07_gpio120
++		      &kso08_gpio121
++		      &kso09_gpio122
++		      &kso10_gpio123
++		      &kso11_gpio124
++		      &kso12_gpio125
++		      &kso13_gpio126 >;
++	pinctrl-names = "default";
++};
+diff --git a/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.yaml b/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.yaml
+new file mode 100644
+index 0000000000..b43be89856
+--- /dev/null
++++ b/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.yaml
+@@ -0,0 +1,19 @@
++#
++# Copyright (c) 2021, Microchip Technology Inc.
++#
++# SPDX-License-Identifier: Apache-2.0
++#
++
++identifier: mec172xmodular_assy6930
++name: MEC172X MODULAR ASSY 6930
++type: mcu
++arch: arm
++toolchain:
++  - zephyr
++  - gnuarmemb
++ram: 64
++flash: 352
++supported:
++  - gpio
++  - pinmux
++  - i2c
+diff --git a/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930_defconfig b/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930_defconfig
+new file mode 100644
+index 0000000000..7c197888fd
+--- /dev/null
++++ b/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930_defconfig
+@@ -0,0 +1,22 @@
++#
++# Copyright (c) 2021, Microchip Technology Inc.
++#
++# SPDX-License-Identifier: Apache-2.0
++#
++
++CONFIG_SOC_MEC172X_NSZ=y
++CONFIG_SOC_SERIES_MEC172X=y
++CONFIG_BOARD_MEC172XMODULAR_ASSY6930=y
++CONFIG_RTOS_TIMER=y
++
++CONFIG_CLOCK_CONTROL=y
++CONFIG_GPIO=y
++CONFIG_PINCTRL=y
++CONFIG_SERIAL=y
++CONFIG_CONSOLE=y
++CONFIG_UART_CONSOLE=y
++CONFIG_ADC=y
++CONFIG_I2C=y
++CONFIG_ESPI=y
++CONFIG_SPI=y
++CONFIG_SPI_ASYNC=y
+diff --git a/boards/arm/mec172xmodular_assy6930/support/spi_cfg.txt b/boards/arm/mec172xmodular_assy6930/support/spi_cfg.txt
+new file mode 100644
+index 0000000000..9b0d207282
+--- /dev/null
++++ b/boards/arm/mec172xmodular_assy6930/support/spi_cfg.txt
+@@ -0,0 +1,54 @@
++; MEC1727 SPI Image Generator configuration file for internal 512KB flash
++[SPI]
++SPISizeMegabits = 4
++Flashmap = false
++FlshmapAddr = 0
++
++[DEVICE]
++TagAddr0 = 0
++TagAddr1 = 0
++; BoardID is used by a Boot-ROM feature named PlatformID. By default PlatformID
++; is disabled. If PlatformID is enabled in OTP Boot-ROM will check the image
++; BoardID value with an OTP PlatformID value. Load is aborted if the ID's do
++; not match.
++BoardID = 0
++
++[IMAGE "0"]
++ImageLocation = 0x100
++SpiFreqMHz = 24
++SpiReadCommand = Dual
++SpiDriveStrength = 4
++SpiSlewFast = false
++SpiSignalControl = 0x00
++FwBinFile = zephyr.bin
++ImageRevision = 0x56
++FwOffset = 0
++FwLoadAddress = 0xC0000
++FwEntryAddress = 0
++UseECDSA = false
++AuthenticateKeySelt = 5
++AutoKeyRevEn = true
++KeyRevPermission = 0x11223344
++AutoRollBackProtEn = false
++RollbackProtPerm031000 = 0x11223344
++RollbackProtPerm063032 = 0x55667788
++RollbackProtPerm095063 = 0
++RollbackProtPerm127096 = 0xDDEEFF99
++ECDSAPrivKeyFile = ec384.pem
++ECDSAPrivKeyPassword = ec384
++FwEncrypt = false
++AesGenECPubKeyFile = ec384_crt.pem
++SHA256andECDSA = false
++TagBuildNumber= 0x1156
++Comp0ProgDrvStrenEN = false
++Comp0WritCmdTotByts = 1
++Comp0ReadCmdByte = 0x15
++Comp0WritCmdByte = 0x11
++Comp0DrvValue = 0x40
++Comp0DrvMask = 0x60
++Comp1ProgDrvStrenEN = false
++Comp1WritCmdTotByts = 1
++Comp1ReadCmdByte = 0x15
++Comp1WritCmdByte = 0x11
++Comp1DrvValue = 0x20
++Comp1DrvMask = 0x60
+diff --git a/boards/arm/mec172xmodular_assy6930/support/spi_cfg_128MBit.txt b/boards/arm/mec172xmodular_assy6930/support/spi_cfg_128MBit.txt
+new file mode 100644
+index 0000000000..aaa35716d6
+--- /dev/null
++++ b/boards/arm/mec172xmodular_assy6930/support/spi_cfg_128MBit.txt
+@@ -0,0 +1,50 @@
++; Everglades SPI Image Generator configuration file
++[SPI]
++SPISizeMegabits = 128
++Flashmap = false
++FlshmapAddr = 0
++
++[DEVICE]
++TagAddr0 = 0
++TagAddr1 = 0
++BoardID = 0x316
++
++[IMAGE "0"]
++ImageLocation = 0x2000
++SpiFreqMHz = 24
++SpiReadCommand = Dual
++SpiDriveStrength = 4
++SpiSlewFast = false
++SpiSignalControl = 0x00
++FwBinFile = zephyr.bin
++ImageRevision = 0x56
++FwOffset = 0
++FwLoadAddress = 0xC0000
++FwEntryAddress = 0
++UseECDSA = false
++AuthenticateKeySelt = 5
++AutoKeyRevEn = true
++KeyRevPermission = 0x11223344
++AutoRollBackProtEn = false
++RollbackProtPerm031000 = 0x11223344
++RollbackProtPerm063032 = 0x55667788
++RollbackProtPerm095063 = 0
++RollbackProtPerm127096 = 0xDDEEFF99
++ECDSAPrivKeyFile = ec384.pem
++ECDSAPrivKeyPassword = ec384
++FwEncrypt = false
++AesGenECPubKeyFile = ec384_crt.pem
++SHA256andECDSA = false
++TagBuildNumber= 0x1156
++Comp0ProgDrvStrenEN = true
++Comp0WritCmdTotByts = 1
++Comp0ReadCmdByte = 0x15
++Comp0WritCmdByte = 0x11
++Comp0DrvValue = 0x40
++Comp0DrvMask = 0x60
++Comp1ProgDrvStrenEN = true
++Comp1WritCmdTotByts = 1
++Comp1ReadCmdByte = 0x15
++Comp1WritCmdByte = 0x11
++Comp1DrvValue = 0x20
++Comp1DrvMask = 0x60
+diff --git a/boards/arm/mec172xmodular_assy6930/support/spi_cfg_4MBit.txt b/boards/arm/mec172xmodular_assy6930/support/spi_cfg_4MBit.txt
+new file mode 100644
+index 0000000000..9b0d207282
+--- /dev/null
++++ b/boards/arm/mec172xmodular_assy6930/support/spi_cfg_4MBit.txt
+@@ -0,0 +1,54 @@
++; MEC1727 SPI Image Generator configuration file for internal 512KB flash
++[SPI]
++SPISizeMegabits = 4
++Flashmap = false
++FlshmapAddr = 0
++
++[DEVICE]
++TagAddr0 = 0
++TagAddr1 = 0
++; BoardID is used by a Boot-ROM feature named PlatformID. By default PlatformID
++; is disabled. If PlatformID is enabled in OTP Boot-ROM will check the image
++; BoardID value with an OTP PlatformID value. Load is aborted if the ID's do
++; not match.
++BoardID = 0
++
++[IMAGE "0"]
++ImageLocation = 0x100
++SpiFreqMHz = 24
++SpiReadCommand = Dual
++SpiDriveStrength = 4
++SpiSlewFast = false
++SpiSignalControl = 0x00
++FwBinFile = zephyr.bin
++ImageRevision = 0x56
++FwOffset = 0
++FwLoadAddress = 0xC0000
++FwEntryAddress = 0
++UseECDSA = false
++AuthenticateKeySelt = 5
++AutoKeyRevEn = true
++KeyRevPermission = 0x11223344
++AutoRollBackProtEn = false
++RollbackProtPerm031000 = 0x11223344
++RollbackProtPerm063032 = 0x55667788
++RollbackProtPerm095063 = 0
++RollbackProtPerm127096 = 0xDDEEFF99
++ECDSAPrivKeyFile = ec384.pem
++ECDSAPrivKeyPassword = ec384
++FwEncrypt = false
++AesGenECPubKeyFile = ec384_crt.pem
++SHA256andECDSA = false
++TagBuildNumber= 0x1156
++Comp0ProgDrvStrenEN = false
++Comp0WritCmdTotByts = 1
++Comp0ReadCmdByte = 0x15
++Comp0WritCmdByte = 0x11
++Comp0DrvValue = 0x40
++Comp0DrvMask = 0x60
++Comp1ProgDrvStrenEN = false
++Comp1WritCmdTotByts = 1
++Comp1ReadCmdByte = 0x15
++Comp1WritCmdByte = 0x11
++Comp1DrvValue = 0x20
++Comp1DrvMask = 0x60
+-- 
+2.17.1
+
+
+From 914aba9c95c452c30cdf2e9deeed09a4d1d41e89 Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Tue, 19 Apr 2022 17:55:11 -0400
+Subject: [PATCH 04/21] [BACKPORTED] drivers: clock-control: Microchip MEC172x
+ adjust clock based on OTP
+
+Microchip MEC172x CPU and fast peripheral (QMSPI and PK) are
+clock source is based upon an OTP setting. Add logic to adjust
+clock source based on OTP value. If the OTP value is ever changed
+this fix will allow calcluation of correct clock rate.
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+---
+ drivers/clock_control/clock_control_mchp_xec.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/clock_control/clock_control_mchp_xec.c b/drivers/clock_control/clock_control_mchp_xec.c
+index a8731704a8..42a9e5b57e 100644
+--- a/drivers/clock_control/clock_control_mchp_xec.c
++++ b/drivers/clock_control/clock_control_mchp_xec.c
+@@ -559,11 +559,19 @@ static int xec_clock_control_get_subsys_rate(const struct device *dev,
+ 	switch (bus) {
+ 	case MCHP_XEC_PCR_CLK_CORE:
+ 	case MCHP_XEC_PCR_CLK_PERIPH_FAST:
+-		*rate = MHZ(96);
++		if (pcr->TURBO_CLK & MCHP_PCR_TURBO_CLK_96M) {
++			*rate = MHZ(96);
++		} else {
++			*rate = MHZ(48);
++		}
+ 		break;
+ 	case MCHP_XEC_PCR_CLK_CPU:
+ 		/* if PCR PROC_CLK_CTRL is 0 the chip is not running */
+-		*rate = MHZ(96) / pcr->PROC_CLK_CTRL;
++		if (pcr->TURBO_CLK & MCHP_PCR_TURBO_CLK_96M) {
++			*rate = MHZ(96) / pcr->PROC_CLK_CTRL;
++		} else {
++			*rate = MHZ(48) / pcr->PROC_CLK_CTRL;
++		}
+ 		break;
+ 	case MCHP_XEC_PCR_CLK_BUS:
+ 	case MCHP_XEC_PCR_CLK_PERIPH:
+-- 
+2.17.1
+
+
+From 94643d424254045877522edc89b787fff2889ce2 Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Tue, 19 Apr 2022 18:13:59 -0400
+Subject: [PATCH 05/21] [BACKPORTED] drivers: SPI: MEC172x QMSPI clock fix
+
+Microchip MEC172x QMSPI expanded its clock divider register
+field from 8 to 16 bits. QMSPI source clock is on the fast
+peripheral domain therefore get the frequency from the clock
+control driver.
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+---
+ drivers/spi/spi_xec_qmspi_ldma.c              | 69 +++++++++++++------
+ dts/arm/microchip/mec172xnsz.dtsi             |  1 +
+ .../microchip_mec/mec172x/reg/mec172x_qspi.h  |  5 +-
+ 3 files changed, 51 insertions(+), 24 deletions(-)
+
+diff --git a/drivers/spi/spi_xec_qmspi_ldma.c b/drivers/spi/spi_xec_qmspi_ldma.c
+index d17e9dde53..4baa4bea56 100644
+--- a/drivers/spi/spi_xec_qmspi_ldma.c
++++ b/drivers/spi/spi_xec_qmspi_ldma.c
+@@ -28,6 +28,8 @@ LOG_MODULE_REGISTER(spi_xec, CONFIG_SPI_LOG_LEVEL);
+ #include <zephyr/sys/printk.h>
+ #endif
+ 
++/* common clock control device node for all Microchip XEC chips */
++#define MCHP_XEC_CLOCK_CONTROL_NODE	DT_NODELABEL(pcr)
+ 
+ /* spin loops waiting for HW to clear soft reset bit */
+ #define XEC_QMSPI_SRST_LOOPS		16
+@@ -90,6 +92,7 @@ struct spi_qmspi_config {
+ /* Device run time data */
+ struct spi_qmspi_data {
+ 	struct spi_context ctx;
++	uint32_t base_freq_hz;
+ 	uint32_t qstatus;
+ 	uint8_t np; /* number of data pins: 1, 2, or 4 */
+ 	uint8_t *pd;
+@@ -158,36 +161,42 @@ static void qmspi_reset(struct qmspi_regs *regs)
+ 	regs->TM_TAPS_CTRL = taps[2];
+ }
+ 
+-/*
+- * Calculate 8-bit QMSPI frequency divider register field value.
+- * QMSPI input clock is MCHP_QMSPI_INPUT_CLOCK_FREQ_HZ.
+- * The 8-bit divider is encoded as:
+- * 0 is divide by 256
+- * 1 through 255 is divide by this value.
+- */
+-static uint32_t qmspi_encoded_fdiv(uint32_t freq_hz)
++static uint32_t qmspi_encoded_fdiv(const struct device *dev, uint32_t freq_hz)
+ {
+-	uint32_t fdiv = 1;
++	struct spi_qmspi_data *qdata = dev->data;
+ 
+-	if (freq_hz < (MCHP_QMSPI_INPUT_CLOCK_FREQ_HZ / 256u)) {
+-		fdiv = 0; /* HW fdiv of 0 -> divide by 256 */
+-	} else if (freq_hz < MCHP_QMSPI_INPUT_CLOCK_FREQ_HZ) {
+-		fdiv = MCHP_QMSPI_INPUT_CLOCK_FREQ_HZ / freq_hz;
++	if (freq_hz == 0u) {
++		return 0u; /* maximum frequency divider */
+ 	}
+ 
+-	return fdiv;
++	return (qdata->base_freq_hz / freq_hz);
+ }
+ 
+-/* Program QMSPI frequency divider field in mode register */
+-static void qmspi_set_frequency(struct qmspi_regs *regs, uint32_t freq_hz)
++/* Program QMSPI frequency divider field in the mode register.
++ * MEC172x QMSPI input clock source is the Fast Peripheral domain whose
++ * clock is controlled by the PCR turbo clock. 96 MHz if turbo mode
++ * enabled else 48 MHz. Query the clock control driver to get clock
++ * rate of fast peripheral domain. MEC172x QMSPI clock divider has
++ * been expanded to a 16-bit field encoded as:
++ * 0 = divide by 0x10000
++ * 1 to 0xffff = divide by this value.
++ */
++static int qmspi_set_frequency(struct qmspi_regs *regs, uint32_t freq_hz)
+ {
+-	uint32_t fdiv, qmode;
++	clock_control_subsys_t clkss =
++		(clock_control_subsys_t)(MCHP_XEC_PCR_CLK_PERIPH_FAST);
++	uint32_t clock = MCHP_QMSPI_INPUT_CLOCK_FREQ_HZ;
++	uint32_t fdiv = 0u;
++
++	if (!clock_control_get_rate(DEVICE_DT_GET(MCHP_XEC_CLOCK_CONTROL_NODE),
++				    (clock_control_subsys_t)clkss, &clock)) {
++		fdiv = clock / freq_hz;
++	}
+ 
+-	fdiv = qmspi_encoded_fdiv(freq_hz);
++	regs->MODE = ((regs->MODE & ~(MCHP_QMSPI_M_FDIV_MASK)) |
++		((fdiv << MCHP_QMSPI_M_FDIV_POS) & MCHP_QMSPI_M_FDIV_MASK));
+ 
+-	qmode = regs->MODE & ~(MCHP_QMSPI_M_FDIV_MASK);
+-	qmode |= (fdiv << MCHP_QMSPI_M_FDIV_POS) & MCHP_QMSPI_M_FDIV_MASK;
+-	regs->MODE = qmode;
++	return 0;
+ }
+ 
+ /*
+@@ -364,7 +373,7 @@ static int qmspi_configure(const struct device *dev,
+ 	/* CS1 alternate mode (frequency) */
+ 	regs->MODE_ALT1 = 0;
+ 	if (cfg->cs1_freq) {
+-		uint32_t fdiv = qmspi_encoded_fdiv(cfg->cs1_freq);
++		uint32_t fdiv = qmspi_encoded_fdiv(dev, cfg->cs1_freq);
+ 
+ 		regs->MODE_ALT1 = (fdiv << MCHP_QMSPI_MA1_CS1_CDIV_POS) &
+ 				  MCHP_QMSPI_MA1_CS1_CDIV_MSK;
+@@ -1087,7 +1096,12 @@ static int qmspi_xec_init(const struct device *dev)
+ 	const struct spi_qmspi_config *cfg = dev->config;
+ 	struct spi_qmspi_data *qdata = dev->data;
+ 	struct qmspi_regs *regs = cfg->regs;
++	const struct device *pcr_dev = DEVICE_DT_GET(MCHP_XEC_CLOCK_CONTROL_NODE);
+ 	int ret;
++	clock_control_subsys_t clkss =
++		(clock_control_subsys_t)(MCHP_XEC_PCR_CLK_PERIPH_FAST);
++
++	qdata->base_freq_hz = 0u;
+ 	qdata->qstatus = 0;
+ 	qdata->np = cfg->width;
+ #ifdef CONFIG_SPI_ASYNC
+@@ -1097,6 +1111,11 @@ static int qmspi_xec_init(const struct device *dev)
+ 	qdata->xfr_len = 0;
+ #endif
+ 
++	if (!device_is_ready(pcr_dev)) {
++		LOG_ERR("%s PCR device not ready", pcr_dev->name);
++		return -ENODEV;
++	}
++
+ 	z_mchp_xec_pcr_periph_sleep(cfg->pcr_idx, cfg->pcr_pos, 0);
+ 
+ 	ret = pinctrl_apply_state(cfg->pcfg, PINCTRL_STATE_DEFAULT);
+@@ -1105,6 +1124,12 @@ static int qmspi_xec_init(const struct device *dev)
+ 		return ret;
+ 	}
+ 
++	ret = clock_control_get_rate(pcr_dev, (clock_control_subsys_t)clkss, &qdata->base_freq_hz);
++	if (ret) {
++		LOG_ERR("QSPI clock control failed");
++		return ret;
++	}
++
+ 	qmspi_reset(regs);
+ 	mchp_xec_ecia_girq_src_clr(cfg->girq, cfg->girq_pos);
+ 
+diff --git a/dts/arm/microchip/mec172xnsz.dtsi b/dts/arm/microchip/mec172xnsz.dtsi
+index 3e3581d1ab..19eac691fa 100644
+--- a/dts/arm/microchip/mec172xnsz.dtsi
++++ b/dts/arm/microchip/mec172xnsz.dtsi
+@@ -695,6 +695,7 @@
+ 			interrupts = <91 2>;
+ 			girqs = < MCHP_XEC_ECIA(18, 1, 10, 91) >;
+ 			pcrs = <4 8>;
++			clocks = <&pcr 1 0>;
+ 			clock-frequency = <12000000>;
+ 			lines = <1>;
+ 			chip_select = <0>;
+diff --git a/soc/arm/microchip_mec/mec172x/reg/mec172x_qspi.h b/soc/arm/microchip_mec/mec172x/reg/mec172x_qspi.h
+index cb2be6eed4..496c0f5238 100644
+--- a/soc/arm/microchip_mec/mec172x/reg/mec172x_qspi.h
++++ b/soc/arm/microchip_mec/mec172x/reg/mec172x_qspi.h
+@@ -168,8 +168,8 @@
+ #define MCHP_QMSPI_M_CS(n) \
+ 	(((uint32_t)(n) & MCHP_QMSPI_M_CS_MASK0) << MCHP_QMSPI_M_CS_POS)
+ #define MCHP_QMSPI_M_FDIV_POS		16u
+-#define MCHP_QMSPI_M_FDIV_MASK0		0xffu
+-#define MCHP_QMSPI_M_FDIV_MASK		0x00ff0000u
++#define MCHP_QMSPI_M_FDIV_MASK0		0xffffu
++#define MCHP_QMSPI_M_FDIV_MASK		0xffff0000u
+ 
+ /* Control/Descriptors */
+ #define MCHP_QMSPI_C_IFM_MASK		0x03u
+@@ -197,6 +197,7 @@
+ #define MCHP_QMSPI_C_RX_DMA_1B		SHLU32(1u, MCHP_QMSPI_C_RX_DMA_POS)
+ #define MCHP_QMSPI_C_RX_DMA_2B		SHLU32(2u, MCHP_QMSPI_C_RX_DMA_POS)
+ #define MCHP_QMSPI_C_RX_DMA_4B		SHLU32(3u, MCHP_QMSPI_C_RX_DMA_POS)
++
+ #define MCHP_QMSPI_C_CLOSE_POS		9u
+ #define MCHP_QMSPI_C_NO_CLOSE		0u
+ #define MCHP_QMSPI_C_CLOSE		BIT(MCHP_QMSPI_C_CLOSE_POS)
+-- 
+2.17.1
+
+
+From e649713863ec0accee754ae27ddd068859eeb4c5 Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Tue, 19 Apr 2022 18:14:46 -0400
+Subject: [PATCH 06/21] [BACKPORTED] drivers: espi: Microchip MEC172x child
+ host device interrupt priorities
+
+Set default interrupt priority to 3 for all Microchip MEC172x eSPI
+host child devices except the UART's which are set to 1.
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+---
+ dts/arm/microchip/mec172xnsz.dtsi | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/dts/arm/microchip/mec172xnsz.dtsi b/dts/arm/microchip/mec172xnsz.dtsi
+index 19eac691fa..d6c624e556 100644
+--- a/dts/arm/microchip/mec172xnsz.dtsi
++++ b/dts/arm/microchip/mec172xnsz.dtsi
+@@ -825,7 +825,7 @@
+ 			mbox0: mbox@400f0000 {
+ 				compatible = "microchip,xec-espi-host-dev";
+ 				reg = <0x400f0000 0x200>;
+-				interrupts = <60 0>;
++				interrupts = <60 3>;
+ 				girqs = < MCHP_XEC_ECIA(15, 20, 7, 60) >;
+ 				pcrs = <2 17>;
+ 				ldn = <0>;
+@@ -911,7 +911,7 @@
+ 			uart0: uart@400f2400 {
+ 				compatible = "microchip,xec-uart";
+ 				reg = <0x400f2400 0x400>;
+-				interrupts = <40 0>;
++				interrupts = <40 1>;
+ 				clock-frequency = <1843200>;
+ 				current-speed = <38400>;
+ 				girqs = <15 0>;
+@@ -922,7 +922,7 @@
+ 			uart1: uart@400f2800 {
+ 				compatible = "microchip,xec-uart";
+ 				reg = <0x400f2800 0x400>;
+-				interrupts = <41 0>;
++				interrupts = <41 1>;
+ 				clock-frequency = <1843200>;
+ 				current-speed = <38400>;
+ 				girqs = <15 1>;
+@@ -933,7 +933,7 @@
+ 			emi0: emi@400f4000 {
+ 				compatible = "microchip,xec-espi-host-dev";
+ 				reg = <0x400f4000 0x400>;
+-				interrupts = <42 0>;
++				interrupts = <42 3>;
+ 				girqs = < MCHP_XEC_ECIA(15, 2, 7, 42) >;
+ 				ldn = <16>;
+ 				status = "disabled";
+@@ -941,7 +941,7 @@
+ 			emi1: emi@400f4400 {
+ 				compatible = "microchip,xec-espi-host-dev";
+ 				reg = <0x400f4400 0x400>;
+-				interrupts = <43 0>;
++				interrupts = <43 3>;
+ 				girqs = < MCHP_XEC_ECIA(15, 3, 7, 43) >;
+ 				ldn = <17>;
+ 				status = "disabled";
+@@ -949,7 +949,7 @@
+ 			emi2: emi@400f4800 {
+ 				compatible = "microchip,xec-espi-host-dev";
+ 				reg = <0x400f4800 0x400>;
+-				interrupts = <44 0>;
++				interrupts = <44 3>;
+ 				girqs = < MCHP_XEC_ECIA(15, 4, 7, 44) >;
+ 				ldn = <18>;
+ 				status = "disabled";
+@@ -957,7 +957,7 @@
+ 			rtc0: rtc@400f5000 {
+ 				compatible = "microchip,xec-espi-host-dev";
+ 				reg = <0x400f5000 0x100>;
+-				interrupts = <119 0>, <120 0>;
++				interrupts = <119 3>, <120 3>;
+ 				girqs = < MCHP_XEC_ECIA(21, 8, 13, 119)
+ 					  MCHP_XEC_ECIA(21, 9, 13, 120) >;
+ 				pcrs = <2 18>;
+-- 
+2.17.1
+
+
+From d0cc151bbe97046cd833560f9723652b5f039453 Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Tue, 19 Apr 2022 18:16:07 -0400
+Subject: [PATCH 07/21] [BACKPORTED] soc: microchip_mec: Prepare for MEC172x
+ SAF version 2
+
+Microchip MEC172x eSPI SAF has significant hardware changes
+requiring a new SAF configuration structure. In preparation
+for the MEC172x we move the current SAF header out of common
+to the MEC1501 subfolder, remove an unused and empty common
+header and remove includes of the moved headers from MEC172x.
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+---
+ soc/arm/microchip_mec/mec1501/soc.h                         | 2 +-
+ .../{common/soc_espi_saf.h => mec1501/soc_espi_saf_v1.h}    | 6 +++---
+ soc/arm/microchip_mec/mec172x/soc.h                         | 1 -
+ 3 files changed, 4 insertions(+), 5 deletions(-)
+ rename soc/arm/microchip_mec/{common/soc_espi_saf.h => mec1501/soc_espi_saf_v1.h} (98%)
+
+diff --git a/soc/arm/microchip_mec/mec1501/soc.h b/soc/arm/microchip_mec/mec1501/soc.h
+index 343ce9394f..caac8aafaf 100644
+--- a/soc/arm/microchip_mec/mec1501/soc.h
++++ b/soc/arm/microchip_mec/mec1501/soc.h
+@@ -18,7 +18,7 @@
+ #include "../common/soc_gpio.h"
+ #include "../common/soc_pins.h"
+ #include "../common/soc_espi_channels.h"
+-#include "../common/soc_espi_saf.h"
++#include "soc_espi_saf_v1.h"
+ 
+ #endif
+ 
+diff --git a/soc/arm/microchip_mec/common/soc_espi_saf.h b/soc/arm/microchip_mec/mec1501/soc_espi_saf_v1.h
+similarity index 98%
+rename from soc/arm/microchip_mec/common/soc_espi_saf.h
+rename to soc/arm/microchip_mec/mec1501/soc_espi_saf_v1.h
+index d1a3a31d53..c13ba76c2e 100644
+--- a/soc/arm/microchip_mec/common/soc_espi_saf.h
++++ b/soc/arm/microchip_mec/mec1501/soc_espi_saf_v1.h
+@@ -265,9 +265,9 @@
+ 		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(3) | \
+ 		 MCHP_QMSPI_C_DESCR_LAST)
+ 
+-#define MCHP_W25Q256_OPA SAF_OPCODE_REG_VAL(0x06U, 0x75U, 0x7aU, 0x05U)
+-#define MCHP_W25Q256_OPB SAF_OPCODE_REG_VAL(0x20U, 0x52U, 0xd8U, 0x02U)
+-#define MCHP_W25Q256_OPC SAF_OPCODE_REG_VAL(0xebU, 0xffU, 0xa5U, 0x35U)
++#define MCHP_W25Q256_OPA MCHP_SAF_OPCODE_REG_VAL(0x06U, 0x75U, 0x7aU, 0x05U)
++#define MCHP_W25Q256_OPB MCHP_SAF_OPCODE_REG_VAL(0x20U, 0x52U, 0xd8U, 0x02U)
++#define MCHP_W25Q256_OPC MCHP_SAF_OPCODE_REG_VAL(0xebU, 0xffU, 0xa5U, 0x35U)
+ 
+ #define MCHP_W25Q256_POLL2_MASK 0xff7fU
+ 
+diff --git a/soc/arm/microchip_mec/mec172x/soc.h b/soc/arm/microchip_mec/mec172x/soc.h
+index 907ba7a077..2841a190ff 100644
+--- a/soc/arm/microchip_mec/mec172x/soc.h
++++ b/soc/arm/microchip_mec/mec172x/soc.h
+@@ -281,7 +281,6 @@ typedef enum {
+ #include "../common/soc_pcr.h"
+ #include "../common/soc_pins.h"
+ #include "../common/soc_espi_channels.h"
+-#include "../common/soc_espi_saf.h"
+ #include "../common/soc_i2c.h"
+ 
+ #endif
+-- 
+2.17.1
+
+
+From 4d130c76bbc823730875c717a291986c9497c116 Mon Sep 17 00:00:00 2001
+From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+Date: Thu, 12 May 2022 12:42:47 -0700
+Subject: [PATCH 08/21] boards: arm: mec172xevb: Update SPI HW block properties
+
+---
+ .../arm/mec172xmodular_assy6930/mec172xmodular_assy6930.dts   | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.dts b/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.dts
+index 440bf315a4..a3f8ae7476 100644
+--- a/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.dts
++++ b/boards/arm/mec172xmodular_assy6930/mec172xmodular_assy6930.dts
+@@ -178,8 +178,8 @@
+ 	status = "okay";
+ 	clock-frequency = <4000000>;
+ 	lines = <4>;
+-	chip-select = <0>;
+-	port-sel = <0>; /* Shared SPI */
++	chip_select = <0>;
++	port_sel = <0>; /* Shared SPI */
+ 
+ 	pinctrl-0 = < &shd_cs0_n_gpio055
+ 		      &shd_clk_gpio056
+-- 
+2.17.1
+
+
+From 942508b3d1fe00a21ac6a99b39dff3d2c4421485 Mon Sep 17 00:00:00 2001
+From: "Chintha, Ramakrishna" <ramakrishna.chintha@intel.com>
+Date: Tue, 13 Sep 2022 12:19:49 +0530
+Subject: [PATCH 09/21] boards: mec172xmodular_assy6930: change drivestrength
+ and mode
+
+Changing the mode to Quad from Dual and spi drivestrength to 8mA
+This changes are required because of the HW limitation,
+With Dual and 4mA Code fetch is failing in SAF mode.
+
+Signed-off-by: Chintha, Ramakrishna <ramakrishna.chintha@intel.com>
+---
+ boards/arm/mec172xmodular_assy6930/support/spi_cfg_4MBit.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+ mode change 100644 => 100755 boards/arm/mec172xmodular_assy6930/support/spi_cfg_4MBit.txt
+
+diff --git a/boards/arm/mec172xmodular_assy6930/support/spi_cfg_4MBit.txt b/boards/arm/mec172xmodular_assy6930/support/spi_cfg_4MBit.txt
+old mode 100644
+new mode 100755
+index 9b0d207282..e7afca5d2b
+--- a/boards/arm/mec172xmodular_assy6930/support/spi_cfg_4MBit.txt
++++ b/boards/arm/mec172xmodular_assy6930/support/spi_cfg_4MBit.txt
+@@ -16,8 +16,8 @@ BoardID = 0
+ [IMAGE "0"]
+ ImageLocation = 0x100
+ SpiFreqMHz = 24
+-SpiReadCommand = Dual
+-SpiDriveStrength = 4
++SpiReadCommand = Quad
++SpiDriveStrength = 8
+ SpiSlewFast = false
+ SpiSignalControl = 0x00
+ FwBinFile = zephyr.bin
+-- 
+2.17.1
+
+
+From 496b9100bdc603a0a8ec5aa48fd6757e898bbfe7 Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Tue, 19 Apr 2022 18:37:17 -0400
+Subject: [PATCH 10/21] [BACKPORTED] drivers: espi_saf: Add Microchip MEC172x
+ eSPI SAF version 2 driver
+
+Microchip MEC172x has a modified eSPI SAF hardware implementation.
+Hardware changes include multiple clock dividers for each SPI
+flash device and data transfer using QMSPI local DMA.
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ drivers/espi/CMakeLists.txt                   |    3 +-
+ drivers/espi/Kconfig                          |   17 +-
+ drivers/espi/Kconfig.xec                      |  121 +-
+ drivers/espi/Kconfig.xec_v2                   |  169 ---
+ drivers/espi/espi_saf_mchp_xec_v2.c           | 1175 +++++++++++++++++
+ dts/arm/microchip/mec172xnsz.dtsi             |   22 +-
+ .../espi/microchip,xec-espi-saf-v2.yaml       |   64 +
+ include/zephyr/drivers/espi.h                 |    1 +
+ .../mec1501/Kconfig.defconfig.mec1501hsz      |    8 +
+ .../mec172x/Kconfig.defconfig.mec172xnsz      |    8 +
+ .../mec172x/reg/mec172x_espi_saf.h            |  260 ++--
+ .../microchip_mec/mec172x/reg/mec172x_qspi.h  |    6 +
+ soc/arm/microchip_mec/mec172x/soc.h           |    3 +
+ .../microchip_mec/mec172x/soc_espi_saf_v2.h   |  516 ++++++++
+ 14 files changed, 2113 insertions(+), 260 deletions(-)
+ delete mode 100644 drivers/espi/Kconfig.xec_v2
+ create mode 100644 drivers/espi/espi_saf_mchp_xec_v2.c
+ create mode 100644 dts/bindings/espi/microchip,xec-espi-saf-v2.yaml
+ create mode 100644 soc/arm/microchip_mec/mec172x/soc_espi_saf_v2.h
+
+diff --git a/drivers/espi/CMakeLists.txt b/drivers/espi/CMakeLists.txt
+index 82e257098f..cfdf84fd75 100644
+--- a/drivers/espi/CMakeLists.txt
++++ b/drivers/espi/CMakeLists.txt
+@@ -7,7 +7,8 @@ zephyr_library_sources_ifdef(CONFIG_ESPI_NPCX		espi_npcx.c)
+ zephyr_library_sources_ifdef(CONFIG_ESPI_NPCX		host_subs_npcx.c)
+ zephyr_library_sources_ifdef(CONFIG_USERSPACE		espi_handlers.c)
+ zephyr_library_sources_ifdef(CONFIG_ESPI_EMUL		espi_emul.c)
+-zephyr_library_sources_ifdef(CONFIG_ESPI_SAF		espi_saf_mchp_xec.c)
++zephyr_library_sources_ifdef(CONFIG_ESPI_SAF_XEC	espi_saf_mchp_xec.c)
+ zephyr_library_sources_ifdef(CONFIG_ESPI_XEC_V2		espi_mchp_xec_v2.c)
+ zephyr_library_sources_ifdef(CONFIG_ESPI_XEC_V2		espi_mchp_xec_host_v2.c)
+ zephyr_library_sources_ifdef(CONFIG_ESPI_IT8XXX2	espi_it8xxx2.c)
++zephyr_library_sources_ifdef(CONFIG_ESPI_SAF_XEC_V2	espi_saf_mchp_xec_v2.c)
+diff --git a/drivers/espi/Kconfig b/drivers/espi/Kconfig
+index 3c4de413c8..f8ee937af5 100644
+--- a/drivers/espi/Kconfig
++++ b/drivers/espi/Kconfig
+@@ -12,8 +12,6 @@ if ESPI
+ 
+ source "drivers/espi/Kconfig.xec"
+ 
+-source "drivers/espi/Kconfig.xec_v2"
+-
+ source "drivers/espi/Kconfig.npcx"
+ 
+ source "drivers/espi/Kconfig.espi_emul"
+@@ -178,4 +176,19 @@ config ESPI_OOB_CHANNEL_RX_ASYNC
+ 	  Enables asynchronous handling for host-initiated OOB traffic.
+ 	  Otherwise OOB traffic is assumed to be always client-initiated.
+ 
++config ESPI_SAF
++	bool "ESPI SAF driver"
++	depends on ESPI_FLASH_CHANNEL
++	help
++	  Enable Slave Attached Flash eSPI driver. SAF depends upon ESPI driver
++	  and flash channel.
++
++config ESPI_SAF_INIT_PRIORITY
++	int "ESPI SAF driver initialization priority"
++	depends on ESPI_SAF
++	default 4
++	help
++	  Driver initialization priority for eSPI SAF driver. SAF driver must
++	  initialize after the ESPI driver.
++
+ endif # ESPI
+diff --git a/drivers/espi/Kconfig.xec b/drivers/espi/Kconfig.xec
+index b6fde723b7..585731dbdd 100644
+--- a/drivers/espi/Kconfig.xec
++++ b/drivers/espi/Kconfig.xec
+@@ -5,11 +5,17 @@
+ 
+ config ESPI_XEC
+ 	bool "XEC Microchip ESPI driver"
+-	depends on SOC_SERIES_MEC1501X
++	depends on DT_HAS_MICROCHIP_XEC_ESPI_SAF_ENABLED
+ 	help
+ 	  Enable the Microchip XEC ESPI driver for MEC15xx family.
+ 
+-if ESPI_XEC
++config ESPI_XEC_V2
++	bool "XEC Microchip ESPI V2 driver"
++	depends on DT_HAS_MICROCHIP_XEC_ESPI_SAF_V2_ENABLED
++	help
++	  Enable the Microchip XEC ESPI driver for MEC172x series.
++
++if ESPI_XEC || ESPI_XEC_V2
+ 
+ config ESPI_OOB_CHANNEL
+ 	default y
+@@ -55,6 +61,93 @@ config ESPI_FLASH_BUFFER_SIZE
+ 	  Use maximum RAM buffer size defined by spec but allow applications
+ 	  to override if eSPI host doesn't support it.
+ 
++config ESPI_SAF_XEC
++	bool "XEC Microchip ESPI SAF driver"
++	depends on SOC_SERIES_MEC1501X
++	help
++	  Enable the Microchip XEC SAF ESPI driver for MEC15xx family.
++
++config ESPI_SAF_XEC_V2
++	bool "XEC Microchip ESPI SAF V2 driver"
++	depends on SOC_SERIES_MEC172X
++	help
++	  Enable the Microchip XEC SAF ESPI driver for MEC172x series.
++
++endif #ESPI_XEC
++
++if ESPI_XEC_V2
++
++config ESPI_XEC_PERIPHERAL_ACPI_SHD_MEM_SIZE
++	int "Host I/O peripheral port size for shared memory in MEC172X series"
++	depends on ESPI_XEC_V2 || ESPI_PERIPHERAL_ACPI_SHM_REGION
++	default 256
++	help
++	  This is the port size used by the Host and EC to communicate over
++	  the shared memory region to return the ACPI response data.
++
++config ESPI_XEC_PERIPHERAL_HOST_CMD_PARAM_SIZE
++	int "Host I/O peripheral port size for ec host command in MEC172X series"
++	depends on ESPI_XEC_V2 || ESPI_PERIPHERAL_EC_HOST_CMD
++	default 256
++	help
++	  This is the port size used by the Host and EC to communicate over
++	  the shared memory region to return the host command parameter data.
++
++config ESPI_PERIPHERAL_8042_KBC
++	default y
++
++if ESPI_PERIPHERAL_CHANNEL
++
++config ESPI_PERIPHERAL_XEC_MAILBOX
++	bool "SoC Mailbox over eSPI"
++	help
++	  Enable a 32 byte mailbox interface accessible via Host I/O over the
++	  ESPI Peripheral Channel.
++
++config ESPI_PERIPHERAL_XEC_ACPI_EC2
++	bool "SoC ACPI EC 2 over eSPI"
++	help
++	  Enable ACPI EC2 interface accessible via Host I/O over the
++	  ESPI Peripheral Channel.
++
++config ESPI_PERIPHERAL_XEC_ACPI_EC3
++	bool "SoC ACPI EC 3 over eSPI"
++	help
++	  Enable ACPI EC3 interface accessible via Host I/O over the
++	  ESPI Peripheral Channel.
++
++config ESPI_PERIPHERAL_XEC_ACPI_EC4
++	bool "SoC ACPI EC 4 over eSPI"
++	help
++	  Enable ACPI EC4 interface accessible via Host I/O over the
++	  ESPI Peripheral Channel.
++
++config ESPI_PERIPHERAL_XEC_ACPI_PM1
++	bool "SoC ACPI PM1 over eSPI"
++	help
++	  Enable ACPI PM1 interface accessible via Host I/O over the
++	  ESPI Peripheral Channel.
++
++config ESPI_PERIPHERAL_XEC_EMI0
++	bool "SoC EMI 0 over eSPI"
++	help
++	  Enable EMI 0 interface accessible via Host I/O over the
++	  ESPI Peripheral Channel.
++
++config ESPI_PERIPHERAL_XEC_EMI1
++	bool "SoC EMI 1 over eSPI"
++	help
++	  Enable EMI 1 interface accessible via Host I/O over the
++	  ESPI Peripheral Channel.
++
++config ESPI_PERIPHERAL_XEC_EMI2
++	bool "SoC EMI 2 over eSPI"
++	help
++	  Enable EMI 2 interface accessible via Host I/O over the
++	  ESPI Peripheral Channel.
++
++endif #ESPI_PERIPHERAL_CHANNEL
++
+ config ESPI_SAF
+ 	bool "XEC Microchip ESPI SAF driver"
+ 	depends on ESPI_FLASH_CHANNEL
+@@ -69,4 +162,26 @@ config ESPI_SAF_INIT_PRIORITY
+ 	help
+ 	  Driver initialization priority for eSPI SAF driver.
+ 
+-endif #ESPI_XEC
++config ESPI_PERIPHERAL_ACPI_EC_IBF_EVT_DATA
++	bool "Read ACPI EC Event Data in IBF ISR"
++	depends on ESPI_PERIPHERAL_CHANNEL
++	help
++	  Enable reading event data in ACPI EC IBF ISR. This is used in OS
++	  environment where application expects IBF ISR to read data and pass
++	  to callback.
++
++endif #ESPI_XEC_V2
++
++if ESPI_XEC_V2 && ESPI_PERIPHERAL_8042_KBC
++
++config ESPI_PERIPHERAL_KBC_IBF_EVT_DATA
++	bool "KBC event data format in IBF"
++	help
++	  Enable espi_evt_data_kbc format for encoding event in KBC IBF ISR
++
++config ESPI_PERIPHERAL_KBC_OBE_CBK
++	bool "KBC OBE Callback"
++	help
++	  Enable KBC OBE callback from OBE ISR
++
++endif #ESPI_XEC_V2 && ESPI_PERIPHERAL_8042_KBC
+diff --git a/drivers/espi/Kconfig.xec_v2 b/drivers/espi/Kconfig.xec_v2
+deleted file mode 100644
+index e7bb715403..0000000000
+--- a/drivers/espi/Kconfig.xec_v2
++++ /dev/null
+@@ -1,169 +0,0 @@
+-# Microchip XEC ESPI configuration options
+-
+-# Copyright (c) 2019 Intel Corporation
+-# Copyright (c) 2021 Microchip Technology Inc.
+-# SPDX-License-Identifier: Apache-2.0
+-
+-config ESPI_XEC_V2
+-	bool "XEC Microchip ESPI V2 driver"
+-	depends on SOC_SERIES_MEC172X
+-	help
+-	  Enable the Microchip XEC ESPI driver for MEC172x series.
+-
+-config ESPI_XEC_PERIPHERAL_ACPI_SHD_MEM_SIZE
+-	int "Host I/O peripheral port size for shared memory in MEC172X series"
+-	depends on ESPI_XEC_V2 || ESPI_PERIPHERAL_ACPI_SHM_REGION
+-	default 256
+-	help
+-	  This is the port size used by the Host and EC to communicate over
+-	  the shared memory region to return the ACPI response data.
+-
+-config ESPI_XEC_PERIPHERAL_HOST_CMD_PARAM_SIZE
+-	int "Host I/O peripheral port size for ec host command in MEC172X series"
+-	depends on ESPI_XEC_V2 || ESPI_PERIPHERAL_EC_HOST_CMD
+-	default 256
+-	help
+-	  This is the port size used by the Host and EC to communicate over
+-	  the shared memory region to return the host command parameter data.
+-
+-if ESPI_XEC_V2
+-
+-config ESPI_OOB_CHANNEL
+-	default y
+-
+-config ESPI_FLASH_CHANNEL
+-	default y
+-
+-config ESPI_PERIPHERAL_HOST_IO
+-	default  y
+-
+-config ESPI_PERIPHERAL_HOST_IO_PVT
+-	default  y
+-
+-config ESPI_PERIPHERAL_DEBUG_PORT_80
+-	default y
+-
+-config ESPI_PERIPHERAL_8042_KBC
+-	default y
+-
+-config ESPI_PERIPHERAL_UART
+-	default y
+-
+-config ESPI_PERIPHERAL_UART_SOC_MAPPING
+-	int "SoC port exposed as logical eSPI UART"
+-	default 1
+-	depends on ESPI_PERIPHERAL_UART
+-	help
+-	  This tells the driver to which SoC UART to direct the UART traffic
+-	  send over eSPI from host. MEC172x implements two UARTs.
+-
+-config ESPI_PERIPHERAL_XEC_MAILBOX
+-	bool "SoC Mailbox over eSPI"
+-	depends on ESPI_PERIPHERAL_CHANNEL
+-	help
+-	  Enable a 32 byte mailbox interface accessible via Host I/O over the
+-	  ESPI Peripheral Channel.
+-
+-config ESPI_PERIPHERAL_XEC_ACPI_EC2
+-	bool "SoC ACPI EC 2 over eSPI"
+-	depends on ESPI_PERIPHERAL_CHANNEL
+-	help
+-	  Enable ACPI EC2 interface accessible via Host I/O over the
+-	  ESPI Peripheral Channel.
+-
+-config ESPI_PERIPHERAL_XEC_ACPI_EC3
+-	bool "SoC ACPI EC 3 over eSPI"
+-	depends on ESPI_PERIPHERAL_CHANNEL
+-	help
+-	  Enable ACPI EC3 interface accessible via Host I/O over the
+-	  ESPI Peripheral Channel.
+-
+-config ESPI_PERIPHERAL_XEC_ACPI_EC4
+-	bool "SoC ACPI EC 4 over eSPI"
+-	depends on ESPI_PERIPHERAL_CHANNEL
+-	help
+-	  Enable ACPI EC4 interface accessible via Host I/O over the
+-	  ESPI Peripheral Channel.
+-
+-config ESPI_PERIPHERAL_XEC_ACPI_PM1
+-	bool "SoC ACPI PM1 over eSPI"
+-	depends on ESPI_PERIPHERAL_CHANNEL
+-	help
+-	  Enable ACPI PM1 interface accessible via Host I/O over the
+-	  ESPI Peripheral Channel.
+-
+-config ESPI_PERIPHERAL_XEC_EMI0
+-	bool "SoC EMI 0 over eSPI"
+-	depends on ESPI_PERIPHERAL_CHANNEL
+-	help
+-	  Enable EMI 0 interface accessible via Host I/O over the
+-	  ESPI Peripheral Channel.
+-
+-config ESPI_PERIPHERAL_XEC_EMI1
+-	bool "SoC EMI 1 over eSPI"
+-	depends on ESPI_PERIPHERAL_CHANNEL
+-	help
+-	  Enable EMI 1 interface accessible via Host I/O over the
+-	  ESPI Peripheral Channel.
+-
+-config ESPI_PERIPHERAL_XEC_EMI2
+-	bool "SoC EMI 2 over eSPI"
+-	depends on ESPI_PERIPHERAL_CHANNEL
+-	help
+-	  Enable EMI 2 interface accessible via Host I/O over the
+-	  ESPI Peripheral Channel.
+-
+-config ESPI_OOB_BUFFER_SIZE
+-	int "eSPI OOB channel buffer size in bytes"
+-	default 128
+-	depends on ESPI_OOB_CHANNEL
+-	help
+-	  Use minimum RAM buffer size by default but allow applications to
+-	  override the value.
+-	  Maximum OOB payload is 73 bytes.
+-
+-config ESPI_FLASH_BUFFER_SIZE
+-	int "eSPI Flash channel buffer size in bytes"
+-	default 256
+-	depends on ESPI_FLASH_CHANNEL
+-	help
+-	  Use maximum RAM buffer size defined by spec but allow applications
+-	  to override if eSPI host doesn't support it.
+-
+-config ESPI_SAF
+-	bool "XEC Microchip ESPI SAF driver"
+-	depends on ESPI_FLASH_CHANNEL
+-	help
+-	  Enable Slave Attached Flash eSPI driver. SAF depends upon ESPI XEC driver
+-	  and flash channel.
+-
+-config ESPI_SAF_INIT_PRIORITY
+-	int "ESPI SAF driver initialization priority"
+-	depends on ESPI_SAF
+-	default 4
+-	help
+-	  Driver initialization priority for eSPI SAF driver.
+-
+-config ESPI_PERIPHERAL_ACPI_EC_IBF_EVT_DATA
+-	bool "Read ACPI EC Event Data in IBF ISR"
+-	depends on ESPI_PERIPHERAL_CHANNEL
+-	help
+-	  Enable reading event data in ACPI EC IBF ISR. This is used in OS
+-	  environment where application expects IBF ISR to read data and pass
+-	  to callback.
+-
+-endif #ESPI_XEC_V2
+-
+-if ESPI_PERIPHERAL_8042_KBC
+-
+-config ESPI_PERIPHERAL_KBC_IBF_EVT_DATA
+-	bool "KBC event data format in IBF"
+-	help
+-	  Enable espi_evt_data_kbc format for encoding event in KBC IBF ISR
+-
+-config ESPI_PERIPHERAL_KBC_OBE_CBK
+-	bool "KBC OBE Callback"
+-	help
+-	  Enable KBC OBE callback from OBE ISR
+-
+-endif #ESPI_PERIPHERAL_8042_KBC
+diff --git a/drivers/espi/espi_saf_mchp_xec_v2.c b/drivers/espi/espi_saf_mchp_xec_v2.c
+new file mode 100644
+index 0000000000..aa7ea69058
+--- /dev/null
++++ b/drivers/espi/espi_saf_mchp_xec_v2.c
+@@ -0,0 +1,1175 @@
++/*
++ * Copyright (c) 2019 Intel Corporation
++ * Copyright (c) 2022 Microchip Technology Inc.
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++#define DT_DRV_COMPAT microchip_xec_espi_saf_v2
++
++#include <zephyr/kernel.h>
++#include <soc.h>
++#include <errno.h>
++#include <zephyr/drivers/clock_control/mchp_xec_clock_control.h>
++#include <zephyr/drivers/espi.h>
++#include <zephyr/drivers/espi_saf.h>
++#include <zephyr/drivers/interrupt_controller/intc_mchp_xec_ecia.h>
++#include <zephyr/dt-bindings/interrupt-controller/mchp-xec-ecia.h>
++#include <zephyr/logging/log.h>
++
++#include "espi_mchp_xec_v2.h"
++#include "espi_utils.h"
++LOG_MODULE_REGISTER(espi_saf, CONFIG_ESPI_LOG_LEVEL);
++
++/* common clock control device node for all Microchip XEC chips */
++#define MCHP_XEC_CLOCK_CONTROL_NODE	DT_NODELABEL(pcr)
++
++/* SAF EC Portal read/write flash access limited to 1-64 bytes */
++#define MAX_SAF_ECP_BUFFER_SIZE 64ul
++
++/* 1 second maximum for flash operations */
++#define MAX_SAF_FLASH_TIMEOUT 125000ul /* 1000ul */
++
++#define MAX_SAF_FLASH_TIMEOUT_MS 1000ul
++
++/* 64 bytes @ 24MHz quad is approx. 6 us */
++#define SAF_WAIT_INTERVAL 8
++
++/* After 8 wait intervals yield */
++#define SAF_YIELD_THRESHOLD 64
++
++/* Get QMSPI 0 encoded GIRQ information */
++#define XEC_QMSPI_ENC_GIRQ						\
++	DT_PROP_BY_IDX(DT_INST(0, microchip_xec_qmspi_ldma), girqs, 0)
++
++#define XEC_QMSPI_GIRQ MCHP_XEC_ECIA_GIRQ(XEC_QMSPI_ENC_GIRQ)
++#define XEC_QMSPI_GIRQ_POS MCHP_XEC_ECIA_GIRQ_POS(XEC_QMSPI_ENC_GIRQ)
++
++#define XEC_SAF_DONE_ENC_GIRQ DT_INST_PROP_BY_IDX(0, girqs, 0)
++#define XEC_SAF_ERR_ENC_GIRQ DT_INST_PROP_BY_IDX(0, girqs, 1)
++
++#define XEC_SAF_DONE_GIRQ MCHP_XEC_ECIA_GIRQ(XEC_SAF_DONE_ENC_GIRQ)
++#define XEC_SAF_DONE_GIRQ_POS MCHP_XEC_ECIA_GIRQ_POS(XEC_SAF_ERR_ENC_GIRQ)
++
++/*
++ * SAF configuration from Device Tree
++ * SAF controller register block base address
++ * QMSPI controller register block base address
++ * SAF communications register block base address
++ * Flash STATUS1 poll timeout in 32KHz periods
++ * Flash consecutive read timeout in units of 20 ns
++ * Delay before first Poll-1 command after suspend in 20 ns units
++ * Hold off suspend for this interval if erase or program in 32KHz periods.
++ * Add delay between Poll STATUS1 commands in 20 ns units.
++ */
++struct espi_saf_xec_config {
++	struct mchp_espi_saf * const saf_base;
++	struct qmspi_regs * const qmspi_base;
++	struct mchp_espi_saf_comm * const saf_comm_base;
++	struct espi_iom_regs * const iom_base;
++	void (*irq_config_func)(void);
++	uint32_t poll_timeout;
++	uint32_t consec_rd_timeout;
++	uint32_t sus_chk_delay;
++	uint16_t sus_rsm_interval;
++	uint16_t poll_interval;
++	uint8_t pcr_idx;
++	uint8_t pcr_pos;
++	uint8_t irq_info_size;
++	uint8_t rsvd1;
++	const struct espi_xec_irq_info *irq_info_list;
++};
++
++struct espi_saf_xec_data {
++	struct k_sem ecp_lock;
++	uint32_t hwstatus;
++	sys_slist_t callbacks;
++};
++
++/* EC portal local flash r/w buffer */
++static uint32_t slave_mem[MAX_SAF_ECP_BUFFER_SIZE];
++
++/*
++ * @brief eSPI SAF configuration
++ */
++
++static inline void mchp_saf_cs_descr_wr(struct mchp_espi_saf *regs, uint8_t cs,
++					uint32_t val)
++{
++	regs->SAF_CS_OP[cs].OP_DESCR = val;
++}
++
++static inline void mchp_saf_poll2_mask_wr(struct mchp_espi_saf *regs, uint8_t cs,
++					  uint16_t val)
++{
++	LOG_DBG("%s cs: %d mask %x", __func__, cs, val);
++	if (cs == 0) {
++		regs->SAF_CS0_CFG_P2M = val;
++	} else {
++		regs->SAF_CS1_CFG_P2M = val;
++	}
++}
++
++static inline void mchp_saf_cm_prefix_wr(struct mchp_espi_saf *regs, uint8_t cs,
++					 uint16_t val)
++{
++	if (cs == 0) {
++		regs->SAF_CS0_CM_PRF = val;
++	} else {
++		regs->SAF_CS1_CM_PRF = val;
++	}
++}
++
++/*
++ * Initialize SAF flash protection regions.
++ * SAF HW implements 17 protection regions.
++ * At least one protection region must be configured to allow
++ * EC access to the local flash through the EC Portal.
++ * Each protection region is composed of 4 32-bit registers
++ * Start bits[19:0] = bits[31:12] region start address (4KB boundaries)
++ * Limit bits[19:0] = bits[31:12] region limit address (4KB boundaries)
++ * Write protect b[7:0] = masters[7:0] allow write/erase. 1=allowed
++ * Read protetc b[7:0] = masters[7:0] allow read. 1=allowed
++ *
++ * This routine configures protection region 0 for full flash array
++ * address range and read-write-erase for all masters.
++ * This routine must be called AFTER the flash configuration size/limit and
++ * threshold registers have been programmed.
++ *
++ * POR default values:
++ * Start = 0x7ffff
++ * Limit = 0
++ * Write Prot = 0x01 Master 0 always granted write/erase
++ * Read Prot = 0x01 Master 0 always granted read
++ *
++ * Sample code configures PR[0]
++ * Start = 0
++ * Limit = 0x7ffff
++ * WR = 0xFF
++ * RD = 0xFF
++ */
++static void saf_protection_regions_init(struct mchp_espi_saf *regs)
++{
++	LOG_DBG("%s", __func__);
++
++	for (size_t n = 0; n < MCHP_ESPI_SAF_PR_MAX; n++) {
++		if (n == 0) {
++			regs->SAF_PROT_RG[0].START = 0U;
++			regs->SAF_PROT_RG[0].LIMIT =
++				regs->SAF_FL_CFG_SIZE_LIM >> 12;
++			regs->SAF_PROT_RG[0].WEBM = MCHP_SAF_MSTR_ALL;
++			regs->SAF_PROT_RG[0].RDBM = MCHP_SAF_MSTR_ALL;
++		} else {
++			regs->SAF_PROT_RG[n].START =
++				MCHP_SAF_PROT_RG_START_DFLT;
++			regs->SAF_PROT_RG[n].LIMIT =
++				MCHP_SAF_PROT_RG_LIMIT_DFLT;
++			regs->SAF_PROT_RG[n].WEBM = 0U;
++			regs->SAF_PROT_RG[n].RDBM = 0U;
++		}
++
++		LOG_DBG("PROT[%d] START %x", n, regs->SAF_PROT_RG[n].START);
++		LOG_DBG("PROT[%d] LIMIT %x", n, regs->SAF_PROT_RG[n].LIMIT);
++		LOG_DBG("PROT[%d] WEBM %x", n, regs->SAF_PROT_RG[n].WEBM);
++		LOG_DBG("PROT[%d] RDBM %x", n, regs->SAF_PROT_RG[n].RDBM);
++	}
++}
++
++static int qmspi_freq_div(uint32_t freqhz, uint32_t *fdiv)
++{
++	clock_control_subsys_t clkss =
++		(clock_control_subsys_t)(MCHP_XEC_PCR_CLK_PERIPH_FAST);
++	uint32_t clk = 0u;
++
++	if (!fdiv) {
++		return -EINVAL;
++	}
++
++	if (clock_control_get_rate(DEVICE_DT_GET(MCHP_XEC_CLOCK_CONTROL_NODE),
++				    (clock_control_subsys_t)clkss, &clk)) {
++		return -EIO;
++	}
++
++	*fdiv = 0u; /* maximum divider = 0x10000 */
++	if (freqhz) {
++		*fdiv = clk / freqhz;
++	}
++
++	return 0u;
++}
++
++static int qmspi_freq_div_from_mhz(uint32_t freqmhz, uint32_t *fdiv)
++{
++	uint32_t freqhz = freqmhz * 1000000u;
++
++	return qmspi_freq_div(freqhz, fdiv);
++}
++
++/*
++ * Take over and re-initialize QMSPI for use by SAF HW engine.
++ * When SAF is activated, QMSPI registers are controlled by SAF
++ * HW engine. CPU no longer has access to QMSPI registers.
++ * 1. Save QMSPI driver frequency divider, SPI signalling mode, and
++ *    chip select timing.
++ * 2. Put QMSPI controller in a known state by performing a soft reset.
++ * 3. Clear QMSPI GIRQ status
++ * 4. Configure QMSPI interface control for SAF.
++ * 5. Load flash device independent (generic) descriptors.
++ * 6. Enable transfer done interrupt in QMSPI
++ * 7. Enable QMSPI SAF mode
++ * 8. If user configuration overrides frequency, signalling mode,
++ *    or chip select timing derive user values.
++ * 9. Program QMSPI MODE and CSTIM registers with activate set.
++ */
++static int saf_qmspi_init(const struct espi_saf_xec_config *xcfg,
++			  const struct espi_saf_cfg *cfg)
++{
++	uint32_t qmode, qfdiv, cstim, n;
++	struct qmspi_regs * const qregs = xcfg->qmspi_base;
++	struct mchp_espi_saf * const regs = xcfg->saf_base;
++	const struct espi_saf_hw_cfg *hwcfg = &cfg->hwcfg;
++
++	qmode = qregs->MODE;
++	if (!(qmode & MCHP_QMSPI_M_ACTIVATE)) {
++		return -EAGAIN;
++	}
++
++	qmode = qregs->MODE & (MCHP_QMSPI_M_FDIV_MASK | MCHP_QMSPI_M_SIG_MASK);
++	cstim = qregs->CSTM;
++	qregs->MODE = MCHP_QMSPI_M_SRST;
++	qregs->STS = MCHP_QMSPI_STS_RW1C_MASK;
++
++	mchp_soc_ecia_girq_src_dis(XEC_QMSPI_GIRQ, XEC_QMSPI_GIRQ_POS);
++	mchp_soc_ecia_girq_src_clr(XEC_QMSPI_GIRQ, XEC_QMSPI_GIRQ_POS);
++
++	qregs->IFCTRL =
++		(MCHP_QMSPI_IFC_WP_OUT_HI | MCHP_QMSPI_IFC_WP_OUT_EN |
++		 MCHP_QMSPI_IFC_HOLD_OUT_HI | MCHP_QMSPI_IFC_HOLD_OUT_EN);
++
++	for (n = 0; n < MCHP_SAF_NUM_GENERIC_DESCR; n++) {
++		qregs->DESCR[MCHP_SAF_CM_EXIT_START_DESCR + n] =
++			hwcfg->generic_descr[n];
++	}
++
++	/* SAF HW uses QMSPI interrupt signal */
++	qregs->IEN = MCHP_QMSPI_IEN_XFR_DONE;
++
++	qmode |= (MCHP_QMSPI_M_SAF_DMA_MODE_EN | MCHP_QMSPI_M_CS0 |
++		  MCHP_QMSPI_M_ACTIVATE);
++
++	if (hwcfg->flags & MCHP_SAF_HW_CFG_FLAG_CPHA) {
++		qmode = (qmode & ~(MCHP_QMSPI_M_SIG_MASK)) |
++			((hwcfg->qmspi_cpha << MCHP_QMSPI_M_SIG_POS) &
++			 MCHP_QMSPI_M_SIG_MASK);
++	}
++
++
++	/* Copy QMSPI frequency divider into SAF CS0 and CS1 QMSPI frequency
++	 * dividers. SAF HW uses CS0/CS1 divider register fields to overwrite
++	 * QMSPI frequency divider in QMSPI.Mode register. Later we will update
++	 * SAF CS0/CS1 SPI frequency dividers based on flash configuration.
++	 */
++	qfdiv = (qmode & MCHP_QMSPI_M_FDIV_MASK) >> MCHP_QMSPI_M_FDIV_POS;
++	qfdiv = qfdiv | (qfdiv << 16); /* read and rest clock dividers */
++	regs->SAF_CLKDIV_CS0 = qfdiv;
++	regs->SAF_CLKDIV_CS1 = qfdiv;
++
++	if (hwcfg->flags & MCHP_SAF_HW_CFG_FLAG_CSTM) {
++		cstim = hwcfg->qmspi_cs_timing;
++	}
++
++	/* MEC172x SAF uses TX LDMA channel 0 in non-descriptor mode.
++	 * SAF HW writes QMSPI.Control and TX LDMA channel 0 registers
++	 * to transmit opcode, address, and data. We configure must
++	 * configure TX LDMA channel 0 control register. We believe SAF
++	 * HW will set bit[6] to 1.
++	 */
++	qregs->LDTX[0].CTRL = MCHP_QMSPI_LDC_EN | MCHP_QMSPI_LDC_RS_EN | MCHP_QMSPI_LDC_ASZ_4;
++
++	qmode |= MCHP_QMSPI_M_LDMA_RX_EN | MCHP_QMSPI_M_LDMA_TX_EN;
++
++	qregs->MODE = qmode;
++	qregs->CSTM = cstim;
++
++	return 0;
++}
++
++/*
++ * Registers at offsets:
++ * SAF Poll timeout @ 0x194.  Hard coded to 0x28000. Default value = 0.
++ *	recommended value = 0x28000 32KHz clocks (5 seconds). b[17:0]
++ * SAF Poll interval @ 0x198.  Hard coded to 0
++ *	Default value = 0. Recommended = 0. b[15:0]
++ * SAF Suspend/Resume Interval @ 0x19c.  Hard coded to 0x8
++ *	Default value = 0x01. Min time erase/prog in 32KHz units.
++ * SAF Consecutive Read Timeout @ 0x1a0. Hard coded to 0x2. b[15:0]
++ *	Units of MCLK. Recommend < 20us. b[19:0]
++ * SAF Suspend Check Delay @ 0x1ac. Not touched.
++ *	Default = 0. Recommend = 20us. Units = MCLK. b[19:0]
++ */
++static void saf_flash_timing_init(struct mchp_espi_saf * const regs,
++				  const struct espi_saf_xec_config *cfg)
++{
++	LOG_DBG("%s\n", __func__);
++	regs->SAF_POLL_TMOUT = cfg->poll_timeout;
++	regs->SAF_POLL_INTRVL = cfg->poll_interval;
++	regs->SAF_SUS_RSM_INTRVL = cfg->sus_rsm_interval;
++	regs->SAF_CONSEC_RD_TMOUT = cfg->consec_rd_timeout;
++	regs->SAF_SUS_CHK_DLY = cfg->sus_chk_delay;
++	LOG_DBG("SAF_POLL_TMOUT %x\n", regs->SAF_POLL_TMOUT);
++	LOG_DBG("SAF_POLL_INTRVL %x\n", regs->SAF_POLL_INTRVL);
++	LOG_DBG("SAF_SUS_RSM_INTRVL %x\n", regs->SAF_SUS_RSM_INTRVL);
++	LOG_DBG("SAF_CONSEC_RD_TMOUT %x\n", regs->SAF_CONSEC_RD_TMOUT);
++	LOG_DBG("SAF_SUS_CHK_DLY %x\n", regs->SAF_SUS_CHK_DLY);
++}
++
++/*
++ * Disable DnX bypass feature.
++ */
++static void saf_dnx_bypass_init(struct mchp_espi_saf * const regs)
++{
++	regs->SAF_DNX_PROT_BYP = 0;
++	regs->SAF_DNX_PROT_BYP = 0xffffffff;
++}
++
++/*
++ * Bitmap of flash erase size from 1KB up to 128KB.
++ * eSPI SAF specification requires 4KB erase support.
++ * MCHP SAF supports 4KB, 32KB, and 64KB.
++ * Only report 32KB and 64KB to Host if supported by both
++ * flash devices.
++ */
++static int saf_init_erase_block_size(const struct device *dev, const struct espi_saf_cfg *cfg)
++{
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct espi_iom_regs * const espi_iom = xcfg->iom_base;
++	struct espi_saf_flash_cfg *fcfg = cfg->flash_cfgs;
++	uint32_t opb = fcfg->opb;
++	uint8_t erase_bitmap = MCHP_ESPI_SERASE_SZ_4K;
++
++	LOG_DBG("%s\n", __func__);
++
++	if (cfg->nflash_devices > 1) {
++		fcfg++;
++		opb &= fcfg->opb;
++	}
++
++	if ((opb & MCHP_SAF_CS_OPB_ER0_MASK) == 0) {
++		/* One or both do not support 4KB erase! */
++		return -EINVAL;
++	}
++
++	if (opb & MCHP_SAF_CS_OPB_ER1_MASK) {
++		erase_bitmap |= MCHP_ESPI_SERASE_SZ_32K;
++	}
++
++	if (opb & MCHP_SAF_CS_OPB_ER2_MASK) {
++		erase_bitmap |= MCHP_ESPI_SERASE_SZ_64K;
++	}
++
++	espi_iom->SAFEBS = erase_bitmap;
++
++	return 0;
++}
++
++/*
++ * Set the continuous mode prefix and 4-byte address mode bits
++ * based upon the flash configuration information.
++ * Updates:
++ * SAF Flash Config Poll2 Mask @ 0x1A4
++ * SAF Flash Config Special Mode @ 0x1B0
++ * SAF Flash Misc Config @ 0x38
++ */
++static void saf_flash_misc_cfg(struct mchp_espi_saf * const regs, uint8_t cs,
++			       const struct espi_saf_flash_cfg *fcfg)
++{
++	uint32_t d, v;
++
++	d = regs->SAF_FL_CFG_MISC;
++
++	v = MCHP_SAF_FL_CFG_MISC_CS0_CPE;
++	if (cs) {
++		v = MCHP_SAF_FL_CFG_MISC_CS1_CPE;
++	}
++
++	/* Does this flash device require a prefix for continuous mode? */
++	if (fcfg->cont_prefix != 0) {
++		d |= v;
++	} else {
++		d &= ~v;
++	}
++
++	v = MCHP_SAF_FL_CFG_MISC_CS0_4BM;
++	if (cs) {
++		v = MCHP_SAF_FL_CFG_MISC_CS1_4BM;
++	}
++
++	/* Use 32-bit addressing for this flash device? */
++	if (fcfg->flags & MCHP_FLASH_FLAG_ADDR32) {
++		d |= v;
++	} else {
++		d &= ~v;
++	}
++
++	regs->SAF_FL_CFG_MISC = d;
++	LOG_DBG("%s SAF_FL_CFG_MISC: %x", __func__, d);
++}
++
++static void saf_flash_pd_cfg(struct mchp_espi_saf * const regs, uint8_t cs,
++			     const struct espi_saf_flash_cfg *fcfg)
++{
++	uint32_t pdval = 0u;
++	uint32_t msk = 0u;
++
++	if (cs == 0) {
++		msk = BIT(SAF_PWRDN_CTRL_CS0_PD_EN_POS) | BIT(SAF_PWRDN_CTRL_CS0_PD_EN_POS);
++		if (fcfg->flags & MCHP_FLASH_FLAG_V2_PD_CS0_EN) {
++			pdval |= BIT(SAF_PWRDN_CTRL_CS0_PD_EN_POS);
++		}
++		if (fcfg->flags & MCHP_FLASH_FLAG_V2_PD_CS0_EC_WK_EN) {
++			pdval |= BIT(SAF_PWRDN_CTRL_CS0_WPA_EN_POS);
++		}
++	} else {
++		msk = BIT(SAF_PWRDN_CTRL_CS1_PD_EN_POS) | BIT(SAF_PWRDN_CTRL_CS1_PD_EN_POS);
++		if (fcfg->flags & MCHP_FLASH_FLAG_V2_PD_CS1_EN) {
++			pdval |= BIT(SAF_PWRDN_CTRL_CS1_PD_EN_POS);
++		}
++		if (fcfg->flags & MCHP_FLASH_FLAG_V2_PD_CS1_EC_WK_EN) {
++			pdval |= BIT(SAF_PWRDN_CTRL_CS1_PD_EN_POS);
++		}
++	}
++
++	regs->SAF_PWRDN_CTRL = (regs->SAF_PWRDN_CTRL & ~msk) | pdval;
++}
++
++/* Configure SAF per chip select QMSPI clock dividers.
++ * SAF HW implements two QMSP clock divider registers per chip select:
++ * Each divider register is composed of two 16-bit fields:
++ *   b[15:0] = QMSPI clock divider for SPI read
++ *   b[31:16] = QMSPI clock divider for all other SPI commands
++ */
++static int saf_flash_freq_cfg(struct mchp_espi_saf * const regs, uint8_t cs,
++			       const struct espi_saf_flash_cfg *fcfg)
++{
++	uint32_t fmhz, fdiv, saf_qclk;
++
++	if (cs == 0) {
++		saf_qclk = regs->SAF_CLKDIV_CS0;
++	} else {
++		saf_qclk = regs->SAF_CLKDIV_CS1;
++	}
++
++	fmhz = fcfg->rd_freq_mhz;
++	if (fmhz) {
++		fdiv = 0u;
++		if (qmspi_freq_div_from_mhz(fmhz, &fdiv)) {
++			LOG_ERR("%s SAF CLKDIV CS0 bad freq MHz %u",
++				__func__, fmhz);
++			return -EIO;
++		}
++		if (fdiv) {
++			saf_qclk = (saf_qclk & ~SAF_CLKDIV_CS_MSK0) |
++				   (fdiv & SAF_CLKDIV_CS_MSK0);
++		}
++	}
++
++	fmhz = fcfg->freq_mhz;
++	if (fmhz) {
++		fdiv = 0u;
++		if (qmspi_freq_div_from_mhz(fmhz, &fdiv)) {
++			LOG_ERR("%s SAF CLKDIV CS1 bad freq MHz %u",
++				__func__, fmhz);
++			return -EIO;
++		}
++		if (fdiv) {
++			saf_qclk &= ~(SAF_CLKDIV_CS_MSK0 << 16);
++			saf_qclk |= (fdiv & SAF_CLKDIV_CS_MSK0) << 16;
++		}
++	}
++
++	if (cs == 0) {
++		regs->SAF_CLKDIV_CS0 = saf_qclk;
++	} else {
++		regs->SAF_CLKDIV_CS1 = saf_qclk;
++	}
++
++	return 0;
++}
++
++/*
++ * Program flash device specific SAF and QMSPI registers.
++ *
++ * CS0 OpA @ 0x4c or CS1 OpA @ 0x5C
++ * CS0 OpB @ 0x50 or CS1 OpB @ 0x60
++ * CS0 OpC @ 0x54 or CS1 OpC @ 0x64
++ * Poll 2 Mask @ 0x1a4
++ * Continuous Prefix @ 0x1b0
++ * CS0: QMSPI descriptors 0-5 or CS1 QMSPI descriptors 6-11
++ * CS0 Descrs @ 0x58 or CS1 Descrs @ 0x68
++ * SAF CS0 QMSPI frequency dividers (read/all other) commands
++ * SAF CS1 QMSPI frequency dividers (read/all other) commands
++ */
++static int saf_flash_cfg(const struct device *dev,
++			 const struct espi_saf_flash_cfg *fcfg, uint8_t cs)
++{
++	uint32_t d, did;
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct mchp_espi_saf * const regs = xcfg->saf_base;
++	struct qmspi_regs * const qregs = xcfg->qmspi_base;
++
++	LOG_DBG("%s cs=%u", __func__, cs);
++
++	regs->SAF_CS_OP[cs].OPA = fcfg->opa;
++	regs->SAF_CS_OP[cs].OPB = fcfg->opb;
++	regs->SAF_CS_OP[cs].OPC = fcfg->opc;
++	regs->SAF_CS_OP[cs].OP_DESCR = (uint32_t)fcfg->cs_cfg_descr_ids;
++
++	did = MCHP_SAF_QMSPI_CS0_START_DESCR;
++	if (cs != 0) {
++		did = MCHP_SAF_QMSPI_CS1_START_DESCR;
++	}
++
++	for (size_t i = 0; i < MCHP_SAF_QMSPI_NUM_FLASH_DESCR; i++) {
++		d = fcfg->descr[i] & ~(MCHP_QMSPI_C_NEXT_DESCR_MASK);
++		d |= (((did + 1) << MCHP_QMSPI_C_NEXT_DESCR_POS) &
++		      MCHP_QMSPI_C_NEXT_DESCR_MASK);
++		qregs->DESCR[did++] = d;
++	}
++
++	mchp_saf_poll2_mask_wr(regs, cs, fcfg->poll2_mask);
++	mchp_saf_cm_prefix_wr(regs, cs, fcfg->cont_prefix);
++	saf_flash_misc_cfg(regs, cs, fcfg);
++	saf_flash_pd_cfg(regs, cs, fcfg);
++
++	return saf_flash_freq_cfg(regs, cs, fcfg);
++}
++
++static const uint32_t tag_map_dflt[MCHP_ESPI_SAF_TAGMAP_MAX] = {
++	MCHP_SAF_TAG_MAP0_DFLT, MCHP_SAF_TAG_MAP1_DFLT, MCHP_SAF_TAG_MAP2_DFLT
++};
++
++static void saf_tagmap_init(struct mchp_espi_saf * const regs,
++			    const struct espi_saf_cfg *cfg)
++{
++	const struct espi_saf_hw_cfg *hwcfg = &cfg->hwcfg;
++
++	for (int i = 0; i < MCHP_ESPI_SAF_TAGMAP_MAX; i++) {
++		if (hwcfg->tag_map[i] & MCHP_SAF_HW_CFG_TAGMAP_USE) {
++			regs->SAF_TAG_MAP[i] = hwcfg->tag_map[i];
++		} else {
++			regs->SAF_TAG_MAP[i] = tag_map_dflt[i];
++		}
++	}
++
++	LOG_DBG("SAF TAG0 %x", regs->SAF_TAG_MAP[0]);
++	LOG_DBG("SAF TAG1 %x", regs->SAF_TAG_MAP[1]);
++	LOG_DBG("SAF TAG2 %x", regs->SAF_TAG_MAP[2]);
++}
++
++#define SAF_QSPI_LDMA_CTRL						\
++	(MCHP_QMSPI_LDC_EN | MCHP_QMSPI_LDC_RS_EN |			\
++	 MCHP_QMSPI_LDC_ASZ_4)
++
++static void saf_qmspi_ldma_cfg(const struct espi_saf_xec_config * const xcfg)
++{
++	struct qmspi_regs * const qregs = xcfg->qmspi_base;
++	uint32_t qmode = qregs->MODE;
++	uint32_t n, temp, chan;
++
++	qregs->MODE = qmode & ~(MCHP_QMSPI_M_ACTIVATE);
++
++	for (n = 0u; n < MCHP_QMSPI_MAX_DESCR; n++) {
++		temp = qregs->DESCR[n];
++		if (temp & MCHP_QMSPI_C_TX_MASK) {
++			chan = (temp & MCHP_QMSPI_C_TX_DMA_MASK) >> MCHP_QMSPI_C_TX_DMA_POS;
++			if (chan) { /* zero is disabled */
++				chan--; /* register array index starts at 0 */
++				qregs->LDMA_TX_DESCR_BM |= BIT(n);
++				qregs->LDTX[chan].CTRL = SAF_QSPI_LDMA_CTRL;
++			}
++		}
++		if (temp & MCHP_QMSPI_C_RX_EN) {
++			chan = (temp & MCHP_QMSPI_C_RX_DMA_MASK) >> MCHP_QMSPI_C_RX_DMA_POS;
++			if (chan) {
++				chan--;
++				qregs->LDMA_RX_DESCR_BM |= BIT(n);
++				qregs->LDRX[chan].CTRL = SAF_QSPI_LDMA_CTRL;
++			}
++		}
++	}
++
++	qregs->MODE = qmode;
++}
++
++/*
++ * Configure SAF and QMSPI for SAF operation based upon the
++ * number and characteristics of local SPI flash devices.
++ * NOTE: SAF is configured but not activated. SAF should be
++ * activated only when eSPI master sends Flash Channel enable
++ * message with MAF/SAF select flag.
++ */
++static int espi_saf_xec_configuration(const struct device *dev,
++				      const struct espi_saf_cfg *cfg)
++{
++	int ret = 0;
++	uint32_t totalsz = 0;
++	uint32_t u = 0;
++
++	LOG_DBG("%s", __func__);
++
++	if ((dev == NULL) || (cfg == NULL)) {
++		return -EINVAL;
++	}
++
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct mchp_espi_saf * const regs = xcfg->saf_base;
++	struct mchp_espi_saf_comm * const comm_regs = xcfg->saf_comm_base;
++	const struct espi_saf_hw_cfg *hwcfg = &cfg->hwcfg;
++	const struct espi_saf_flash_cfg *fcfg = cfg->flash_cfgs;
++
++	if ((fcfg == NULL) || (cfg->nflash_devices == 0U) ||
++	    (cfg->nflash_devices > MCHP_SAF_MAX_FLASH_DEVICES)) {
++		return -EINVAL;
++	}
++
++	if (regs->SAF_FL_CFG_MISC & MCHP_SAF_FL_CFG_MISC_SAF_EN) {
++		return -EAGAIN;
++	}
++
++	saf_qmspi_init(xcfg, cfg);
++
++	regs->SAF_CS0_CFG_P2M = 0;
++	regs->SAF_CS1_CFG_P2M = 0;
++
++	regs->SAF_FL_CFG_GEN_DESCR = MCHP_SAF_FL_CFG_GEN_DESCR_STD;
++
++	/* global flash power down activity counter and interval time */
++	regs->SAF_AC_RELOAD = hwcfg->flash_pd_timeout;
++	regs->SAF_FL_PWR_TMOUT = hwcfg->flash_pd_min_interval;
++
++	/* flash device connected to CS0 required */
++	totalsz = fcfg->flashsz;
++	regs->SAF_FL_CFG_THRH = totalsz;
++	ret = saf_flash_cfg(dev, fcfg, 0);
++	if (ret) {
++		return ret;
++	}
++
++	/* optional second flash device connected to CS1 */
++	if (cfg->nflash_devices > 1) {
++		fcfg++;
++		totalsz += fcfg->flashsz;
++	}
++	/* Program CS1 configuration (same as CS0 if only one device) */
++	ret = saf_flash_cfg(dev, fcfg, 1);
++	if (ret) {
++		return ret;
++	}
++
++	if (totalsz == 0) {
++		return -EAGAIN;
++	}
++
++	regs->SAF_FL_CFG_SIZE_LIM = totalsz - 1;
++
++	LOG_DBG("SAF_FL_CFG_THRH = %x SAF_FL_CFG_SIZE_LIM = %x",
++		regs->SAF_FL_CFG_THRH, regs->SAF_FL_CFG_SIZE_LIM);
++
++	saf_tagmap_init(regs, cfg);
++
++	saf_protection_regions_init(regs);
++
++	saf_dnx_bypass_init(regs);
++
++	saf_flash_timing_init(regs, xcfg);
++
++	ret = saf_init_erase_block_size(dev, cfg);
++	if (ret != 0) {
++		LOG_ERR("SAF Config bad flash erase config");
++		return ret;
++	}
++
++	/* Default or expedited prefetch? */
++	u = MCHP_SAF_FL_CFG_MISC_PFOE_DFLT;
++	if (cfg->hwcfg.flags & MCHP_SAF_HW_CFG_FLAG_PFEXP) {
++		u = MCHP_SAF_FL_CFG_MISC_PFOE_EXP;
++	}
++
++	regs->SAF_FL_CFG_MISC =
++		(regs->SAF_FL_CFG_MISC & ~(MCHP_SAF_FL_CFG_MISC_PFOE_MASK)) | u;
++
++	/* enable prefetch ? */
++	if (cfg->hwcfg.flags & MCHP_SAF_HW_CFG_FLAG_PFEN) {
++		comm_regs->SAF_COMM_MODE |= MCHP_SAF_COMM_MODE_PF_EN;
++	} else {
++		comm_regs->SAF_COMM_MODE &= ~(MCHP_SAF_COMM_MODE_PF_EN);
++	}
++
++	LOG_DBG("%s SAF_FL_CFG_MISC: %x", __func__, regs->SAF_FL_CFG_MISC);
++	LOG_DBG("%s Aft MCHP_SAF_COMM_MODE_REG: %x", __func__,
++		comm_regs->SAF_COMM_MODE);
++
++	saf_qmspi_ldma_cfg(xcfg);
++
++	return 0;
++}
++
++static int espi_saf_xec_set_pr(const struct device *dev,
++			       const struct espi_saf_protection *pr)
++{
++	if ((dev == NULL) || (pr == NULL)) {
++		return -EINVAL;
++	}
++
++	if (pr->nregions >= MCHP_ESPI_SAF_PR_MAX) {
++		return -EINVAL;
++	}
++
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct mchp_espi_saf * const regs = xcfg->saf_base;
++
++	if (regs->SAF_FL_CFG_MISC & MCHP_SAF_FL_CFG_MISC_SAF_EN) {
++		return -EAGAIN;
++	}
++
++	const struct espi_saf_pr *preg = pr->pregions;
++	size_t n = pr->nregions;
++
++	while (n--) {
++		uint8_t regnum = preg->pr_num;
++
++		if (regnum >= MCHP_ESPI_SAF_PR_MAX) {
++			return -EINVAL;
++		}
++
++		/* NOTE: If previously locked writes have no effect */
++		if (preg->flags & MCHP_SAF_PR_FLAG_ENABLE) {
++			regs->SAF_PROT_RG[regnum].START = preg->start >> 12U;
++			regs->SAF_PROT_RG[regnum].LIMIT =
++				(preg->start + preg->size - 1U) >> 12U;
++			regs->SAF_PROT_RG[regnum].WEBM = preg->master_bm_we;
++			regs->SAF_PROT_RG[regnum].RDBM = preg->master_bm_rd;
++		} else {
++			regs->SAF_PROT_RG[regnum].START = 0x7FFFFU;
++			regs->SAF_PROT_RG[regnum].LIMIT = 0U;
++			regs->SAF_PROT_RG[regnum].WEBM = 0U;
++			regs->SAF_PROT_RG[regnum].RDBM = 0U;
++		}
++
++		if (preg->flags & MCHP_SAF_PR_FLAG_LOCK) {
++			regs->SAF_PROT_LOCK |= (1UL << regnum);
++		}
++
++		preg++;
++	}
++
++	return 0;
++}
++
++static bool espi_saf_xec_channel_ready(const struct device *dev)
++{
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct mchp_espi_saf * const regs = xcfg->saf_base;
++
++	if (regs->SAF_FL_CFG_MISC & MCHP_SAF_FL_CFG_MISC_SAF_EN) {
++		return true;
++	}
++
++	return false;
++}
++
++/*
++ * MCHP SAF hardware supports a range of flash block erase
++ * sizes from 1KB to 128KB. The eSPI Host specification requires
++ * 4KB must be supported. The MCHP SAF QMSPI HW interface only
++ * supported three erase sizes. Most SPI flash devices chosen for
++ * SAF support 4KB, 32KB, and 64KB.
++ * Get flash erase sizes driver has configured from eSPI capabilities
++ * registers. We assume driver flash tables have opcodes to match
++ * capabilities configuration.
++ * Check requested erase size is supported.
++ */
++struct erase_size_encoding {
++	uint8_t hwbitpos;
++	uint8_t encoding;
++};
++
++static const struct erase_size_encoding ersz_enc[] = {
++	{ MCHP_ESPI_SERASE_SZ_4K_BITPOS, 0 },
++	{ MCHP_ESPI_SERASE_SZ_32K_BITPOS, 1 },
++	{ MCHP_ESPI_SERASE_SZ_64K_BITPOS, 2 }
++};
++
++#define SAF_ERASE_ENCODING_MAX_ENTRY                                           \
++	(sizeof(ersz_enc) / sizeof(struct erase_size_encoding))
++
++static uint32_t get_erase_size_encoding(const struct device *dev, uint32_t erase_size)
++{
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct espi_iom_regs * const espi_iom = xcfg->iom_base;
++	uint8_t supsz = espi_iom->SAFEBS;
++
++	LOG_DBG("%s\n", __func__);
++	for (int i = 0; i < SAF_ERASE_ENCODING_MAX_ENTRY; i++) {
++		uint32_t sz = MCHP_ESPI_SERASE_SZ(ersz_enc[i].hwbitpos);
++
++		if ((sz == erase_size) &&
++		    (supsz & (1 << ersz_enc[i].hwbitpos))) {
++			return ersz_enc[i].encoding;
++		}
++	}
++
++	return 0xffffffffU;
++}
++
++static int check_ecp_access_size(uint32_t reqlen)
++{
++	if ((reqlen < MCHP_SAF_ECP_CMD_RW_LEN_MIN) ||
++	    (reqlen > MCHP_SAF_ECP_CMD_RW_LEN_MAX)) {
++		return -EAGAIN;
++	}
++
++	return 0;
++}
++
++/*
++ * EC access to SAF atttached flash array
++ * Allowed commands:
++ * MCHP_SAF_ECP_CMD_READ(0x0), MCHP_SAF_ECP_CMD_WRITE(0x01),
++ * MCHP_SAF_ECP_CMD_ERASE(0x02), MCHP_SAF_ECP_CMD_RPMC_OP1_CS0(0x03),
++ * MCHP_SAF_ECP_CMD_RPMC_OP2_CS0(0x04), MCHP_SAF_ECP_CMD_RPMC_OP1_CS1(0x83),
++ * MCHP_SAF_ECP_CMD_RPMC_OP2_CS1(0x84)
++ */
++static int saf_ecp_access(const struct device *dev,
++			  struct espi_saf_packet *pckt, uint8_t cmd)
++{
++	uint32_t scmd, err_mask, n;
++	int rc, counter;
++	struct espi_saf_xec_data *xdat = dev->data;
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct mchp_espi_saf * const regs = xcfg->saf_base;
++	const struct espi_xec_irq_info *safirq = &xcfg->irq_info_list[0];
++
++	counter = 0;
++	err_mask = MCHP_SAF_ECP_STS_ERR_MASK;
++
++	LOG_DBG("%s", __func__);
++
++	if (!(regs->SAF_FL_CFG_MISC & MCHP_SAF_FL_CFG_MISC_SAF_EN)) {
++		LOG_ERR("SAF is disabled");
++		return -EIO;
++	}
++
++	n = regs->SAF_ECP_BUSY;
++	if (n & (MCHP_SAF_ECP_EC0_BUSY | MCHP_SAF_ECP_EC1_BUSY)) {
++		LOG_ERR("SAF EC Portal is busy: 0x%08x", n);
++		return -EBUSY;
++	}
++
++	switch (cmd) {
++	case MCHP_SAF_ECP_CMD_READ:
++	case MCHP_SAF_ECP_CMD_WRITE:
++		rc = check_ecp_access_size(pckt->len);
++		if (rc) {
++			LOG_ERR("SAF EC Portal size out of bounds");
++			return rc;
++		}
++
++		if (cmd == MCHP_SAF_ECP_CMD_WRITE) {
++			memcpy(slave_mem, pckt->buf, pckt->len);
++		}
++
++		n = pckt->len;
++		break;
++	case MCHP_SAF_ECP_CMD_ERASE:
++		n = get_erase_size_encoding(dev, pckt->len);
++		if (n == UINT32_MAX) {
++			LOG_ERR("SAF EC Portal unsupported erase size");
++			return -EAGAIN;
++		}
++		break;
++	case MCHP_SAF_ECP_CMD_RPMC_OP1_CS0:
++	case MCHP_SAF_ECP_CMD_RPMC_OP2_CS0:
++		rc = check_ecp_access_size(pckt->len);
++		if (rc) {
++			LOG_ERR("SAF EC Portal RPMC size out of bounds");
++			return rc;
++		}
++		if (!(regs->SAF_CFG_CS0_OPD & SAF_CFG_CS_OPC_RPMC_OP2_MSK)) {
++			LOG_ERR("SAF CS0 RPMC opcode not configured");
++			return -EIO;
++		}
++		n = pckt->len;
++		break;
++	case MCHP_SAF_ECP_CMD_RPMC_OP1_CS1:
++	case MCHP_SAF_ECP_CMD_RPMC_OP2_CS1:
++		rc = check_ecp_access_size(pckt->len);
++		if (rc) {
++			LOG_ERR("SAF EC Portal RPMC size out of bounds");
++			return rc;
++		}
++		if (!(regs->SAF_CFG_CS1_OPD & SAF_CFG_CS_OPC_RPMC_OP2_MSK)) {
++			LOG_ERR("SAF CS1 RPMC opcode not configured");
++			return -EIO;
++		}
++		n = pckt->len;
++		break;
++	default:
++		LOG_ERR("SAF EC Portal bad cmd");
++		return -EAGAIN;
++	}
++
++	LOG_DBG("%s params val done", __func__);
++
++	regs->SAF_ECP_INTEN = 0;
++	regs->SAF_ECP_STATUS = MCHP_SAF_ECP_STS_MASK;
++	mchp_xec_ecia_girq_src_clr(safirq->gid, safirq->gpos);
++
++	regs->SAF_ECP_INTEN = BIT(MCHP_SAF_ECP_INTEN_DONE_POS);
++
++	regs->SAF_ECP_FLAR = pckt->flash_addr;
++	regs->SAF_ECP_BFAR = (uint32_t)&slave_mem[0];
++
++	scmd = MCHP_SAF_ECP_CMD_PUT_FLASH_NP |
++		((uint32_t)cmd << MCHP_SAF_ECP_CMD_CTYPE_POS) |
++		((n << MCHP_SAF_ECP_CMD_LEN_POS) & MCHP_SAF_ECP_CMD_LEN_MASK);
++
++	LOG_DBG("%s ECP_FLAR=0x%x", __func__, regs->SAF_ECP_FLAR);
++	LOG_DBG("%s ECP_BFAR=0x%x", __func__, regs->SAF_ECP_BFAR);
++	LOG_DBG("%s ECP_CMD=0x%x", __func__, scmd);
++
++	regs->SAF_ECP_CMD = scmd;
++	regs->SAF_ECP_START = MCHP_SAF_ECP_START;
++
++	rc = k_sem_take(&xdat->ecp_lock, K_MSEC(MAX_SAF_FLASH_TIMEOUT_MS));
++	if (rc == -EAGAIN) {
++		LOG_ERR("%s timeout", __func__);
++		return -ETIMEDOUT;
++	}
++
++	LOG_DBG("%s wake on semaphore", __func__);
++
++	n = regs->SAF_ECP_STATUS;
++	/* clear hardware status and check for errors */
++	if (n & err_mask) {
++		regs->SAF_ECP_STATUS = n;
++		LOG_ERR("%s error %x", __func__, n);
++		return -EIO;
++	}
++
++	if (cmd == MCHP_SAF_ECP_CMD_READ) {
++		memcpy(pckt->buf, slave_mem, pckt->len);
++	}
++
++	return rc;
++}
++
++/* Flash read using SAF EC Portal */
++static int saf_xec_flash_read(const struct device *dev,
++			      struct espi_saf_packet *pckt)
++{
++	LOG_DBG("%s", __func__);
++	return saf_ecp_access(dev, pckt, MCHP_SAF_ECP_CMD_READ);
++}
++
++/* Flash write using SAF EC Portal */
++static int saf_xec_flash_write(const struct device *dev,
++			       struct espi_saf_packet *pckt)
++{
++	return saf_ecp_access(dev, pckt, MCHP_SAF_ECP_CMD_WRITE);
++}
++
++/* Flash erase using SAF EC Portal */
++static int saf_xec_flash_erase(const struct device *dev,
++			       struct espi_saf_packet *pckt)
++{
++	return saf_ecp_access(dev, pckt, MCHP_SAF_ECP_CMD_ERASE);
++}
++
++static int espi_saf_xec_manage_callback(const struct device *dev,
++					struct espi_callback *callback,
++					bool set)
++{
++	struct espi_saf_xec_data *data = dev->data;
++
++	return espi_manage_callback(&data->callbacks, callback, set);
++}
++
++static int espi_saf_xec_activate(const struct device *dev)
++{
++	if (dev == NULL) {
++		return -EINVAL;
++	}
++
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct mchp_espi_saf * const regs = xcfg->saf_base;
++	const struct espi_xec_irq_info *safirq = &xcfg->irq_info_list[1];
++
++	regs->SAF_ESPI_MON_STATUS = MCHP_SAF_ESPI_MON_STS_IEN_MSK;
++	mchp_xec_ecia_girq_src_clr(safirq->gid, safirq->gpos);
++
++	regs->SAF_FL_CFG_MISC |= MCHP_SAF_FL_CFG_MISC_SAF_EN;
++	regs->SAF_ESPI_MON_INTEN = (BIT(MCHP_SAF_ESPI_MON_STS_IEN_TMOUT_POS) |
++				    BIT(MCHP_SAF_ESPI_MON_STS_IEN_OOR_POS) |
++				    BIT(MCHP_SAF_ESPI_MON_STS_IEN_AV_POS) |
++				    BIT(MCHP_SAF_ESPI_MON_STS_IEN_BND_4K_POS) |
++				    BIT(MCHP_SAF_ESPI_MON_STS_IEN_ERSZ_POS));
++
++	k_busy_wait(1000); /* TODO FIXME get estimate of time interval */
++
++	return 0;
++}
++
++static void espi_saf_done_isr(const struct device *dev)
++{
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct espi_saf_xec_data *data = dev->data;
++	struct mchp_espi_saf * const regs = xcfg->saf_base;
++	const struct espi_xec_irq_info *safirq = &xcfg->irq_info_list[0];
++	uint32_t ecp_status = regs->SAF_ECP_STATUS;
++	struct espi_event evt = { .evt_type = ESPI_BUS_SAF_NOTIFICATION,
++				  .evt_details = BIT(0),
++				  .evt_data = ecp_status };
++
++	regs->SAF_ECP_INTEN = 0u;
++	regs->SAF_ECP_STATUS = BIT(MCHP_SAF_ECP_STS_DONE_POS);
++	mchp_xec_ecia_girq_src_clr(safirq->gid, safirq->gpos);
++
++	data->hwstatus = ecp_status;
++
++	LOG_DBG("SAF Done ISR: status=0x%x", ecp_status);
++
++	espi_send_callbacks(&data->callbacks, dev, evt);
++
++	k_sem_give(&data->ecp_lock);
++}
++
++static void espi_saf_err_isr(const struct device *dev)
++{
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct espi_saf_xec_data *data = dev->data;
++	struct mchp_espi_saf * const regs = xcfg->saf_base;
++	const struct espi_xec_irq_info *safirq = &xcfg->irq_info_list[1];
++	uint32_t mon_status = regs->SAF_ESPI_MON_STATUS;
++	struct espi_event evt = { .evt_type = ESPI_BUS_PERIPHERAL_NOTIFICATION,
++				  .evt_details = BIT(7),
++				  .evt_data = mon_status };
++
++	regs->SAF_ESPI_MON_STATUS = mon_status;
++	mchp_xec_ecia_girq_src_clr(safirq->gid, safirq->gpos);
++
++	data->hwstatus = mon_status;
++	espi_send_callbacks(&data->callbacks, dev, evt);
++}
++
++static const struct espi_saf_driver_api espi_saf_xec_driver_api = {
++	.config = espi_saf_xec_configuration,
++	.set_protection_regions = espi_saf_xec_set_pr,
++	.activate = espi_saf_xec_activate,
++	.get_channel_status = espi_saf_xec_channel_ready,
++	.flash_read = saf_xec_flash_read,
++	.flash_write = saf_xec_flash_write,
++	.flash_erase = saf_xec_flash_erase,
++	.manage_callback = espi_saf_xec_manage_callback,
++};
++
++static int espi_saf_xec_init(const struct device *dev)
++{
++	const struct espi_saf_xec_config * const xcfg = dev->config;
++	struct espi_saf_xec_data * const data = dev->data;
++	struct espi_iom_regs * const espi_iom = xcfg->iom_base;
++
++	/* ungate SAF clocks by disabling PCR sleep enable */
++	z_mchp_xec_pcr_periph_sleep(xcfg->pcr_idx, xcfg->pcr_pos, 0);
++
++	/* Configure the channels and its capabilities based on build config */
++	espi_iom->CAP0 |= MCHP_ESPI_GBL_CAP0_FC_SUPP;
++	espi_iom->CAPFC &= ~(MCHP_ESPI_FC_CAP_SHARE_MASK);
++	espi_iom->CAPFC |= MCHP_ESPI_FC_CAP_SHARE_MAF_SAF;
++
++	xcfg->irq_config_func();
++
++	k_sem_init(&data->ecp_lock, 0, 1);
++
++	return 0;
++}
++
++
++/* n = node-id, p = property, i = index */
++#define XEC_SAF_IRQ_INFO(n, p, i)					    \
++	{								    \
++		.gid = MCHP_XEC_ECIA_GIRQ(DT_PROP_BY_IDX(n, p, i)),	    \
++		.gpos = MCHP_XEC_ECIA_GIRQ_POS(DT_PROP_BY_IDX(n, p, i)),    \
++		.anid = MCHP_XEC_ECIA_NVIC_AGGR(DT_PROP_BY_IDX(n, p, i)),   \
++		.dnid = MCHP_XEC_ECIA_NVIC_DIRECT(DT_PROP_BY_IDX(n, p, i)), \
++	},
++
++#define ESPI_SAF_XEC_DEVICE(n)								\
++											\
++	static struct espi_saf_xec_data espisaf_xec_data_##n;				\
++											\
++	static void espi_saf_xec_connect_irqs_##n(void);				\
++											\
++	static const struct espi_xec_irq_info espi_saf_xec_irq_info_##n[] = {		\
++		DT_INST_FOREACH_PROP_ELEM(n, girqs, XEC_SAF_IRQ_INFO)			\
++	};										\
++											\
++	static const struct espi_saf_xec_config espisaf_xec_config_##n = {		\
++		.saf_base = (struct mchp_espi_saf * const)(				\
++					DT_INST_REG_ADDR_BY_IDX(n, 0)),			\
++		.qmspi_base = (struct qmspi_regs * const)(				\
++						DT_INST_REG_ADDR_BY_IDX(n, 1)),		\
++		.saf_comm_base = (struct mchp_espi_saf_comm * const)(			\
++							DT_INST_REG_ADDR_BY_IDX(n, 2)),	\
++		.iom_base = (struct espi_iom_regs * const)(				\
++					DT_REG_ADDR_BY_NAME(DT_INST_PARENT(n), io)),	\
++		.poll_timeout = DT_INST_PROP_OR(n, poll_timeout,			\
++						MCHP_SAF_FLASH_POLL_TIMEOUT),		\
++		.consec_rd_timeout = DT_INST_PROP_OR(					\
++			n, consec_rd_timeout, MCHP_SAF_FLASH_CONSEC_READ_TIMEOUT),	\
++		.sus_chk_delay = DT_INST_PROP_OR(n, sus_chk_delay,			\
++						 MCHP_SAF_FLASH_SUS_CHK_DELAY),		\
++		.sus_rsm_interval = DT_INST_PROP_OR(n, sus_rsm_interval,		\
++						    MCHP_SAF_FLASH_SUS_RSM_INTERVAL),	\
++		.poll_interval = DT_INST_PROP_OR(n, poll_interval,			\
++						 MCHP_SAF_FLASH_POLL_INTERVAL),		\
++		.pcr_idx = DT_INST_PROP_BY_IDX(n, pcrs, 0),				\
++		.pcr_pos = DT_INST_PROP_BY_IDX(n, pcrs, 1),				\
++		.irq_config_func = espi_saf_xec_connect_irqs_##n,			\
++		.irq_info_size = ARRAY_SIZE(espi_saf_xec_irq_info_##n),			\
++		.irq_info_list = espi_saf_xec_irq_info_##n,				\
++	};										\
++	DEVICE_DT_INST_DEFINE(0, &espi_saf_xec_init, NULL,				\
++				  &espisaf_xec_data_##n,				\
++				  &espisaf_xec_config_##n, POST_KERNEL,			\
++				  CONFIG_ESPI_SAF_INIT_PRIORITY,			\
++				  &espi_saf_xec_driver_api);				\
++											\
++	static void espi_saf_xec_connect_irqs_##n(void)					\
++	{										\
++		uint8_t girq, gpos;							\
++											\
++		/* SAF Done */								\
++		IRQ_CONNECT(DT_INST_IRQ_BY_IDX(n, 0, irq),				\
++				DT_INST_IRQ_BY_IDX(n, 0, priority),			\
++				espi_saf_done_isr,					\
++				DEVICE_DT_INST_GET(n), 0);				\
++		irq_enable(DT_INST_IRQ_BY_IDX(n, 0, irq));				\
++											\
++		girq = MCHP_XEC_ECIA_GIRQ(DT_INST_PROP_BY_IDX(n, girqs, 0));		\
++		gpos = MCHP_XEC_ECIA_GIRQ_POS(DT_INST_PROP_BY_IDX(n, girqs, 0));	\
++		mchp_xec_ecia_girq_src_en(girq, gpos);					\
++											\
++		/* SAF Error */								\
++		IRQ_CONNECT(DT_INST_IRQ_BY_IDX(n, 1, irq),				\
++				DT_INST_IRQ_BY_IDX(n, 1, priority),			\
++				espi_saf_err_isr,					\
++				DEVICE_DT_INST_GET(n), 0);				\
++		irq_enable(DT_INST_IRQ_BY_IDX(n, 1, irq));				\
++											\
++		girq = MCHP_XEC_ECIA_GIRQ(DT_INST_PROP_BY_IDX(n, girqs, 1));		\
++		gpos = MCHP_XEC_ECIA_GIRQ_POS(DT_INST_PROP_BY_IDX(n, girqs, 1));	\
++		mchp_xec_ecia_girq_src_en(girq, gpos);					\
++	}
++
++DT_INST_FOREACH_STATUS_OKAY(ESPI_SAF_XEC_DEVICE)
+diff --git a/dts/arm/microchip/mec172xnsz.dtsi b/dts/arm/microchip/mec172xnsz.dtsi
+index d6c624e556..619d0f1b0b 100644
+--- a/dts/arm/microchip/mec172xnsz.dtsi
++++ b/dts/arm/microchip/mec172xnsz.dtsi
+@@ -799,12 +799,17 @@
+ 		};
+ 		espi0: espi@400f3400 {
+ 			compatible = "microchip,xec-espi-v2";
++			/* reg tuple contains one 32-bit address cell and one
++			 * 32-bit length(size) cell.
++			 */
++			#address-cells = <1>;
++			#size-cells = <1>;
+ 			reg = < 0x400f3400 0x400
+ 				0x400f3800 0x400
+ 				0x400f9c00 0x400>;
+ 			reg-names = "io", "mem", "vw";
+ 			interrupts = <103 3>, <104 3>, <105 3>, <106 3>,
+-				     <107 3>, <108 3>, <109 3>, <110 3>,
++				     <107 3>, <108 3>, <109 3>, <110 2>,
+ 				     <156 3>;
+ 			interrupt-names = "pc", "bm1", "bm2", "ltr", "oob_up",
+ 					  "oob_dn", "fc", "rst", "vw_chan_en";
+@@ -818,10 +823,21 @@
+ 				  MCHP_XEC_ECIA(19, 7, 11, 110)
+ 				  MCHP_XEC_ECIA(19, 8, 11, 156) >;
+ 			pcrs = <2 19>;
+-			#address-cells = <1>;
+-			#size-cells = <0>;
+ 			status = "disabled";
+ 
++			espi_saf0: espi_saf@40008000 {
++				compatible = "microchip,xec-espi-saf-v2";
++				reg = <0x40008000 0x400>, <0x40070000 0x400>,
++				      <0x40071000 0x400>;
++				reg-names = "safbr", "safqspi", "safcomm";
++				interrupts = <166 3>, <167 3>;
++				interrupt-names = "done", "err";
++				girqs = < MCHP_XEC_ECIA(19, 9, 11, 166) >,
++					< MCHP_XEC_ECIA(19, 10, 11, 167) >;
++				pcrs = <2 27>;
++				status = "disabled";
++			};
++
+ 			mbox0: mbox@400f0000 {
+ 				compatible = "microchip,xec-espi-host-dev";
+ 				reg = <0x400f0000 0x200>;
+diff --git a/dts/bindings/espi/microchip,xec-espi-saf-v2.yaml b/dts/bindings/espi/microchip,xec-espi-saf-v2.yaml
+new file mode 100644
+index 0000000000..84e41cc13d
+--- /dev/null
++++ b/dts/bindings/espi/microchip,xec-espi-saf-v2.yaml
+@@ -0,0 +1,64 @@
++# Copyright (c) 2019 Intel Corporation
++# Copyright (c) 2022 Microchip Technology Inc.
++# SPDX-License-Identifier: Apache-2.0
++
++description: Microchip ESPI SAF version 2 controller
++
++compatible: "microchip,xec-espi-saf-v2"
++
++include: espi-controller.yaml
++
++properties:
++    reg:
++      description: mmio register space
++      required: true
++
++    girqs:
++      type: array
++      required: true
++      description: Array of encoded interrupt information
++
++    pcrs:
++      type: array
++      required: true
++      description: Array of eSPI PCR register index and bit position
++
++    poll-timeout:
++      type: int
++      description: poll flash busy timeout in 32KHz periods
++      required: false
++
++    poll-interval:
++      type: int
++      description: interval between flash busy poll in 20 ns units
++      required: false
++
++    consec-rd-timeout:
++      type: int
++      description: timeout after last read to resume supended operations in 20 ns units
++      required: false
++
++    sus-chk-delay:
++      type: int
++      description: hold off poll after suspend in 20 ns units
++      required: false
++
++    sus-rsm=interval:
++      type: int
++      description: force suspended erase or program to resume in 32KHz periods
++      required: false
++
++    "#girq-cells":
++      type: int
++      const: 1
++
++    "#pcr-cells":
++      type: int
++      const: 2
++
++girq-cells:
++    - girqinfo
++
++pcr-cells:
++    - regidx
++    - bitpos
+diff --git a/include/zephyr/drivers/espi.h b/include/zephyr/drivers/espi.h
+index 6a37b7ff65..842b3deab0 100644
+--- a/include/zephyr/drivers/espi.h
++++ b/include/zephyr/drivers/espi.h
+@@ -113,6 +113,7 @@ enum espi_bus_event {
+ 	ESPI_BUS_EVENT_VWIRE_RECEIVED       = BIT(2),
+ 	ESPI_BUS_EVENT_OOB_RECEIVED         = BIT(3),
+ 	ESPI_BUS_PERIPHERAL_NOTIFICATION    = BIT(4),
++	ESPI_BUS_SAF_NOTIFICATION           = BIT(5),
+ };
+ 
+ /**
+diff --git a/soc/arm/microchip_mec/mec1501/Kconfig.defconfig.mec1501hsz b/soc/arm/microchip_mec/mec1501/Kconfig.defconfig.mec1501hsz
+index efe2e01973..5ee1c0e2ab 100644
+--- a/soc/arm/microchip_mec/mec1501/Kconfig.defconfig.mec1501hsz
++++ b/soc/arm/microchip_mec/mec1501/Kconfig.defconfig.mec1501hsz
+@@ -19,6 +19,14 @@ config ESPI_XEC
+ 	default y
+ 	depends on ESPI
+ 
++config ESPI_SAF_XEC
++	default y
++	depends on ESPI_SAF
++
++config COUNTER_XEC
++	default y
++	depends on COUNTER
++
+ config PS2_XEC
+ 	default y
+ 	depends on PS2
+diff --git a/soc/arm/microchip_mec/mec172x/Kconfig.defconfig.mec172xnsz b/soc/arm/microchip_mec/mec172x/Kconfig.defconfig.mec172xnsz
+index b8ea53f49a..758652fd31 100644
+--- a/soc/arm/microchip_mec/mec172x/Kconfig.defconfig.mec172xnsz
++++ b/soc/arm/microchip_mec/mec172x/Kconfig.defconfig.mec172xnsz
+@@ -23,4 +23,12 @@ config EEPROM_XEC
+ 	default y
+ 	depends on EEPROM
+ 
++config ESPI_SAF_XEC_V2
++	default y
++	depends on ESPI_SAF
++
++config SPI_XEC_QMSPI_LDMA
++	default y
++	depends on SPI
++
+ endif # SOC_MEC172X_NSZ
+diff --git a/soc/arm/microchip_mec/mec172x/reg/mec172x_espi_saf.h b/soc/arm/microchip_mec/mec172x/reg/mec172x_espi_saf.h
+index b69e868ddc..006010bdb0 100644
+--- a/soc/arm/microchip_mec/mec172x/reg/mec172x_espi_saf.h
++++ b/soc/arm/microchip_mec/mec172x/reg/mec172x_espi_saf.h
+@@ -36,30 +36,40 @@
+ /* Register bit definitions */
+ 
+ /* SAF EC Portal Command register */
+-#define MCHP_SAF_ECP_CMD_OFS		0x18u
+-#define MCHP_SAF_ECP_CMD_MASK		0xff00ffffu
+-#define MCHP_SAF_ECP_CMD_PUT_POS	0
+-#define MCHP_SAF_ECP_CMD_PUT_MASK	0xffu
+-#define MCHP_SAF_ECP_CMD_PUT_FLASH_NP	0x0au
+-#define MCHP_SAF_ECP_CMD_CTYPE_POS	8
+-#define MCHP_SAF_ECP_CMD_CTYPE_READ0	0x00u
+-#define MCHP_SAF_ECP_CMD_CTYPE_WRITE0	0x01u
+-#define MCHP_SAF_ECP_CMD_CTYPE_ERASE0	0x02u
+-#define MCHP_SAF_ECP_CMD_CTYPE_MAX0	0x03u
+-#define MCHP_SAF_ECP_CMD_CTYPE_MASK	0xff00ul
+-#define MCHP_SAF_ECP_CMD_CTYPE_READ	0x0000ul
+-#define MCHP_SAF_ECP_CMD_CTYPE_WRITE	0x0100ul
+-#define MCHP_SAF_ECP_CMD_CTYPE_ERASE	0x0200ul
+-#define MCHP_SAF_ECP_CMD_LEN_POS	24
+-#define MCHP_SAF_ECP_CMD_LEN_MASK0	0xffu
+-#define MCHP_SAF_ECP_CMD_LEN_MASK	0xff000000ul
++#define MCHP_SAF_ECP_CMD_OFS			0x18u
++#define MCHP_SAF_ECP_CMD_MASK			0xff00ffffu
++#define MCHP_SAF_ECP_CMD_PUT_POS		0
++#define MCHP_SAF_ECP_CMD_PUT_MASK		0xffu
++#define MCHP_SAF_ECP_CMD_PUT_FLASH_NP		0x0au
++#define MCHP_SAF_ECP_CMD_CTYPE_POS		8
++#define MCHP_SAF_ECP_CMD_CTYPE_MSK0		0xffu
++#define MCHP_SAF_ECP_CMD_CTYPE_MASK		0xff00u
++#define MCHP_SAF_ECP_CMD_CTYPE_READ		0x0000u
++#define MCHP_SAF_ECP_CMD_CTYPE_WRITE		0x0100u
++#define MCHP_SAF_ECP_CMD_CTYPE_ERASE		0x0200u
++#define MCHP_SAF_ECP_CMD_CTYPE_RPMC_OP1_CS0	0x0300u
++#define MCHP_SAF_ECP_CMD_CTYPE_RPMC_OP2_CS0	0x0400u
++#define MCHP_SAF_ECP_CMD_CTYPE_RPMC_OP1_CS1	0x8300u
++#define MCHP_SAF_ECP_CMD_CTYPE_RPMC_OP2_CS1	0x8400u
++#define MCHP_SAF_ECP_CMD_LEN_POS		24
++#define MCHP_SAF_ECP_CMD_LEN_MASK0		0xffu
++#define MCHP_SAF_ECP_CMD_LEN_MASK		0xff000000ul
+ /* Read/Write request size (1 <= reqlen <= 64) bytes */
+-#define MCHP_SAF_ECP_CMD_RW_LEN_MIN	1u
+-#define MCHP_SAF_ECP_CMD_RW_LEN_MAX	64u
++#define MCHP_SAF_ECP_CMD_RW_LEN_MIN		1u
++#define MCHP_SAF_ECP_CMD_RW_LEN_MAX		64u
+ /* Only three erase sizes are supported encoded as */
+-#define MCHP_SAF_ECP_CMD_ERASE_4K	0u
+-#define MCHP_SAF_ECP_CMD_ERASE_32K	BIT(24)
+-#define MCHP_SAF_ECP_CMD_ERASE_64K	BIT(25)
++#define MCHP_SAF_ECP_CMD_ERASE_4K		0u
++#define MCHP_SAF_ECP_CMD_ERASE_32K		BIT(24)
++#define MCHP_SAF_ECP_CMD_ERASE_64K		BIT(25)
++
++/* Zero based command values */
++#define MCHP_SAF_ECP_CMD_READ			0x00u
++#define MCHP_SAF_ECP_CMD_WRITE			0x01u
++#define MCHP_SAF_ECP_CMD_ERASE			0x02u
++#define MCHP_SAF_ECP_CMD_RPMC_OP1_CS0		0x03u
++#define MCHP_SAF_ECP_CMD_RPMC_OP2_CS0		0x04u
++#define MCHP_SAF_ECP_CMD_RPMC_OP1_CS1		0x83u
++#define MCHP_SAF_ECP_CMD_RPMC_OP2_CS1		0x84u
+ 
+ /* SAF EC Portal Flash Address register */
+ #define MCHP_SAF_ECP_FLAR_OFS		0x1cu
+@@ -68,6 +78,7 @@
+ /* SAF EC Portal Start register */
+ #define MCHP_SAF_ECP_START_OFS		0x20u
+ #define MCHP_SAF_ECP_START_MASK		0x01u
++#define MCHP_SAF_ECP_START_POS		0
+ #define MCHP_SAF_ECP_START		BIT(0)
+ 
+ /* SAF EC Portal Buffer Address register */
+@@ -78,6 +89,15 @@
+ #define MCHP_SAF_ECP_STS_OFS		0x28u
+ #define MCHP_SAF_ECP_STS_MASK		0x1ffu
+ #define MCHP_SAF_ECP_STS_ERR_MASK	0x1fcu
++#define MCHP_SAF_ECP_STS_DONE_POS	0
++#define MCHP_SAF_ECP_STS_DONE_TST_POS	1
++#define MCHP_SAF_ECP_STS_TMOUT_POS	2
++#define MCHP_SAF_ECP_STS_OOR_POS	3
++#define MCHP_SAF_ECP_STS_AV_POS		4
++#define MCHP_SAF_ECP_STS_BND_4K_POS	5
++#define MCHP_SAF_ECP_STS_ERSZ_POS	6
++#define MCHP_SAF_ECP_STS_ST_OVFL_POS	7
++#define MCHP_SAF_ECP_STS_BAD_REQ_POS	8
+ #define MCHP_SAF_ECP_STS_DONE		BIT(0)
+ #define MCHP_SAF_ECP_STS_DONE_TST	BIT(1)
+ #define MCHP_SAF_ECP_STS_TMOUT		BIT(2)
+@@ -91,6 +111,7 @@
+ /* SAF EC Portal Interrupt Enable register */
+ #define MCHP_SAF_ECP_INTEN_OFS		0x2cu
+ #define MCHP_SAF_ECP_INTEN_MASK		0x01u
++#define MCHP_SAF_ECP_INTEN_DONE_POS	0
+ #define MCHP_SAF_ECP_INTEN_DONE		BIT(0)
+ 
+ /* SAF Flash Configuration Size Limit register */
+@@ -102,40 +123,46 @@
+ #define MCHP_SAF_FL_CFG_THRH_MASK	0xffffffffu
+ 
+ /* SAF Flash Configuration Miscellaneous register */
+-#define MCHP_SAF_FL_CFG_MISC_OFS	0x38u
+-#define MCHP_SAF_FL_CFG_MISC_MASK	0x000030f3u
+-#define MCHP_SAF_FL_CFG_MISC_PFOE_MASK	0x03u
+-#define MCHP_SAF_FL_CFG_MISC_PFOE_DFLT	0x00u
+-#define MCHP_SAF_FL_CFG_MISC_PFOE_EXP	0x03u
+-#define MCHP_SAF_FL_CFG_MISC_CS0_4BM	BIT(4)
+-#define MCHP_SAF_FL_CFG_MISC_CS1_4BM	BIT(5)
+-#define MCHP_SAF_FL_CFG_MISC_CS0_CPE	BIT(6)
+-#define MCHP_SAF_FL_CFG_MISC_CS1_CPE	BIT(7)
+-#define MCHP_SAF_FL_CFG_MISC_SAF_EN	BIT(12)
+-#define MCHP_SAF_FL_CFG_MISC_SAF_LOCK	BIT(13)
+-
+-/* SAF eSPI Monitor Status register */
+-#define MCHP_SAF_ESPI_MON_STATUS_OFS	0x3cu
+-#define MCHP_SAF_ESPI_MON_STATUS_MASK	0x1fu
+-#define MCHP_SAF_ESPI_MON_STS_TMOUT	BIT(0)
+-#define MCHP_SAF_ESPI_MON_STS_OOR	BIT(1)
+-#define MCHP_SAF_ESPI_MON_STS_AV	BIT(2)
+-#define MCHP_SAF_ESPI_MON_STS_BND_4K	BIT(3)
+-#define MCHP_SAF_ESPI_MON_STS_ERSZ	BIT(4)
+-
+-/* SAF eSPI Monitor Interrupt Enable register */
+-#define MCHP_SAF_ESPI_MON_INTEN_OFS	0x40u
+-#define MCHP_SAF_ESPI_MON_INTEN_MASK	0x1fu
+-#define MCHP_SAF_ESPI_MON_INTEN_TMOUT	BIT(0)
+-#define MCHP_SAF_ESPI_MON_INTEN_OOR	BIT(1)
+-#define MCHP_SAF_ESPI_MON_INTEN_AV	BIT(2)
+-#define MCHP_SAF_ESPI_MON_INTEN_BND_4K	BIT(3)
+-#define MCHP_SAF_ESPI_MON_INTEN_ERSZ	BIT(4)
++#define MCHP_SAF_FL_CFG_MISC_OFS		0x38u
++#define MCHP_SAF_FL_CFG_MISC_MASK		0x000030f3u
++#define MCHP_SAF_FL_CFG_MISC_PFOE_MASK		0x3u
++#define MCHP_SAF_FL_CFG_MISC_PFOE_DFLT		0u
++#define MCHP_SAF_FL_CFG_MISC_PFOE_EXP		0x3u
++#define MCHP_SAF_FL_CFG_MISC_CS0_4BM_POS	4
++#define MCHP_SAF_FL_CFG_MISC_CS1_4BM_POS	5
++#define MCHP_SAF_FL_CFG_MISC_CS0_CPE_POS	6
++#define MCHP_SAF_FL_CFG_MISC_CS1_CPE_POS	7
++#define MCHP_SAF_FL_CFG_MISC_SAF_EN_POS		12
++#define MCHP_SAF_FL_CFG_MISC_SAF_LOCK_POS	13
++#define MCHP_SAF_FL_CFG_MISC_CS0_4BM		BIT(4)
++#define MCHP_SAF_FL_CFG_MISC_CS1_4BM		BIT(5)
++#define MCHP_SAF_FL_CFG_MISC_CS0_CPE		BIT(6)
++#define MCHP_SAF_FL_CFG_MISC_CS1_CPE		BIT(7)
++#define MCHP_SAF_FL_CFG_MISC_SAF_EN		BIT(12)
++#define MCHP_SAF_FL_CFG_MISC_SAF_LOCK		BIT(13)
++
++/* SAF eSPI Monitor Status and Interrupt enable registers */
++#define MCHP_SAF_ESPI_MON_STATUS_OFS		0x3cu
++#define MCHP_SAF_ESPI_MON_INTEN_OFS		0x40u
++#define MCHP_SAF_ESPI_MON_STS_IEN_MSK		0x1fu
++#define MCHP_SAF_ESPI_MON_STS_IEN_TMOUT_POS	0
++#define MCHP_SAF_ESPI_MON_STS_IEN_OOR_POS	1
++#define MCHP_SAF_ESPI_MON_STS_IEN_AV_POS	2
++#define MCHP_SAF_ESPI_MON_STS_IEN_BND_4K_POS	3
++#define MCHP_SAF_ESPI_MON_STS_IEN_ERSZ_POS	4
++#define MCHP_SAF_ESPI_MON_STS_IEN_TMOUT		BIT(0)
++#define MCHP_SAF_ESPI_MON_STS_IEN_OOR		BIT(1)
++#define MCHP_SAF_ESPI_MON_STS_IEN_AV		BIT(2)
++#define MCHP_SAF_ESPI_MON_STS_IEN_BND_4K	BIT(3)
++#define MCHP_SAF_ESPI_MON_STS_IEN_ERSZ		BIT(4)
+ 
+ /* SAF EC Portal Busy register */
+ #define MCHP_SAF_ECP_BUSY_OFS		0x44u
+ #define MCHP_SAF_ECP_BUSY_MASK		0x01u
+-#define MCHP_SAF_ECP_BUSY		BIT(0)
++#define MCHP_SAF_ECP_EC0_BUSY_POS	0
++#define MCHP_SAF_ECP_EC1_BUSY_POS	1
++#define MCHP_SAF_ECP_EC0_BUSY		BIT(0)
++#define MCHP_SAF_ECP_EC1_BUSY		BIT(1)
+ 
+ /* SAF CS0/CS1 Opcode A registers */
+ #define MCHP_SAF_CS0_OPA_OFS		0x4cu
+@@ -444,7 +471,64 @@
+ 
+ /* SAF DnX Protection Bypass register */
+ #define MCHP_SAF_DNX_PROT_BYP_OFS	0x1b4u
+-#define MCHP_SAF_DNX_PROT_BYP_MASK	0xffffffffu
++#define MCHP_SAF_DNX_PROT_BYP_MASK	0x1110ffffu
++#define MCHP_SAF_DNX_PB_TAG_POS(n)	((uint32_t)(n) & 0xfu)
++#define MCHP_SAF_DNX_PB_TAG(n)		BIT(((n) & 0xfu))
++#define MCHP_SAF_DNX_DS_RO_POS		20
++#define MCHP_SAF_DNX_DS_RO		BIT(20)
++#define MCHP_SAF_DNX_DM_POS		24
++#define MCHP_SAF_DNX_DM			BIT(24)
++#define MCHP_SAF_DNX_LK_POS		28
++#define MCHP_SAF_DNX_LK			BIT(28)
++
++/* SAF Activity Count Reload Valud register */
++#define MCHP_SAF_AC_RELOAD_OFS		0x1b8u
++#define MCHP_SAF_AC_RELOAD_REG_MSK	0xffffu
++
++/* SAF Power Down Control register */
++#define SAF_PWRDN_CTRL_OFS		0x1bcu
++#define SAF_PWRDN_CTRL_REG_MSK		0x0fu
++#define SAF_PWRDN_CTRL_CS0_PD_EN_POS	0
++#define SAF_PWRDN_CTRL_CS1_PD_EN_POS	1
++#define SAF_PWRDN_CTRL_CS0_WPA_EN_POS	2
++#define SAF_PWRDN_CTRL_CS1_WPA_EN_POS	3
++
++/* SAF Memory Power Status register (RO) */
++#define SAF_MEM_PWR_STS_OFS		0x1c0u
++#define SAF_MEM_PWR_STS_REG_MSK		0x03u
++
++/* SAF Config CS0 and CS1 Opcode registers */
++#define SAF_CFG_CS0_OPC_OFS		0x1c4u
++#define SAF_CFG_CS1_OPC_OFS		0x1c8u
++#define SAF_CFG_CS_OPC_REG_MSK		0x00ffffffu
++#define SAF_CFG_CS_OPC_ENTER_PD_POS	0
++#define SAF_CFG_CS_OPC_ENTER_PD_MSK0	0xffu
++#define SAF_CFG_CS_OPC_ENTER_PD_MSK	0xffu
++#define SAF_CFG_CS_OPC_EXIT_PD_POS	8
++#define SAF_CFG_CS_OPC_EXIT_PD_MSK0	0xffu
++#define SAF_CFG_CS_OPC_EXIT_PD_MSK	0xff00u
++#define SAF_CFG_CS_OPC_RPMC_OP2_POS	16
++#define SAF_CFG_CS_OPC_RPMC_OP2_MSK0	0xffu
++#define SAF_CFG_CS_OPC_RPMC_OP2_MSK	0xff0000u
++
++
++/* SAF Flash Power Down/Up Timerout register */
++#define SAF_FL_PWR_TMOUT_OFS		0x1ccu
++#define SAF_FL_PWR_TMOUT_REG_MSK	0xffffu
++
++/* SAF Clock Divider CS0 and CS1 registers */
++#define SAF_CLKDIV_CS0_OFS		0x200u
++#define SAF_CLKDIV_CS1_OFS		0x204u
++#define SAF_CLKDIV_CS_REG_MSK		0xffffffffu
++#define SAF_CLKDIV_CS_READ_POS		0
++#define SAF_CLKDIV_CS_REST_POS		16
++#define SAF_CLKDIV_CS_MSK0		0xffffu
++
++/* SAF RPMC OP2 eSPI, EC0, and EC1 Result Address register */
++#define	SAF_RPMC_OP2_ESPI_RES_OFS	0x208u
++#define SAF_RPMC_OP2_EC0_RES_OFS	0x20cu
++#define SAF_RPMC_OP2_EC1_RES_OFS	0x210u
++#define	SAF_RPMC_OP2_RES_REG_MSK	0xffffffffu
+ 
+ /* SAF Communication Mode */
+ #define MCHP_SAF_COMM_MODE_MASK		0x01u
+@@ -496,36 +580,48 @@ struct mchp_espi_saf_pr {
+ /** @brief eSPI SAF configuration and control registers at 0x40008000 */
+ struct mchp_espi_saf {
+ 	uint32_t RSVD1[6];
+-	volatile uint32_t SAF_ECP_CMD;
+-	volatile uint32_t SAF_ECP_FLAR;
+-	volatile uint32_t SAF_ECP_START;
+-	volatile uint32_t SAF_ECP_BFAR;
+-	volatile uint32_t SAF_ECP_STATUS;
+-	volatile uint32_t SAF_ECP_INTEN;
+-	volatile uint32_t SAF_FL_CFG_SIZE_LIM;
+-	volatile uint32_t SAF_FL_CFG_THRH;
+-	volatile uint32_t SAF_FL_CFG_MISC;
+-	volatile uint32_t SAF_ESPI_MON_STATUS;
+-	volatile uint32_t SAF_ESPI_MON_INTEN;
+-	volatile uint32_t SAF_ECP_BUSY;
++	volatile uint32_t SAF_ECP_CMD;			/* 0x18 */
++	volatile uint32_t SAF_ECP_FLAR;			/* 0x1c */
++	volatile uint32_t SAF_ECP_START;		/* 0x20 */
++	volatile uint32_t SAF_ECP_BFAR;			/* 0x24 */
++	volatile uint32_t SAF_ECP_STATUS;		/* 0x28 */
++	volatile uint32_t SAF_ECP_INTEN;		/* 0x2c */
++	volatile uint32_t SAF_FL_CFG_SIZE_LIM;		/* 0x30 */
++	volatile uint32_t SAF_FL_CFG_THRH;		/* 0x34 */
++	volatile uint32_t SAF_FL_CFG_MISC;		/* 0x38 */
++	volatile uint32_t SAF_ESPI_MON_STATUS;		/* 0x3c */
++	volatile uint32_t SAF_ESPI_MON_INTEN;		/* 0x40 */
++	volatile uint32_t SAF_ECP_BUSY;			/* 0x44 */
+ 	uint32_t RSVD2[1];
+-	struct mchp_espi_saf_op SAF_CS_OP[2];
+-	volatile uint32_t SAF_FL_CFG_GEN_DESCR;
+-	volatile uint32_t SAF_PROT_LOCK;
+-	volatile uint32_t SAF_PROT_DIRTY;
+-	volatile uint32_t SAF_TAG_MAP[3];
+-	struct mchp_espi_saf_pr SAF_PROT_RG[17];
+-	volatile uint32_t SAF_POLL_TMOUT;
+-	volatile uint32_t SAF_POLL_INTRVL;
+-	volatile uint32_t SAF_SUS_RSM_INTRVL;
+-	volatile uint32_t SAF_CONSEC_RD_TMOUT;
+-	volatile uint16_t SAF_CS0_CFG_P2M;
+-	volatile uint16_t SAF_CS1_CFG_P2M;
+-	volatile uint32_t SAF_FL_CFG_SPM;
+-	volatile uint32_t SAF_SUS_CHK_DLY;
+-	volatile uint16_t SAF_CS0_CM_PRF;
+-	volatile uint16_t SAF_CS1_CM_PRF;
+-	volatile uint32_t SAF_DNX_PROT_BYP;
++	struct mchp_espi_saf_op SAF_CS_OP[2];		/* 0x4c - 0x6b */
++	volatile uint32_t SAF_FL_CFG_GEN_DESCR;		/* 0x6c */
++	volatile uint32_t SAF_PROT_LOCK;		/* 0x70 */
++	volatile uint32_t SAF_PROT_DIRTY;		/* 0x74 */
++	volatile uint32_t SAF_TAG_MAP[3];		/* 0x78 - 0x83 */
++	struct mchp_espi_saf_pr SAF_PROT_RG[17];	/* 0x84 - 0x193 */
++	volatile uint32_t SAF_POLL_TMOUT;		/* 0x194 */
++	volatile uint32_t SAF_POLL_INTRVL;		/* 0x198 */
++	volatile uint32_t SAF_SUS_RSM_INTRVL;		/* 0x19c */
++	volatile uint32_t SAF_CONSEC_RD_TMOUT;		/* 0x1a0 */
++	volatile uint16_t SAF_CS0_CFG_P2M;		/* 0x1a4 */
++	volatile uint16_t SAF_CS1_CFG_P2M;		/* 0x1a6 */
++	volatile uint32_t SAF_FL_CFG_SPM;		/* 0x1a8 */
++	volatile uint32_t SAF_SUS_CHK_DLY;		/* 0x1ac */
++	volatile uint16_t SAF_CS0_CM_PRF;		/* 0x1b0 */
++	volatile uint16_t SAF_CS1_CM_PRF;		/* 0x1b2 */
++	volatile uint32_t SAF_DNX_PROT_BYP;		/* 0x1b4 */
++	volatile uint32_t SAF_AC_RELOAD;		/* 0x1b8 */
++	volatile uint32_t SAF_PWRDN_CTRL;		/* 0x1bc */
++	volatile uint32_t SAF_MEM_PWR_STS;		/* 0x1c0 */
++	volatile uint32_t SAF_CFG_CS0_OPD;		/* 0x1c4 */
++	volatile uint32_t SAF_CFG_CS1_OPD;		/* 0x1c8 */
++	volatile uint32_t SAF_FL_PWR_TMOUT;		/* 0x1cc */
++	uint32_t RSVD[12];
++	volatile uint32_t SAF_CLKDIV_CS0;		/* 0x200 */
++	volatile uint32_t SAF_CLKDIV_CS1;		/* 0x204 */
++	volatile uint32_t SAF_RPMC_OP2_ESPI_RES;	/* 0x208 */
++	volatile uint32_t SAF_RPMC_OP2_EC0_RES;		/* 0x20c */
++	volatile uint32_t SAF_RPMC_OP2_EC1_RES;		/* 0x210 */
+ };
+ 
+ struct mchp_espi_saf_comm { /* @ 0x40071000 */
+diff --git a/soc/arm/microchip_mec/mec172x/reg/mec172x_qspi.h b/soc/arm/microchip_mec/mec172x/reg/mec172x_qspi.h
+index 496c0f5238..fa04a2da01 100644
+--- a/soc/arm/microchip_mec/mec172x/reg/mec172x_qspi.h
++++ b/soc/arm/microchip_mec/mec172x/reg/mec172x_qspi.h
+@@ -188,6 +188,9 @@
+ #define MCHP_QMSPI_C_TX_DMA_1B		SHLU32(1u, MCHP_QMSPI_C_TX_DMA_POS)
+ #define MCHP_QMSPI_C_TX_DMA_2B		SHLU32(2u, MCHP_QMSPI_C_TX_DMA_POS)
+ #define MCHP_QMSPI_C_TX_DMA_4B		SHLU32(3u, MCHP_QMSPI_C_TX_DMA_POS)
++#define MCHP_QMSPI_C_TX_LDMA_CH0	SHLU32(1u, MCHP_QMSPI_C_TX_DMA_POS)
++#define MCHP_QMSPI_C_TX_LDMA_CH1	SHLU32(2u, MCHP_QMSPI_C_TX_DMA_POS)
++#define MCHP_QMSPI_C_TX_LDMA_CH2	SHLU32(3u, MCHP_QMSPI_C_TX_DMA_POS)
+ #define MCHP_QMSPI_C_RX_POS		6u
+ #define MCHP_QMSPI_C_RX_DIS		0u
+ #define MCHP_QMSPI_C_RX_EN		BIT(MCHP_QMSPI_C_RX_POS)
+@@ -197,6 +200,9 @@
+ #define MCHP_QMSPI_C_RX_DMA_1B		SHLU32(1u, MCHP_QMSPI_C_RX_DMA_POS)
+ #define MCHP_QMSPI_C_RX_DMA_2B		SHLU32(2u, MCHP_QMSPI_C_RX_DMA_POS)
+ #define MCHP_QMSPI_C_RX_DMA_4B		SHLU32(3u, MCHP_QMSPI_C_RX_DMA_POS)
++#define MCHP_QMSPI_C_RX_LDMA_CH0	SHLU32(1u, MCHP_QMSPI_C_RX_DMA_POS)
++#define MCHP_QMSPI_C_RX_LDMA_CH1	SHLU32(2u, MCHP_QMSPI_C_RX_DMA_POS)
++#define MCHP_QMSPI_C_RX_lDMA_CH2	SHLU32(3u, MCHP_QMSPI_C_RX_DMA_POS)
+ 
+ #define MCHP_QMSPI_C_CLOSE_POS		9u
+ #define MCHP_QMSPI_C_NO_CLOSE		0u
+diff --git a/soc/arm/microchip_mec/mec172x/soc.h b/soc/arm/microchip_mec/mec172x/soc.h
+index 2841a190ff..134363fc6d 100644
+--- a/soc/arm/microchip_mec/mec172x/soc.h
++++ b/soc/arm/microchip_mec/mec172x/soc.h
+@@ -283,6 +283,9 @@ typedef enum {
+ #include "../common/soc_espi_channels.h"
+ #include "../common/soc_i2c.h"
+ 
++/* MEC172x SAF V2 */
++#include "soc_espi_saf_v2.h"
++
+ #endif
+ 
+ #endif
+diff --git a/soc/arm/microchip_mec/mec172x/soc_espi_saf_v2.h b/soc/arm/microchip_mec/mec172x/soc_espi_saf_v2.h
+new file mode 100644
+index 0000000000..d4fa144aec
+--- /dev/null
++++ b/soc/arm/microchip_mec/mec172x/soc_espi_saf_v2.h
+@@ -0,0 +1,516 @@
++/*
++ * Copyright (c) 2020 Microchip Technology Inc.
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++/**
++ * @file Header containing definitions for MCHP eSPI SAF
++ */
++
++#ifndef _SOC_ESPI_SAF_H_
++#define _SOC_ESPI_SAF_H_
++
++#include <stdint.h>
++#include <sys/util.h>
++
++#define MCHP_SAF_MAX_FLASH_DEVICES		2U
++
++/*
++ * SAF hardware state machine timings
++ * poll timeout is in 32KHz clock periods
++ * poll interval is in AHB clock(48MHz) units.
++ * suspend resume interval is in 32KHz clock periods.
++ * consecutive read timeout is in AHB clock periods.
++ * suspend check delay is in AHB clock(48MHz) periods.
++ */
++#define MCHP_SAF_FLASH_POLL_TIMEOUT		0x28000u
++#define MCHP_SAF_FLASH_POLL_INTERVAL		0u
++#define MCHP_SAF_FLASH_SUS_RSM_INTERVAL		8u
++#define MCHP_SAF_FLASH_CONSEC_READ_TIMEOUT	2u
++#define MCHP_SAF_FLASH_SUS_CHK_DELAY		0u
++
++/* Default SAF Map of eSPI TAG numbers to master numbers */
++#define MCHP_SAF_TAG_MAP0_DFLT			0x23221100u
++#define MCHP_SAF_TAG_MAP1_DFLT			0x77677767u
++#define MCHP_SAF_TAG_MAP2_DFLT			0x00000005u
++
++/*
++ * Default QMSPI clock divider and chip select timing.
++ * QMSPI master clock is either 96 or 48 MHz depending upon
++ * Boot-ROM OTP configuration.
++ */
++#define MCHP_SAF_QMSPI_CLK_DIV			4u
++
++/* SAF V2 implements dynamically changing the QMSPI clock
++ * divider for SPI read vs all other SPI commands.
++ */
++#define MCHP_SAF_CS_CLK_DIV(read, other)	\
++	(((uint32_t)(read) & 0xffffu) | (((uint32_t)(other) & 0xffffu) << 16))
++
++#define MCHP_SAF_CS0_CLK_DIV MCHP_SAF_CS_CLK_DIV(4, 4)
++#define MCHP_SAF_CS1_CLK_DIV MCHP_SAF_CS_CLK_DIV(4, 4)
++
++#define MCHP_SAF_QMSPI_CS_TIMING		0x03000101u
++
++/* SAF QMSPI programming */
++
++#define MCHP_SAF_QMSPI_NUM_FLASH_DESCR		6u
++#define MCHP_SAF_QMSPI_CS0_START_DESCR		0u
++#define MCHP_SAF_QMSPI_CS1_START_DESCR		\
++	(MCHP_SAF_QMSPI_CS0_START_DESCR + MCHP_SAF_QMSPI_NUM_FLASH_DESCR)
++
++/* SAF engine requires start indices of descriptor chains */
++#define MCHP_SAF_CM_EXIT_START_DESCR		12u
++#define MCHP_SAF_CM_EXIT_LAST_DESCR		13u
++#define MCHP_SAF_POLL_STS_START_DESCR		14u
++#define MCHP_SAF_POLL_STS_END_DESCR		15u
++#define MCHP_SAF_NUM_GENERIC_DESCR		4u
++
++/* QMSPI descriptors 12-15 for all SPI flash devices */
++
++/* QMSPI descriptors 12-13 are exit continuous mode */
++#define MCHP_SAF_EXIT_CM_DESCR12 \
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_ONES |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 |				\
++		 MCHP_QMSPI_C_NEXT_DESCR(13) |				\
++		 MCHP_QMSPI_C_XFR_NUNITS(1))
++
++#define MCHP_SAF_EXIT_CM_DESCR13					\
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DIS |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_EN |		\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_CLOSE |		\
++		 MCHP_QMSPI_C_XFR_UNITS_1 |				\
++		 MCHP_QMSPI_C_NEXT_DESCR(0) |				\
++		 MCHP_QMSPI_C_XFR_NUNITS(9) |				\
++		 MCHP_QMSPI_C_DESCR_LAST)
++
++#define MCHP_SAF_EXIT_CM_DUAL_DESCR12 \
++		(MCHP_QMSPI_C_IFM_2X | MCHP_QMSPI_C_TX_ONES |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 |				\
++		 MCHP_QMSPI_C_NEXT_DESCR(13) |				\
++		 MCHP_QMSPI_C_XFR_NUNITS(1))
++
++#define MCHP_SAF_EXIT_CM_DUAL_DESCR13					\
++		(MCHP_QMSPI_C_IFM_2X | MCHP_QMSPI_C_TX_DIS |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_EN |		\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_CLOSE |		\
++		 MCHP_QMSPI_C_XFR_UNITS_1 |				\
++		 MCHP_QMSPI_C_NEXT_DESCR(0) |				\
++		 MCHP_QMSPI_C_XFR_NUNITS(5) |				\
++		 MCHP_QMSPI_C_DESCR_LAST)
++
++/*
++ * QMSPI descriptors 14-15 are poll 16-bit flash status
++ * Transmit one byte opcode at 1X (no DMA).
++ * Receive two bytes at 1X (no DMA).
++ */
++#define MCHP_SAF_POLL_DESCR14						\
++		(MCHP_QMSPI_C_IFM_1X | MCHP_QMSPI_C_TX_DATA |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 |				\
++		 MCHP_QMSPI_C_NEXT_DESCR(15) |				\
++		 MCHP_QMSPI_C_XFR_NUNITS(1))
++
++#define MCHP_SAF_POLL_DESCR15						\
++		(MCHP_QMSPI_C_IFM_1X | MCHP_QMSPI_C_TX_DIS |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_EN |		\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_CLOSE |		\
++		 MCHP_QMSPI_C_XFR_UNITS_1 |				\
++		 MCHP_QMSPI_C_NEXT_DESCR(0) |				\
++		 MCHP_QMSPI_C_XFR_NUNITS(2) |				\
++		 MCHP_QMSPI_C_DESCR_LAST)
++
++
++/* SAF Pre-fetch optimization mode */
++#define MCHP_SAF_PREFETCH_MODE MCHP_SAF_FL_CFG_MISC_PFOE_DFLT
++
++#define MCHP_SAF_CFG_MISC_PREFETCH_EXPEDITED	0x03U
++
++/*
++ * SAF Opcode 32-bit register value.
++ * Each byte contain a SPI flash 8-bit opcode.
++ * NOTE1: opcode value of 0 = flash does not support this operation
++ * NOTE2:
++ * SAF Opcode A
++ *	op0 = SPI flash write-enable opcode
++ *	op1 = SPI flash program/erase suspend opcode
++ *	op2 = SPI flash program/erase resume opcode
++ *	op3 = SPI flash read STATUS1 opcode
++ * SAF Opcode B
++ *	op0 = SPI flash erase 4KB sector opcode
++ *	op1 = SPI flash erase 32KB sector opcode
++ *	op2 = SPI flash erase 64KB sector opcode
++ *	op3 = SPI flash page program opcode
++ * SAF Opcode C
++ *	op0 = SPI flash read 1-4-4 continuous mode opcode
++ *	op1 = SPI flash op0 mode byte value for non-continuous mode
++ *	op2 = SPI flash op0 mode byte value for continuous mode
++ *	op3 = SPI flash read STATUS2 opcode
++ */
++#define MCHP_SAF_OPCODE_REG_VAL(op0, op1, op2, op3)			\
++	(((uint32_t)(op0)&0xffU) | (((uint32_t)(op1)&0xffU) << 8) |	\
++	 (((uint32_t)(op2)&0xffU) << 16) | (((uint32_t)(op3)&0xffU) << 24))
++
++/*
++ * SAF Flash Config CS0/CS1 QMSPI descriptor indices register value
++ * e = First QMSPI descriptor index for enter continuous mode chain
++ * r = First QMSPI descriptor index for continuous mode read chain
++ * s = Index of QMSPI descriptor in continuous mode read chain that
++ *     contains the data length field.
++ */
++#define MCHP_SAF_CS_CFG_DESCR_IDX_REG_VAL(e, r, s)			\
++	(((uint32_t)(e)&0xfU) | (((uint32_t)(r)&0xfU) << 8) |		\
++		(((uint32_t)(s)&0xfU) << 12))
++
++/* W25Q128 SPI flash device connected size in bytes */
++#define MCHP_W25Q128_SIZE (16U * 1024U * 1024U)
++
++/*
++ * Six QMSPI descriptors describe SPI flash opcode protocols.
++ * Example: W25Q128
++ */
++/* Continuous mode read: transmit-quad 24-bit address and mode byte */
++#define MCHP_W25Q128_CM_RD_D0						\
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DATA |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(4))
++
++/* Continuous mode read: transmit-quad 4 dummy clocks with I/O tri-stated */
++#define MCHP_W25Q128_CM_RD_D1						\
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DIS |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(2))
++
++/* Continuous mode read: read N bytes */
++#define MCHP_W25Q128_CM_RD_D2						\
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DIS |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_EN |		\
++		 MCHP_QMSPI_C_RX_LDMA_CH0 | MCHP_QMSPI_C_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 |				\
++		 MCHP_QMSPI_C_XFR_NUNITS(0) | MCHP_QMSPI_C_DESCR_LAST)
++
++/* Continuous Mode: 24-bit address plus mode byte */
++#define MCHP_W25Q128_CM_RD_DUAL_D0					\
++		(MCHP_QMSPI_C_IFM_2X | MCHP_QMSPI_C_TX_DATA |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(4))
++
++/* Continuous mode read: read N bytes */
++#define MCHP_W25Q128_CM_RD_DUAL_D1					\
++		(MCHP_QMSPI_C_IFM_2X | MCHP_QMSPI_C_TX_DIS |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_EN |		\
++		 MCHP_QMSPI_C_RX_LDMA_CH0 | MCHP_QMSPI_C_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 |				\
++		 MCHP_QMSPI_C_XFR_NUNITS(0) | MCHP_QMSPI_C_DESCR_LAST)
++
++/* Continuous mode Dual D2. Not used */
++#define MCHP_W25Q128_CM_RD_DUAL_D2					0
++
++/* Enter Continuous mode: transmit-single CM quad read opcode */
++#define MCHP_W25Q128_ENTER_CM_D0					\
++		(MCHP_QMSPI_C_IFM_1X | MCHP_QMSPI_C_TX_DATA |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(1))
++
++/* Enter Continuous mode: transmit-quad 24-bit address and mode byte  */
++#define MCHP_W25Q128_ENTER_CM_D1					\
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DATA |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(4))
++
++/* Enter Continuous mode: read-quad 3 bytes */
++#define MCHP_W25Q128_ENTER_CM_D2					\
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DIS |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_CLOSE |		\
++		 MCHP_QMSPI_C_XFR_UNITS_1 |				\
++		 MCHP_QMSPI_C_XFR_NUNITS(3) | MCHP_QMSPI_C_DESCR_LAST)
++
++/* Enter Continuous mode: transmit-single CM dual read opcode */
++#define MCHP_W25Q128_ENTER_CM_DUAL_D0					\
++		(MCHP_QMSPI_C_IFM_1X | MCHP_QMSPI_C_TX_DATA |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(1))
++
++/* Enter Continuous mode: transmit-dual 24-bit address and mode byte  */
++#define MCHP_W25Q128_ENTER_CM_DUAL_D1					\
++		(MCHP_QMSPI_C_IFM_2X | MCHP_QMSPI_C_TX_DATA |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE |	\
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(4))
++
++/* Enter Continuous mode: read-dual 3 bytes */
++#define MCHP_W25Q128_ENTER_CM_DUAL_D2					\
++		(MCHP_QMSPI_C_IFM_2X | MCHP_QMSPI_C_TX_DIS |		\
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS |	\
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_CLOSE |		\
++		 MCHP_QMSPI_C_XFR_UNITS_1 |				\
++		 MCHP_QMSPI_C_XFR_NUNITS(3) | MCHP_QMSPI_C_DESCR_LAST)
++
++#define MCHP_W25Q128_OPA MCHP_SAF_OPCODE_REG_VAL(0x06u, 0x75u, 0x7au, 0x05u)
++#define MCHP_W25Q128_OPB MCHP_SAF_OPCODE_REG_VAL(0x20u, 0x52u, 0xd8u, 0x02u)
++#define MCHP_W25Q128_OPC MCHP_SAF_OPCODE_REG_VAL(0xebu, 0xffu, 0xa5u, 0x35u)
++#define MCHP_W25Q128_OPD MCHP_SAF_OPCODE_REG_VAL(0xb9u, 0xabu, 0u, 0u)
++
++#define MCHP_W25Q128_DUAL_OPC MCHP_SAF_OPCODE_REG_VAL(0xbbu, 0xffu, 0xa5u, 0x35u)
++
++/* W25Q128 STATUS2 bit[7] == 0 part is NOT in suspend state */
++#define MCHP_W25Q128_POLL2_MASK			0xff7fU
++
++/*
++ * SAF Flash Continuous Mode Prefix register value
++ * b[7:0] = continuous mode prefix opcode
++ * b[15:8] = continuous mode prefix opcode data
++ * Some SPI flash devices require a prefix command before
++ * they will enter continuous mode.
++ * A zero value means the SPI flash does not require a prefix
++ * command.
++ */
++#define MCHP_W25Q128_CONT_MODE_PREFIX_VAL	0u
++
++/* SAF Flash power down/up activity timeout in 32KHz units */
++#define MCHP_W25Q128_PD_TIMEOUT_32K		0x10u
++
++/* SAF Flash minimum time between power up and down events in
++ * 48MHz time units (~20 ns)
++ */
++#define MCHP_W25Q128_PD_EVENT_INTERVAL		0x4ffu
++
++#define MCHP_SAF_PD_EVENT_INTERVAL_25US		1279u
++
++
++#define MCHP_W25Q128_FLAGS			0U
++
++
++/* W25Q256 SPI flash device connected size in bytes */
++#define MCHP_W25Q256_SIZE (32U * 1024U * 1024U)
++
++/*
++ * Six QMSPI descriptors describe SPI flash opcode protocols.
++ * W25Q256 device.
++ */
++
++/* Continuous Mode Read: Transmit-quad opcode plus 32-bit address */
++#define MCHP_W25Q256_CM_RD_D0 \
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DATA | \
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS | \
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE | \
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(5))
++
++#define MCHP_W25Q256_CM_RD_D1 \
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DIS | \
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS | \
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE | \
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(2))
++
++#define MCHP_W25Q256_CM_RD_D2 \
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DIS | \
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_EN | \
++		 MCHP_QMSPI_C_RX_LDMA_CH0 | MCHP_QMSPI_C_CLOSE | \
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(0) | \
++		 MCHP_QMSPI_C_DESCR_LAST)
++
++/* Enter Continuous mode: transmit-single CM quad read opcode */
++#define MCHP_W25Q256_ENTER_CM_D0 \
++		(MCHP_QMSPI_C_IFM_1X | MCHP_QMSPI_C_TX_DATA | \
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS | \
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE | \
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(1))
++
++/* Enter Continuous mode: transmit-quad 32-bit address and mode byte  */
++#define MCHP_W25Q256_ENTER_CM_D1 \
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DATA | \
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS | \
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_NO_CLOSE | \
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(5))
++
++/* Enter Continuous mode: read-quad 3 bytes */
++#define MCHP_W25Q256_ENTER_CM_D2 \
++		(MCHP_QMSPI_C_IFM_4X | MCHP_QMSPI_C_TX_DIS | \
++		 MCHP_QMSPI_C_TX_DMA_DIS | MCHP_QMSPI_C_RX_DIS | \
++		 MCHP_QMSPI_C_RX_DMA_DIS | MCHP_QMSPI_C_CLOSE | \
++		 MCHP_QMSPI_C_XFR_UNITS_1 | MCHP_QMSPI_C_XFR_NUNITS(3) | \
++		 MCHP_QMSPI_C_DESCR_LAST)
++
++#define MCHP_W25Q256_OPA MCHP_SAF_OPCODE_REG_VAL(0x06U, 0x75U, 0x7aU, 0x05U)
++#define MCHP_W25Q256_OPB MCHP_SAF_OPCODE_REG_VAL(0x20U, 0x52U, 0xd8U, 0x02U)
++#define MCHP_W25Q256_OPC MCHP_SAF_OPCODE_REG_VAL(0xebU, 0xffU, 0xa5U, 0x35U)
++#define MCHP_W25Q256_OPD MCHP_SAF_OPCODE_REG_VAL(0xb9U, 0xabU, 0U, 0U)
++
++#define MCHP_W25Q256_POLL2_MASK 0xff7fU
++
++#define MCHP_W25Q256_CONT_MODE_PREFIX_VAL 0U
++
++#define MCHP_W25Q256_FLAGS 0U
++
++/* SAF Flash Config CS0 QMSPI descriptor indices */
++#define MCHP_CS0_CFG_DESCR_IDX_REG_VAL \
++		MCHP_SAF_CS_CFG_DESCR_IDX_REG_VAL(3U, 0U, 2U)
++
++#define MCHP_CS0_CFG_DESCR_IDX_REG_VAL_DUAL \
++		MCHP_SAF_CS_CFG_DESCR_IDX_REG_VAL(3U, 0U, 1U)
++
++/* SAF Flash Config CS1 QMSPI descriptor indices */
++#define MCHP_CS1_CFG_DESCR_IDX_REG_VAL \
++		MCHP_SAF_CS_CFG_DESCR_IDX_REG_VAL(9U, 6U, 8U)
++
++#define MCHP_CS1_CFG_DESCR_IDX_REG_VAL_DUAL \
++		MCHP_SAF_CS_CFG_DESCR_IDX_REG_VAL(9U, 6U, 7U)
++
++#define MCHP_SAF_HW_CFG_FLAG_FREQ 0x01U
++#define MCHP_SAF_HW_CFG_FLAG_CSTM 0x02U
++#define MCHP_SAF_HW_CFG_FLAG_CPHA 0x04U
++
++/* enable SAF prefetch */
++#define MCHP_SAF_HW_CFG_FLAG_PFEN 0x10U
++/* Use expedited prefetch instead of default */
++#define MCHP_SAF_HW_CFG_FLAG_PFEXP 0x20U
++
++/*
++ * Override the default tag map value when this bit is set
++ * in a tag_map[].
++ */
++#define MCHP_SAF_HW_CFG_TAGMAP_USE BIT(31)
++
++#define MCHP_SAF_VER_1			0
++#define MCHP_SAF_VER_2			1
++
++struct espi_saf_hw_cfg {
++	uint8_t  version;
++	uint8_t  flags;
++	uint8_t  rsvd1;
++	uint8_t  qmspi_cpha;
++	uint32_t qmspi_cs_timing;
++	uint16_t flash_pd_timeout;
++	uint16_t flash_pd_min_interval;
++	uint32_t generic_descr[MCHP_SAF_NUM_GENERIC_DESCR];
++	uint32_t tag_map[MCHP_ESPI_SAF_TAGMAP_MAX];
++};
++
++/*
++ * SAF local flash configuration.
++ * Version: 0 = V1, 1 = V2(this version)
++ * miscellaneous configuration flags
++ * SPI flash device size in bytes
++ * SPI opcodes for SAF Opcode A register
++ * SPI opcodes for SAF Opcode B register
++ * SPI opcodes for SAF Opcode C register
++ * SPI opcodes for SAF Opcode D register: power down/up and
++ *     RPMC continuous mode read
++ * SAF controller Poll2 Mask value specific for this flash device
++ * SAF continuous mode prefix register value for those flashes requiring
++ * a prefix byte transmitted before the enter continuous mode command.
++ * Start QMSPI descriptor numbers.
++ * Power down timeout count in units of 32 KHz ticks.
++ * Minimum interval between power down/up commands in 48 MHz units.
++ * QMSPI descriptors describing SPI opcode transmit and data read.
++ */
++
++/* Flags */
++#define MCHP_FLASH_FLAG_ADDR32			BIT(0)
++#define MCHP_FLASH_FLAG_V1_MSK			0xffu
++#define MCHP_FLASH_FLAG_V2_MSK			0xff00u
++#define MCHP_FLASH_FLAG_V2_PD_CS0_EN		BIT(8)
++#define MCHP_FLASH_FLAG_V2_PD_CS1_EN		BIT(9)
++#define MCHP_FLASH_FLAG_V2_PD_CS0_EC_WK_EN	BIT(10)
++#define MCHP_FLASH_FLAG_V2_PD_CS1_EC_WK_EN	BIT(11)
++
++struct espi_saf_flash_cfg {
++	uint8_t  version;
++	uint8_t  rsvd1;
++	uint16_t flags;
++	uint32_t flashsz;
++	uint8_t  rd_freq_mhz;
++	uint8_t  freq_mhz;
++	uint8_t  rsvd2[2];
++	uint32_t opa;
++	uint32_t opb;
++	uint32_t opc;
++	uint32_t opd;
++	uint16_t poll2_mask;
++	uint16_t cont_prefix;
++	uint16_t cs_cfg_descr_ids;
++	uint16_t rsvd3;
++	uint32_t descr[MCHP_SAF_QMSPI_NUM_FLASH_DESCR];
++};
++
++
++/*
++ * 17 flash protection regions
++ * Each region is described by:
++ * SPI start address. 20-bits = bits[31:12] of SPI address
++ * SPI limit address. 20-bits = bits[31:12] of last SPI address
++ * 8-bit bit map of eSPI master write-erase permission
++ * 8-bit bit map of eSPI maste read permission
++ * eSPI master numbers 0 - 7 correspond to bits 0 - 7.
++ *
++ * Protection region lock:
++ *   One 32-bit register with bits[16:0] -> protection regions 16:0
++ *
++ * eSPI Host maps threads by a tag number to master numbers.
++ * Thread numbers are 4-bit
++ * Master numbers are 3-bit
++ * Master number    Thread numbers    Description
++ *     0                0h, 1h        Host PCH HW init
++ *     1                2h, 3h        Host CPU access(HW/BIOS/SMM/SW)
++ *     2                4h, 5h        Host PCH ME
++ *     3                6h            Host PCH LAN
++ *     4                N/A           Not defined/used
++ *     5                N/A           EC Firmware portal access
++ *     6                9h, Dh        Host PCH IE
++ *     7                N/A           Not defined/used
++ *
++ * NOTE: eSPI SAF specification allows master 0 (Host PCH HW) full
++ * access to all protection regions.
++ *
++ * SAF TAG Map registers 0 - 2 map eSPI TAG values 0h - Fh to
++ * the three bit master number. Each 32-bit register contains 3-bit
++ * fields aligned on nibble boundaries holding the master number
++ * associated with the eSPI tag (thread) number.
++ * A master value of 7h in a field indicates a non-existent map entry.
++ *
++ * bit map of registers to program
++ * b[2:0] = TAG Map[2:0]
++ * b[20:4] = ProtectionRegions[16:0]
++ * bit map of PR's to lock
++ * b[20:4] = ProtectionRegions[16:0]
++ *
++ */
++#define MCHP_SAF_PR_FLAG_ENABLE 0x01U
++#define MCHP_SAF_PR_FLAG_LOCK 0x02U
++
++#define MCHP_SAF_MSTR_HOST_PCH		0U
++#define MCHP_SAF_MSTR_HOST_CPU		1U
++#define MCHP_SAF_MSTR_HOST_PCH_ME	2U
++#define MCHP_SAF_MSTR_HOST_PCH_LAN	3U
++#define MCHP_SAF_MSTR_RSVD4		4U
++#define MCHP_SAF_MSTR_EC		5U
++#define MCHP_SAF_MSTR_HOST_PCH_IE	6U
++
++struct espi_saf_pr {
++	uint32_t start;
++	uint32_t size;
++	uint8_t  master_bm_we;
++	uint8_t  master_bm_rd;
++	uint8_t  pr_num;
++	uint8_t  flags; /* bit[0]==1 is lock the region */
++};
++
++struct espi_saf_protection {
++	size_t nregions;
++	const struct espi_saf_pr *pregions;
++};
++
++#endif /* _SOC_ESPI_SAF_H_ */
+-- 
+2.17.1
+
+
+From cadbdd4aa3972cbddf382c7d07f461a023445a16 Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Mon, 26 Sep 2022 16:37:05 -0400
+Subject: [PATCH 11/21] [BACKPORTED] soc: arm: microchip: add common mec_gpio.h
+
+add common mec_gpio.h to allow access to common gpio_regs
+structure for both mec15xx and mec17xx, used in pinctrl driver
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ drivers/pinctrl/pinctrl_mchp_xec.c            | 137 +-----------------
+ soc/arm/microchip_mec/common/reg/mec_gpio.h   |  26 ++++
+ soc/arm/microchip_mec/mec1501/soc.h           |   4 +
+ .../microchip_mec/mec172x/reg/mec172x_gpio.h  |  13 --
+ soc/arm/microchip_mec/mec172x/soc.h           |   1 +
+ 5 files changed, 32 insertions(+), 149 deletions(-)
+ create mode 100644 soc/arm/microchip_mec/common/reg/mec_gpio.h
+
+diff --git a/drivers/pinctrl/pinctrl_mchp_xec.c b/drivers/pinctrl/pinctrl_mchp_xec.c
+index 6bd74b7afd..4d8f390d87 100644
+--- a/drivers/pinctrl/pinctrl_mchp_xec.c
++++ b/drivers/pinctrl/pinctrl_mchp_xec.c
+@@ -10,142 +10,7 @@
+ #define DT_DRV_COMPAT microchip_xec_pinctrl
+ 
+ #include <zephyr/drivers/pinctrl.h>
+-
+-/** @brief All GPIO register as arrays of registers */
+-struct gpio_regs {
+-	volatile uint32_t  CTRL[174];
+-	uint32_t  RESERVED[18];
+-	volatile uint32_t  PARIN[6];
+-	uint32_t  RESERVED1[26];
+-	volatile uint32_t  PAROUT[6];
+-	uint32_t  RESERVED2[20];
+-	volatile uint32_t  LOCK[6];
+-	uint32_t  RESERVED3[64];
+-	volatile uint32_t  CTRL2[174];
+-};
+-
+-#define NUM_MCHP_GPIO_PORTS	6u
+-
+-/* GPIO Control register field definitions. */
+-
+-/* bits[1:0] internal pull up/down selection */
+-#define MCHP_GPIO_CTRL_PUD_POS		0
+-#define MCHP_GPIO_CTRL_PUD_MASK0	0x03u
+-#define MCHP_GPIO_CTRL_PUD_MASK		0x03u
+-#define MCHP_GPIO_CTRL_PUD_NONE		0x00u
+-#define MCHP_GPIO_CTRL_PUD_PU		0x01u
+-#define MCHP_GPIO_CTRL_PUD_PD		0x02u
+-/* Repeater(keeper) mode */
+-#define MCHP_GPIO_CTRL_PUD_RPT		0x03u
+-
+-/* bits[3:2] power gating */
+-#define MCHP_GPIO_CTRL_PWRG_POS		2
+-#define MCHP_GPIO_CTRL_PWRG_MASK0	0x03u
+-#define MCHP_GPIO_CTRL_PWRG_VTR_IO	0
+-#define MCHP_GPIO_CTRL_PWRG_VCC_IO	SHLU32(1, MCHP_GPIO_CTRL_PWRG_POS)
+-#define MCHP_GPIO_CTRL_PWRG_OFF		SHLU32(2, MCHP_GPIO_CTRL_PWRG_POS)
+-#define MCHP_GPIO_CTRL_PWRG_RSVD	SHLU32(3, MCHP_GPIO_CTRL_PWRG_POS)
+-#define MCHP_GPIO_CTRL_PWRG_MASK	SHLU32(3, MCHP_GPIO_CTRL_PWRG_POS)
+-
+-/* bit[8] output buffer type: push-pull or open-drain */
+-#define MCHP_GPIO_CTRL_BUFT_POS		8
+-#define MCHP_GPIO_CTRL_BUFT_MASK	BIT(MCHP_GPIO_CTRL_BUFT_POS)
+-#define MCHP_GPIO_CTRL_BUFT_OPENDRAIN	BIT(MCHP_GPIO_CTRL_BUFT_POS)
+-#define MCHP_GPIO_CTRL_BUFT_PUSHPULL	0
+-
+-/* bit[9] direction */
+-#define MCHP_GPIO_CTRL_DIR_POS		9
+-#define MCHP_GPIO_CTRL_DIR_MASK		BIT(MCHP_GPIO_CTRL_DIR_POS)
+-#define MCHP_GPIO_CTRL_DIR_OUTPUT	BIT(MCHP_GPIO_CTRL_DIR_POS)
+-#define MCHP_GPIO_CTRL_DIR_INPUT	0
+-
+-/*
+- * bit[10] Alternate output disable. Default==0(alternate output enabled)
+- * GPIO output value is controlled by bit[16] of this register.
+- * Set bit[10]=1 if you wish to control pin output using the parallel
+- * GPIO output register bit for this pin.
+- */
+-#define MCHP_GPIO_CTRL_AOD_POS		10
+-#define MCHP_GPIO_CTRL_AOD_MASK		BIT(MCHP_GPIO_CTRL_AOD_POS)
+-#define MCHP_GPIO_CTRL_AOD_DIS		BIT(MCHP_GPIO_CTRL_AOD_POS)
+-
+-/* bit[11] GPIO function output polarity */
+-#define MCHP_GPIO_CTRL_POL_POS		11
+-#define MCHP_GPIO_CTRL_POL_INVERT	BIT(MCHP_GPIO_CTRL_POL_POS)
+-
+-/* bits[14:12] pin mux (function) */
+-#define MCHP_GPIO_CTRL_MUX_POS		12
+-#define MCHP_GPIO_CTRL_MUX_MASK0	0x07u
+-#define MCHP_GPIO_CTRL_MUX_MASK		SHLU32(7, MCHP_GPIO_CTRL_MUX_POS)
+-#define MCHP_GPIO_CTRL_MUX_F0		0
+-#define MCHP_GPIO_CTRL_MUX_GPIO		MCHP_GPIO_CTRL_MUX_F0
+-#define MCHP_GPIO_CTRL_MUX_F1		SHLU32(1, MCHP_GPIO_CTRL_MUX_POS)
+-#define MCHP_GPIO_CTRL_MUX_F2		SHLU32(2, MCHP_GPIO_CTRL_MUX_POS)
+-#define MCHP_GPIO_CTRL_MUX_F3		SHLU32(3, MCHP_GPIO_CTRL_MUX_POS)
+-#define MCHP_GPIO_CTRL_MUX_F4		SHLU32(4, MCHP_GPIO_CTRL_MUX_POS)
+-#define MCHP_GPIO_CTRL_MUX_F5		SHLU32(5, MCHP_GPIO_CTRL_MUX_POS)
+-#define MCHP_GPIO_CTRL_MUX_F6		SHLU32(6, MCHP_GPIO_CTRL_MUX_POS)
+-#define MCHP_GPIO_CTRL_MUX_F7		SHLU32(7, MCHP_GPIO_CTRL_MUX_POS)
+-#define MCHP_GPIO_CTRL_MUX(n) SHLU32(((n) & 0x7u), MCHP_GPIO_CTRL_MUX_POS)
+-
+-/*
+- * bit[15] Disables input pad leaving output pad enabled
+- * Useful for reducing power consumption of output only pins.
+- */
+-#define MCHP_GPIO_CTRL_INPAD_DIS_POS	15
+-#define MCHP_GPIO_CTRL_INPAD_DIS_MASK	BIT(MCHP_GPIO_CTRL_INPAD_DIS_POS)
+-#define MCHP_GPIO_CTRL_INPAD_DIS	BIT(MCHP_GPIO_CTRL_INPAD_DIS_POS)
+-
+-/* bit[16]: Alternate output pin value. Enabled when bit[10]==0(default) */
+-#define MCHP_GPIO_CTRL_OUTVAL_POS	16
+-#define MCHP_GPIO_CTRL_OUTV_HI		BIT(MCHP_GPIO_CTRL_OUTVAL_POS)
+-
+-/* bit[24] Input pad value. Always live unless input pad is powered down */
+-#define MCHP_GPIO_CTRL_INPAD_VAL_POS	24
+-#define MCHP_GPIO_CTRL_INPAD_VAL_HI	BIT(MCHP_GPIO_CTRL_INPAD_VAL_POS)
+-
+-#define MCHP_GPIO_CTRL_DRIVE_OD_HI				     \
+-	(MCHP_GPIO_CTRL_BUFT_OPENDRAIN + MCHP_GPIO_CTRL_DIR_OUTPUT + \
+-	 MCHP_GPIO_CTRL_MUX_GPIO + MCHP_GPIO_CTRL_OUTV_HI)
+-
+-/*
+- * Each GPIO pin implements a second control register.
+- * GPIO Control 2 register selects pin drive strength and slew rate.
+- * bit[0] = slew rate: 0=slow, 1=fast
+- * bits[5:4] = drive strength
+- * 00b = 2mA (default)
+- * 01b = 4mA
+- * 10b = 8mA
+- * 11b = 12mA
+- */
+-#define MCHP_GPIO_CTRL2_OFFSET		0x0500u
+-#define MCHP_GPIO_CTRL2_SLEW_POS	0
+-#define MCHP_GPIO_CTRL2_SLEW_MASK	0x01u
+-#define MCHP_GPIO_CTRL2_SLEW_SLOW	0
+-#define MCHP_GPIO_CTRL2_SLEW_FAST	BIT(MCHP_GPIO_CTRL2_SLEW_POS)
+-#define MCHP_GPIO_CTRL2_DRV_STR_POS	4
+-#define MCHP_GPIO_CTRL2_DRV_STR_MASK	0x30u
+-#define MCHP_GPIO_CTRL2_DRV_STR_2MA	0
+-#define MCHP_GPIO_CTRL2_DRV_STR_4MA	0x10u
+-#define MCHP_GPIO_CTRL2_DRV_STR_8MA	0x20u
+-#define MCHP_GPIO_CTRL2_DRV_STR_12MA	0x30u
+-
+-#define MCHP_XEC_NO_PULL	0x0
+-#define MCHP_XEC_PULL_UP	0x1
+-#define MCHP_XEC_PULL_DOWN	0x2
+-#define MCHP_XEC_REPEATER	0x3
+-#define MCHP_XEC_PUSH_PULL	0x0
+-#define MCHP_XEC_OPEN_DRAIN	0x1
+-#define MCHP_XEC_NO_OVAL	0x0
+-#define MCHP_XEC_OVAL_LOW	0x1
+-#define MCHP_XEC_OVAL_HIGH	0x2
+-#define MCHP_XEC_DRVSTR_NONE	0x0
+-#define MCHP_XEC_DRVSTR_2MA	0x1
+-#define MCHP_XEC_DRVSTR_4MA	0x2
+-#define MCHP_XEC_DRVSTR_8MA	0x3
+-#define MCHP_XEC_DRVSTR_12MA	0x4
+-
+-#define SHLU32(v, n)			((uint32_t)(v) << (n))
++#include <soc.h>
+ 
+ /* Microchip XEC: each GPIO pin has two 32-bit control register.
+  * The first 32-bit register contains all pin features except
+diff --git a/soc/arm/microchip_mec/common/reg/mec_gpio.h b/soc/arm/microchip_mec/common/reg/mec_gpio.h
+new file mode 100644
+index 0000000000..bf9ac42504
+--- /dev/null
++++ b/soc/arm/microchip_mec/common/reg/mec_gpio.h
+@@ -0,0 +1,26 @@
++/*
++ * Copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++#ifndef _MEC_GPIO_H
++#define _MEC_GPIO_H
++
++#include <stdint.h>
++#include <stddef.h>
++
++/** @brief All GPIO register as arrays of registers */
++struct gpio_regs {
++	volatile uint32_t  CTRL[174];
++	uint32_t  RESERVED[18];
++	volatile uint32_t  PARIN[6];
++	uint32_t  RESERVED1[26];
++	volatile uint32_t  PAROUT[6];
++	uint32_t  RESERVED2[20];
++	volatile uint32_t  LOCK[6];
++	uint32_t  RESERVED3[64];
++	volatile uint32_t  CTRL2[174];
++};
++
++#endif	/* #ifndef _MEC_GPIO_H */
+diff --git a/soc/arm/microchip_mec/mec1501/soc.h b/soc/arm/microchip_mec/mec1501/soc.h
+index caac8aafaf..9e24d1e404 100644
+--- a/soc/arm/microchip_mec/mec1501/soc.h
++++ b/soc/arm/microchip_mec/mec1501/soc.h
+@@ -14,12 +14,16 @@
+ #include "MEC1501hsz.h"
+ #include "regaccess.h"
+ 
++/* common SoC API */
+ #include "../common/soc_dt.h"
+ #include "../common/soc_gpio.h"
+ #include "../common/soc_pins.h"
+ #include "../common/soc_espi_channels.h"
+ #include "soc_espi_saf_v1.h"
+ 
++/* common peripheral register defines */
++#include "../common/reg/mec_gpio.h"
++
+ #endif
+ 
+ #endif
+diff --git a/soc/arm/microchip_mec/mec172x/reg/mec172x_gpio.h b/soc/arm/microchip_mec/mec172x/reg/mec172x_gpio.h
+index 8cb981fcad..82b53c4af0 100644
+--- a/soc/arm/microchip_mec/mec172x/reg/mec172x_gpio.h
++++ b/soc/arm/microchip_mec/mec172x/reg/mec172x_gpio.h
+@@ -393,19 +393,6 @@ enum mchp_gpio_drv_str {
+ 	MCHP_GPIO_DRV_STR_12MA,
+ };
+ 
+-/** @brief All GPIO register as arrays of registers */
+-struct gpio_regs {
+-	volatile uint32_t  CTRL[174];
+-	uint32_t  RESERVED[18];
+-	volatile uint32_t  PARIN[6];
+-	uint32_t  RESERVED1[26];
+-	volatile uint32_t  PAROUT[6];
+-	uint32_t  RESERVED2[20];
+-	volatile uint32_t  LOCK[6];
+-	uint32_t  RESERVED3[64];
+-	volatile uint32_t  CTRL2[174];
+-};
+-
+ /** @brief GPIO control registers by pin name */
+ struct gpio_ctrl_regs {
+ 	volatile uint32_t CTRL_0000;
+diff --git a/soc/arm/microchip_mec/mec172x/soc.h b/soc/arm/microchip_mec/mec172x/soc.h
+index 134363fc6d..3bf4f533fd 100644
+--- a/soc/arm/microchip_mec/mec172x/soc.h
++++ b/soc/arm/microchip_mec/mec172x/soc.h
+@@ -274,6 +274,7 @@ typedef enum {
+ #include "../common/reg/mec_uart.h"
+ #include "../common/reg/mec_vci.h"
+ #include "../common/reg/mec_wdt.h"
++#include "../common/reg/mec_gpio.h"
+ 
+ /* common SoC API */
+ #include "../common/soc_dt.h"
+-- 
+2.17.1
+
+
+From 01f6588fff700a639e5d023569a64e2294f496a1 Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Fri, 30 Sep 2022 17:12:39 -0400
+Subject: [PATCH 12/21] [BACKPORTED] drivers: uart: microchip: add support for
+ mec15xx
+
+update uart mchp xec driver to support mec15xx and add
+pinctrl support for mec15xx uart
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ .../mec1501modular_assy6885.dts               |  2 +
+ .../mec15xxevb_assy6853.dts                   |  2 +
+ drivers/serial/uart_mchp_xec.c                | 66 +++++++++++++++----
+ dts/arm/microchip/mec1501hsz.dtsi             | 18 +++--
+ 4 files changed, 71 insertions(+), 17 deletions(-)
+
+diff --git a/boards/arm/mec1501modular_assy6885/mec1501modular_assy6885.dts b/boards/arm/mec1501modular_assy6885/mec1501modular_assy6885.dts
+index 872cc86570..33f6dc06d3 100644
+--- a/boards/arm/mec1501modular_assy6885/mec1501modular_assy6885.dts
++++ b/boards/arm/mec1501modular_assy6885/mec1501modular_assy6885.dts
+@@ -52,6 +52,8 @@
+ &uart1 {
+ 	status = "okay";
+ 	current-speed = <115200>;
++	pinctrl-0 = <&uart1_tx_gpio170 &uart1_rx_gpio171>;
++	pinctrl-names = "default";
+ };
+ 
+ &adc0 {
+diff --git a/boards/arm/mec15xxevb_assy6853/mec15xxevb_assy6853.dts b/boards/arm/mec15xxevb_assy6853/mec15xxevb_assy6853.dts
+index d7a67f353a..1ac1439bdc 100644
+--- a/boards/arm/mec15xxevb_assy6853/mec15xxevb_assy6853.dts
++++ b/boards/arm/mec15xxevb_assy6853/mec15xxevb_assy6853.dts
+@@ -80,6 +80,8 @@
+ &uart2 {
+ 	status = "okay";
+ 	current-speed = <115200>;
++	pinctrl-0 = <&uart2_tx_gpio146 &uart2_rx_gpio145>;
++	pinctrl-names = "default";
+ };
+ 
+ &adc0 {
+diff --git a/drivers/serial/uart_mchp_xec.c b/drivers/serial/uart_mchp_xec.c
+index 8a7b74eea8..bc7859aad4 100644
+--- a/drivers/serial/uart_mchp_xec.c
++++ b/drivers/serial/uart_mchp_xec.c
+@@ -24,16 +24,15 @@
+ #include <zephyr/init.h>
+ #include <zephyr/toolchain.h>
+ #include <zephyr/linker/sections.h>
++#ifdef CONFIG_SOC_SERIES_MEC172X
+ #include <zephyr/drivers/clock_control/mchp_xec_clock_control.h>
+ #include <zephyr/drivers/interrupt_controller/intc_mchp_xec_ecia.h>
++#endif
+ #include <zephyr/drivers/pinctrl.h>
+ #include <zephyr/drivers/uart.h>
+ #include <zephyr/sys/sys_io.h>
+ #include <zephyr/spinlock.h>
+ 
+-BUILD_ASSERT(IS_ENABLED(CONFIG_SOC_SERIES_MEC172X),
+-	     "XEC UART driver only support MEC172x at this time");
+-
+ /* Clock source is 1.8432 MHz derived from PLL 48 MHz */
+ #define XEC_UART_CLK_SRC_1P8M		0
+ /* Clock source is PLL 48 MHz output */
+@@ -195,6 +194,56 @@ struct uart_xec_dev_data {
+ 
+ static const struct uart_driver_api uart_xec_driver_api;
+ 
++#ifdef CONFIG_SOC_SERIES_MEC172X
++
++static void uart_clr_slp_en(const struct device *dev)
++{
++	struct uart_xec_device_config const *dev_cfg = dev->config;
++
++	z_mchp_xec_pcr_periph_sleep(dev_cfg->pcr_idx, dev_cfg->pcr_bitpos, 0);
++}
++
++static inline void uart_xec_girq_clr(const struct device *dev)
++{
++	struct uart_xec_device_config const *dev_cfg = dev->config;
++
++	mchp_soc_ecia_girq_src_clr(dev_cfg->girq_id, dev_cfg->girq_pos);
++}
++
++static inline void uart_xec_girq_en(uint8_t girq_idx, uint8_t girq_posn)
++{
++	mchp_xec_ecia_girq_src_en(girq_idx, girq_posn);
++}
++
++#else
++
++static void uart_clr_slp_en(const struct device *dev)
++{
++	struct uart_xec_device_config const *dev_cfg = dev->config;
++
++	if (dev_cfg->pcr_bitpos == MCHP_PCR2_UART0_POS) {
++		mchp_pcr_periph_slp_ctrl(PCR_UART0, 0);
++	} else if (dev_cfg->pcr_bitpos == MCHP_PCR2_UART1_POS) {
++		mchp_pcr_periph_slp_ctrl(PCR_UART1, 0);
++	} else {
++		mchp_pcr_periph_slp_ctrl(PCR_UART2, 0);
++	}
++}
++
++static inline void uart_xec_girq_clr(const struct device *dev)
++{
++	struct uart_xec_device_config const *dev_cfg = dev->config;
++
++	MCHP_GIRQ_SRC(dev_cfg->girq_id) = BIT(dev_cfg->girq_pos);
++}
++
++static inline void uart_xec_girq_en(uint8_t girq_idx, uint8_t girq_posn)
++{
++	MCHP_GIRQ_ENSET(girq_idx) = BIT(girq_posn);
++}
++
++#endif
++
+ static void set_baud_rate(const struct device *dev, uint32_t baud_rate)
+ {
+ 	const struct uart_xec_device_config * const dev_cfg = dev->config;
+@@ -363,11 +412,7 @@ static int uart_xec_init(const struct device *dev)
+ 	struct uart_xec_dev_data *dev_data = dev->data;
+ 	int ret;
+ 
+-	ret = z_mchp_xec_pcr_periph_sleep(dev_cfg->pcr_idx,
+-					  dev_cfg->pcr_bitpos, 0);
+-	if (ret != 0) {
+-		return ret;
+-	}
++	uart_clr_slp_en(dev);
+ 
+ 	ret = pinctrl_apply_state(dev_cfg->pcfg, PINCTRL_STATE_DEFAULT);
+ 	if (ret != 0) {
+@@ -750,7 +795,6 @@ static void uart_xec_irq_callback_set(const struct device *dev,
+  */
+ static void uart_xec_isr(const struct device *dev)
+ {
+-	const struct uart_xec_device_config * const dev_cfg = dev->config;
+ 	struct uart_xec_dev_data * const dev_data = dev->data;
+ 
+ 	if (dev_data->cb) {
+@@ -758,7 +802,7 @@ static void uart_xec_isr(const struct device *dev)
+ 	}
+ 
+ 	/* clear ECIA GIRQ R/W1C status bit after UART status cleared */
+-	mchp_xec_ecia_girq_src_clr(dev_cfg->girq_id, dev_cfg->girq_pos);
++	uart_xec_girq_clr(dev);
+ }
+ 
+ #endif /* CONFIG_UART_INTERRUPT_DRIVEN */
+@@ -862,7 +906,7 @@ static const struct uart_driver_api uart_xec_driver_api = {
+ 			    uart_xec_isr, DEVICE_DT_INST_GET(n),	\
+ 			    0);						\
+ 		irq_enable(DT_INST_IRQN(n));				\
+-		mchp_xec_ecia_girq_src_en(DT_INST_PROP_BY_IDX(n, girqs, 0), \
++		uart_xec_girq_en(DT_INST_PROP_BY_IDX(n, girqs, 0), \
+ 					  DT_INST_PROP_BY_IDX(n, girqs, 1)); \
+ 	}
+ #else
+diff --git a/dts/arm/microchip/mec1501hsz.dtsi b/dts/arm/microchip/mec1501hsz.dtsi
+index 85d02eb494..16e6e63194 100644
+--- a/dts/arm/microchip/mec1501hsz.dtsi
++++ b/dts/arm/microchip/mec1501hsz.dtsi
+@@ -162,30 +162,36 @@
+ 			pcrs = <1 9>;
+ 		};
+ 		uart0: uart@400f2400 {
+-			compatible = "ns16550";
++			compatible = "microchip,xec-uart";
+ 			reg = <0x400f2400 0x400>;
+ 			interrupts = <40 0>;
+ 			clock-frequency = <1843200>;
+ 			current-speed = <38400>;
+-			reg-shift = <0>;
++			girqs = <15 0>;
++			pcrs = <2 1>;
++			ldn = <9>;
+ 			status = "disabled";
+ 		};
+ 		uart1: uart@400f2800 {
+-			compatible = "ns16550";
++			compatible = "microchip,xec-uart";
+ 			reg = <0x400f2800 0x400>;
+ 			interrupts = <41 0>;
+ 			clock-frequency = <1843200>;
+ 			current-speed = <38400>;
+-			reg-shift = <0>;
++			girqs = <15 1>;
++			pcrs = <2 2>;
++			ldn = <10>;
+ 			status = "disabled";
+ 		};
+ 		uart2: uart@400f2c00 {
+-			compatible = "ns16550";
++			compatible = "microchip,xec-uart";
+ 			reg = <0x400f2c00 0x400>;
+ 			interrupts = <44 0>;
+ 			clock-frequency = <1843200>;
+ 			current-speed = <38400>;
+-			reg-shift = <0>;
++			girqs = <15 4>;
++			pcrs = <2 28>;
++			ldn = <11>;
+ 			status = "disabled";
+ 		};
+ 
+-- 
+2.17.1
+
+
+From f05d3093f51a86904bcec14e7fbf12f03e0bbfab Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Tue, 1 Nov 2022 13:01:16 -0400
+Subject: [PATCH 13/21] [BACKPORTED] soc: arm: mec1501: add debug interface
+ configuration
+
+Move regs configuration from previous pinmux.c to soc layer.
+This involves the debug interface, configuring the GPIO bank power
+and the test clock out pin.
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+---
+ soc/arm/microchip_mec/mec1501/soc.c | 49 +++++++++++++++++++++++++++++
+ 1 file changed, 49 insertions(+)
+
+diff --git a/soc/arm/microchip_mec/mec1501/soc.c b/soc/arm/microchip_mec/mec1501/soc.c
+index f4382b1a64..3eec5889e7 100644
+--- a/soc/arm/microchip_mec/mec1501/soc.c
++++ b/soc/arm/microchip_mec/mec1501/soc.c
+@@ -7,6 +7,7 @@
+ #include <zephyr/device.h>
+ #include <zephyr/init.h>
+ #include <soc.h>
++#include <zephyr/drivers/pinctrl.h>
+ #include <zephyr/kernel.h>
+ #include <zephyr/arch/cpu.h>
+ #include <zephyr/arch/arm/aarch32/cortex_m/cmsis.h>
+@@ -15,6 +16,8 @@
+ #define MCHP_GCFG_DID_DEV_ID_MEC150x    0x0020U
+ #define MCHP_TRIM_ENABLE_INT_OSCILLATOR 0x06U
+ 
++#define TEST_CLK_OUT_PIN_COUNT		1
++
+ /*
+  * Make sure PCR sleep enables are clear except for crypto
+  * which do not have internal clock gating.
+@@ -130,9 +133,36 @@ static int soc_ecia_init(void)
+ 	return 0;
+ }
+ 
++static void configure_debug_interface(void)
++{
++	/* No debug support */
++	ECS_REGS->DEBUG_CTRL = 0;
++	ECS_REGS->ETM_CTRL = 0;
++
++#ifdef CONFIG_SOC_MEC1501_DEBUG_WITHOUT_TRACING
++	/* Release JTAG TDI and JTAG TDO pins so they can be
++	 * controlled by their respective PCR register (UART2).
++	 * For more details see table 44-1
++	 */
++	ECS_REGS->DEBUG_CTRL = (MCHP_ECS_DCTRL_DBG_EN |
++				MCHP_ECS_DCTRL_MODE_SWD);
++#elif defined(CONFIG_SOC_MEC1501_DEBUG_AND_TRACING)
++	#if defined(CONFIG_SOC_MEC1501_DEBUG_AND_ETM_TRACING)
++	#pragma error "TRACE DATA are not exposed in HW connector"
++	#elif defined(CONFIG_SOC_MEC1501_DEBUG_AND_SWV_TRACING)
++		ECS_REGS->DEBUG_CTRL = (MCHP_ECS_DCTRL_DBG_EN |
++				MCHP_ECS_DCTRL_MODE_SWD_SWV);
++	#endif /* CONFIG_SOC_MEC1501_DEBUG_AND_TRACING */
++
++#endif /* CONFIG_SOC_MEC1501_DEBUG_WITHOUT_TRACING */
++}
++
+ static int soc_init(const struct device *dev)
+ {
+ 	uint32_t isave;
++#ifdef CONFIG_SOC_MEC1501_TEST_CLK_OUT
++	const pinctrl_soc_pin_t test_clk_out_pin = {MCHP_XEC_PINMUX(060, MCHP_AF2), 0};
++#endif
+ 
+ 	ARG_UNUSED(dev);
+ 
+@@ -154,6 +184,25 @@ static int soc_init(const struct device *dev)
+ 
+ 	soc_ecia_init();
+ 
++	/* Configure GPIO bank before usage
++	 * VTR1 is not configurable
++	 * VTR2 doesn't need configuration if setting VTR2_STRAP
++	 */
++#ifdef CONFIG_SOC_MEC1501_VTR3_1_8V
++	ECS_REGS->GPIO_BANK_PWR |= MCHP_ECS_VTR3_LVL_18;
++#endif
++
++	configure_debug_interface();
++
++#ifdef CONFIG_SOC_MEC1501_TEST_CLK_OUT
++	/*
++	 * Deep sleep testing: Enable TEST_CLK_OUT on GPIO_060 function 2.
++	 * TEST_CLK_OUT is the PLL 48MHz conditioned output.
++	 */
++
++	pinctrl_configure_pins(&test_clk_out_pin, TEST_CLK_OUT_PIN_COUNT, 0);
++#endif
++
+ 	if (!isave) {
+ 		__enable_irq();
+ 	}
+-- 
+2.17.1
+
+
+From 32a3986faab8524d374a2434294c7e4a9d394dd3 Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Tue, 1 Nov 2022 13:21:30 -0400
+Subject: [PATCH 14/21] [BACKPORTED] driver: peci: mec: enable peci in ec
+ subsystem register
+
+Ensure that PECI block is enabled in the EC Subsystem by clearing
+the PECI_DIS (peci disable) register
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+---
+ drivers/peci/peci_mchp_xec.c      | 3 +++
+ dts/arm/microchip/mec1501hsz.dtsi | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/drivers/peci/peci_mchp_xec.c b/drivers/peci/peci_mchp_xec.c
+index fff0abe74b..d97f85d855 100644
+--- a/drivers/peci/peci_mchp_xec.c
++++ b/drivers/peci/peci_mchp_xec.c
+@@ -442,6 +442,7 @@ static int peci_xec_init(const struct device *dev)
+ {
+ 	const struct peci_xec_config * const cfg = dev->config;
+ 	struct peci_regs * const regs = cfg->regs;
++	struct ecs_regs * const ecs_regs = (struct ecs_regs *)(DT_REG_ADDR(DT_NODELABEL(ecs)));
+ 
+ #ifdef CONFIG_PINCTRL
+ 	int ret = pinctrl_apply_state(cfg->pcfg, PINCTRL_STATE_DEFAULT);
+@@ -458,6 +459,8 @@ static int peci_xec_init(const struct device *dev)
+ 
+ 	peci_clr_slp_en(dev);
+ 
++	ecs_regs->PECI_DIS = 0x00u;
++
+ 	/* Reset PECI interface */
+ 	regs->CONTROL |= MCHP_PECI_CTRL_RST;
+ 	k_msleep(PECI_RESET_DELAY_MS);
+diff --git a/dts/arm/microchip/mec1501hsz.dtsi b/dts/arm/microchip/mec1501hsz.dtsi
+index 16e6e63194..733a604de5 100644
+--- a/dts/arm/microchip/mec1501hsz.dtsi
++++ b/dts/arm/microchip/mec1501hsz.dtsi
+@@ -67,6 +67,9 @@
+ 	};
+ 
+ 	soc {
++		ecs: ecs@4000fc00 {
++			reg = <0x4000fc00 0x200>;
++		};
+ 		pcr: pcr@40080100 {
+ 			reg = <0x40080100 0x100 0x4000a400 0x100>;
+ 			reg-names = "pcrr", "vbatr";
+-- 
+2.17.1
+
+
+From cf9ff01716fde6f0249accb7aa696fcbd3a3d7ef Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Micha=C5=82=20Barna=C5=9B?= <mb@semihalf.com>
+Date: Tue, 8 Nov 2022 18:23:21 +0100
+Subject: [PATCH 15/21] [BACKPORTED] espi: auto enable the ESPI SAF XEC based
+ on the device tree
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The SAF XEC driver for eSPI was not enabled by default so sample
+code for espi was failing. This commit changes the behavior to match
+current scheme of enabling the drivers based on the status of required
+device tree nodes.
+
+Signed-off-by: Michał Barnaś <mb@semihalf.com>
+---
+ drivers/espi/Kconfig.xec | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/espi/Kconfig.xec b/drivers/espi/Kconfig.xec
+index 585731dbdd..7c9285dbf3 100644
+--- a/drivers/espi/Kconfig.xec
++++ b/drivers/espi/Kconfig.xec
+@@ -63,13 +63,17 @@ config ESPI_FLASH_BUFFER_SIZE
+ 
+ config ESPI_SAF_XEC
+ 	bool "XEC Microchip ESPI SAF driver"
++	default y
+ 	depends on SOC_SERIES_MEC1501X
++	depends on DT_HAS_MICROCHIP_XEC_ESPI_SAF_ENABLED
+ 	help
+ 	  Enable the Microchip XEC SAF ESPI driver for MEC15xx family.
+ 
+ config ESPI_SAF_XEC_V2
+ 	bool "XEC Microchip ESPI SAF V2 driver"
++	default y
+ 	depends on SOC_SERIES_MEC172X
++	depends on DT_HAS_MICROCHIP_XEC_ESPI_SAF_V2_ENABLED
+ 	help
+ 	  Enable the Microchip XEC SAF ESPI driver for MEC172x series.
+ 
+-- 
+2.17.1
+
+
+From 22d2be002d38245357fef42025260334f5bc10f9 Mon Sep 17 00:00:00 2001
+From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
+Date: Tue, 13 Dec 2022 12:02:55 +0530
+Subject: [PATCH 16/21] soc: arm: microchip: mec172x: Add option to enable JTAG
+
+Set different options for MEC172x SoC debug via JTAG.
+
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ soc/arm/microchip_mec/mec172x/Kconfig.soc | 47 +++++++++++++++++++++++
+ soc/arm/microchip_mec/mec172x/soc.c       | 34 ++++++++++++++++
+ 2 files changed, 81 insertions(+)
+
+diff --git a/soc/arm/microchip_mec/mec172x/Kconfig.soc b/soc/arm/microchip_mec/mec172x/Kconfig.soc
+index d74993b446..45d48b2922 100644
+--- a/soc/arm/microchip_mec/mec172x/Kconfig.soc
++++ b/soc/arm/microchip_mec/mec172x/Kconfig.soc
+@@ -29,3 +29,50 @@ config SOC_MEC172X_TEST_CLK_OUT
+ 	bool "Test clock out pin"
+ 	help
+ 	  Enables a test clock out pin
++
++choice
++	prompt "MEC172X debug interface general configuration"
++	default SOC_MEC172X_DEBUG_DISABLED
++	depends on SOC_SERIES_MEC172X
++	help
++	  Select Debug SoC interface support for MEC15xx SoC family
++
++	config SOC_MEC172X_DEBUG_DISABLED
++		bool "Disable debug support"
++		help
++		  Debug port is disabled, JTAG/SWD cannot be enabled. JTAG_RST#
++		  pin is ignored. All other JTAG pins can be used as GPIOs
++		  or other non-JTAG alternate functions.
++
++	config SOC_MEC172X_DEBUG_WITHOUT_TRACING
++		bool "Debug support via Serial wire debug"
++		help
++		  JTAG port in SWD mode. ADC00-03 can be used.
++
++	config SOC_MEC172X_DEBUG_AND_TRACING
++		bool "Debug support via Serial wire debug with tracing enabled"
++		help
++		  JTAG port is enabled in SWD mode. Refer to tracing options
++		  to see if ADC00-03 can be used or not.
++
++endchoice
++
++choice
++	prompt "MEC172X debug interface trace configuration"
++	default SOC_MEC172X_DEBUG_AND_ETM_TRACING
++	depends on SOC_MEC172X_DEBUG_AND_TRACING
++	help
++	  Select tracing mode for debug interface
++
++	config SOC_MEC172X_DEBUG_AND_ETM_TRACING
++		bool "Debug support via Serial wire debug"
++		help
++		  JTAG port in SWD mode and SWV as tracing method.
++		  ADC00-03 cannot be used.
++
++	config SOC_MEC172X_DEBUG_AND_SWV_TRACING
++		bool "debug support via Serial Wire Debug and Viewer"
++		help
++		  JTAG port in SWD mode and SWV as tracing method.
++		  ADC00-03 can be used.
++endchoice
+diff --git a/soc/arm/microchip_mec/mec172x/soc.c b/soc/arm/microchip_mec/mec172x/soc.c
+index 8ecdf7d3be..bc569c14d5 100644
+--- a/soc/arm/microchip_mec/mec172x/soc.c
++++ b/soc/arm/microchip_mec/mec172x/soc.c
+@@ -12,6 +12,38 @@
+ #include <zephyr/arch/cpu.h>
+ #include <zephyr/arch/arm/aarch32/cortex_m/cmsis.h>
+ 
++
++static uintptr_t ecs_regbase = DT_REG_ADDR(DT_NODELABEL(ecs));
++static void configure_debug_interface(void)
++{
++
++	struct ecs_regs* regs = ((struct ecs_regs *)ecs_regbase);
++
++	/* No debug support */
++	regs->DEBUG_CTRL = 0;
++	regs->ETM_CTRL = 0;
++
++#ifdef CONFIG_SOC_MEC172X_DEBUG_WITHOUT_TRACING
++	/* Release JTAG TDI and JTAG TDO pins so they can be
++	 * controlled by their respective PCR register.
++	 * For more details see table 50.8.5 in datasheet
++	 */
++	regs->DEBUG_CTRL = (MCHP_ECS_DCTRL_DBG_EN |
++				MCHP_ECS_DCTRL_MODE_SWD);
++#elif defined(CONFIG_SOC_MEC172X_DEBUG_AND_TRACING)
++	struct ecs_regs* regs = ((struct ecs_regs *)ecs_regbase);
++
++	#if defined(CONFIG_SOC_MEC172X_DEBUG_AND_ETM_TRACING)
++		regs->ETM_CTRL = MCHP_ECS_ETM_CTRL_EN;
++		regs->DEBUG_CTRL = (MCHP_ECS_DCTRL_DBG_EN |
++				MCHP_ECS_DCTRL_MODE_SWD);
++	#elif defined(CONFIG_SOC_MEC172X_DEBUG_AND_SWV_TRACING)
++		regs->DEBUG_CTRL = (MCHP_ECS_DCTRL_DBG_EN |
++				MCHP_ECS_DCTRL_MODE_SWD_SWV);
++	#endif /* CONFIG_SOC_MEC172X_DEBUG_AND_TRACING */
++#endif /* CONFIG_SOC_MEC172X_DEBUG_WITHOUT_TRACING */
++}
++
+ static int soc_init(const struct device *dev)
+ {
+ 	ARG_UNUSED(dev);
+@@ -25,6 +57,8 @@ static int soc_init(const struct device *dev)
+ 						MCHP_GPIO_CTRL_IDET_DISABLE;
+ 	}
+ 
++	configure_debug_interface();
++
+ 	return 0;
+ }
+ 
+-- 
+2.17.1
+
+
+From afeb234d5086c96ceb61e733872dc60926ebc8db Mon Sep 17 00:00:00 2001
+From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
+Date: Tue, 13 Dec 2022 14:02:54 +0530
+Subject: [PATCH 17/21] include: drivers: peci: Add missing subsystem macro
+
+Add subsystem macro for peci driver API.
+
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ include/zephyr/drivers/peci.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/zephyr/drivers/peci.h b/include/zephyr/drivers/peci.h
+index 7397ade679..905857708a 100644
+--- a/include/zephyr/drivers/peci.h
++++ b/include/zephyr/drivers/peci.h
+@@ -199,7 +199,7 @@ typedef int (*peci_transfer_t)(const struct device *dev, struct peci_msg *msg);
+ typedef int (*peci_disable_t)(const struct device *dev);
+ typedef int (*peci_enable_t)(const struct device *dev);
+ 
+-struct peci_driver_api {
++__subsystem struct peci_driver_api {
+ 	peci_config_t config;
+ 	peci_disable_t disable;
+ 	peci_enable_t enable;
+-- 
+2.17.1
+
+
+From 8edec7a4f640615b88ede51e868988a2786d05ff Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Mon, 7 Nov 2022 12:36:27 -0500
+Subject: [PATCH 18/21] [BACKPORTED] drivers: led: Microchip XEC LED driver
+ using BBLED controller
+
+Implement a LED driver for Microchip XEC using the breathing,
+blinking LED controller. The driver supports LED on, off, and
+blink API's. The BBLED block uses the 32768 Hz clock domain
+allowing the module to operate in light and deep sleep states.
+Blink frequency is 32768 divided by 256 * (prescale + 1) where
+prescale is a 12-bit value. Duty cycle is specified by an 8-bit
+value where 0 = full off, 127 is 50%, and 255 is full on.
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ drivers/led/CMakeLists.txt                |   1 +
+ drivers/led/Kconfig                       |   1 +
+ drivers/led/Kconfig.xec                   |  11 +
+ drivers/led/led_mchp_xec.c                | 292 ++++++++++++++++++++++
+ dts/arm/microchip/mec1501hsz.dtsi         |  21 ++
+ dts/bindings/led/microchip,xec-bbled.yaml |  31 +++
+ 6 files changed, 357 insertions(+)
+ create mode 100644 drivers/led/Kconfig.xec
+ create mode 100644 drivers/led/led_mchp_xec.c
+ create mode 100644 dts/bindings/led/microchip,xec-bbled.yaml
+
+diff --git a/drivers/led/CMakeLists.txt b/drivers/led/CMakeLists.txt
+index b3d5147ef6..ba1dd973fa 100644
+--- a/drivers/led/CMakeLists.txt
++++ b/drivers/led/CMakeLists.txt
+@@ -5,6 +5,7 @@ zephyr_library()
+ zephyr_library_sources_ifdef(CONFIG_HT16K33 ht16k33.c)
+ zephyr_library_sources_ifdef(CONFIG_LED_GPIO led_gpio.c)
+ zephyr_library_sources_ifdef(CONFIG_LED_PWM led_pwm.c)
++zephyr_library_sources_ifdef(CONFIG_LED_XEC led_mchp_xec.c)
+ zephyr_library_sources_ifdef(CONFIG_LP3943 lp3943.c)
+ zephyr_library_sources_ifdef(CONFIG_LP503X lp503x.c)
+ zephyr_library_sources_ifdef(CONFIG_LP5562 lp5562.c)
+diff --git a/drivers/led/Kconfig b/drivers/led/Kconfig
+index 7c62be06ba..a93e4dc83c 100644
+--- a/drivers/led/Kconfig
++++ b/drivers/led/Kconfig
+@@ -34,5 +34,6 @@ source "drivers/led/Kconfig.lp5562"
+ source "drivers/led/Kconfig.pca9633"
+ source "drivers/led/Kconfig.pwm"
+ source "drivers/led/Kconfig.tlc59108"
++source "drivers/led/Kconfig.xec"
+ 
+ endif # LED
+diff --git a/drivers/led/Kconfig.xec b/drivers/led/Kconfig.xec
+new file mode 100644
+index 0000000000..e0651567ca
+--- /dev/null
++++ b/drivers/led/Kconfig.xec
+@@ -0,0 +1,11 @@
++# Copyright (c) 2022 Microchip Technology Inc.
++# SPDX-License-Identifier: Apache-2.0
++
++config LED_XEC
++	bool "Microchip XEC BB-LED driver"
++	default y
++        # Backport note: Drop this and use device tree when intercepting 3.2
++	depends on LED
++	help
++	  Enable driver for the Microchip XEC Breathing-Blinking
++	  LED controller
+diff --git a/drivers/led/led_mchp_xec.c b/drivers/led/led_mchp_xec.c
+new file mode 100644
+index 0000000000..1dfc405e0a
+--- /dev/null
++++ b/drivers/led/led_mchp_xec.c
+@@ -0,0 +1,292 @@
++/*
++ * Copyright (c) 2022 Microchip Technology Inc.
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++#define DT_DRV_COMPAT microchip_xec_bbled
++
++/**
++ * @file
++ * @brief Microchip Breathing-Blinking LED controller
++ */
++
++#include <soc.h>
++#ifndef CONFIG_SOC_SERIES_MEC1501X
++#include <zephyr/drivers/clock_control/mchp_xec_clock_control.h>
++#include <zephyr/drivers/interrupt_controller/intc_mchp_xec_ecia.h>
++#endif
++#include <zephyr/drivers/led.h>
++#include <zephyr/drivers/pinctrl.h>
++#include <zephyr/device.h>
++#include <zephyr/kernel.h>
++
++#include <zephyr/logging/log.h>
++LOG_MODULE_REGISTER(led_xec, CONFIG_LED_LOG_LEVEL);
++
++/* Same BBLED hardware block in MEC15xx and MEC172x families
++ * Config register
++ */
++#define XEC_BBLED_CFG_MSK		0x1ffffu
++#define XEC_BBLED_CFG_MODE_POS		0
++#define XEC_BBLED_CFG_MODE_MSK		0x3u
++#define XEC_BBLED_CFG_MODE_OFF		0
++#define XEC_BBLED_CFG_MODE_BREATHING	0x1u
++#define XEC_BBLED_CFG_MODE_PWM		0x2u
++#define XEC_BBLED_CFG_MODE_ALWAYS_ON	0x3u
++#define XEC_BBLED_CFG_CLK_SRC_48M_POS	2
++#define XEC_BBLED_CFG_EN_UPDATE_POS	6
++#define XEC_BBLED_CFG_RST_PWM_POS	7
++#define XEC_BBLED_CFG_WDT_RLD_POS	8
++#define XEC_BBLED_CFG_WDT_RLD_MSK0	0xffu
++#define XEC_BBLED_CFG_WDT_RLD_MSK	0xff00u
++#define XEC_BBLED_CFG_WDT_RLD_DFLT	0x1400u
++
++/* Limits register */
++#define XEC_BBLED_LIM_MSK		0xffffu
++#define XEC_BBLED_LIM_MIN_POS		0
++#define XEC_BBLED_LIM_MIN_MSK		0xffu
++#define XEC_BBLED_LIM_MAX_POS		8
++#define XEC_BBLED_LIM_MAX_MSK		0xff00u
++
++/* Delay register */
++#define XEC_BBLED_DLY_MSK		0xffffffu
++#define XEC_BBLED_DLY_LO_POS		0
++#define XEC_BBLED_DLY_LO_MSK		0xfffu
++#define XEC_BBLED_DLY_HI_POS		12
++#define XEC_BBLED_DLY_HI_MSK		0xfff000u
++
++/* Update step size and update interval registers implement
++ * eight 4-bit fields numbered 0 to 7
++ */
++#define XEC_BBLED_UPD_SSI_POS(n)	((uint32_t)(n) * 4u)
++#define XEC_BBLED_UPD_SSI0_MSK(n)	((uint32_t)0xfu << XEC_BBLED_UPD_SSI_POS(n))
++
++/* Output delay register: b[7:0] is delay in clock source units */
++#define XEC_BBLED_OUT_DLY_MSK		0xffu
++
++/* Delay.Lo register field */
++#define XEC_BBLED_MAX_PRESCALER		4095u
++/* Blink mode source frequency is 32768 Hz */
++#define XEC_BBLED_BLINK_CLK_SRC_HZ	32768u
++/* Fblink = 32768 / (256 * (prescaler+1))
++ * prescaler is 12 bit.
++ * Maximum Fblink = 128 Hz or 7.8125 ms
++ * Minimum Fblink = 32.25 mHz or 32000 ms
++ */
++#define XEC_BBLED_BLINK_PERIOD_MAX_MS	32000u
++#define XEC_BBLED_BLINK_PERIOD_MIN_MS	8u
++
++struct xec_bbled_regs {
++	volatile uint32_t config;
++	volatile uint32_t limits;
++	volatile uint32_t delay;
++	volatile uint32_t update_step_size;
++	volatile uint32_t update_interval;
++	volatile uint32_t output_delay;
++};
++
++struct xec_bbled_config {
++	struct xec_bbled_regs * const regs;
++	const struct pinctrl_dev_config *pcfg;
++	uint8_t girq_id;
++	uint8_t girq_pos;
++	uint8_t pcr_id;
++	uint8_t pcr_pos;
++};
++
++/* delay_on and delay_off are in milliseconds
++ * (prescale+1) = (32768 * Tblink_ms) / (256 * 1000)
++ * requires caller to limit delay_on and delay_off based
++ * on BBLED 32KHz minimum/maximum values.
++ */
++static uint32_t calc_blink_32k_prescaler(uint32_t delay_on, uint32_t delay_off)
++{
++	uint32_t temp = ((delay_on + delay_off) * XEC_BBLED_BLINK_CLK_SRC_HZ) / (256U * 1000U);
++	uint32_t prescaler = 0u;
++
++	if (temp) {
++		temp--;
++		if (temp > XEC_BBLED_MAX_PRESCALER) {
++			prescaler = XEC_BBLED_MAX_PRESCALER;
++		} else {
++			prescaler = (uint32_t)temp;
++		}
++	}
++
++	return prescaler;
++}
++
++/* return duty cycle scaled to [0, 255]
++ * caller must insure delay_on and delay_off are in hardware range.
++ */
++static inline uint32_t calc_blink_duty_cycle(uint32_t delay_on, uint32_t delay_off)
++{
++	return (256U * delay_on) / (delay_on + delay_off);
++}
++
++/* Enable HW blinking of the LED.
++ * delay_on = on time in milliseconds
++ * delay_off = off time in milliseconds
++ * BBLED blinking mode uses an 8-bit accumulator and an 8-bit duty cycle
++ * register. The duty cycle register is programmed once and the
++ * accumulator is used as an 8-bit up counter.
++ * The counter uses the 32768 Hz clock and is pre-scaled by the delay
++ * counter. Maximum blink rate is 128Hz to 32.25 mHz (7.8 ms to 32 seconds).
++ * 8-bit duty cycle values: 0x00 = full off, 0xff = full on.
++ * Fblink = 32768 / ((prescale + 1) * 256)
++ * HiWidth (seconds) = (1/Fblink) * (duty_cycle / 256)
++ * LoWidth (seconds) = (1/Fblink) * ((1 - duty_cycle) / 256)
++ * duty_cycle in [0, 1]. Register value for duty cycle is
++ * scaled to [0, 255].
++ * prescale is delay register low delay field, bits[11:0]
++ * duty_cycle is limits register minimum field, bits[7:0]
++ */
++static int xec_bbled_blink(const struct device *dev, uint32_t led,
++			    uint32_t delay_on, uint32_t delay_off)
++{
++	const struct xec_bbled_config * const config = dev->config;
++	struct xec_bbled_regs * const regs = config->regs;
++	uint32_t period, prescaler, dcs;
++
++	if (led) {
++		return -EINVAL;
++	}
++
++	/* insure period will not overflow uin32_t */
++	if ((delay_on > XEC_BBLED_BLINK_PERIOD_MAX_MS)
++	    || (delay_off > XEC_BBLED_BLINK_PERIOD_MAX_MS)) {
++		return -EINVAL;
++	}
++
++	period = delay_on + delay_off;
++	if ((period < XEC_BBLED_BLINK_PERIOD_MIN_MS)
++	    || (period > XEC_BBLED_BLINK_PERIOD_MAX_MS)) {
++		return -EINVAL;
++	}
++
++	prescaler = calc_blink_32k_prescaler(delay_on, delay_off);
++	dcs = calc_blink_duty_cycle(delay_on, delay_off);
++
++	regs->config = (regs->config & ~(XEC_BBLED_CFG_MODE_MSK))
++		       | XEC_BBLED_CFG_MODE_OFF;
++	regs->delay = (regs->delay & ~(XEC_BBLED_DLY_LO_MSK))
++		      | (prescaler & XEC_BBLED_DLY_LO_MSK);
++	regs->limits = (regs->limits & ~(XEC_BBLED_LIM_MIN_MSK))
++		       | (dcs & XEC_BBLED_LIM_MIN_MSK);
++	regs->config = (regs->config & ~(XEC_BBLED_CFG_MODE_MSK))
++		       | XEC_BBLED_CFG_MODE_PWM;
++	regs->config |= BIT(XEC_BBLED_CFG_EN_UPDATE_POS);
++
++	return 0;
++}
++
++static int xec_bbled_on(const struct device *dev, uint32_t led)
++{
++	const struct xec_bbled_config * const config = dev->config;
++	struct xec_bbled_regs * const regs = config->regs;
++
++	if (led) {
++		return -EINVAL;
++	}
++
++	regs->config = (regs->config & ~(XEC_BBLED_CFG_MODE_MSK))
++			| XEC_BBLED_CFG_MODE_ALWAYS_ON;
++	return 0;
++}
++
++static int xec_bbled_off(const struct device *dev, uint32_t led)
++{
++	const struct xec_bbled_config * const config = dev->config;
++	struct xec_bbled_regs * const regs = config->regs;
++
++	if (led) {
++		return -EINVAL;
++	}
++
++	regs->config = (regs->config & ~(XEC_BBLED_CFG_MODE_MSK))
++			| XEC_BBLED_CFG_MODE_OFF;
++	return 0;
++}
++
++#ifdef CONFIG_SOC_SERIES_MEC1501X
++static inline void xec_bbled_slp_en_clr(const struct device *dev)
++{
++	const struct xec_bbled_config * const cfg = dev->config;
++	enum pcr_id pcr_val = PCR_MAX_ID;
++
++	switch (cfg->pcr_pos) {
++	case MCHP_PCR3_LED0_POS:
++		pcr_val = PCR_LED0;
++		break;
++	case MCHP_PCR3_LED1_POS:
++		pcr_val = PCR_LED1;
++		break;
++	case MCHP_PCR3_LED2_POS:
++		pcr_val = PCR_LED2;
++		break;
++	default:
++		return;
++	}
++
++	mchp_pcr_periph_slp_ctrl(pcr_val, 0);
++}
++#else
++static inline void xec_bbled_slp_en_clr(const struct device *dev)
++{
++	const struct xec_bbled_config * const cfg = dev->config;
++
++	z_mchp_xec_pcr_periph_sleep(cfg->pcr_id, cfg->pcr_pos, 0);
++}
++#endif
++
++static int xec_bbled_init(const struct device *dev)
++{
++	const struct xec_bbled_config * const config = dev->config;
++	struct xec_bbled_regs * const regs = config->regs;
++
++	xec_bbled_slp_en_clr(dev);
++
++	/* soft reset, disable BBLED WDT, set clock source to default (32KHz domain) */
++	regs->config |= BIT(XEC_BBLED_CFG_RST_PWM_POS);
++	regs->config = XEC_BBLED_CFG_MODE_OFF;
++
++	int ret = pinctrl_apply_state(config->pcfg, PINCTRL_STATE_DEFAULT);
++
++	if (ret != 0) {
++		LOG_ERR("XEC BBLED pinctrl setup failed (%d)", ret);
++	}
++
++	return ret;
++}
++
++static const struct led_driver_api xec_bbled_api = {
++	.on		= xec_bbled_on,
++	.off		= xec_bbled_off,
++	.blink		= xec_bbled_blink,
++};
++
++#define XEC_BBLED_PINCTRL_DEF(i) PINCTRL_DT_INST_DEFINE(i)
++
++#define XEC_BBLED_CONFIG(i)						\
++static struct xec_bbled_config xec_bbled_config_##i = {			\
++	.regs = (struct xec_bbled_regs * const)DT_INST_REG_ADDR(i),	\
++	.pcfg = PINCTRL_DT_INST_DEV_CONFIG_GET(i),			\
++	.girq_id = (uint8_t)(DT_INST_PROP_BY_IDX(i, girqs, 0)),		\
++	.girq_pos = (uint8_t)(DT_INST_PROP_BY_IDX(i, girqs, 1)),	\
++	.pcr_id = (uint8_t)DT_INST_PROP_BY_IDX(i, pcrs, 0),		\
++	.pcr_pos = (uint8_t)DT_INST_PROP_BY_IDX(i, pcrs, 1),		\
++}
++
++#define XEC_BBLED_DEVICE(i)						\
++									\
++XEC_BBLED_PINCTRL_DEF(i);						\
++									\
++XEC_BBLED_CONFIG(i);							\
++									\
++DEVICE_DT_INST_DEFINE(i, &xec_bbled_init, NULL,				\
++		      NULL, &xec_bbled_config_##i,			\
++		      POST_KERNEL, CONFIG_LED_INIT_PRIORITY,		\
++		      &xec_bbled_api);
++
++DT_INST_FOREACH_STATUS_OKAY(XEC_BBLED_DEVICE)
+diff --git a/dts/arm/microchip/mec1501hsz.dtsi b/dts/arm/microchip/mec1501hsz.dtsi
+index 733a604de5..9116405c79 100644
+--- a/dts/arm/microchip/mec1501hsz.dtsi
++++ b/dts/arm/microchip/mec1501hsz.dtsi
+@@ -492,6 +492,27 @@
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+ 		};
++		bbled0: bbled@4000b800 {
++			reg = <0x4000b800 0x100>;
++			interrupts = <83 0>;
++			girqs = <17 13>;
++			pcrs = <3 16>;
++			status = "disabled";
++		};
++		bbled1: bbled@4000b900 {
++			reg = <0x4000b900 0x100>;
++			interrupts = <84 0>;
++			girqs = <17 14>;
++			pcrs = <3 17>;
++			status = "disabled";
++		};
++		bbled2: bbled@4000ba00 {
++			reg = <0x4000ba00 0x100>;
++			interrupts = <85 0>;
++			girqs = <17 15>;
++			pcrs = <3 18>;
++			status = "disabled";
++		};
+ 	};
+ };
+ 
+diff --git a/dts/bindings/led/microchip,xec-bbled.yaml b/dts/bindings/led/microchip,xec-bbled.yaml
+new file mode 100644
+index 0000000000..563c7ecaf4
+--- /dev/null
++++ b/dts/bindings/led/microchip,xec-bbled.yaml
+@@ -0,0 +1,31 @@
++# Copyright (c) 2022, Microchip Technology Inc.
++# SPDX-License-Identifier: Apache-2.0
++
++description: Microchip XEC BBLED
++
++include: [led-controller.yaml, base.yaml, pinctrl-device.yaml]
++
++compatible: "microchip,xec-bbled"
++
++properties:
++    reg:
++      required: true
++
++    interrupts:
++      required: true
++
++    pinctrl-0:
++      required: false
++
++    pinctrl-names:
++      required: false
++
++    girqs:
++      type: array
++      required: true
++      description: Array of pairs of GIRQ number and bit position
++
++    pcrs:
++      type: array
++      required: true
++      description: BBLED PCR register index and bit position
+-- 
+2.17.1
+
+
+From 4a059318b012dff125c6bf071e007433c0a174ac Mon Sep 17 00:00:00 2001
+From: Jay Vasanth <jay.vasanth@microchip.com>
+Date: Mon, 7 Nov 2022 12:37:15 -0500
+Subject: [PATCH 19/21] [BACKPORTED] samples: drivers: led: Add sample for
+ Microchip XEC LED driver
+
+Add a sample program demonstrating the LED driver for Microchip's
+XEC microcontrollers. The sample can be built for MEC152x and
+MEC172x.
+
+Signed-off-by: Jay Vasanth <jay.vasanth@microchip.com>
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ samples/drivers/led_xec/CMakeLists.txt        |   9 ++
+ samples/drivers/led_xec/README.rst            |  75 ++++++++++
+ .../boards/mec15xxevb_assy6853.overlay        |  29 ++++
+ .../boards/mec172xevb_assy6906.overlay        |  36 +++++
+ samples/drivers/led_xec/prj.conf              |   4 +
+ samples/drivers/led_xec/sample.yaml           |   8 ++
+ samples/drivers/led_xec/src/main.c            | 133 ++++++++++++++++++
+ 7 files changed, 294 insertions(+)
+ create mode 100644 samples/drivers/led_xec/CMakeLists.txt
+ create mode 100644 samples/drivers/led_xec/README.rst
+ create mode 100644 samples/drivers/led_xec/boards/mec15xxevb_assy6853.overlay
+ create mode 100644 samples/drivers/led_xec/boards/mec172xevb_assy6906.overlay
+ create mode 100644 samples/drivers/led_xec/prj.conf
+ create mode 100644 samples/drivers/led_xec/sample.yaml
+ create mode 100644 samples/drivers/led_xec/src/main.c
+
+diff --git a/samples/drivers/led_xec/CMakeLists.txt b/samples/drivers/led_xec/CMakeLists.txt
+new file mode 100644
+index 0000000000..51e3ce00cb
+--- /dev/null
++++ b/samples/drivers/led_xec/CMakeLists.txt
+@@ -0,0 +1,9 @@
++# SPDX-License-Identifier: Apache-2.0
++
++cmake_minimum_required(VERSION 3.20.0)
++
++find_package(Zephyr HINTS $ENV{ZEPHYR_BASE})
++project(led_xec)
++
++FILE(GLOB app_sources src/*.c)
++target_sources(app PRIVATE ${app_sources})
+diff --git a/samples/drivers/led_xec/README.rst b/samples/drivers/led_xec/README.rst
+new file mode 100644
+index 0000000000..1f0a8b776b
+--- /dev/null
++++ b/samples/drivers/led_xec/README.rst
+@@ -0,0 +1,75 @@
++.. _led:
++
++LED sample application
++##########################
++
++Overview
++********
++
++This sample allows to test the Microchip led-xec driver which uses the
++breathing-blinking LED (BBLED) controllers. The SoC is design is fixed
++allowing each BBLED control over one specific GPIO.
++MEC15xx and MEC172x:
++BBLED controller 0 uses GPIO 0156.
++BBLED controller 1 uses GPIO 0157.
++BBLED controller 2 uses GPIO 0153.
++MEC172x has a fourth instance of BBLED.
++BBLED controller 3 uses GPIO 0035
++
++Test pattern
++============
++
++For each LEDs (one after the other):
++
++- Turning on
++- Turning off
++- Blinking on: 0.1 sec, off: 0.1 sec
++- Blinking on: 1 sec, off: 1 sec
++
++Board Jumpers
++********************
++
++EVB: mec172xevb_assy6906
++BBLED0 GPIO 0156.
++Connect GPIO 0156 to board LED4 by placing a wire from JP71-11 to J47-3.
++Make sure there are no jumpers on JP54 1-2 and JP21 4-5
++
++BBLED1 GPIO 0157.
++Connect GPIO 0156 to board LED5 by placing a wire from JP71-12 to J48-3.
++Make sure there are no jumpers on JP54 3-4 and JP21 16-17
++
++BBLED2 GPIO 0153.
++Connect GPIO 0153 to board LED7 by placing a wire from JP71-5 to JP146-5.
++JP146-5 is connected to MEC172x VCI_OUT1 without a jumper. Force VCI_OUT1
++high by forcing VCI_IN1 high: install jumper on J55 3-4 which pulls VCI_IN1
++to the VBAT rail via a 100K pull-up. Requires VBAT power rail is connected
++to VTR or some other power source.
++
++BBLED3 GPIO 0035.
++Connect GPIO 0035 to board LED7 by placing a wire from JP67-19 to JP146-1.
++Make sure there is no jumper on JP79 17-18.
++JP146-1 is connected to MEC172x VCI_OUT2 without a jumper. Force VCI_OUT2
++high by forcing VCI_IN2 high: install a jumper on J55 5-6 which pulls VCI_IN2
++to the VBAT rail via a 100K pull-up. Requires VBAT power rail is connected
++to VTR or some other power source.
++
++EVB: mec15xxevb_assy6853
++BBLED0 GPIO 0156.
++Add jumper on JP41 1-2 to connect GPIO 0156 to board LED2
++Remove jumper on JP31 13-14
++
++BBLED1 GPIO 0157.
++Add jumper on JP41 3-4 to connect GPIO 0157 to board LED3
++Remove jumper on JP31 15-16
++
++BBLED2 GPIO 0153.
++Add jumper on JP41 3-4 to connect GPIO 0153 to board LED4
++Remove jumper on JP31 17-18
++
++Building and Running
++********************
++
++This sample can be built and executed on all the boards with the LEDs connected.
++The LEDs must be correctly described in the DTS. Each breathing-blinking LED
++controller is fixed by chip design to connect to one GPIO. The bbled node must
++have its PINCTRL properties set to the correct GPIO.
+diff --git a/samples/drivers/led_xec/boards/mec15xxevb_assy6853.overlay b/samples/drivers/led_xec/boards/mec15xxevb_assy6853.overlay
+new file mode 100644
+index 0000000000..7368096dbe
+--- /dev/null
++++ b/samples/drivers/led_xec/boards/mec15xxevb_assy6853.overlay
+@@ -0,0 +1,29 @@
++/*
++ * Copyright (c) 2022 Microchip Technology Inc.
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++/ {
++};
++
++&bbled0 {
++	compatible = "microchip,xec-bbled";
++	pinctrl-0 = <&led0_gpio156>;
++	pinctrl-names = "default";
++	status = "okay";
++};
++
++&bbled1 {
++	compatible = "microchip,xec-bbled";
++	pinctrl-0 = <&led1_gpio157>;
++	pinctrl-names = "default";
++	status = "okay";
++};
++
++&bbled2 {
++	compatible = "microchip,xec-bbled";
++	pinctrl-0 = <&led2_gpio153>;
++	pinctrl-names = "default";
++	status = "okay";
++};
+diff --git a/samples/drivers/led_xec/boards/mec172xevb_assy6906.overlay b/samples/drivers/led_xec/boards/mec172xevb_assy6906.overlay
+new file mode 100644
+index 0000000000..1492e2a2bc
+--- /dev/null
++++ b/samples/drivers/led_xec/boards/mec172xevb_assy6906.overlay
+@@ -0,0 +1,36 @@
++/*
++ * Copyright (c) 2022 Microchip Technology Inc.
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++/ {
++};
++
++&bbled0 {
++	compatible = "microchip,xec-bbled";
++	pinctrl-0 = <&led0_gpio156>;
++	pinctrl-names = "default";
++	status = "okay";
++};
++
++&bbled1 {
++	compatible = "microchip,xec-bbled";
++	pinctrl-0 = <&led1_gpio157>;
++	pinctrl-names = "default";
++	status = "okay";
++};
++
++&bbled2 {
++	compatible = "microchip,xec-bbled";
++	pinctrl-0 = <&led2_gpio153>;
++	pinctrl-names = "default";
++	status = "okay";
++};
++
++&bbled3 {
++	compatible = "microchip,xec-bbled";
++	pinctrl-0 = <&led3_gpio035>;
++	pinctrl-names = "default";
++	status = "okay";
++};
+diff --git a/samples/drivers/led_xec/prj.conf b/samples/drivers/led_xec/prj.conf
+new file mode 100644
+index 0000000000..6689b1cbeb
+--- /dev/null
++++ b/samples/drivers/led_xec/prj.conf
+@@ -0,0 +1,4 @@
++CONFIG_LOG=y
++CONFIG_LOG_MODE_MINIMAL=y
++
++CONFIG_LED=y
+diff --git a/samples/drivers/led_xec/sample.yaml b/samples/drivers/led_xec/sample.yaml
+new file mode 100644
+index 0000000000..55fd0f4b77
+--- /dev/null
++++ b/samples/drivers/led_xec/sample.yaml
+@@ -0,0 +1,8 @@
++sample:
++  description: Demonstration of the Microchip XEC LED driver
++  name: XEC LED sample
++tests:
++  sample.drivers.led.led_xec:
++    build_only: true
++    tags: LED
++    platform_allow: mec172xevb_assy6906, mec15xxevb_assy6853
+diff --git a/samples/drivers/led_xec/src/main.c b/samples/drivers/led_xec/src/main.c
+new file mode 100644
+index 0000000000..a1a116c0ab
+--- /dev/null
++++ b/samples/drivers/led_xec/src/main.c
+@@ -0,0 +1,133 @@
++/*
++ * Copyright (c) 2022 Microchip Technology Inc.
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++#include <errno.h>
++#include <soc.h>
++#include <zephyr/kernel.h>
++#include <zephyr/device.h>
++#include <zephyr/drivers/led.h>
++#include <zephyr/logging/log_ctrl.h>
++#include <zephyr/logging/log.h>
++#include <sys/sys_io.h>
++LOG_MODULE_DECLARE(led, CONFIG_LED_LOG_LEVEL);
++
++#define K_WAIT_DELAY          100u
++
++struct dev_info {
++	const struct device *dev;
++	uint32_t base_addr;
++};
++
++#define XEC_BBLED_DEV(node_id)		\
++	{ .dev = DEVICE_DT_GET(node_id), .base_addr = (uint32_t)DT_REG_ADDR(node_id) },
++
++static const struct dev_info led_dev_table[] = {
++	DT_FOREACH_STATUS_OKAY(microchip_xec_bbled, XEC_BBLED_DEV)
++};
++
++static void print_bbled_regs(mem_addr_t bbled_base)
++{
++	uint32_t r = 0;
++
++	if (!bbled_base) {
++		return;
++	}
++
++	LOG_INF("BBLED @ 0x%lx", bbled_base);
++
++	r = sys_read32(bbled_base);
++	LOG_INF("config = 0x%x", r);
++	r = sys_read32(bbled_base + 4U);
++	LOG_INF("limits = 0x%x", r);
++	r = sys_read32(bbled_base + 8U);
++	LOG_INF("delay = 0x%x", r);
++	r = sys_read32(bbled_base + 0xcU);
++	LOG_INF("update_step_size = 0x%x", r);
++	r = sys_read32(bbled_base + 0x10U);
++	LOG_INF("update_interval = 0x%x", r);
++	r = sys_read32(bbled_base + 0x14U);
++	LOG_INF("output_delay = 0x%x", r);
++}
++
++int led_test(void)
++{
++	int ret = 0;
++	size_t n = 0;
++	uint32_t delay_on = 0, delay_off = 0;
++
++	/* Account for the time serial port is detected so log messages can
++	 * be seen
++	 */
++	k_sleep(K_SECONDS(1));
++
++	LOG_INF("Microchip XEC EVB BBLED Sample");
++
++	for (n = 0; n < ARRAY_SIZE(led_dev_table); n++) {
++		const struct device *dev = led_dev_table[n].dev;
++		uint32_t base = led_dev_table[n].base_addr;
++
++		LOG_INF("BBLED instance %d @ %x", n, base);
++		print_bbled_regs(base);
++
++		if (!device_is_ready(dev)) {
++			LOG_ERR("%s: device not ready", dev->name);
++			continue;
++		}
++
++		LOG_INF("blink: T = 0.5 second, duty cycle = 0.5");
++		delay_on = 250;
++		delay_off = 250;
++		ret = led_blink(dev, 0, delay_on, delay_off);
++		if (ret) {
++			LOG_ERR("LED blink API returned error %d", ret);
++		}
++		print_bbled_regs(base);
++
++		LOG_INF("Delay 5 seconds");
++		k_sleep(K_SECONDS(5));
++
++		LOG_INF("blink: T = 3 seconds, duty cycle = 0.4");
++		delay_on = 1200;
++		delay_off = 1800;
++		ret = led_blink(dev, 0, delay_on, delay_off);
++		if (ret) {
++			LOG_ERR("LED blink API returned error %d", ret);
++		}
++		print_bbled_regs(base);
++
++		LOG_INF("Delay 15 seconds");
++		k_sleep(K_SECONDS(15));
++
++		LOG_INF("Set ON");
++		ret = led_on(dev, 0);
++		if (ret) {
++			LOG_ERR("LED ON API returned error %d", ret);
++		}
++		print_bbled_regs(base);
++
++		LOG_INF("Delay 2 seconds");
++		k_sleep(K_SECONDS(2));
++
++		LOG_INF("Set OFF");
++		ret = led_off(dev, 0);
++		if (ret) {
++			LOG_ERR("LED OFF API returned error %d", ret);
++		}
++		print_bbled_regs(base);
++
++		LOG_INF("Delay 2 seconds");
++		k_sleep(K_SECONDS(2));
++	}
++
++	LOG_INF("LED test done");
++
++	return 0;
++}
++
++void main(void)
++{
++	led_test();
++}
+-- 
+2.17.1
+
+
+From 996c2bd1d40036f8a93dd11cebb18950010bd4c1 Mon Sep 17 00:00:00 2001
+From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
+Date: Wed, 2 Nov 2022 17:24:53 +0530
+Subject: [PATCH 20/21] drivers: Modify headers to start with "zephyr\"
+
+All header files now need to be referenced with "zephyr\"
+starting Zephyr v3.2.
+
+Signed-off-by: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
+---
+ soc/arm/microchip_mec/mec172x/soc_espi_saf_v2.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/soc/arm/microchip_mec/mec172x/soc_espi_saf_v2.h b/soc/arm/microchip_mec/mec172x/soc_espi_saf_v2.h
+index d4fa144aec..3e00e3592d 100644
+--- a/soc/arm/microchip_mec/mec172x/soc_espi_saf_v2.h
++++ b/soc/arm/microchip_mec/mec172x/soc_espi_saf_v2.h
+@@ -12,7 +12,7 @@
+ #define _SOC_ESPI_SAF_H_
+ 
+ #include <stdint.h>
+-#include <sys/util.h>
++#include <zephyr/sys/util.h>
+ 
+ #define MCHP_SAF_MAX_FLASH_DEVICES		2U
+ 
+-- 
+2.17.1
+
+
+From e8834fa7e917b5b5cda3854791759af7cbc6f6b6 Mon Sep 17 00:00:00 2001
+From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+Date: Mon, 5 Dec 2022 19:08:20 -0800
+Subject: [PATCH 21/21] [BACKPORT] soc: arm: microchip: mec172x: Correct PECI
+ base address
+
+Use correct device tree entry
+
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ soc/arm/microchip_mec/mec172x/device_power.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/soc/arm/microchip_mec/mec172x/device_power.c b/soc/arm/microchip_mec/mec172x/device_power.c
+index 601ce99c61..cf7d412171 100644
+--- a/soc/arm/microchip_mec/mec172x/device_power.c
++++ b/soc/arm/microchip_mec/mec172x/device_power.c
+@@ -19,7 +19,7 @@
+ #define ECS_XEC_REG_BASE						\
+ 	((struct ecs_regs *)(DT_REG_ADDR(DT_NODELABEL(ecs))))
+ #define PECI_XEC_REG_BASE						\
+-	((struct peci_regs *)(DT_REG_ADDR(DT_NODELABEL(pcr))))
++	((struct peci_regs *)(DT_REG_ADDR(DT_NODELABEL(peci0))))
+ #define PCR_XEC_REG_BASE						\
+ 	((struct pcr_regs *)(DT_REG_ADDR(DT_NODELABEL(pcr))))
+ #define TFDP_0_XEC_REG_BASE						\
+-- 
+2.17.1
+

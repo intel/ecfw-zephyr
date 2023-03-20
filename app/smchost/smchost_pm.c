@@ -6,6 +6,7 @@
 
 #include <zephyr/logging/log.h>
 #include <zephyr/device.h>
+#include <zephyr/kernel.h>
 #include "port80display.h"
 #include "board.h"
 #include "board_config.h"

@@ -6,6 +6,7 @@
 
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/espi.h>
+#include <zephyr/kernel.h>
 #include "espi_hub.h"
 #include "pwrseq_utils.h"
 #include "board_config.h"

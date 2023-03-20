@@ -5,6 +5,7 @@
  */
 
 #include <zephyr/logging/log.h>
+#include <zephyr/kernel.h>
 #include "board.h"
 #include "board_config.h"
 #include "smc.h"

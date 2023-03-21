@@ -36,7 +36,7 @@ config EC_DELAYED_BOOT
 	int "Enable EC FW delayed boot"
 	default 0
 	help
-	  Indicate if EC FW boot is delayed for N seconds. This is useful to
+	  Indicate if EC FW boot is delayed for N miliseconds. This is useful to
 	  debug early app initialization via serial logs or JTAG.
 
 config PWRMGT_LOG_LEVEL

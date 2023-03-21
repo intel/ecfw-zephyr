@@ -23,13 +23,7 @@ int main(void)
 	int ret;
 
 	/* Delayed start for debug */
-	k_sleep(K_SECONDS(CONFIG_EC_DELAYED_BOOT));
-
-	/* In platform N-1 rework doesn't route SMC_RST to MECC card, causing
-	 * I2C glitches among other issues, add a delay to get postcodes
-	 * until HW WA is possible.
-	 */
-	k_msleep(100);
+	k_msleep(CONFIG_EC_DELAYED_BOOT);
 
 	LOG_INF("EC FW Zephyr %p %s", k_current_get(), CONFIG_BOARD);
 

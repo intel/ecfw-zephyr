@@ -237,6 +237,11 @@ static void espi_reset_handler(const struct device *dev,
 	LOG_WRN("%s", __func__);
 	if (event.evt_type == ESPI_BUS_RESET) {
 		hub.espi_rst_sts = event.evt_data;
+		/* this is required to catch the global reset*/
+		if (!hub.espi_rst_sts) {
+			LOG_ERR("ESPI reset status %d", hub.espi_rst_sts);
+			hub.espi_rst_transition_low = true;
+		}
 
 #if defined(CONFIG_SOC_SERIES_NPCX4)
 		if (hub.espi_rst_sts) {
@@ -516,6 +521,7 @@ int espihub_wait_for_vwire(enum espi_vwire_signal signal, uint16_t timeout,
 	uint8_t level;
 	int loop_cnt = timeout;
 
+	hub.espi_rst_transition_low = false;
 	do {
 		ret = espi_receive_vwire(espi_dev, signal, &level);
 		if (ret) {
@@ -528,6 +534,15 @@ int espihub_wait_for_vwire(enum espi_vwire_signal signal, uint16_t timeout,
 		}
 
 		k_usleep(100);
+		/* break the loop when global reset ocurred.
+		 * Introduced a new error code when the global reset ocurred
+		 * and the error code is 117.
+		 */
+		if (hub.espi_rst_transition_low == true) {
+			LOG_DBG("global reset ocurred while waiting for %d ", signal);
+			hub.espi_rst_transition_low = false;
+			return -EHOSTDOWN;
+		}
 		loop_cnt--;
 	} while (loop_cnt > 0 || (timeout == WAIT_TIMEOUT_FOREVER) ||
 		 ec_timeout_status());

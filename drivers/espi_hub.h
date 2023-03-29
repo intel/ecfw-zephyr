@@ -80,6 +80,7 @@ struct espihub_context {
 	/* SPI flash sharing config detection */
 	enum boot_config_mode spi_boot_mode;
 	bool boot_config_detected;
+	bool espi_rst_transition_low;
 };
 
 /**

@@ -13,7 +13,7 @@
  * @brief GPIO driver wrapper APIS.
  */
 #define EC_GPIO_PORT_POS	8U
-#define EC_GPIO_PORT_MASK	((uint32_t) 0xfU << EC_GPIO_PORT_POS)
+#define EC_GPIO_PORT_MASK	((uint32_t)0x1fU << EC_GPIO_PORT_POS)
 #define EC_GPIO_PIN_POS		0U
 #define EC_GPIO_PIN_MASK	((uint32_t)0x1fU << EC_GPIO_PIN_POS)
 

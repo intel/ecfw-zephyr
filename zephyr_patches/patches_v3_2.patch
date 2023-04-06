@@ -1,7 +1,7 @@
-From dd56f27bf0c71f2a377849332d7742ef1cb5d893 Mon Sep 17 00:00:00 2001
+From a105a831349c63e02e41c8c33b7336545439fc07 Mon Sep 17 00:00:00 2001
 From: Venkataramana Kotakonda <venkataramana.kotakonda@intel.com>
 Date: Mon, 30 Mar 2020 10:32:05 -0400
-Subject: [PATCH 01/21] drivers: espi: Clear virtual wire interrupt before
+Subject: [PATCH 01/32] drivers: espi: Clear virtual wire interrupt before
  calling handler
 
 Clearing virtual wire interrupt after calling handler may cause next
@@ -37,13 +37,13 @@ index f04c910fe1..1a3c65d9f3 100644
  
  #if DT_INST_PROP_HAS_IDX(0, vw_girqs, 1)
 -- 
-2.17.1
+2.34.1
 
 
-From a61f87606b50455c2c61b0a0be4ace418c83726c Mon Sep 17 00:00:00 2001
+From 17ec05308995ff5bd864ef7a0a200094021642e4 Mon Sep 17 00:00:00 2001
 From: Kunal Shah <kunal.a.shah@intel.com>
 Date: Wed, 3 Mar 2021 17:06:31 +0530
-Subject: [PATCH 02/21] espi:driver: espi ltr support
+Subject: [PATCH 02/32] espi:driver: espi ltr support
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -243,14 +243,13 @@ index e16ebca5ab..6a37b7ff65 100644
   * @brief Sends system/platform signal as a virtual wire packet.
   *
 -- 
-2.17.1
+2.34.1
 
 
-From 4fc8dffc2ea93eef8c211f7c1b68bb557e7338ae Mon Sep 17 00:00:00 2001
+From e88bbbb874267316e2474388f1d7cd11dc4e326d Mon Sep 17 00:00:00 2001
 From: Frances Wu <frances.wu@microchip.com>
 Date: Thu, 24 Mar 2022 14:28:00 -0700
-Subject: [PATCH 03/21] [BACKPORTED][UNDER REVIEW] mec172xmodular_assy6930: add
- board support
+Subject: [PATCH 03/32] [BACKPORTED][UNDER REVIEW] mec172xmodular_assy6930: add board support
 
 Add board files for mec172xmodular_assy6930.  This is for
 MEC172x Modular Card support.
@@ -866,14 +865,14 @@ index 0000000000..9b0d207282
 +Comp1DrvValue = 0x20
 +Comp1DrvMask = 0x60
 -- 
-2.17.1
+2.34.1
 
 
-From 914aba9c95c452c30cdf2e9deeed09a4d1d41e89 Mon Sep 17 00:00:00 2001
+From 7c83f5b1a97a0a353f9481fe20ecc076c46f0ca0 Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Tue, 19 Apr 2022 17:55:11 -0400
-Subject: [PATCH 04/21] [BACKPORTED] drivers: clock-control: Microchip MEC172x
- adjust clock based on OTP
+Subject: [PATCH 04/32] [BACKPORTED] drivers: clock-control: Microchip MEC172x adjust clock
+ based on OTP
 
 Microchip MEC172x CPU and fast peripheral (QMSPI and PK) are
 clock source is based upon an OTP setting. Add logic to adjust
@@ -912,13 +911,13 @@ index a8731704a8..42a9e5b57e 100644
  	case MCHP_XEC_PCR_CLK_BUS:
  	case MCHP_XEC_PCR_CLK_PERIPH:
 -- 
-2.17.1
+2.34.1
 
 
-From 94643d424254045877522edc89b787fff2889ce2 Mon Sep 17 00:00:00 2001
+From 7c45cdb4b1e8c879df13bcd0aecd1d5b83f372c2 Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Tue, 19 Apr 2022 18:13:59 -0400
-Subject: [PATCH 05/21] [BACKPORTED] drivers: SPI: MEC172x QMSPI clock fix
+Subject: [PATCH 05/32] [BACKPORTED] drivers: SPI: MEC172x QMSPI clock fix
 
 Microchip MEC172x QMSPI expanded its clock divider register
 field from 8 to 16 bits. QMSPI source clock is on the fast
@@ -1100,14 +1099,14 @@ index cb2be6eed4..496c0f5238 100644
  #define MCHP_QMSPI_C_NO_CLOSE		0u
  #define MCHP_QMSPI_C_CLOSE		BIT(MCHP_QMSPI_C_CLOSE_POS)
 -- 
-2.17.1
+2.34.1
 
 
-From e649713863ec0accee754ae27ddd068859eeb4c5 Mon Sep 17 00:00:00 2001
+From 77ec2ac2d59e4081bc70368ff2f1d8b7f1f12378 Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Tue, 19 Apr 2022 18:14:46 -0400
-Subject: [PATCH 06/21] [BACKPORTED] drivers: espi: Microchip MEC172x child
- host device interrupt priorities
+Subject: [PATCH 06/32] [BACKPORTED] drivers: espi: Microchip MEC172x child host device
+ interrupt priorities
 
 Set default interrupt priority to 3 for all Microchip MEC172x eSPI
 host child devices except the UART's which are set to 1.
@@ -1185,14 +1184,13 @@ index 19eac691fa..d6c624e556 100644
  					  MCHP_XEC_ECIA(21, 9, 13, 120) >;
  				pcrs = <2 18>;
 -- 
-2.17.1
+2.34.1
 
 
-From d0cc151bbe97046cd833560f9723652b5f039453 Mon Sep 17 00:00:00 2001
+From 49536448f9b3c02ef57fac496a7ad51cd7db0971 Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Tue, 19 Apr 2022 18:16:07 -0400
-Subject: [PATCH 07/21] [BACKPORTED] soc: microchip_mec: Prepare for MEC172x
- SAF version 2
+Subject: [PATCH 07/32] [BACKPORTED] soc: microchip_mec: Prepare for MEC172x SAF version 2
 
 Microchip MEC172x eSPI SAF has significant hardware changes
 requiring a new SAF configuration structure. In preparation
@@ -1254,13 +1252,13 @@ index 907ba7a077..2841a190ff 100644
  
  #endif
 -- 
-2.17.1
+2.34.1
 
 
-From 4d130c76bbc823730875c717a291986c9497c116 Mon Sep 17 00:00:00 2001
+From 9d329db1333e022fbda930cf00dc2cf0f6c88618 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Thu, 12 May 2022 12:42:47 -0700
-Subject: [PATCH 08/21] boards: arm: mec172xevb: Update SPI HW block properties
+Subject: [PATCH 08/32] boards: arm: mec172xevb: Update SPI HW block properties
 
 ---
  .../arm/mec172xmodular_assy6930/mec172xmodular_assy6930.dts   | 4 ++--
@@ -1282,13 +1280,13 @@ index 440bf315a4..a3f8ae7476 100644
  	pinctrl-0 = < &shd_cs0_n_gpio055
  		      &shd_clk_gpio056
 -- 
-2.17.1
+2.34.1
 
 
-From 942508b3d1fe00a21ac6a99b39dff3d2c4421485 Mon Sep 17 00:00:00 2001
+From 65a5a34610a37eb0088a54bd0c276cca1b87a303 Mon Sep 17 00:00:00 2001
 From: "Chintha, Ramakrishna" <ramakrishna.chintha@intel.com>
 Date: Tue, 13 Sep 2022 12:19:49 +0530
-Subject: [PATCH 09/21] boards: mec172xmodular_assy6930: change drivestrength
+Subject: [PATCH 09/32] boards: mec172xmodular_assy6930: change drivestrength
  and mode
 
 Changing the mode to Quad from Dual and spi drivestrength to 8mA
@@ -1319,14 +1317,14 @@ index 9b0d207282..e7afca5d2b
  SpiSignalControl = 0x00
  FwBinFile = zephyr.bin
 -- 
-2.17.1
+2.34.1
 
 
-From 496b9100bdc603a0a8ec5aa48fd6757e898bbfe7 Mon Sep 17 00:00:00 2001
+From ba68fddd52d6529ecb196df1b75066d5cf8fc52e Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Tue, 19 Apr 2022 18:37:17 -0400
-Subject: [PATCH 10/21] [BACKPORTED] drivers: espi_saf: Add Microchip MEC172x
- eSPI SAF version 2 driver
+Subject: [PATCH 10/32] [BACKPORTED] drivers: espi_saf: Add Microchip MEC172x eSPI SAF
+ version 2 driver
 
 Microchip MEC172x has a modified eSPI SAF hardware implementation.
 Hardware changes include multiple clock dividers for each SPI
@@ -3950,13 +3948,13 @@ index 0000000000..d4fa144aec
 +
 +#endif /* _SOC_ESPI_SAF_H_ */
 -- 
-2.17.1
+2.34.1
 
 
-From cadbdd4aa3972cbddf382c7d07f461a023445a16 Mon Sep 17 00:00:00 2001
+From 6554f12348b6edee2d588fe98bb3111920e2cf1c Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Mon, 26 Sep 2022 16:37:05 -0400
-Subject: [PATCH 11/21] [BACKPORTED] soc: arm: microchip: add common mec_gpio.h
+Subject: [PATCH 11/32] [BACKPORTED] soc: arm: microchip: add common mec_gpio.h
 
 add common mec_gpio.h to allow access to common gpio_regs
 structure for both mec15xx and mec17xx, used in pinctrl driver
@@ -4210,14 +4208,13 @@ index 134363fc6d..3bf4f533fd 100644
  /* common SoC API */
  #include "../common/soc_dt.h"
 -- 
-2.17.1
+2.34.1
 
 
-From 01f6588fff700a639e5d023569a64e2294f496a1 Mon Sep 17 00:00:00 2001
+From d96e483474715d239b63078ca55921ec07e3b10c Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Fri, 30 Sep 2022 17:12:39 -0400
-Subject: [PATCH 12/21] [BACKPORTED] drivers: uart: microchip: add support for
- mec15xx
+Subject: [PATCH 12/32] [BACKPORTED] drivers: uart: microchip: add support for mec15xx
 
 update uart mchp xec driver to support mec15xx and add
 pinctrl support for mec15xx uart
@@ -4424,14 +4421,13 @@ index 85d02eb494..16e6e63194 100644
  		};
  
 -- 
-2.17.1
+2.34.1
 
 
-From f05d3093f51a86904bcec14e7fbf12f03e0bbfab Mon Sep 17 00:00:00 2001
+From 46fd35b81fb26e4bd807f824a76b69f365aa817a Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Tue, 1 Nov 2022 13:01:16 -0400
-Subject: [PATCH 13/21] [BACKPORTED] soc: arm: mec1501: add debug interface
- configuration
+Subject: [PATCH 13/32] [BACKPORTED] soc: arm: mec1501: add debug interface configuration
 
 Move regs configuration from previous pinmux.c to soc layer.
 This involves the debug interface, configuring the GPIO bank power
@@ -4527,14 +4523,13 @@ index f4382b1a64..3eec5889e7 100644
  		__enable_irq();
  	}
 -- 
-2.17.1
+2.34.1
 
 
-From 32a3986faab8524d374a2434294c7e4a9d394dd3 Mon Sep 17 00:00:00 2001
+From 047ea83639eadf8f9aca6d4da7f40b6a56ee87d3 Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Tue, 1 Nov 2022 13:21:30 -0400
-Subject: [PATCH 14/21] [BACKPORTED] driver: peci: mec: enable peci in ec
- subsystem register
+Subject: [PATCH 14/32] [BACKPORTED] driver: peci: mec: enable peci in ec subsystem register
 
 Ensure that PECI block is enabled in the EC Subsystem by clearing
 the PECI_DIS (peci disable) register
@@ -4581,14 +4576,14 @@ index 16e6e63194..733a604de5 100644
  			reg = <0x40080100 0x100 0x4000a400 0x100>;
  			reg-names = "pcrr", "vbatr";
 -- 
-2.17.1
+2.34.1
 
 
-From cf9ff01716fde6f0249accb7aa696fcbd3a3d7ef Mon Sep 17 00:00:00 2001
+From 55156276c0921eb0eaf400e22a559d8c1eaee8ca Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Micha=C5=82=20Barna=C5=9B?= <mb@semihalf.com>
 Date: Tue, 8 Nov 2022 18:23:21 +0100
-Subject: [PATCH 15/21] [BACKPORTED] espi: auto enable the ESPI SAF XEC based
- on the device tree
+Subject: [PATCH 15/32] [BACKPORTED] espi: auto enable the ESPI SAF XEC based on the device
+ tree
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -4626,21 +4621,21 @@ index 585731dbdd..7c9285dbf3 100644
  	  Enable the Microchip XEC SAF ESPI driver for MEC172x series.
  
 -- 
-2.17.1
+2.34.1
 
 
-From 22d2be002d38245357fef42025260334f5bc10f9 Mon Sep 17 00:00:00 2001
+From ce64a43b5cc06e928318cc16c4060ab5fe21e0d8 Mon Sep 17 00:00:00 2001
 From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
 Date: Tue, 13 Dec 2022 12:02:55 +0530
-Subject: [PATCH 16/21] soc: arm: microchip: mec172x: Add option to enable JTAG
+Subject: [PATCH 16/32] soc: arm: microchip: mec172x: Add option to enable JTAG
 
 Set different options for MEC172x SoC debug via JTAG.
 
 Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 ---
  soc/arm/microchip_mec/mec172x/Kconfig.soc | 47 +++++++++++++++++++++++
- soc/arm/microchip_mec/mec172x/soc.c       | 34 ++++++++++++++++
- 2 files changed, 81 insertions(+)
+ soc/arm/microchip_mec/mec172x/soc.c       | 32 +++++++++++++++
+ 2 files changed, 79 insertions(+)
 
 diff --git a/soc/arm/microchip_mec/mec172x/Kconfig.soc b/soc/arm/microchip_mec/mec172x/Kconfig.soc
 index d74993b446..45d48b2922 100644
@@ -4698,10 +4693,10 @@ index d74993b446..45d48b2922 100644
 +		  ADC00-03 can be used.
 +endchoice
 diff --git a/soc/arm/microchip_mec/mec172x/soc.c b/soc/arm/microchip_mec/mec172x/soc.c
-index 8ecdf7d3be..bc569c14d5 100644
+index 8ecdf7d3be..d2e0b9b02b 100644
 --- a/soc/arm/microchip_mec/mec172x/soc.c
 +++ b/soc/arm/microchip_mec/mec172x/soc.c
-@@ -12,6 +12,38 @@
+@@ -12,6 +12,36 @@
  #include <zephyr/arch/cpu.h>
  #include <zephyr/arch/arm/aarch32/cortex_m/cmsis.h>
  
@@ -4724,8 +4719,6 @@ index 8ecdf7d3be..bc569c14d5 100644
 +	regs->DEBUG_CTRL = (MCHP_ECS_DCTRL_DBG_EN |
 +				MCHP_ECS_DCTRL_MODE_SWD);
 +#elif defined(CONFIG_SOC_MEC172X_DEBUG_AND_TRACING)
-+	struct ecs_regs* regs = ((struct ecs_regs *)ecs_regbase);
-+
 +	#if defined(CONFIG_SOC_MEC172X_DEBUG_AND_ETM_TRACING)
 +		regs->ETM_CTRL = MCHP_ECS_ETM_CTRL_EN;
 +		regs->DEBUG_CTRL = (MCHP_ECS_DCTRL_DBG_EN |
@@ -4740,7 +4733,7 @@ index 8ecdf7d3be..bc569c14d5 100644
  static int soc_init(const struct device *dev)
  {
  	ARG_UNUSED(dev);
-@@ -25,6 +57,8 @@ static int soc_init(const struct device *dev)
+@@ -25,6 +55,8 @@ static int soc_init(const struct device *dev)
  						MCHP_GPIO_CTRL_IDET_DISABLE;
  	}
  
@@ -4750,13 +4743,13 @@ index 8ecdf7d3be..bc569c14d5 100644
  }
  
 -- 
-2.17.1
+2.34.1
 
 
-From afeb234d5086c96ceb61e733872dc60926ebc8db Mon Sep 17 00:00:00 2001
+From 28e92c0dad281298eeeade507bda34f84134ba08 Mon Sep 17 00:00:00 2001
 From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
 Date: Tue, 13 Dec 2022 14:02:54 +0530
-Subject: [PATCH 17/21] include: drivers: peci: Add missing subsystem macro
+Subject: [PATCH 17/32] include: drivers: peci: Add missing subsystem macro
 
 Add subsystem macro for peci driver API.
 
@@ -4779,14 +4772,14 @@ index 7397ade679..905857708a 100644
  	peci_disable_t disable;
  	peci_enable_t enable;
 -- 
-2.17.1
+2.34.1
 
 
-From 8edec7a4f640615b88ede51e868988a2786d05ff Mon Sep 17 00:00:00 2001
+From 7caec56d3c804af4dd767cd8ca64988fe5cba38d Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Mon, 7 Nov 2022 12:36:27 -0500
-Subject: [PATCH 18/21] [BACKPORTED] drivers: led: Microchip XEC LED driver
- using BBLED controller
+Subject: [PATCH 18/32] [BACKPORTED] drivers: led: Microchip XEC LED driver using BBLED
+ controller
 
 Implement a LED driver for Microchip XEC using the breathing,
 blinking LED controller. The driver supports LED on, off, and
@@ -5218,14 +5211,14 @@ index 0000000000..563c7ecaf4
 +      required: true
 +      description: BBLED PCR register index and bit position
 -- 
-2.17.1
+2.34.1
 
 
-From 4a059318b012dff125c6bf071e007433c0a174ac Mon Sep 17 00:00:00 2001
+From f93f14278a6358b961fe53afb34be440002b35a2 Mon Sep 17 00:00:00 2001
 From: Jay Vasanth <jay.vasanth@microchip.com>
 Date: Mon, 7 Nov 2022 12:37:15 -0500
-Subject: [PATCH 19/21] [BACKPORTED] samples: drivers: led: Add sample for
- Microchip XEC LED driver
+Subject: [PATCH 19/32] [BACKPORTED] samples: drivers: led: Add sample for Microchip XEC LED
+ driver
 
 Add a sample program demonstrating the LED driver for Microchip's
 XEC microcontrollers. The sample can be built for MEC152x and
@@ -5587,13 +5580,13 @@ index 0000000000..a1a116c0ab
 +	led_test();
 +}
 -- 
-2.17.1
+2.34.1
 
 
-From 996c2bd1d40036f8a93dd11cebb18950010bd4c1 Mon Sep 17 00:00:00 2001
+From 1c1ae5b5bb7dde10d8fba79ae9ed810d809d23da Mon Sep 17 00:00:00 2001
 From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
 Date: Wed, 2 Nov 2022 17:24:53 +0530
-Subject: [PATCH 20/21] drivers: Modify headers to start with "zephyr\"
+Subject: [PATCH 20/32] drivers: Modify headers to start with "zephyr\"
 
 All header files now need to be referenced with "zephyr\"
 starting Zephyr v3.2.
@@ -5617,14 +5610,13 @@ index d4fa144aec..3e00e3592d 100644
  #define MCHP_SAF_MAX_FLASH_DEVICES		2U
  
 -- 
-2.17.1
+2.34.1
 
 
-From e8834fa7e917b5b5cda3854791759af7cbc6f6b6 Mon Sep 17 00:00:00 2001
+From c268a292737df4c6d5439a6036cd5d375e7d7ae9 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Mon, 5 Dec 2022 19:08:20 -0800
-Subject: [PATCH 21/21] [BACKPORT] soc: arm: microchip: mec172x: Correct PECI
- base address
+Subject: [PATCH 21/32] [BACKPORTED] soc: arm: microchip: mec172x: Correct PECI base address
 
 Use correct device tree entry
 
@@ -5647,5 +5639,975 @@ index 601ce99c61..cf7d412171 100644
  	((struct pcr_regs *)(DT_REG_ADDR(DT_NODELABEL(pcr))))
  #define TFDP_0_XEC_REG_BASE						\
 -- 
-2.17.1
+2.34.1
+
+
+From 14691adffaf942fd2cdc2feffca5b80ee0f7f6f8 Mon Sep 17 00:00:00 2001
+From: Stephanos Ioannidis <root@stephanos.io>
+Date: Thu, 8 Sep 2022 20:28:34 +0900
+Subject: [PATCH 22/32] [BACKPORTED] cmake: clang: Disable deprecated non-prototype warning
+
+Clang 15 added a new warning type `-Wdeprecated-non-prototype` that
+warns about the functions without prototypes, which have been
+deprecated since the C89 and will not work in the upcoming C2x.
+
+This commit disables the warning because Zephyr deliberately makes use
+of the functions without prototypes to allow the use of a "generic"
+function pointer (notoriously in the cbprintf implementation) and
+Zephyr will not move to the C2x in the foreseeable future.
+
+Signed-off-by: Stephanos Ioannidis <root@stephanos.io>
+---
+ cmake/compiler/clang/compiler_flags.cmake | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/cmake/compiler/clang/compiler_flags.cmake b/cmake/compiler/clang/compiler_flags.cmake
+index f4d5a65301..ce0c8b17fe 100644
+--- a/cmake/compiler/clang/compiler_flags.cmake
++++ b/cmake/compiler/clang/compiler_flags.cmake
+@@ -29,6 +29,7 @@ check_set_compiler_property(PROPERTY warning_base
+                             -Wno-main
+                             -Wno-unused-but-set-variable
+                             -Wno-typedef-redefinition
++                            -Wno-deprecated-non-prototype
+ )
+ 
+ check_set_compiler_property(APPEND PROPERTY warning_base -Wno-pointer-sign)
+-- 
+2.34.1
+
+
+From 068475f98f97ccdd2332f497e71639275f9f65ac Mon Sep 17 00:00:00 2001
+From: Kumar Gala <kumar.gala@intel.com>
+Date: Fri, 20 Jan 2023 23:21:23 +0000
+Subject: [PATCH 23/32] [BACKPORTED] toolchain: oneApi: Fix support and update for 2023.0.0
+ release
+
+The oneApi support has bit rotten since it was first introduced.  Update
+the support to function with the latest 2023.0.0 release and add a
+check to only support that version or newer for now.  Versions before
+2021.2.0 have linker script failures.
+
+Various fixes made:
+* In the 2023.0.0 release, various binaries are in a llvm-bin path so
+  add support to search in that path.  This replaces the python search
+  path that much older versions needed.
+* newlib isn't supported with oneApi so set TOOLCHAIN_HAS_NEWLIB to
+  OFF to match that.
+* 2023.0.0 doesn't back llvm-nm, so use binutils version.  This
+  is expected to be fixed in 2023.1.0 release so add a check to
+  handle either case.
+* Update compiler flag check based on clang to also support
+  CMAKE_C_COMPILER_ID of "IntelLLVM" as that is how the oneApi toolchain
+  reports itself.
+
+Signed-off-by: Kumar Gala <kumar.gala@intel.com>
+---
+ CMakeLists.txt                       |  3 ++-
+ cmake/bintools/oneApi/target.cmake   | 10 ++++++++--
+ cmake/modules/FindoneApi.cmake       | 24 ++++++++++++++++++++++++
+ cmake/toolchain/oneApi/generic.cmake |  4 +++-
+ 4 files changed, 37 insertions(+), 4 deletions(-)
+ create mode 100644 cmake/modules/FindoneApi.cmake
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5cba6ee3a8..b8aded7afe 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -391,7 +391,8 @@ zephyr_compile_options(${COMPILER_OPT_AS_LIST})
+ 
+ # TODO: Include arch compiler options at this point.
+ 
+-if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
++if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
++   NOT CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM")
+   # GCC assumed
+   zephyr_cc_option(-fno-reorder-functions)
+ 
+diff --git a/cmake/bintools/oneApi/target.cmake b/cmake/bintools/oneApi/target.cmake
+index 4b69900f06..488e2345e9 100644
+--- a/cmake/bintools/oneApi/target.cmake
++++ b/cmake/bintools/oneApi/target.cmake
+@@ -1,12 +1,18 @@
+ # SPDX-License-Identifier: Apache-2.0
+ 
+ if(DEFINED TOOLCHAIN_HOME)
+-  set(find_program_clang_args PATHS ${TOOLCHAIN_HOME} ${ONEAPI_PYTHON_PATH} NO_DEFAULT_PATH)
++  set(find_program_clang_args PATHS ${TOOLCHAIN_HOME} ${ONEAPI_LLVM_BIN_PATH} NO_DEFAULT_PATH)
+   set(find_program_binutils_args PATHS ${TOOLCHAIN_HOME} )
+ endif()
+ 
++find_package(oneApi 2023.0.0 REQUIRED)
++
+ find_program(CMAKE_AR      llvm-ar      ${find_program_clang_args}   )
+-find_program(CMAKE_NM      llvm-nm      ${find_program_clang_args}   )
++if(ONEAPI_VERSION VERSION_LESS_EQUAL "2023.0.0")
++  find_program(CMAKE_NM      nm           ${find_program_binutils_args}   )
++else()
++  find_program(CMAKE_NM      llvm-nm      ${find_program_clang_args}   )
++endif()
+ # In OneApi installation directory on Windows, there is no llvm-objdump
+ # binary, so would better use objdump from system environment both
+ # on Linux and Windows.
+diff --git a/cmake/modules/FindoneApi.cmake b/cmake/modules/FindoneApi.cmake
+new file mode 100644
+index 0000000000..0b3ff56fbf
+--- /dev/null
++++ b/cmake/modules/FindoneApi.cmake
+@@ -0,0 +1,24 @@
++# SPDX-License-Identifier: Apache-2.0
++#
++# Copyright (c) 2023 Intel Corporation
++#
++# FindoneApi module for locating oneAPI compiler, icx.
++#
++# The module defines the following variables:
++#
++# 'oneApi_FOUND', 'ONEAPI_FOUND'
++# True if the oneApi toolchain/compiler, icx, was found.
++#
++# 'ONEAPI_VERSION'
++# The version of the oneAPI toolchain.
++
++if(CMAKE_C_COMPILER)
++  # Parse the 'clang --version' output to find the installed version.
++  execute_process(COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE ONEAPI_VERSION)
++  string(REGEX REPLACE "[^0-9]*([0-9.]+) .*" "\\1" ONEAPI_VERSION ${ONEAPI_VERSION})
++endif()
++
++find_package_handle_standard_args(oneApi
++				  REQUIRED_VARS CMAKE_C_COMPILER
++				  VERSION_VAR ONEAPI_VERSION
++)
+diff --git a/cmake/toolchain/oneApi/generic.cmake b/cmake/toolchain/oneApi/generic.cmake
+index c72a7a873d..d22176ff22 100644
+--- a/cmake/toolchain/oneApi/generic.cmake
++++ b/cmake/toolchain/oneApi/generic.cmake
+@@ -10,7 +10,7 @@ endif()
+ string(TOLOWER ${CMAKE_HOST_SYSTEM_NAME} system)
+ if(ONEAPI_TOOLCHAIN_PATH)
+   set(TOOLCHAIN_HOME ${ONEAPI_TOOLCHAIN_PATH}/compiler/latest/${system}/bin/)
+-  set(ONEAPI_PYTHON_PATH ${ONEAPI_TOOLCHAIN_PATH}/intelpython/latest/bin)
++  set(ONEAPI_LLVM_BIN_PATH ${ONEAPI_TOOLCHAIN_PATH}/compiler/latest/${system}/bin-llvm)
+ endif()
+ 
+ set(ONEAPI_TOOLCHAIN_PATH ${ONEAPI_TOOLCHAIN_PATH} CACHE PATH "oneApi install directory")
+@@ -43,4 +43,6 @@ elseif(system STREQUAL "windows")
+   add_link_options(--target=${triple})
+ endif()
+ 
++set(TOOLCHAIN_HAS_NEWLIB OFF CACHE BOOL "True if toolchain supports newlib")
++
+ message(STATUS "Found toolchain: host (clang/ld)")
+-- 
+2.34.1
+
+
+From 3743edcadeb09b9c50494d2874b4f6be37cb4244 Mon Sep 17 00:00:00 2001
+From: Kumar Gala <kumar.gala@intel.com>
+Date: Thu, 16 Mar 2023 14:58:27 +0000
+Subject: [PATCH 24/32] [BACKPORTED] toolchain: Add ARMClang to gcc related toolchain flags
+ check
+
+Add ARMClang similar to LLVM to check to skip GCC specific flags
+
+Signed-off-by: Kumar Gala <kumar.gala@intel.com>
+---
+ CMakeLists.txt | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b8aded7afe..4f4408603e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -392,7 +392,8 @@ zephyr_compile_options(${COMPILER_OPT_AS_LIST})
+ # TODO: Include arch compiler options at this point.
+ 
+ if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
+-   NOT CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM")
++   NOT CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM" AND
++   NOT CMAKE_C_COMPILER_ID STREQUAL "ARMClang")
+   # GCC assumed
+   zephyr_cc_option(-fno-reorder-functions)
+ 
+-- 
+2.34.1
+
+
+From aaa4906435170bbf80c060cc9ec9597e57263316 Mon Sep 17 00:00:00 2001
+From: Kumar Gala <kumar.gala@intel.com>
+Date: Wed, 15 Mar 2023 23:58:29 +0000
+Subject: [PATCH 25/32] [BACKPORTED] armclang: fix compiler warnings with isprint()
+
+We get compile warnings of the form:
+
+drivers/console/uart_console.c:508:8: error: converting the result of
+'<<' to a boolean; did you mean
+'((__aeabi_ctype_table_ + 1)[(byte)] << 28) != 0'?
+ [-Werror,-Wint-in-bool-context]
+                if (!isprint(byte)) {
+                     ^
+
+Since isprint returns an int, change check to an explicit test against
+the return value.
+
+Signed-off-by: Kumar Gala <kumar.gala@intel.com>
+---
+ drivers/console/uart_console.c               | 2 +-
+ samples/subsys/shell/shell_module/src/main.c | 4 ++--
+ subsys/logging/log_output.c                  | 2 +-
+ subsys/shell/shell.c                         | 4 ++--
+ subsys/tracing/tracing_backend_uart.c        | 2 +-
+ tests/lib/c_lib/src/main.c                   | 2 +-
+ 6 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/console/uart_console.c b/drivers/console/uart_console.c
+index 0515e31e83..1be0863ab0 100644
+--- a/drivers/console/uart_console.c
++++ b/drivers/console/uart_console.c
+@@ -490,7 +490,7 @@ static void uart_console_isr(const struct device *unused, void *user_data)
+ 		}
+ 
+ 		/* Handle special control characters */
+-		if (!isprint(byte)) {
++		if (isprint(byte) == 0) {
+ 			switch (byte) {
+ 			case BS:
+ 			case DEL:
+diff --git a/samples/subsys/shell/shell_module/src/main.c b/samples/subsys/shell/shell_module/src/main.c
+index 41275a8a76..9da823a752 100644
+--- a/samples/subsys/shell/shell_module/src/main.c
++++ b/samples/subsys/shell/shell_module/src/main.c
+@@ -134,7 +134,7 @@ static int cmd_demo_getopt_ts(const struct shell *sh, size_t argc,
+ 				shell_print(sh,
+ 					"Option -%c requires an argument.",
+ 					state->optopt);
+-			} else if (isprint(state->optopt)) {
++			} else if (isprint(state->optopt) != 0) {
+ 				shell_print(sh,
+ 					"Unknown option `-%c'.",
+ 					state->optopt);
+@@ -184,7 +184,7 @@ static int cmd_demo_getopt(const struct shell *sh, size_t argc,
+ 				shell_print(sh,
+ 					"Option -%c requires an argument.",
+ 					optopt);
+-			} else if (isprint(optopt)) {
++			} else if (isprint(optopt) != 0) {
+ 				shell_print(sh, "Unknown option `-%c'.",
+ 					optopt);
+ 			} else {
+diff --git a/subsys/logging/log_output.c b/subsys/logging/log_output.c
+index d07681dd0e..0a14e54ef4 100644
+--- a/subsys/logging/log_output.c
++++ b/subsys/logging/log_output.c
+@@ -393,7 +393,7 @@ static void hexdump_line_print(const struct log_output *output,
+ 			unsigned char c = (unsigned char)data[i];
+ 
+ 			print_formatted(output, "%c",
+-			      isprint((int)c) ? c : '.');
++			      isprint((int)c) != 0 ? c : '.');
+ 		} else {
+ 			print_formatted(output, " ");
+ 		}
+diff --git a/subsys/shell/shell.c b/subsys/shell/shell.c
+index c4d1177b44..2a5026a0a4 100644
+--- a/subsys/shell/shell.c
++++ b/subsys/shell/shell.c
+@@ -1049,7 +1049,7 @@ static void state_collect(const struct shell *shell)
+ 				break;
+ 
+ 			default:
+-				if (isprint((int) data)) {
++				if (isprint((int) data) != 0) {
+ 					z_flag_history_exit_set(shell, true);
+ 					z_shell_op_char_insert(shell, data);
+ 				} else if (z_flag_echo_get(shell)) {
+@@ -1555,7 +1555,7 @@ void shell_hexdump_line(const struct shell *shell, unsigned int offset,
+ 			char c = data[i];
+ 
+ 			shell_fprintf(shell, SHELL_NORMAL, "%c",
+-				      isprint((int)c) ? c : '.');
++				      isprint((int)c) != 0 ? c : '.');
+ 		} else {
+ 			shell_fprintf(shell, SHELL_NORMAL, " ");
+ 		}
+diff --git a/subsys/tracing/tracing_backend_uart.c b/subsys/tracing/tracing_backend_uart.c
+index cfc046927c..647f26abf0 100644
+--- a/subsys/tracing/tracing_backend_uart.c
++++ b/subsys/tracing/tracing_backend_uart.c
+@@ -48,7 +48,7 @@ static void uart_isr(const struct device *dev, void *user_data)
+ 			length = tracing_cmd_buffer_alloc(&cmd);
+ 		}
+ 
+-		if (!isprint(byte)) {
++		if (isprint(byte) == 0) {
+ 			if (byte == '\r') {
+ 				cmd[cur] = '\0';
+ 				tracing_cmd_handle(cmd, cur);
+diff --git a/tests/lib/c_lib/src/main.c b/tests/lib/c_lib/src/main.c
+index abe3f38d28..0e747ef7b4 100644
+--- a/tests/lib/c_lib/src/main.c
++++ b/tests/lib/c_lib/src/main.c
+@@ -479,7 +479,7 @@ ZTEST(test_c_lib, test_checktype)
+ 
+ 	ptr = buf;
+ 	for (int i = 0; i < 128; i++) {
+-		if (isprint(i)) {
++		if (isprint(i) != 0) {
+ 			*ptr++ = i;
+ 		}
+ 	}
+-- 
+2.34.1
+
+
+From 7da1d7011f764366f453b95e16af3e5aafc70f7f Mon Sep 17 00:00:00 2001
+From: Krzysztof Chruscinski <krzysztof.chruscinski@nordicsemi.no>
+Date: Sat, 13 Aug 2022 08:31:19 +0200
+Subject: [PATCH 26/32] [BACKPORTED] logging: Use STRUCT_SECTION macros for log backend
+
+Clean up logging code to utilize macros for handling sections.
+
+Signed-off-by: Krzysztof Chruscinski <krzysztof.chruscinski@nordicsemi.no>
+---
+ .../linker/common-rom/common-rom-logging.ld   |  7 +---
+ include/zephyr/logging/log_backend.h          | 15 ++++++---
+ subsys/logging/log_cmds.c                     | 16 ++--------
+ subsys/logging/log_core.c                     | 32 ++++++-------------
+ subsys/logging/log_mgmt.c                     | 14 +++-----
+ tests/subsys/logging/log_api/src/main.c       |  5 ++-
+ .../logging/log_backend_init/src/main.c       |  6 +++-
+ .../log_core_additional/src/log_test.c        | 19 ++++-------
+ 8 files changed, 45 insertions(+), 69 deletions(-)
+
+diff --git a/include/zephyr/linker/common-rom/common-rom-logging.ld b/include/zephyr/linker/common-rom/common-rom-logging.ld
+index 48b5a772e5..52063bad91 100644
+--- a/include/zephyr/linker/common-rom/common-rom-logging.ld
++++ b/include/zephyr/linker/common-rom/common-rom-logging.ld
+@@ -14,9 +14,4 @@
+ 		__log_const_end = .;
+ 	} GROUP_ROM_LINK_IN(RAMABLE_REGION, ROMABLE_REGION)
+ 
+-	SECTION_DATA_PROLOGUE(log_backends_sections,,)
+-	{
+-		__log_backends_start = .;
+-		KEEP(*("._log_backend.*"));
+-		__log_backends_end = .;
+-	} GROUP_ROM_LINK_IN(RAMABLE_REGION, ROMABLE_REGION)
++	ITERABLE_SECTION_ROM(log_backend, 4)
+diff --git a/include/zephyr/logging/log_backend.h b/include/zephyr/logging/log_backend.h
+index 721d160d68..71c770328b 100644
+--- a/include/zephyr/logging/log_backend.h
++++ b/include/zephyr/logging/log_backend.h
+@@ -94,9 +94,6 @@ struct log_backend {
+ 	bool autostart;
+ };
+ 
+-extern const struct log_backend __log_backends_start[];
+-extern const struct log_backend __log_backends_end[];
+-
+ /**
+  * @brief Macro for creating a logger backend instance.
+  *
+@@ -246,7 +243,11 @@ static inline uint8_t log_backend_id_get(const struct log_backend *const backend
+  */
+ static inline const struct log_backend *log_backend_get(uint32_t idx)
+ {
+-	return &__log_backends_start[idx];
++	const struct log_backend *backend;
++
++	STRUCT_SECTION_GET(log_backend, idx, &backend);
++
++	return backend;
+ }
+ 
+ /**
+@@ -256,7 +257,11 @@ static inline const struct log_backend *log_backend_get(uint32_t idx)
+  */
+ static inline int log_backend_count_get(void)
+ {
+-	return __log_backends_end - __log_backends_start;
++	int cnt;
++
++	STRUCT_SECTION_COUNT(log_backend, &cnt);
++
++	return cnt;
+ }
+ 
+ /**
+diff --git a/subsys/logging/log_cmds.c b/subsys/logging/log_cmds.c
+index 2d9333fade..80fce16c02 100644
+--- a/subsys/logging/log_cmds.c
++++ b/subsys/logging/log_cmds.c
+@@ -41,11 +41,9 @@ static const char * const severity_lvls_sorted[] = {
+  */
+ static const struct log_backend *backend_find(char const *name)
+ {
+-	const struct log_backend *backend;
+ 	size_t slen = strlen(name);
+ 
+-	for (int i = 0; i < log_backend_count_get(); i++) {
+-		backend = log_backend_get(i);
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 		if (strncmp(name, backend->name, slen) == 0) {
+ 			return backend;
+ 		}
+@@ -343,13 +341,7 @@ static int cmd_log_backend_go(const struct shell *shell,
+ static int cmd_log_backends_list(const struct shell *shell,
+ 				 size_t argc, char **argv)
+ {
+-	int backend_count;
+-
+-	backend_count = log_backend_count_get();
+-
+-	for (int i = 0; i < backend_count; i++) {
+-		const struct log_backend *backend = log_backend_get(i);
+-
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 		shell_fprintf(shell, SHELL_NORMAL,
+ 			      "%s\r\n"
+ 			      "\t- Status: %s\r\n"
+@@ -410,9 +402,7 @@ static void backend_name_get(size_t idx, struct shell_static_entry *entry)
+ 	entry->subcmd = &sub_log_backend;
+ 	entry->syntax  = NULL;
+ 
+-	if (idx < log_backend_count_get()) {
+-		const struct log_backend *backend = log_backend_get(idx);
+-
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 		entry->syntax = backend->name;
+ 	}
+ }
+diff --git a/subsys/logging/log_core.c b/subsys/logging/log_core.c
+index 6c7f906dae..46f4770d0c 100644
+--- a/subsys/logging/log_core.c
++++ b/subsys/logging/log_core.c
+@@ -159,11 +159,9 @@ static void z_log_msg_post_finalize(void)
+ 
+ const struct log_backend *log_format_set_all_active_backends(size_t log_type)
+ {
+-	const struct log_backend *backend;
+ 	const struct log_backend *failed_backend = NULL;
+ 
+-	for (int i = 0; i < log_backend_count_get(); i++) {
+-		backend = log_backend_get(i);
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 		if (log_backend_is_active(backend)) {
+ 			int retCode = log_backend_format_set(backend, log_type);
+ 
+@@ -262,16 +260,15 @@ static uint32_t z_log_init(bool blocking, bool can_sleep)
+ 	}
+ 
+ 	__ASSERT_NO_MSG(log_backend_count_get() < LOG_FILTERS_NUM_OF_SLOTS);
+-	int i;
+ 
+ 	if (atomic_inc(&initialized) != 0) {
+ 		return 0;
+ 	}
+ 
+-	/* Assign ids to backends. */
+-	for (i = 0; i < log_backend_count_get(); i++) {
+-		const struct log_backend *backend = log_backend_get(i);
++	int i = 0;
+ 
++	/* Assign ids to backends. */
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 		if (backend->autostart) {
+ 			log_backend_init(backend);
+ 
+@@ -285,6 +282,8 @@ static uint32_t z_log_init(bool blocking, bool can_sleep)
+ 			} else {
+ 				mask |= BIT(i);
+ 			}
++
++			i++;
+ 		}
+ 	}
+ 
+@@ -346,8 +345,6 @@ int log_set_timestamp_func(log_timestamp_get_t timestamp_getter, uint32_t freq)
+ 
+ void z_impl_log_panic(void)
+ {
+-	struct log_backend const *backend;
+-
+ 	if (panic_mode) {
+ 		return;
+ 	}
+@@ -364,9 +361,7 @@ void z_impl_log_panic(void)
+ 		}
+ 	}
+ 
+-	for (int i = 0; i < log_backend_count_get(); i++) {
+-		backend = log_backend_get(i);
+-
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 		if (log_backend_is_active(backend)) {
+ 			log_backend_panic(backend);
+ 		}
+@@ -425,10 +420,7 @@ static bool msg_filter_check(struct log_backend const *backend,
+ 
+ static void msg_process(union log_msg_generic *msg)
+ {
+-	struct log_backend const *backend;
+-
+-	for (int i = 0; i < log_backend_count_get(); i++) {
+-		backend = log_backend_get(i);
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 		if (log_backend_is_active(backend) &&
+ 		    msg_filter_check(backend, msg)) {
+ 			log_backend_msg_process(backend, msg);
+@@ -440,9 +432,7 @@ void dropped_notify(void)
+ {
+ 	uint32_t dropped = z_log_dropped_read_and_clear();
+ 
+-	for (int i = 0; i < log_backend_count_get(); i++) {
+-		struct log_backend const *backend = log_backend_get(i);
+-
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 		if (log_backend_is_active(backend)) {
+ 			log_backend_dropped(backend, dropped);
+ 		}
+@@ -638,9 +628,7 @@ int log_mem_get_max_usage(uint32_t *max)
+ static void log_backend_notify_all(enum log_backend_evt event,
+ 				   union log_backend_evt_arg *arg)
+ {
+-	for (int i = 0; i < log_backend_count_get(); i++) {
+-		const struct log_backend *backend = log_backend_get(i);
+-
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 		log_backend_notify(backend, event, arg);
+ 	}
+ }
+diff --git a/subsys/logging/log_mgmt.c b/subsys/logging/log_mgmt.c
+index fc85c267f9..62278841c5 100644
+--- a/subsys/logging/log_mgmt.c
++++ b/subsys/logging/log_mgmt.c
+@@ -104,12 +104,10 @@ uint32_t z_impl_log_filter_set(struct log_backend const *const backend,
+ 		uint32_t *filters = z_log_dynamic_filters_get(source_id);
+ 
+ 		if (backend == NULL) {
+-			struct log_backend const *iter_backend;
+ 			uint32_t max = 0U;
+ 			uint32_t current;
+ 
+-			for (int i = 0; i < log_backend_count_get(); i++) {
+-				iter_backend = log_backend_get(i);
++			STRUCT_SECTION_FOREACH(log_backend, iter_backend) {
+ 				current = log_filter_set(iter_backend,
+ 							 domain_id,
+ 							 source_id, level);
+@@ -174,14 +172,12 @@ static void backend_filter_set(struct log_backend const *const backend,
+ 
+ const struct log_backend *log_backend_get_by_name(const char *backend_name)
+ {
+-	const struct log_backend *ptr = __log_backends_start;
+-
+-	while (ptr < __log_backends_end) {
+-		if (strcmp(backend_name, ptr->name) == 0) {
+-			return ptr;
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
++		if (strcmp(backend_name, backend->name) == 0) {
++			return backend;
+ 		}
+-		ptr++;
+ 	}
++
+ 	return NULL;
+ }
+ 
+diff --git a/tests/subsys/logging/log_api/src/main.c b/tests/subsys/logging/log_api/src/main.c
+index df5c1c3c15..d512dd8dfc 100644
+--- a/tests/subsys/logging/log_api/src/main.c
++++ b/tests/subsys/logging/log_api/src/main.c
+@@ -127,7 +127,10 @@ static void process_and_validate(bool backend2_enable, bool panic)
+ 	mock_log_frontend_validate(panic);
+ 
+ 	if (NO_BACKENDS) {
+-		zassert_equal(log_backend_count_get(), 0);
++		int cnt;
++
++		STRUCT_SECTION_COUNT(log_backend, &cnt);
++		zassert_equal(cnt, 0);
+ 		return;
+ 	}
+ 
+diff --git a/tests/subsys/logging/log_backend_init/src/main.c b/tests/subsys/logging/log_backend_init/src/main.c
+index 31fa813adb..5704fa164f 100644
+--- a/tests/subsys/logging/log_backend_init/src/main.c
++++ b/tests/subsys/logging/log_backend_init/src/main.c
+@@ -8,6 +8,7 @@
+ #include <zephyr/tc_util.h>
+ #include <stdbool.h>
+ #include <zephyr/kernel.h>
++#include <zephyr/toolchain.h>
+ #include <zephyr/ztest.h>
+ #include <zephyr/logging/log_backend.h>
+ #include <zephyr/logging/log_ctrl.h>
+@@ -111,7 +112,10 @@ LOG_BACKEND_DEFINE(backend2, backend_api, true, &context2);
+  */
+ ZTEST(log_backend_init, test_log_backends_initialization)
+ {
+-	if (log_backend_count_get() != 2) {
++	int cnt;
++
++	STRUCT_SECTION_COUNT(log_backend, &cnt);
++	if (cnt != 2) {
+ 		/* Other backends should not be enabled. */
+ 		ztest_test_skip();
+ 	}
+diff --git a/tests/subsys/logging/log_core_additional/src/log_test.c b/tests/subsys/logging/log_core_additional/src/log_test.c
+index 8cd09581ac..0e26ee88c9 100644
+--- a/tests/subsys/logging/log_core_additional/src/log_test.c
++++ b/tests/subsys/logging/log_core_additional/src/log_test.c
+@@ -238,10 +238,7 @@ ZTEST(test_log_core_additional, test_log_early_logging)
+ 		log_init();
+ 
+ 		/* deactivate other backends */
+-		const struct log_backend *backend;
+-
+-		for (int i = 0; i < log_backend_count_get(); i++) {
+-			backend = log_backend_get(i);
++		STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 			if (strcmp(backend->name, "test")) {
+ 				log_backend_deactivate(backend);
+ 			}
+@@ -309,10 +306,7 @@ ZTEST(test_log_core_additional, test_log_timestamping)
+ 
+ 	log_init();
+ 	/* deactivate all other backend */
+-	const struct log_backend *backend;
+-
+-	for (int i = 0; i < log_backend_count_get(); i++) {
+-		backend = log_backend_get(i);
++	STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 		log_backend_deactivate(backend);
+ 	}
+ 
+@@ -356,18 +350,19 @@ ZTEST(test_log_core_additional, test_log_timestamping)
+ #define UART_BACKEND "log_backend_uart"
+ ZTEST(test_log_core_additional, test_multiple_backends)
+ {
++	int cnt;
++
+ 	TC_PRINT("Test multiple backends");
+ 	/* enable both backend1 and backend2 */
+ 	log_setup(true);
+-	zassert_true((log_backend_count_get() >= 2),
++	STRUCT_SECTION_COUNT(log_backend, &cnt);
++	zassert_true((cnt >= 2),
+ 		     "There is no multi backends");
+ 
+ 	if (IS_ENABLED(CONFIG_LOG_BACKEND_UART)) {
+ 		bool have_uart = false;
+-		struct log_backend const *backend;
+ 
+-		for (int i = 0; i < log_backend_count_get(); i++) {
+-			backend = log_backend_get(i);
++		STRUCT_SECTION_FOREACH(log_backend, backend) {
+ 			if (strcmp(backend->name, UART_BACKEND) == 0) {
+ 				have_uart = true;
+ 			}
+-- 
+2.34.1
+
+
+From e72eee3f1329791e3e902e75ad721601d3e127f9 Mon Sep 17 00:00:00 2001
+From: Kumar Gala <kumar.gala@intel.com>
+Date: Fri, 17 Mar 2023 15:27:31 +0000
+Subject: [PATCH 27/32] [BACKPORTED] linker: Fix handling of _static_thread_data section
+
+_static_thread_data should be in ROM as its static data.  So move
+it from common-ram.cmake to common-rom.cmake and fix it the params
+we call zephyr_iterable_section with.
+
+Signed-off-by: Kumar Gala <kumar.gala@intel.com>
+---
+ cmake/linker_script/common/common-ram.cmake | 2 --
+ cmake/linker_script/common/common-rom.cmake | 2 ++
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/cmake/linker_script/common/common-ram.cmake b/cmake/linker_script/common/common-ram.cmake
+index cac599aaa4..b1b77d0230 100644
+--- a/cmake/linker_script/common/common-ram.cmake
++++ b/cmake/linker_script/common/common-ram.cmake
+@@ -35,8 +35,6 @@ zephyr_linker_section_configure(SECTION initshell
+ zephyr_linker_section(NAME log_dynamic GROUP DATA_REGION NOINPUT)
+ zephyr_linker_section_configure(SECTION log_dynamic KEEP INPUT ".log_dynamic_*")
+ 
+-zephyr_iterable_section(NAME _static_thread_data GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
+-
+ if(CONFIG_USERSPACE)
+   # All kernel objects within are assumed to be either completely
+   # initialized at build time, or initialized automatically at runtime
+diff --git a/cmake/linker_script/common/common-rom.cmake b/cmake/linker_script/common/common-rom.cmake
+index 0d267fb362..4a9831eb18 100644
+--- a/cmake/linker_script/common/common-rom.cmake
++++ b/cmake/linker_script/common/common-rom.cmake
+@@ -181,3 +181,5 @@ zephyr_linker_section_configure(SECTION zephyr_dbg_info INPUT ".zephyr_dbg_info"
+ zephyr_linker_section(NAME device_handles KVMA RAM_REGION GROUP RODATA_REGION NOINPUT ${XIP_ALIGN_WITH_INPUT} ENDALIGN 16)
+ zephyr_linker_section_configure(SECTION device_handles INPUT .__device_handles_pass1* KEEP SORT NAME PASS LINKER_DEVICE_HANDLES_PASS1)
+ zephyr_linker_section_configure(SECTION device_handles INPUT .__device_handles_pass2* KEEP SORT NAME PASS NOT LINKER_DEVICE_HANDLES_PASS1)
++
++zephyr_iterable_section(NAME _static_thread_data KVMA RAM_REGION GROUP RODATA_REGION SUBALIGN 4)
+-- 
+2.34.1
+
+
+From 47080058cd5525ec9a846deac6ae759158cc1c69 Mon Sep 17 00:00:00 2001
+From: Kumar Gala <kumar.gala@intel.com>
+Date: Thu, 16 Mar 2023 17:05:01 +0000
+Subject: [PATCH 28/32] [BACKPORTED] linker: Add missing ram iterable sections
+
+Add missing users of ITERABLE_SECTION_RAM* macros that should exist
+in common-ram.cmake so that linker script generation for arm clang
+works for those users.
+
+Signed-off-by: Kumar Gala <kumar.gala@intel.com>
+---
+ cmake/linker_script/common/common-ram.cmake | 34 +++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+
+diff --git a/cmake/linker_script/common/common-ram.cmake b/cmake/linker_script/common/common-ram.cmake
+index b1b77d0230..2a5c9c0afa 100644
+--- a/cmake/linker_script/common/common-ram.cmake
++++ b/cmake/linker_script/common/common-ram.cmake
+@@ -55,6 +55,7 @@ zephyr_iterable_section(NAME k_pipe GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SU
+ zephyr_iterable_section(NAME k_sem GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
+ zephyr_iterable_section(NAME k_queue GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
+ zephyr_iterable_section(NAME k_condvar GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++zephyr_iterable_section(NAME k_event GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
+ 
+ zephyr_linker_section(NAME _net_buf_pool_area GROUP DATA_REGION NOINPUT ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
+ zephyr_linker_section_configure(SECTION _net_buf_pool_area
+@@ -110,3 +111,36 @@ if(CONFIG_ZTEST_NEW_API)
+   zephyr_iterable_section(NAME ztest_test_rule GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
+   zephyr_iterable_section(NAME ztest_expected_result_entry GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
+ endif()
++
++if(CONFIG_ZBUS)
++  zephyr_iterable_section(NAME zbus_channel GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++  zephyr_iterable_section(NAME zbus_observer GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++endif()
++
++if(CONFIG_UVB)
++  zephyr_iterable_section(NAME uvb_node GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++endif()
++
++if(CONFIG_BT_MESH_ADV_EXT)
++  zephyr_iterable_section(NAME bt_mesh_ext_adv GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++endif()
++
++if(CONFIG_LOG)
++  zephyr_iterable_section(NAME log_mpsc_pbuf GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++  zephyr_iterable_section(NAME log_msg_ptr GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++endif()
++
++if(CONFIG_PCIE)
++  zephyr_iterable_section(NAME pcie_dev GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++endif()
++
++if(CONFIG_USB_DEVICE_STACK OR CONFIG_USB_DEVICE_STACK_NEXT)
++  zephyr_iterable_section(NAME usb_cfg_data GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++  zephyr_iterable_section(NAME usbd_contex GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++  zephyr_iterable_section(NAME usbd_class_node GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++endif()
++
++if(CONFIG_USB_HOST_STACK)
++  zephyr_iterable_section(NAME usbh_contex GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++  zephyr_iterable_section(NAME usbh_class_data GROUP DATA_REGION ${XIP_ALIGN_WITH_INPUT} SUBALIGN 4)
++endif()
+-- 
+2.34.1
+
+
+From 120ac7430a3ac93806945caec357d13f51ec6f06 Mon Sep 17 00:00:00 2001
+From: Kumar Gala <kumar.gala@intel.com>
+Date: Thu, 16 Mar 2023 17:52:14 +0000
+Subject: [PATCH 29/32] [BACKPORTED] linker: Add missing rom iterable sections
+
+Add missing users of ITERABLE_SECTION_ROM* macros that should exist
+in common-rom.cmake so that linker script generation for arm clang
+works for those users.
+
+Signed-off-by: Kumar Gala <kumar.gala@intel.com>
+---
+ cmake/linker_script/common/common-rom.cmake | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/cmake/linker_script/common/common-rom.cmake b/cmake/linker_script/common/common-rom.cmake
+index 4a9831eb18..b129bb7787 100644
+--- a/cmake/linker_script/common/common-rom.cmake
++++ b/cmake/linker_script/common/common-rom.cmake
+@@ -183,3 +183,23 @@ zephyr_linker_section_configure(SECTION device_handles INPUT .__device_handles_p
+ zephyr_linker_section_configure(SECTION device_handles INPUT .__device_handles_pass2* KEEP SORT NAME PASS NOT LINKER_DEVICE_HANDLES_PASS1)
+ 
+ zephyr_iterable_section(NAME _static_thread_data KVMA RAM_REGION GROUP RODATA_REGION SUBALIGN 4)
++
++if (CONFIG_BT_IAS)
++  zephyr_iterable_section(NAME bt_ias_cb KVMA RAM_REGION GROUP RODATA_REGION SUBALIGN 4)
++endif()
++
++if (CONFIG_LOG)
++  zephyr_iterable_section(NAME log_link KVMA RAM_REGION GROUP RODATA_REGION SUBALIGN 4)
++endif()
++
++if (CONFIG_HTTP_SERVER)
++  zephyr_iterable_section(NAME http_service_desc KVMA RAM_REGION GROUP RODATA_REGION SUBALIGN 4)
++endif()
++
++if(CONFIG_INPUT)
++  zephyr_iterable_section(NAME input_listener KVMA RAM_REGION GROUP RODATA_REGION SUBALIGN 4)
++endif()
++
++if(CONFIG_USBD_MSC_CLASS)
++  zephyr_iterable_section(NAME usbd_msc_lun KVMA RAM_REGION GROUP RODATA_REGION SUBALIGN 4)
++endif()
+-- 
+2.34.1
+
+
+From df52e5be73191759b3f9adaf80ca651098ddae3e Mon Sep 17 00:00:00 2001
+From: Kumar Gala <kumar.gala@intel.com>
+Date: Thu, 16 Mar 2023 18:01:20 +0000
+Subject: [PATCH 30/32] [BACKPORTED] linker: Fix handling of log_backend iterable section
+
+The log_backed section is now using the iterable section macros so
+we should be using zephyr_iterable_section() in common-rom.cmake
+so the generation of the linker script is correct for arm clang
+compiles.
+
+Fixes #56440
+
+Signed-off-by: Kumar Gala <kumar.gala@intel.com>
+---
+ cmake/linker_script/common/common-rom.cmake | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/cmake/linker_script/common/common-rom.cmake b/cmake/linker_script/common/common-rom.cmake
+index b129bb7787..766465777a 100644
+--- a/cmake/linker_script/common/common-rom.cmake
++++ b/cmake/linker_script/common/common-rom.cmake
+@@ -162,9 +162,6 @@ zephyr_linker_section_configure(SECTION log_strings INPUT ".log_strings*" KEEP S
+ zephyr_linker_section(NAME log_const KVMA RAM_REGION GROUP RODATA_REGION NOINPUT ${XIP_ALIGN_WITH_INPUT})
+ zephyr_linker_section_configure(SECTION log_const INPUT ".log_const_*" KEEP SORT NAME)
+ 
+-zephyr_linker_section(NAME log_backends KVMA RAM_REGION GROUP RODATA_REGION NOINPUT ${XIP_ALIGN_WITH_INPUT})
+-zephyr_linker_section_configure(SECTION log_backends INPUT ".log_backends.*" KEEP)
+-
+ zephyr_iterable_section(NAME shell KVMA RAM_REGION GROUP RODATA_REGION SUBALIGN 4)
+ 
+ zephyr_linker_section(NAME shell_root_cmds KVMA RAM_REGION GROUP RODATA_REGION NOINPUT ${XIP_ALIGN_WITH_INPUT})
+@@ -190,6 +187,7 @@ endif()
+ 
+ if (CONFIG_LOG)
+   zephyr_iterable_section(NAME log_link KVMA RAM_REGION GROUP RODATA_REGION SUBALIGN 4)
++  zephyr_iterable_section(NAME log_backend KVMA RAM_REGION GROUP RODATA_REGION SUBALIGN 4)
+ endif()
+ 
+ if (CONFIG_HTTP_SERVER)
+-- 
+2.34.1
+
+
+From cd95563591081b607ac50d9e1067918ed08cad9d Mon Sep 17 00:00:00 2001
+From: Kumar Gala <kumar.gala@intel.com>
+Date: Tue, 21 Mar 2023 20:07:04 +0000
+Subject: [PATCH 31/32] [BACKPORTED] armclang: Fix building cortex-m4 w/o floating point
+
+When we build for a SoC that has a cortex-m4 w/o a FPU that
+utilizes CMSIS headers with armclang (like mec1501modular_assy6885)
+we get the following warning:
+
+modules/hal/cmsis/CMSIS/Core/Include/core_cm4.h:93:8: warning:
+   "Compiler generates FPU instructions for a device without
+    an FPU (check __FPU_PRESENT)" [-W#warnings]
+   #warning "Compiler generates FPU instructions for a device
+   without an FPU (check __FPU_PRESENT)"
+
+Fix the by setting -mfloat-abi=soft for such cases that don't have FPU
+enabled.
+
+Fixes #56068
+
+Signed-off-by: Kumar Gala <kumar.gala@intel.com>
+---
+ cmake/compiler/armclang/target.cmake | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/cmake/compiler/armclang/target.cmake b/cmake/compiler/armclang/target.cmake
+index 54ddefda04..a431974612 100644
+--- a/cmake/compiler/armclang/target.cmake
++++ b/cmake/compiler/armclang/target.cmake
+@@ -38,6 +38,8 @@ else()
+     elseif(CONFIG_FP_HARDABI)
+       list(APPEND TOOLCHAIN_C_FLAGS   -mfloat-abi=hard)
+     endif()
++  else()
++    list(APPEND TOOLCHAIN_C_FLAGS   -mfloat-abi=soft)
+   endif()
+ endif()
+ 
+-- 
+2.34.1
+
+
+From 8937a651a147cc25009dad1ce992ff0956ff28b7 Mon Sep 17 00:00:00 2001
+From: Kumar Gala <kumar.gala@intel.com>
+Date: Thu, 30 Mar 2023 21:12:19 +0000
+Subject: [PATCH 32/32] [BACKPORTED] drivers: intc: mchp_ecia_xec: Ensure correct device
+ init order
+
+We need to ensure that the XEC GIRQs are initialized after the
+XEC ECIA device.  Right now we depend on the linker ordering
+things correctly since everything is at INTC_INIT_PRIORITY
+priority
+
+Set the XEC GIRQs to 41 so the init priority is one more than
+INTC_INIT_PRIORITY that is used by xec-ecia.
+
+Signed-off-by: Kumar Gala <kumar.gala@intel.com>
+---
+ drivers/interrupt_controller/Kconfig              | 13 +++++++++++++
+ drivers/interrupt_controller/intc_mchp_ecia_xec.c |  2 +-
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/interrupt_controller/Kconfig b/drivers/interrupt_controller/Kconfig
+index 93d6332294..a5ae5eb565 100644
+--- a/drivers/interrupt_controller/Kconfig
++++ b/drivers/interrupt_controller/Kconfig
+@@ -43,6 +43,19 @@ config INTC_INIT_PRIORITY
+ 	help
+ 	  Interrupt controller device initialization priority.
+ 
++if MCHP_ECIA_XEC
++
++config XEC_GIRQ_INIT_PRIORITY
++	int "XEX GIRQ Interrupt controller init priority"
++	default 41
++	help
++	  XEC GIRQ Interrupt controller device initialization priority.
++	  The priority value needs to be greater than INTC_INIT_PRIORITY
++	  So that the XEC GIRQ controllers are initialized after the
++	  xec_ecia.
++
++endif
++
+ module = INTC
+ module-str = intc
+ source "subsys/logging/Kconfig.template.log_config"
+diff --git a/drivers/interrupt_controller/intc_mchp_ecia_xec.c b/drivers/interrupt_controller/intc_mchp_ecia_xec.c
+index 5a3a05953d..789c635b6a 100644
+--- a/drivers/interrupt_controller/intc_mchp_ecia_xec.c
++++ b/drivers/interrupt_controller/intc_mchp_ecia_xec.c
+@@ -572,7 +572,7 @@ static int xec_ecia_init(const struct device *dev)
+ 									\
+ 	DEVICE_DT_DEFINE(n, xec_girq_init_##n,				\
+ 		 NULL, &xec_data_girq_##n, &xec_config_girq_##n,	\
+-		 PRE_KERNEL_1, CONFIG_INTC_INIT_PRIORITY,		\
++		 PRE_KERNEL_1, CONFIG_XEC_GIRQ_INIT_PRIORITY,		\
+ 		 NULL);							\
+ 									\
+ 	static int xec_girq_init_##n(const struct device *dev)		\
+-- 
+2.34.1
 

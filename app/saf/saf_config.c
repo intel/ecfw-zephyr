@@ -259,7 +259,6 @@ int spi_flash_init(uint8_t slave_index)
 	spi_cfg.operation = SPI_OP_MODE_MASTER | SPI_TRANSFER_MSB
 			    | SPI_WORD_SET(8) | SPI_LINES_SINGLE;
 	spi_cfg.slave = 0;
-	spi_cfg.cs = NULL;
 
 	ret = qspi_read_status(slave_index);
 	if (ret) {

@@ -191,7 +191,7 @@
 	compatible = "microchip,xec-qmspi-ldma";
 	clock-frequency = <4000000>;
 	lines = <4>;
-	chip_select = <0>;
+	chip-select = <0>;
 
 	pinctrl-0 = < &shd_cs0_n_gpio055
 		      &shd_clk_gpio056

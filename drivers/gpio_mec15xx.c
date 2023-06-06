@@ -297,10 +297,7 @@ int gpio_force_configure_pin(uint32_t port_pin, gpio_flags_t flags)
 
 	port_idx = gpio_get_port(port_pin);
 
-	pinctrl_soc_pin_t pin = {
-		.pinmux = MCHP_XEC_PINMUX(
-				get_absolute_gpio_num(port_pin), MCHP_GPIO),
-	};
+	const pinctrl_soc_pin_t pin = MCHP_XEC_PINMUX(get_absolute_gpio_num(port_pin), MCHP_GPIO);
 
 	LOG_WRN("%s pinctrl port: %d pin: %d EC_GPIO_%o",
 		__func__, port_idx, pp.pin, get_absolute_gpio_num(port_pin));

@@ -7,21 +7,25 @@
 #include <errno.h>
 #include <zephyr/logging/log_ctrl.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/sem.h>
+#include <zephyr/app_memory/app_memdomain.h>
 #include "espi_hub.h"
 #include "postcodemgmt.h"
 #include "port80display.h"
 LOG_MODULE_REGISTER(postcode, CONFIG_POSTCODE_LOG_LEVEL);
 
-static struct k_sem update_lock;
+/* Use macro so object goes into kernel object hash, which is required for user space */
+K_SEM_DEFINE(update_lock, 0, 1);
+
 /* Postcode requested to be displayed */
-static uint8_t port80_code;
-static uint8_t port81_code;
+K_APP_BMEM(ecfw_partition) static uint8_t port80_code;
+K_APP_BMEM(ecfw_partition) static uint8_t port81_code;
 
 /* Indicates a PCH/board error condition was detected */
-static uint8_t err_code;
+K_APP_BMEM(ecfw_partition) uint8_t err_code;
 
 #ifdef CONFIG_POWER_SEQUENCE_ERROR_LED
-static uint8_t led_cntr;
+K_APP_BMEM(ecfw_partition) uint8_t led_cntr;
 #endif
 
 #define BOARD_ERR_INDICATOR 0xEC
@@ -129,7 +133,8 @@ void postcode_thread(void *p1, void *p2, void *p3)
 	}
 
 	espihub_add_postcode_handler(update_postcode);
-	k_sem_init(&update_lock, 0, 1);
+
+	LOG_WRN("POST initialization complete is_user_context %d ", k_is_user_context());
 
 	while (true) {
 		/* Wait until postcode update is received */

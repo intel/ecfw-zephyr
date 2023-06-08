@@ -116,6 +116,10 @@
 	pinctrl-names = "default";
 };
 
+&pwm0 {
+	status = "disabled";
+};
+
 &pwm8 {
 	status = "okay";
 

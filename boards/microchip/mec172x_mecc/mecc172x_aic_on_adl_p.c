@@ -158,6 +158,7 @@ int board_init(void)
 {
 	int ret;
 
+	LOG_WRN("%s", __func__);
 	bgpo_disable();
 
 	ret = gpio_init();
@@ -166,15 +167,13 @@ int board_init(void)
 		return ret;
 	}
 
+	LOG_WRN("%s i2c_hub config", __func__);
 	ret = i2c_hub_config(I2C_0);
 	if (ret) {
 		return ret;
 	}
 
-	ret = i2c_hub_config(I2C_1);
-	if (ret) {
-		return ret;
-	}
+	LOG_WRN("%s read board id", __func__);
 	ret = read_board_id();
 	if (ret) {
 		LOG_ERR("Failed to fetch brd id: %d", ret);

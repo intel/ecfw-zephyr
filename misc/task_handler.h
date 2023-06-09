@@ -11,6 +11,8 @@
 
 #define THRML_MGMT_TASK_NAME    "THRMLMGMT"
 
+void init_tasks_memory_domain(void);
+
 /**
  * @brief Set names for all tasks in the app.
  *

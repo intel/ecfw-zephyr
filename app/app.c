@@ -21,6 +21,10 @@ void main(void)
 {
 	int ret;
 
+#ifdef CONFIG_USERSPACE
+	init_tasks_memory_domain();
+#endif
+
 	/* Delayed start for debug */
 	k_sleep(K_SECONDS(CONFIG_EC_DELAYED_BOOT));
 

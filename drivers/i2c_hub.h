@@ -30,6 +30,7 @@ enum i2c_bus_num {
  */
 int i2c_hub_config(uint8_t instance);
 
+void i2c_hub_allow_access(uint8_t instance, struct k_thread *tid);
 /**
  * @brief Set up the i2c controller Speed
  *

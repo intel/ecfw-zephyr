@@ -8,6 +8,7 @@
 #include <zephyr/device.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/espi.h>
+#include <zephyr/app_memory/app_memdomain.h>
 #include "espi_hub.h"
 #include "pwrseq_utils.h"
 #include "board_config.h"
@@ -22,13 +23,13 @@ LOG_MODULE_REGISTER(espihub, CONFIG_ESPIHUB_LOG_LEVEL);
 #define ESPI_LTR_LATENCY		2U
 #endif
 
-static const struct device *espi_dev;
-static struct espihub_context hub;
-static espi_warn_handler_t warn_handlers[ESPIHUB_MAX_HANDLER_INDEX];
-static espi_state_handler_t state_handler;
-static espi_acpi_handler_t acpi_handlers[MAX_ACPI_HANDLERS];
-static espi_kbc_handler_t kbc_handler;
-static espi_postcode_handler_t postcode_handler;
+K_APP_DMEM(ecfw_partition) static const struct device *espi_dev;
+K_APP_DMEM(ecfw_partition) static struct espihub_context hub;
+K_APP_DMEM(ecfw_partition) static espi_warn_handler_t warn_handlers[ESPIHUB_MAX_HANDLER_INDEX];
+K_APP_DMEM(ecfw_partition) static espi_state_handler_t state_handler;
+K_APP_DMEM(ecfw_partition) static espi_acpi_handler_t acpi_handlers[MAX_ACPI_HANDLERS];
+K_APP_DMEM(ecfw_partition) static espi_kbc_handler_t kbc_handler;
+K_APP_DMEM(ecfw_partition) static espi_postcode_handler_t postcode_handler;
 
 /* Registration from other modules */
 int espihub_add_state_handler(espi_state_handler_t handler)

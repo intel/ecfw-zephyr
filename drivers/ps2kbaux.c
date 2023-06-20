@@ -8,6 +8,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/ps2.h>
+#include <zephyr/app_memory/app_memdomain.h>
 #include "board_config.h"
 #include "keyboard_utility.h"
 #include "ps2kbaux.h"
@@ -43,10 +44,11 @@ LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 #define F12_SC1				0x58U
 #define PS2_ACK				0xFAU
 
-static ps2_callback keyboard_callback;
-static ps2_callback mouse_callback;
-static const struct device *keyboard_dev;
-static const struct device *mouse_dev;
+K_APP_DMEM(ecfw_partition) static ps2_callback keyboard_callback;
+K_APP_DMEM(ecfw_partition) static ps2_callback mouse_callback;
+K_APP_DMEM(ecfw_partition) static const struct device *keyboard_dev;
+K_APP_DMEM(ecfw_partition) static const struct device *mouse_dev;
+
 static struct km_api *keymap_api;
 static const uint8_t *current_set;
 

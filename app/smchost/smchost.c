@@ -6,6 +6,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/app_memory/app_memdomain.h>
 #include "board.h"
 #include "board_config.h"
 #include "smc.h"
@@ -23,9 +24,9 @@
 #ifdef CONFIG_DNX_SUPPORT
 #include "dnx.h"
 #endif
-
-
 LOG_MODULE_REGISTER(smchost, CONFIG_SMCHOST_LOG_LEVEL);
+
+K_APP_BMEM(ecfw_partition) struct acpi_tbl g_acpi_tbl;
 
 uint8_t host_req[SMCHOST_MAX_BUF_SIZE];
 uint8_t host_res[SMCHOST_MAX_BUF_SIZE];
@@ -33,8 +34,6 @@ uint8_t host_req_len;
 uint8_t host_res_len;
 uint8_t host_res_idx;
 uint8_t prev_kb_bklt_pwm_duty;
-
-struct acpi_tbl g_acpi_tbl;
 
 static bool proc_host_send(void);
 static void proc_acpi_burst(void);

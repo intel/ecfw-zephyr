@@ -48,7 +48,7 @@
 };
 
 &kscan0 {
-	status = "okay";
+	status = "disabled";
 
 	pinctrl-0 = < &ksi0_gpio017
 		      &ksi1_gpio020

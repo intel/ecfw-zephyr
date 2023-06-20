@@ -39,10 +39,42 @@ K_APPMEM_PARTITION_DEFINE(ecfw_partition);
 static struct k_mem_domain ecfw_domain;
 
 /* TODO: Decide if can use this for all kernel objects */
-static const struct device *const devices[] = {
+static const struct device *const post_devices[] = {
 	DEVICE_DT_GET(I2C_BUS_0),
-	DEVICE_DT_GET(I2C_BUS_1),
 };
+
+#define DT_DRV_COMPAT   nxp_pca95xx
+
+static const struct device *const pwrseq_devices[] = {
+	DEVICE_DT_GET(I2C_BUS_0),
+	DEVICE_DT_GET(ESPI_0),
+	/*  TODO: Re-structure kbc_enable_interface so kbchost perform the operations */
+#if defined(CONFIG_PS2_MOUSE)
+	DEVICE_DT_GET(PS2_MOUSE),
+#endif
+#if defined(CONFIG_PS2_KEYBOARD)
+	DEVICE_DT_GET(PS2_KEYBOARD),
+#endif
+#if defined(CONFIG_KSCAN_EC)
+	DEVICE_DT_GET(KSCAN_MATRIX),
+#endif
+	DEVICE_DT_GET(DT_NODELABEL(gpio_000_036)),
+	DEVICE_DT_GET(DT_NODELABEL(gpio_040_076)),
+	DEVICE_DT_GET(DT_NODELABEL(gpio_100_136)),
+	DEVICE_DT_GET(DT_NODELABEL(gpio_140_176)),
+	DEVICE_DT_GET(DT_NODELABEL(gpio_200_236)),
+	DEVICE_DT_GET(DT_NODELABEL(gpio_240_276)),
+#if DT_NODE_HAS_STATUS(DT_DRV_INST(0), okay)
+	DEVICE_DT_INST_GET(0),
+#endif
+#if DT_NODE_HAS_STATUS(DT_DRV_INST(1), okay)
+	DEVICE_DT_INST_GET(1),
+#endif
+};
+
+/* TODO: Find if possible to to avoid extern here towards variable defined in postcodemgmt.c */
+extern struct k_sem update_lock;
+
 #endif
 
 const uint32_t periph_thrd_period = 1;
@@ -67,9 +99,6 @@ static uint32_t postcode_thrd_period = 125;
 K_THREAD_DEFINE(postcode_thrd_id, EC_TASK_STACK_SIZE, postcode_thread,
 		&postcode_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_USER | K_INHERIT_PERMS, EC_WAIT_FOREVER);
-
-/* TODO: Find if possible to to avoid extern here towards variable defined in postcodemgmt.c */
-extern struct k_sem update_lock;
 K_THREAD_ACCESS_GRANT(postcode_thrd_id, &update_lock);
 
 /* TODO: Check this with FMOS team, giving static access to device driver does not build */
@@ -84,7 +113,9 @@ K_THREAD_DEFINE(periph_thrd_id, EC_TASK_STACK_SIZE, periph_thread,
 
 K_THREAD_DEFINE(pwrseq_thrd_id, EC_TASK_STACK_SIZE, pwrseq_thread,
 		&pwrseq_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
-		K_INHERIT_PERMS, EC_WAIT_FOREVER);
+		K_USER | K_INHERIT_PERMS, EC_WAIT_FOREVER);
+/* TODO: Restructure postcode mgmt API so no need to grant access */
+K_THREAD_ACCESS_GRANT(pwrseq_thrd_id, &update_lock);
 
 #define OOBMNGR_TASK_STACK_SIZE		512U
 K_THREAD_DEFINE(oobmngr_thrd_id, OOBMNGR_TASK_STACK_SIZE, oobmngr_thread,
@@ -170,6 +201,23 @@ void init_tasks_memory_domain(void)
 }
 #endif
 
+
+void grant_thread_device_access(uint8_t tid, const void *devices, int n)
+{
+	k_mem_domain_add_thread(&ecfw_domain, tasks[tid].thread_id);
+
+	/* TODO: See if we can avoid dynamic object access grant and use
+	 * static macros.
+	 */
+	for (int d_idx = 0; d_idx < n; d_idx++) {
+		//LOG_WRN("Grant %s access to %p", tasks[i].tagname, devices[d_idx]);
+
+		/* TODO: Decide if grant access individually or via hub APIs */
+		//k_object_access_grant(devices[d_idx], tasks[index].thread_id);
+	}
+
+}
+
 void start_all_tasks(void)
 {
 	for (int i = 0; i < ARRAY_SIZE(tasks); i++) {
@@ -184,18 +232,31 @@ void start_all_tasks(void)
 
 #ifdef CONFIG_USERSPACE
 			if (strcmp(tasks[i].tagname, "POST") == 0) {
-
-				/* TODO: See if we can avoid dynamic object access grant and use
-				 * static macros.
-				 * If can only be done dynamically perhaps create a matrix
-				 * for devices each thread needs?
-				 */
-				LOG_WRN("Grant %s access to %p", tasks[i].tagname, devices[0]);
-				/* TODO: Decide if grant access individually or via hub APIs */
-				k_object_access_grant(devices[0], postcode_thrd_id);
-				i2c_hub_allow_access(0, postcode_thrd_id);
-
-				k_mem_domain_add_thread(&ecfw_domain, postcode_thrd_id);
+				//grant_thread_device_access(i, post_devices, ARRAY_SIZE(post_devices));
+				k_mem_domain_add_thread(&ecfw_domain, tasks[i].thread_id);
+				i2c_hub_allow_access(0, tasks[i].thread_id);
+				k_object_access_grant(post_devices[0], tasks[i].thread_id);
+			} else if (strcmp(tasks[i].tagname, "PWR") == 0) {
+				//grant_thread_device_access(i, pwrseq_devices, ARRAY_SIZE(pwrseq_devices));
+				k_mem_domain_add_thread(&ecfw_domain, tasks[i].thread_id);
+				i2c_hub_allow_access(0, tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[0], tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[1], tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[2], tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[3], tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[4], tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[5], tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[6], tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[7], tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[8], tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[9], tasks[i].thread_id);
+				k_object_access_grant(pwrseq_devices[10], tasks[i].thread_id);
+#if DT_NODE_HAS_STATUS(DT_DRV_INST(1), okay)
+				k_object_access_grant(pwrseq_devices[11], tasks[i].thread_id);
+#endif
+#if DT_NODE_HAS_STATUS(DT_DRV_INST(1), okay)
+				k_object_access_grant(pwrseq_devices[12], tasks[i].thread_id);
+#endif
 			}
 #endif
 

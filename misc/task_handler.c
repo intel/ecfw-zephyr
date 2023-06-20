@@ -36,6 +36,8 @@ LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 
 #ifdef CONFIG_USERSPACE
 K_APPMEM_PARTITION_DEFINE(ecfw_partition);
+K_APPMEM_PARTITION_DEFINE(ecfw_kbc_partition);
+K_APPMEM_PARTITION_DEFINE(ecfw_pwrseq_partition);
 static struct k_mem_domain ecfw_domain;
 
 /* TODO: Decide if can use this for all kernel objects */
@@ -181,7 +183,7 @@ void init_tasks_memory_domain(void)
 {
 	int ret;
 	struct k_mem_partition *ecfw_parts[] = {
-		&ecfw_partition,
+		&ecfw_partition, &ecfw_kbc_partition, &ecfw_pwrseq_partition
 	};
 
 	/* Initialize a memory domain with the specified partitions

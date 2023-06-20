@@ -7,6 +7,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/kscan.h>
+#include <zephyr/app_memory/app_memdomain.h>
 #include "kbs_keymap.h"
 #include "kbs_matrix.h"
 #include "board_config.h"
@@ -21,9 +22,9 @@
 #include <memops.h>
 LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 
-static const struct device *kscan_dev;
+K_APP_DMEM(ecfw_partition) static const struct device *kscan_dev;
 static struct k_timer typematic_timer;
-static kbs_matrix_callback kbs_callback;
+K_APP_DMEM(ecfw_partition) static kbs_matrix_callback kbs_callback;
 static void typematic_callback(struct k_timer *timer);
 static void kscan_callback(const struct device *dev, uint32_t row,
 			   uint32_t col, bool pressed);

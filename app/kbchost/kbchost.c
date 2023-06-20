@@ -6,6 +6,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/espi.h>
+#include <zephyr/app_memory/app_memdomain.h>
 #include "kbchost.h"
 #include "ps2kbaux.h"
 #include "gpio_ec.h"
@@ -31,7 +32,7 @@ LOG_MODULE_REGISTER(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
  * this realization we just use a variable to represent its
  * internal state.
  */
-static uint8_t cmdbyte = KBC_8042_KBD_DIS | KBC_8042_MOUSE_DIS |
+K_APP_DMEM(ecfw_kbc_partition) static uint8_t cmdbyte = KBC_8042_KBD_DIS | KBC_8042_MOUSE_DIS |
 			KBC_8042_HOST_SYS_FLAG | KBC_8042_TRANSLATE;
 
 static uint8_t resend_cmd[MAX_HOST_REQ_SIZE];

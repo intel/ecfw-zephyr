@@ -9,6 +9,8 @@
 #include <zephyr/device.h>
 #include <zephyr/drivers/espi.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/app_memory/app_memdomain.h>
+
 #include "gpio_ec.h"
 #include "espi_hub.h"
 #include "espioob_mngr.h"
@@ -75,14 +77,20 @@ LOG_MODULE_REGISTER(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 #define PWR_PLANE_RSMRST_DELAY_MS	100
 
 /* Track power sequencing events */
-struct pwr_flags g_pwrflags;
-static bool pwrseq_timeout_disabled;
-static bool pwrseq_failure;
-static bool in_therm_shutdown;
+K_APP_BMEM(ecfw_partition) struct pwr_flags g_pwrflags;
+
+K_APP_BMEM(ecfw_partition) static bool pwrseq_timeout_disabled;
+K_APP_BMEM(ecfw_partition) static bool pwrseq_failure;
+K_APP_BMEM(ecfw_partition) static bool in_therm_shutdown;
 
 /* System state machine */
-static enum system_power_state current_state;
-static enum system_power_state next_state;
+K_APP_BMEM(ecfw_partition) static enum system_power_state current_state;
+K_APP_BMEM(ecfw_partition) static enum system_power_state next_state;
+
+/* This global variable is used mostly for pin configuration in board init */
+K_APP_BMEM(ecfw_partition) uint8_t boot_mode_maf;
+
+K_APP_BMEM(ecfw_partition) static uint8_t shutdown_reason;
 
 /* Handle S5 entry/exit and G3 exit */
 static void power_off(void);
@@ -90,11 +98,6 @@ static int power_on(void);
 static void suspend(void);
 static int resume(void);
 static void pwrseq_reset(void);
-
-/* This global variable is used mostly for pin configuration in board init */
-uint8_t boot_mode_maf;
-
-static uint8_t shutdown_reason;
 
 uint8_t read_shutdown_reason(void)
 {

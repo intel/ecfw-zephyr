@@ -6,6 +6,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
+#include <zephyr/app_memory/app_memdomain.h>
 #include "gpio_ec.h"
 #include "board.h"
 #include "board_config.h"
@@ -40,13 +41,14 @@ enum pg3_state_n {
 	PG3_STATE_ENTERED,
 	PG3_STATE_WAKE_WAIT,
 };
-static enum pg3_state_n pg3_state, pg3_prev_state;
 
 static void counter_expired_hndlr(struct k_timer *counter);
 
 K_TIMER_DEFINE(pg3_counter_dc, counter_expired_hndlr, NULL);
-static bool pg3_generate_wake;
-static bool pg3_enable_status;
+
+K_APP_BMEM(ecfw_partition) static enum pg3_state_n pg3_state, pg3_prev_state;
+K_APP_BMEM(ecfw_partition) static bool pg3_generate_wake;
+K_APP_BMEM(ecfw_partition) static bool pg3_enable_status;
 
 static bool is_pseudo_g3_condition(void)
 {

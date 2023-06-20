@@ -6,6 +6,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
+#include <zephyr/app_memory/app_memdomain.h>
 #include "eeprom.h"
 #include "errcodes.h"
 #include "dswmode.h"
@@ -17,11 +18,11 @@ LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 #define DSW_NO_DATA       0x0000
 
 /* Cached configuration data */
-static uint8_t dsw_valid_config;
+K_APP_DMEM(ecfw_pwrseq_partition) static uint8_t dsw_valid_config;
 
 /* New configuration data not yet stored */
-static uint8_t dsw_tmp_config;
-static bool dsw_mode_update;
+K_APP_DMEM(ecfw_pwrseq_partition) static uint8_t dsw_tmp_config;
+K_APP_DMEM(ecfw_pwrseq_partition) static bool dsw_mode_update;
 
 bool dsw_enabled(void)
 {

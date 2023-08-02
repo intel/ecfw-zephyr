@@ -11,6 +11,7 @@
 #include <zephyr/drivers/adc.h>
 #include "adc_sensors.h"
 #include "board_config.h"
+#include "memops.h"
 LOG_MODULE_REGISTER(adcsens, CONFIG_ADC_SENSORS_LOG_LEVEL);
 
 /* For cases where ADC failure occurs during LPM exit, PLL takes 3ms to lock */
@@ -283,6 +284,7 @@ void adc_sensors_read_all(void)
 	int ret;
 	int16_t adc_raw_val[num_of_adc_ch];
 	uint8_t ch, ch_cnt = 0;
+	memsets(adc_raw_val, 0, sizeof(adc_raw_val));
 
 	const struct adc_sequence sequence = {
 		.channels	= adc_ch_bits,

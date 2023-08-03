@@ -24,6 +24,7 @@ enum pmc_request {
  * @brief Resets the SoC (host) making use of eSPI OOB
  *
  * @param reset_type system reset requested. See enum pmc_request.
+ * @param sync operation won't be queued but carried away synchronously.
  *
  * @retval -EIO General input / output error, failed to configure device.
  * @retval -ENOTSUP capability not supported.
@@ -31,6 +32,6 @@ enum pmc_request {
  *
  */
 
-int pmc_reset_soc(enum pmc_request reset_type);
+int pmc_reset_soc(enum pmc_request req_type, bool sync);
 
 #endif /* __PMC_H__ */

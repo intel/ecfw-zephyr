@@ -6,7 +6,6 @@
 
 #include <errno.h>
 #include <zephyr/kernel.h>
-#include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/logging/log.h>
 #include "pwrplane.h"
@@ -163,5 +162,15 @@ void wake_task(const char *tagname)
 			k_wakeup(tasks[i].thread_id);
 			break;
 		}
+	}
+}
+
+void dump_tasks_state(void)
+{
+	char thread_state_buf[THREAD_STATE_MAX_SIZE];
+
+	for (int i = 0; i < ARRAY_SIZE(tasks); i++) {
+		k_thread_state_str(tasks[i].thread_id, thread_state_buf, THREAD_STATE_MAX_SIZE);
+		LOG_WRN("[%p] %s - %s", tasks[i].thread_id, tasks[i].tagname, thread_state_buf);
 	}
 }

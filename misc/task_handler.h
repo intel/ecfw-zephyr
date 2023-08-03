@@ -35,4 +35,10 @@ void resume_all_tasks(void);
  */
 void wake_task(const char *tagname);
 
+/**
+ * @brief dumps the current state of all tasks.
+ *
+ */
+void dump_tasks_state(void);
+
 #endif /* __TASK_HANDLER_H__ */

@@ -15,11 +15,12 @@ LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 
 #define PMC_RESET_PAYLOAD_SIZE 1U
 
-int pmc_reset_soc(enum pmc_request req_type)
+int pmc_reset_soc(enum pmc_request req_type, bool sync)
 {
 	uint8_t buf[sizeof(struct oob_msg_str) + PMC_RESET_PAYLOAD_SIZE];
 	struct espi_oob_packet req_pckt;
 	struct oob_msg_str oob_msg;
+	int ret = 0;
 
 	LOG_DBG("%s", __func__);
 
@@ -34,8 +35,16 @@ int pmc_reset_soc(enum pmc_request req_type)
 	req_pckt.buf = buf;
 	req_pckt.len = sizeof(buf);
 
-	if (oob_send_async(&req_pckt, NULL, OOB_TX_HAS_RX)) {
-		LOG_ERR("PMC request failed");
+	if (sync) {
+		/* Do send the OOB PMC request immediately */
+		ret = oob_send_sync(&req_pckt, NULL, OOB_TX_HAS_RX, MIN_WAIT_TIME_FOR_OOB_IN_MS);
+	} else {
+		/* Queue request */
+		ret = oob_send_async(&req_pckt, NULL, OOB_TX_HAS_RX);
+	}
+
+	if (ret) {
+		LOG_ERR("PMC request failed %d\n", ret);
 		return -EIO;
 	}
 

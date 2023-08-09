@@ -75,6 +75,14 @@ void ec_reset(void)
 	gpio_write_pin(PM_RSMRST, 0);
 	LOG_DBG("%s: Before calling the reset_ec_chip", __func__);
 
+#ifdef CONFIG_DEPRECATED_DPWROK_HANDLING
+	/* EC FW need to drive DPWR_OK to low(recovery indicator is used
+	 * to drive dpwr_ok) along with RSMRST_N low to meet the power
+	 * sequence's requirement in Deepsx supported systems as per the
+	 * PDG when performing EC reset
+	 */
+	gpio_write_pin(RECOVERY_INDICATOR_N, 0);
+#endif
 	ec_arm_reset();
 
 	/* Flush logging subsystem buffer prior to reset */

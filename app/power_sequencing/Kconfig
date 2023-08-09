@@ -39,6 +39,15 @@ config EC_DELAYED_BOOT
 	  Indicate if EC FW boot is delayed for N miliseconds. This is useful to
 	  debug early app initialization via serial logs or JTAG.
 
+config DEPRECATED_DPWROK_HANDLING
+	bool "Drive dpwrok to low in DeepSx enabled systems"
+	help
+	  EC FW need to drive DPWR_OK to low(recovery indicator is used
+	  to drive dpwr_ok) along with RSMRST_N low to meet the power
+	  sequence's requirement in Deepsx supported systems as per the
+	  PDG when performing EC reset
+
+
 config PWRMGT_LOG_LEVEL
 	int "Power management log level"
 	depends on PWRMGMT

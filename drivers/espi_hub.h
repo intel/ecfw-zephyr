@@ -23,6 +23,8 @@
 #define MIN_ESPI_FREQ             20u
 #define MAX_ESPI_FREQ             66u
 
+#define MAX_PLTRST_WARN_HANDLERS  2u
+#define MAX_HOST_RST_WARN_HANDLERS 2u
 #define MAX_ACPI_HANDLERS         2u
 #define MAX_PERIPH_HANDLERS       2u
 
@@ -43,7 +45,7 @@ typedef void (*espi_postcode_handler_t)(uint8_t port_index, uint32_t code);
 #define	ESPIHUB_VW_HIGH	1
 
 enum espihub_handler {
-	ESPIHUB_RESET_WARNING,
+	ESPIHUB_HOST_RESET_WARNING,
 	ESPIHUB_PLATFORM_RESET,
 	ESPIHUB_SUSPEND_WARNING,
 	ESPIHUB_DNX_WARNING,

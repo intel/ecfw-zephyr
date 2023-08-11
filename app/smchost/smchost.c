@@ -316,7 +316,7 @@ static inline int smchost_task_init(void)
 				smchost_slatemode_handler);
 #endif
 	espihub_add_acpi_handler(ESPIHUB_ACPI_PUBLIC, smchost_acpi_handler);
-	espihub_add_warn_handler(ESPIHUB_RESET_WARNING,
+	espihub_add_warn_handler(ESPIHUB_HOST_RESET_WARNING,
 				 smchost_host_rst_warn_handler);
 	espihub_add_warn_handler(ESPIHUB_PLATFORM_RESET,
 				 smchost_pltrst_handler);

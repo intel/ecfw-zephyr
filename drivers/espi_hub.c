@@ -24,11 +24,19 @@ LOG_MODULE_REGISTER(espihub, CONFIG_ESPIHUB_LOG_LEVEL);
 
 static const struct device *espi_dev;
 static struct espihub_context hub;
-static espi_warn_handler_t warn_handlers[ESPIHUB_MAX_HANDLER_INDEX];
 static espi_state_handler_t state_handler;
 static espi_acpi_handler_t acpi_handlers[MAX_ACPI_HANDLERS];
 static espi_kbc_handler_t kbc_handler;
 static espi_postcode_handler_t postcode_handler;
+
+static espi_warn_handler_t host_rst_warn_handlers[MAX_HOST_RST_WARN_HANDLERS];
+static espi_warn_handler_t pltrst_warn_handlers[MAX_PLTRST_WARN_HANDLERS];
+static espi_warn_handler_t suspend_warn_handler;
+static espi_warn_handler_t dnx_warn_handler;
+static espi_warn_handler_t espi_bus_rst_warn_handler;
+
+static uint8_t pltrst_hndler_idx;
+static uint8_t host_rst_warn_hndler_idx;
 
 /* Registration from other modules */
 int espihub_add_state_handler(espi_state_handler_t handler)
@@ -47,12 +55,56 @@ int espihub_add_warn_handler(enum espihub_handler type,
 			      espi_warn_handler_t handler)
 {
 	__ASSERT(handler, "Handler shouldn't be NULL");
-	if (warn_handlers[type]) {
-		LOG_ERR("Only warn %d handler supported", type);
-		return -EINVAL;
+	int ret = 0;
+
+	switch (type) {
+	case ESPIHUB_HOST_RESET_WARNING:
+		if (host_rst_warn_hndler_idx < MAX_HOST_RST_WARN_HANDLERS) {
+			host_rst_warn_handlers[host_rst_warn_hndler_idx] = handler;
+			host_rst_warn_hndler_idx++;
+		} else {
+			ret = -EINVAL;
+		}
+		break;
+
+	case ESPIHUB_PLATFORM_RESET:
+		if (pltrst_hndler_idx < MAX_PLTRST_WARN_HANDLERS) {
+			pltrst_warn_handlers[pltrst_hndler_idx] = handler;
+			pltrst_hndler_idx++;
+		} else {
+			ret = -EINVAL;
+		}
+		break;
+
+	case ESPIHUB_SUSPEND_WARNING:
+		if (suspend_warn_handler) {
+			ret = -EINVAL;
+		} else {
+			suspend_warn_handler = handler;
+		}
+		break;
+
+	case ESPIHUB_DNX_WARNING:
+		if (dnx_warn_handler) {
+			ret = -EINVAL;
+		} else {
+			dnx_warn_handler = handler;
+		}
+	case ESPIHUB_BUS_RESET:
+		if (espi_bus_rst_warn_handler) {
+			ret = -EINVAL;
+		} else {
+			espi_bus_rst_warn_handler = handler;
+		}
+	default:
+		break;
 	}
 
-	warn_handlers[type] = handler;
+	if (ret) {
+		LOG_ERR("Warn handler %d registered already", type);
+		return ret;
+	}
+
 	return 0;
 }
 
@@ -127,17 +179,17 @@ static void host_warn_handler(uint32_t signal, uint32_t status)
 	switch (signal) {
 	case ESPI_VWIRE_SIGNAL_PLTRST:
 		LOG_INF("PLT_RST changed %d", status);
-		if (warn_handlers[ESPIHUB_PLATFORM_RESET]) {
-			warn_handlers[ESPIHUB_PLATFORM_RESET](status);
-		} else {
-			LOG_WRN("No PLT_RST handler registered");
+		for (int idx = 0; idx < pltrst_hndler_idx; idx++) {
+			if (pltrst_warn_handlers[idx]) {
+				pltrst_warn_handlers[idx](status);
+			}
 		}
 		break;
 	case ESPI_VWIRE_SIGNAL_HOST_RST_WARN:
-		if (warn_handlers[ESPIHUB_RESET_WARNING]) {
-			warn_handlers[ESPIHUB_RESET_WARNING](status);
-		} else {
-			LOG_WRN("No Host rst handler registered");
+		for (int idx = 0; idx < host_rst_warn_hndler_idx; idx++) {
+			if (host_rst_warn_handlers[idx]) {
+				host_rst_warn_handlers[idx](status);
+			}
 		}
 		LOG_INF("Send ACK HOST RST %d", status);
 		espi_send_vwire(espi_dev, ESPI_VWIRE_SIGNAL_HOST_RST_ACK,
@@ -149,8 +201,8 @@ static void host_warn_handler(uint32_t signal, uint32_t status)
 				status);
 		break;
 	case ESPI_VWIRE_SIGNAL_SUS_WARN:
-		if (warn_handlers[ESPIHUB_SUSPEND_WARNING]) {
-			warn_handlers[ESPIHUB_SUSPEND_WARNING](status);
+		if (suspend_warn_handler) {
+			suspend_warn_handler(status);
 		} else {
 			LOG_WRN("No suspend handler registered");
 		}
@@ -159,8 +211,8 @@ static void host_warn_handler(uint32_t signal, uint32_t status)
 		hub.dnx_mode = status;
 		LOG_INF("Send DnX WARN %d", status);
 		espi_send_vwire(espi_dev, ESPI_VWIRE_SIGNAL_DNX_ACK, status);
-		if (warn_handlers[ESPIHUB_DNX_WARNING]) {
-			warn_handlers[ESPIHUB_DNX_WARNING](status);
+		if (dnx_warn_handler) {
+			dnx_warn_handler(status);
 		} else {
 			LOG_WRN("No dnx handler registered");
 		}
@@ -188,9 +240,9 @@ static void espi_reset_handler(const struct device *dev,
 		}
 #endif
 
-		LOG_INF("eSPI BUS reset %d", event.evt_data);
-		if (warn_handlers[ESPIHUB_BUS_RESET]) {
-			warn_handlers[ESPIHUB_BUS_RESET](event.evt_data);
+		LOG_INF("eSPI BUS reset %d", hub.espi_rst_sts);
+		if (espi_bus_rst_warn_handler) {
+			espi_bus_rst_warn_handler(hub.espi_rst_sts);
 		} else {
 			LOG_WRN("No bus reset handler registered");
 		}

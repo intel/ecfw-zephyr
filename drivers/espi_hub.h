@@ -23,6 +23,7 @@
 #define MIN_ESPI_FREQ             20u
 #define MAX_ESPI_FREQ             66u
 
+#define MAX_ESPI_BUS_RST_HANDLERS 2u
 #define MAX_PLTRST_WARN_HANDLERS  2u
 #define MAX_HOST_RST_WARN_HANDLERS 2u
 #define MAX_ACPI_HANDLERS         2u

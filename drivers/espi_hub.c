@@ -33,8 +33,9 @@ static espi_warn_handler_t host_rst_warn_handlers[MAX_HOST_RST_WARN_HANDLERS];
 static espi_warn_handler_t pltrst_warn_handlers[MAX_PLTRST_WARN_HANDLERS];
 static espi_warn_handler_t suspend_warn_handler;
 static espi_warn_handler_t dnx_warn_handler;
-static espi_warn_handler_t espi_bus_rst_warn_handler;
+static espi_warn_handler_t espi_bus_rst_warn_handlers[MAX_ESPI_BUS_RST_HANDLERS];
 
+static uint8_t espi_bus_rst_hndler_idx;
 static uint8_t pltrst_hndler_idx;
 static uint8_t host_rst_warn_hndler_idx;
 
@@ -91,10 +92,11 @@ int espihub_add_warn_handler(enum espihub_handler type,
 			dnx_warn_handler = handler;
 		}
 	case ESPIHUB_BUS_RESET:
-		if (espi_bus_rst_warn_handler) {
-			ret = -EINVAL;
+		if (espi_bus_rst_hndler_idx < MAX_ESPI_BUS_RST_HANDLERS) {
+			espi_bus_rst_warn_handlers[espi_bus_rst_hndler_idx] = handler;
+			espi_bus_rst_hndler_idx++;
 		} else {
-			espi_bus_rst_warn_handler = handler;
+			ret = -EINVAL;
 		}
 	default:
 		break;
@@ -241,10 +243,13 @@ static void espi_reset_handler(const struct device *dev,
 #endif
 
 		LOG_INF("eSPI BUS reset %d", hub.espi_rst_sts);
-		if (espi_bus_rst_warn_handler) {
-			espi_bus_rst_warn_handler(hub.espi_rst_sts);
-		} else {
-			LOG_WRN("No bus reset handler registered");
+		for (int idx = 0; idx < espi_bus_rst_hndler_idx; idx++) {
+			if (espi_bus_rst_warn_handlers[idx]) {
+				espi_bus_rst_warn_handlers[idx](hub.espi_rst_sts);
+			}
+		}
+		if (!espi_bus_rst_hndler_idx) {
+			LOG_WRN("No eSPI bus reset handler registered");
 		}
 	}
 }

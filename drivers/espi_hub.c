@@ -91,6 +91,8 @@ int espihub_add_warn_handler(enum espihub_handler type,
 		} else {
 			dnx_warn_handler = handler;
 		}
+		break;
+
 	case ESPIHUB_BUS_RESET:
 		if (espi_bus_rst_hndler_idx < MAX_ESPI_BUS_RST_HANDLERS) {
 			espi_bus_rst_warn_handlers[espi_bus_rst_hndler_idx] = handler;
@@ -98,6 +100,8 @@ int espihub_add_warn_handler(enum espihub_handler type,
 		} else {
 			ret = -EINVAL;
 		}
+		break;
+
 	default:
 		break;
 	}

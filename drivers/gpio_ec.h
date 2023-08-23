@@ -87,7 +87,7 @@ int gpio_configure_pin(uint32_t port_pin, gpio_flags_t flags);
  *
  * @retval 0 if successful, negative errno code on failure.
  */
-int gpio_configure_array(struct gpio_ec_config *gpios, uint32_t len);
+int gpio_configure_array(const struct gpio_ec_config *gpios, uint32_t len);
 
 /**
  * @brief Set the level for a pin.

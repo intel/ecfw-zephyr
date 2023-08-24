@@ -14,7 +14,7 @@
 #define KSC_PATCH_ID      0
 #define KSC_QS_BUILD_VER  0
 
-__in_section(ecfw_info, static, var) struct ksc_img_hdr header = {
+__in_section(ecfw_info, static, var) const struct ksc_img_hdr header = {
 	/* This is replaced by real checksum in build. */
 	.checksum = 0x0000,
 	.signature = "TKSC",

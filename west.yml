@@ -24,14 +24,14 @@ manifest:
       repo-path: zephyr.git
       path: ecfwwork/zephyr_fork
       remote: zephyrproject
-      revision: v3.2.0
+      revision: v3.4.0
       clone-depth: 1
       west-commands: scripts/west-commands.yml
 
     - name: cmsis
       path: ecfwwork/modules/hal/cmsis
       remote: zephyrproject
-      revision: 093de61c2a7d12dc9253daf8692f61f793a9254a
+      revision: 74981bf893e8b10931464b9945e2143d99a3f0a3
 
     - name: hal_microchip
       path: ecfwwork/modules/hal/microchip

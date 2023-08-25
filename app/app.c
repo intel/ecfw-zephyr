@@ -10,6 +10,7 @@
 #include <soc.h>
 #include <zephyr/drivers/espi.h>
 #include <zephyr/logging/log.h>
+#include "board.h"
 #include "board_config.h"
 #include "espi_hub.h"
 #include "pwrplane.h"
@@ -31,6 +32,12 @@ void main(void)
 	k_msleep(100);
 
 	LOG_INF("EC FW Zephyr %p %s", k_current_get(), CONFIG_BOARD);
+
+	ret = board_devices_check();
+	if (ret) {
+		LOG_ERR("Device drivers check fail %d", ret);
+		return;
+	}
 
 	/* The espi block needs to be initialized before the GPIOS. This is
 	 * because we must query the boot mode before assigning functions

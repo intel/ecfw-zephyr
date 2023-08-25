@@ -21,6 +21,39 @@ LOG_MODULE_REGISTER(board, CONFIG_BOARD_LOG_LEVEL);
 static uint16_t plat_data;
 static uint16_t io_data;
 
+int board_devices_check(void)
+{
+	const struct device *dev;
+	const struct device *devlist_end;
+	size_t ndevs;
+
+	ndevs = z_device_get_all_static(&dev);
+	devlist_end = dev + ndevs;
+
+	if (ndevs == 0) {
+		LOG_ERR("No devices initialized!");
+		return -ENODEV;
+	}
+
+	while (dev < devlist_end) {
+		if ((dev->name != NULL) && (strlen(dev->name) != 0)) {
+			if (z_device_is_ready(dev)) {
+				LOG_DBG("%s ready", dev->name);
+			} else {
+				LOG_WRN("%s not ready. Check dts", dev->name);
+				printk("%s not ready. Check dts\n", dev->name);
+				return -ENODEV;
+			}
+		} else {
+			LOG_WRN("Device with no name");
+		}
+
+		dev++;
+	}
+
+	return 0;
+}
+
 static inline int read_rvp_board_id(uint8_t *data)
 {
 	int ret = 0;

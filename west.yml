@@ -17,8 +17,6 @@ manifest:
   remotes:
     - name: zephyrproject
       url-base: https://github.com/zephyrproject-rtos
-    - name: github_restricted
-      url-base: https://github.com/intel-restricted
 
   # The list of dependencies
   #

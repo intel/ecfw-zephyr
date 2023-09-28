@@ -12,6 +12,12 @@ config POWER_SEQUENCE_DISABLE_TIMEOUTS
 	help
 	  Indicate if EC will enforce timeouts during power sequencing or not.
 
+config PWR_TASK_STACK_SIZE
+	int "Adjust power plane thread stack size"
+	default 1024
+	help
+	 EC FW power plane management thread task stack size.
+
 config POWER_SEQUENCE_MINIMUM_ESPI_CAPS
 	bool "eSPI handshake with minimum capabilities"
 	help

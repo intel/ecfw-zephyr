@@ -61,6 +61,12 @@ config OOBMNGR_SUPPORT
 	  Enable EC support for OOB manager eSPI hub extension to tunnel all
 	  the OOB traffic through OOB manager APIs.
 
+config OOBMNGR_TASK_STACK_SIZE
+	int "Adjust eSPI OOB manager thread stack size"
+	default 512
+	help
+	 EC FW eSPI Out-of-band channel manager thread task stack size.
+
 config ENABLE_ESPI_LTR
 	bool "Enable Latency Tolerance Reporting"
 	help

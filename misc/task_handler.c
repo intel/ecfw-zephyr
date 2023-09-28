@@ -20,8 +20,9 @@
 #include "thermalmgmt.h"
 #endif
 
-LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
+LOG_MODULE_DECLARE(ecfw, CONFIG_EC_LOG_LEVEL);
 
+#define THREAD_STATE_MAX_SIZE	12U
 #define EC_TASK_STACK_SIZE	1024
 
 /* K_FOREVER can no longer be used with K_THREAD_DEFINE
@@ -39,41 +40,40 @@ const uint32_t smchost_thrd_period = 10;
 	(defined(CONFIG_PS2_KEYBOARD) || defined(CONFIG_PS2_MOUSE) || \
 	defined(CONFIG_KSCAN_EC))
 
-#define KBC_TASK_STACK_SIZE	500
-#define KB_TASK_STACK_SIZE	384
-K_THREAD_DEFINE(kbc_thrd_id, KBC_TASK_STACK_SIZE, to_from_host_thread,
+K_THREAD_DEFINE(kbc_thrd_id, CONFIG_KBC_TASK_STACK_SIZE, to_from_host_thread,
 		NULL, NULL, NULL, EC_TASK_PRIORITY, 0, EC_WAIT_FOREVER);
-K_THREAD_DEFINE(kb_thrd_id, KB_TASK_STACK_SIZE, to_host_kb_thread,
+K_THREAD_DEFINE(kb_thrd_id, CONFIG_KB_TASK_STACK_SIZE, to_host_kb_thread,
 		NULL, NULL, NULL, EC_TASK_PRIORITY, 0, EC_WAIT_FOREVER);
 #endif
 
 #ifdef CONFIG_POSTCODE_MANAGEMENT
 const uint32_t postcode_thrd_period = 125;
-K_THREAD_DEFINE(postcode_thrd_id, EC_TASK_STACK_SIZE, postcode_thread,
+K_THREAD_DEFINE(postcode_thrd_id, CONFIG_POST_TASK_STACK_SIZE, postcode_thread,
 		&postcode_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 #endif
 
-K_THREAD_DEFINE(periph_thrd_id, EC_TASK_STACK_SIZE, periph_thread,
+K_THREAD_DEFINE(periph_thrd_id, CONFIG_PERIPH_TASK_STACK_SIZE, periph_thread,
 		&periph_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 
-K_THREAD_DEFINE(pwrseq_thrd_id, EC_TASK_STACK_SIZE, pwrseq_thread,
+K_THREAD_DEFINE(pwrseq_thrd_id, CONFIG_PWR_TASK_STACK_SIZE, pwrseq_thread,
 		&pwrseq_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 
-#define OOBMNGR_TASK_STACK_SIZE		512U
-K_THREAD_DEFINE(oobmngr_thrd_id, OOBMNGR_TASK_STACK_SIZE, oobmngr_thread,
-		NULL, NULL, NULL, EC_TASK_PRIORITY,
+#define OOBMNGR_TASK_PRIORITY	K_PRIO_COOP(3)
+K_THREAD_DEFINE(oobmngr_thrd_id, CONFIG_OOBMNGR_TASK_STACK_SIZE, oobmngr_thread,
+		NULL, NULL, NULL, OOBMNGR_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 
-K_THREAD_DEFINE(smchost_thrd_id, EC_TASK_STACK_SIZE, smchost_thread,
+K_THREAD_DEFINE(smchost_thrd_id, CONFIG_SMC_TASK_STACK_SIZE, smchost_thread,
 		&smchost_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 
 #ifdef CONFIG_THERMAL_MANAGEMENT
 const uint32_t thermal_thrd_period = 250;
-K_THREAD_DEFINE(thermal_thrd_id, EC_TASK_STACK_SIZE, thermalmgmt_thread,
+K_THREAD_DEFINE(thermal_thrd_id, CONFIG_THERMAL_TASK_STACK_SIZE,
+		thermalmgmt_thread,
 		&thermal_thrd_period, NULL, NULL, EC_TASK_PRIORITY,
 		K_INHERIT_PERMS, EC_WAIT_FOREVER);
 #endif

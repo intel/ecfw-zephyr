@@ -1,0 +1,28 @@
+#
+# Copyright (c) 2023, Intel Corporation.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+identifier: mec172xlj_mtl_template
+name: MEC172X LJ MTL TEMPLATE
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+ram: 128
+flash: 416
+supported:
+  - adc
+  - counter
+  - espi
+  - gpio
+  - i2c
+  - pinctrl
+  - pwm
+  - watchdog
+  - ps2
+  - peci
+  - kscan
+  - sensor

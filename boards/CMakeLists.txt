@@ -34,6 +34,13 @@ target_sources_ifdef(CONFIG_BOARD_MEC1501_MTL_P app
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mtl_p_mec1501.h
     )
 
+target_sources_ifdef(CONFIG_BOARD_MEC172XLJ_MTL_TEMPLATE app
+    PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/microchip/mtl_template_mec172xlj.c
+    PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}/microchip/mtl_template_mec172xlj.h
+    )
+
 target_sources_ifdef(CONFIG_BOARD_MEC172X_MTL_S app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mtl_s_mec172x.c

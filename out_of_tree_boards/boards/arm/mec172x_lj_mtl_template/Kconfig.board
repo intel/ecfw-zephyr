@@ -1,0 +1,7 @@
+# Copyright (c) 2023, Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_MEC172XLJ_MTL_TEMPLATE
+	bool "MEC172X-LJ MTL template"
+	depends on SOC_MEC172X_NLJ
+

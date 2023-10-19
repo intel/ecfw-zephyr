@@ -26,6 +26,8 @@ extern uint8_t boot_mode_maf;
 #include "adl_p_mec1501.h"
 #elif defined(CONFIG_BOARD_MEC1501_MTL_P)
 #include "mtl_p_mec1501.h"
+#elif defined(CONFIG_BOARD_MEC172XLJ_MTL_TEMPLATE)
+#include "mtl_template_mec172xlj.h"
 #elif defined(CONFIG_BOARD_MEC172X_MTL_S)
 #include "mtl_s_mec172x.h"
 #else

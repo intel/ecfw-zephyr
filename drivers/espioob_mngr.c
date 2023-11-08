@@ -87,7 +87,8 @@ static int verify_oob_tx_pckt(struct espi_oob_packet *tx)
 
 	if (tx->buf[OOB_IDX_SRC_SLV_ADDR] !=
 		OOB_SRC_ADDR(OOB_SLAVE_ADDR_EC)) {
-		LOG_INF("Invalid Src slave addr. Use %x", OOB_SLAVE_ADDR_EC);
+		LOG_INF("Invalid Src slave addr %x. Use %x", tx->buf[OOB_IDX_SRC_SLV_ADDR],
+			OOB_SLAVE_ADDR_EC);
 		/* No need to return as error */
 	}
 

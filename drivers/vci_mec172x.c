@@ -10,8 +10,13 @@
 #include "vci.h"
 #include "soc.h"
 
+#ifdef CONFIG_SOC_MEC172X_NSZ
 /* Set bits 0,1 and 2 to enable BGPO0, BGPO1 and BGPO2 */
 #define BGPO_EN_MASK	0x7U
+#else
+/* Set bits 0-4 to enable BGPO0-BGPO5 */
+#define BGPO_EN_MASK	0x3FU
+#endif
 
 static uintptr_t vci_regbase = DT_REG_ADDR(DT_NODELABEL(vci0));
 static uintptr_t wktmr_regbase = DT_REG_ADDR(DT_NODELABEL(weektmr0));

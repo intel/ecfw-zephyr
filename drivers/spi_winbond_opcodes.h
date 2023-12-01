@@ -30,22 +30,20 @@
 /* Map opcodes based on SPI flash capacity, since first require use 2-byte
  * addresses and later required 3-byte addresses.
  */
-#if (CONFIG_SAF_SPI_CAPACITY == 16)
+#if (CONFIG_SAF_SPI_CAPACITY < 32)
 #define PAGE_PROGRAM_OPCODE            0x02U
 #define SECTOR_ERASE_OPCODE            0x20U
 #define BLOCK_ERASE_64K_OPCODE         0xD8U
 #define FAST_READ_DUAL_IO_OPCODE       0xBBU
 #define FAST_READ_QUAD_IO_OPCODE       0xEBU
 #define QUAD_WRITE_DATA_OPCODE         0x32U
-#elif (CONFIG_SAF_SPI_CAPACITY == 32)
+#else
 #define PAGE_PROGRAM_OPCODE            0x12U
 #define SECTOR_ERASE_OPCODE            0x21U
 #define BLOCK_ERASE_64K_OPCODE         0xDCU
 #define FAST_READ_DUAL_IO_OPCODE       0xBCU
 #define FAST_READ_QUAD_IO_OPCODE       0xECU
 #define QUAD_WRITE_DATA_OPCODE         0x34U
-#else
-#pragma error "Unsupported SPI capacity"
 #endif
 
 #endif /* __SPI_WINBOND_OPCODES_H__ */

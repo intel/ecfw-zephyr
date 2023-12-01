@@ -58,7 +58,7 @@
 #define SAF_RPMC_STATUS_DATA_OPCODE	0U
 
 /* Capacity adjustments */
-#if (CONFIG_SAF_SPI_CAPACITY == 32)
+#if (CONFIG_SAF_SPI_CAPACITY > 16)
 #define SAF_POLL_MASK		(MCHP_W25Q256_POLL2_MASK)
 
 #if DT_PROP(DT_SPI_INST, lines) == 4

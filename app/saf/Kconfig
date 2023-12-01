@@ -19,6 +19,9 @@ config SAF_SPI_CAPACITY
 	depends on ESPI_SAF
 	help
 	  Indicate SPI flash devices capacity in MB.
+	  This is used to configure SAF bridge size limit, if any attempt
+	  is done by the eSPI host to a flash address greater than this
+	  limit, it will cause an out-of-range error.
 
 config SAF_SPI_FREQ_MHZ
 	int "SAF SPI flash frequency"

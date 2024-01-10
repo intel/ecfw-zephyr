@@ -38,7 +38,7 @@ struct async_msb {
 	uint16_t len;
 	uint8_t buf[MAX_OOB_BUF_SIZE];
 	uint8_t from;
-	bool exp_rx;
+	uint8_t oob_flags;
 	oob_rx_callback_handler_t fn;
 };
 
@@ -65,7 +65,7 @@ static int verify_oob_tx_pckt(struct espi_oob_packet *tx)
 	uint8_t len = OOB_MSG_LEN_FROM_BYTE_CNT(tx->buf[OOB_IDX_BYTE_CNT]);
 
 	if ((len >= MAX_OOB_BUF_SIZE) || (len < OOB_IDX_HDR_SIZE)) {
-		LOG_ERR("Invalid byte count %d", len);
+		LOG_ERR("Tx Invalid byte count %d", len);
 		return -EINVAL;
 	}
 
@@ -100,7 +100,7 @@ static int verify_oob_rx_pckt(struct espi_oob_packet *rx)
 	uint8_t len = OOB_MSG_LEN_FROM_BYTE_CNT(rx->buf[OOB_IDX_BYTE_CNT]);
 
 	if ((len >= MAX_OOB_BUF_SIZE) || (len < OOB_IDX_HDR_SIZE)) {
-		LOG_ERR("Invalid byte count %d", len);
+		LOG_ERR("Rx Invalid byte count %d", len);
 		return -EINVAL;
 	}
 
@@ -149,9 +149,11 @@ static inline struct oob_msg *get_oob_master(uint8_t addr_byte)
 	}
 }
 
-int oob_send_sync(struct espi_oob_packet *tx, struct espi_oob_packet *rx, bool exp_rx, int timeout)
+int oob_send_sync(struct espi_oob_packet *tx, struct espi_oob_packet *rx, uint8_t oobmgr_flags,
+		  int timeout)
 {
 	int ret = 0;
+	bool exp_rx = (oobmgr_flags & OOB_TX_HAS_RX);
 	struct oob_msg *master;
 	int wait_time = MAX(MIN(timeout, MAX_WAIT_TIME_FOR_OOB_IN_MS),
 		MIN_WAIT_TIME_FOR_OOB_IN_MS);
@@ -168,10 +170,14 @@ int oob_send_sync(struct espi_oob_packet *tx, struct espi_oob_packet *rx, bool e
 		return -ENOBUFS;
 	}
 
-	ret = verify_oob_tx_pckt(tx);
-	if (ret) {
-		LOG_ERR("OOB Tx packet verification failed %d", ret);
-		return ret;
+	if (oobmgr_flags & OOB_TX_MAY_INVALID) {
+		LOG_INF("OOB sync bypass val");
+	} else {
+		ret = verify_oob_tx_pckt(tx);
+		if (ret) {
+			LOG_ERR("OOB Tx packet verification failed %d", ret);
+			return ret;
+		}
 	}
 
 	master = get_oob_master(tx->buf[OOB_IDX_DEST_SLV_ADDR]);
@@ -229,7 +235,7 @@ int oob_send_sync(struct espi_oob_packet *tx, struct espi_oob_packet *rx, bool e
 }
 
 
-int oob_send_async(struct espi_oob_packet *tx, oob_rx_callback_handler_t cb, bool exp_rx)
+int oob_send_async(struct espi_oob_packet *tx, oob_rx_callback_handler_t cb, uint8_t oobmgr_flags)
 {
 	int ret;
 	struct async_msb msg;
@@ -242,17 +248,21 @@ int oob_send_async(struct espi_oob_packet *tx, oob_rx_callback_handler_t cb, boo
 		return -ENODATA;
 	}
 
-	ret = verify_oob_tx_pckt(tx);
-	if (ret) {
-		LOG_ERR("OOB Tx packet verification failed %d", ret);
-		return ret;
+	if (oobmgr_flags & OOB_TX_MAY_INVALID) {
+		LOG_INF("OOB async bypass val");
+	} else {
+		ret = verify_oob_tx_pckt(tx);
+		if (ret) {
+			LOG_ERR("OOB Tx packet verification failed %d", ret);
+			return ret;
+		}
 	}
 
 	msg.len = tx->len;
 	memcpys(msg.buf, tx->buf, tx->len);
 	msg.fn = cb;
 	msg.from = OOB_SLAVE_ADDR_EC;
-	msg.exp_rx = exp_rx;
+	msg.oob_flags = oobmgr_flags;
 
 	ret = k_msgq_put(&async_msgq, &msg, K_NO_WAIT);
 	if (ret) {
@@ -369,7 +379,8 @@ void oobmngr_thread(void *p1, void *p2, void *p3)
 			struct espi_oob_packet resp = {
 				.buf = msg.buf, .len = sizeof(msg.buf)};
 
-			ret = oob_send_sync(&req, &resp, msg.exp_rx, OOB_MSG_SYNC_WAIT_TIME_DFLT);
+			ret = oob_send_sync(&req, &resp, msg.oob_flags,
+					    OOB_MSG_SYNC_WAIT_TIME_DFLT);
 
 			LOG_DBG("Async msg processed, status: %d", ret);
 

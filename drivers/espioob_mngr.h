@@ -63,9 +63,11 @@ struct oob_msg_str {
 #define OOB_BYTE_CNT_HW_REQ_MSG		0x01U
 #define OOB_BYTE_CNT_PMC_PWR_MGMT_EVT	0x02U
 
-/* OOB Transaction types */
-#define OOB_TX_HAS_RX			true
-#define OOB_TX_ONLY			false
+/* OOB transaction flags */
+#define OOB_TX_ONLY			0x0U
+#define OOB_TX_HAS_RX			0x1U
+
+#define OOB_TX_MAY_INVALID		0x2U
 
 /*
  * Macros for wait time
@@ -103,8 +105,7 @@ void oobmngr_thread(void *p1, void *p2, void *p3);
  *
  * @param tx eSPI OOB packet to send.
  * @param rx eSPI OOB packet to be collected as response from master.
- * @param exp_rx whether transmitted oob packet expects a response or not.
- *		 Some OOB messages are simply tx only, for eg. response to the master request.
+ * @param oobmgr_flags Refer to OOB MGR flags.
  * @param timeout max wait time in miliseconds for receiving OOB response.
  * @return 0 if successful, otherwise below error code.
  *
@@ -123,7 +124,8 @@ void oobmngr_thread(void *p1, void *p2, void *p3);
  *
  * @note Can only be run from thread.
  */
-int oob_send_sync(struct espi_oob_packet *tx, struct espi_oob_packet *rx, bool exp_rx, int timeout);
+int oob_send_sync(struct espi_oob_packet *tx, struct espi_oob_packet *rx, uint8_t oobmgr_flags,
+		  int timeout);
 
 /**
  * @brief Function pointer definition for handling asynchronous OOB response.
@@ -144,9 +146,7 @@ typedef void (*oob_rx_callback_handler_t) (struct espi_oob_packet *rx, int err);
  * @param tx eSPI OOB packet to send.
  * @param cb callback routine to be called when response for the requested OOB
  * message received from master.
- * @param exp_rx whether transmitted oob packet expects a response or not.
- *		 Some OOB messages are simply tx only, for eg. response to the master request.
- *
+ * @param oobmgr_flags Refer to OOB MGR flags.
  * @return 0 if successful, otherwise below error code.
  *
  * @return -ENOTSUP Function call not supported.
@@ -159,7 +159,7 @@ typedef void (*oob_rx_callback_handler_t) (struct espi_oob_packet *rx, int err);
  * @return -ENOBUFS when too many OOB requests are queued and no space available
  *		    to queue another one.
  */
-int oob_send_async(struct espi_oob_packet *tx, oob_rx_callback_handler_t cb, bool exp_rx);
+int oob_send_async(struct espi_oob_packet *tx, oob_rx_callback_handler_t cb, uint8_t oobmgr_flags);
 
 /**
  * @brief Callback handler for downstream OOB messages.

@@ -7,9 +7,8 @@ export CI_PROJECT_DIR=${PWD}
 export CI_EC_SCRIPTS=.ci-functions
 export ARTIFACTS_FOLDER=binaries
 
-rm -rf ${ARTIFACTS_FOLDER}
-
 # Build binaries
+rm -rf ${ARTIFACTS_FOLDER}
 export ARTIFACTS="TRUE"
 source ${CI_EC_SCRIPTS}/build.sh
 set_artifacts_folder

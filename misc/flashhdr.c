@@ -9,9 +9,9 @@
 #include "board_config.h"
 #include "flashhdr.h"
 
-#define KSC_MAJOR_VER     2
+#define KSC_MAJOR_VER     3
 #define KSC_MINOR_VER     1
-#define KSC_PATCH_ID      1
+#define KSC_PATCH_ID      2
 #define KSC_QS_BUILD_VER  0
 
 __in_section(ecfw_info, static, var) struct ksc_img_hdr header = {

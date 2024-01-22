@@ -219,10 +219,14 @@ inline int keymap_get_keynum(struct km_api *api, uint8_t col, uint8_t row)
 	return api->get_keynum(col, row);
 }
 
-inline int keymap_get_fnkey(struct km_api *api, uint8_t key_num,
+static inline int keymap_get_fnkey(struct km_api *api, uint8_t key_num,
 			    struct fn_data *data,
 			    bool pressed)
 {
+	if (api == NULL) {
+		return -EINVAL;
+	}
+
 	if (api->get_fnkey == NULL) {
 		return -EINVAL;
 	}

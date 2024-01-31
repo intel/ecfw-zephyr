@@ -37,7 +37,6 @@ struct gpio_ec_config mecc1501_cfg[] = {
 	{ EC_SPI_CS1_N,		GPIO_OUTPUT_HIGH},
 	/* MIC privacy switch, not used */
 	{ EC_GPIO_011,		GPIO_DISCONNECTED },
-	{ RSMRST_PWRGD_MAF_P,	GPIO_INPUT },
 	{ KBD_BKLT_CTRL,	GPIO_OUTPUT_LOW },
 	{ PM_BAT_STATUS_LED1,	GPIO_OUTPUT_LOW },
 	{ CPU_C10_GATE,		GPIO_INPUT },

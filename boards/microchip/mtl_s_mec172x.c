@@ -35,8 +35,6 @@ struct gpio_ec_config mecc172x_cfg[] = {
 	{ PM_SLP_SUS,		GPIO_INPUT },
 	{ EC_SPI_CS1_N,		GPIO_OUTPUT_HIGH},
 	{ EC_GPIO_011,		GPIO_INPUT },
-	{ RSMRST_PWRGD_G3SAF_P,	GPIO_INPUT },
-	{ RSMRST_PWRGD_MAF_P,	GPIO_INPUT },
 	{ ATX_DETECT,		GPIO_INPUT },
 	{ KBD_BKLT_CTRL,	GPIO_INPUT },
 	{ EC_GPIO_015,		GPIO_INPUT },
@@ -247,6 +245,7 @@ int board_init(void)
 	 * keep it like that during the boot phase in order to avoid espi reset
 	 */
 	if (espihub_boot_mode() == FLASH_BOOT_MODE_MAF) {
+		gpio_force_configure_pin(RSMRST_PWRGD_MAF_P, GPIO_INPUT);
 		gpio_force_configure_pin(PM_RSMRST_MAF_P, GPIO_OUTPUT_HIGH);
 	} else {
 		gpio_configure_pin(RSMRST_PWRGD_G3SAF_P, GPIO_INPUT);

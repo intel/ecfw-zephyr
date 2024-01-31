@@ -32,8 +32,6 @@ struct gpio_ec_config mecc1501_cfg[] = {
 	{ PM_SLP_SUS,		GPIO_INPUT },
 	{ REAR_FAN_CTRL,	GPIO_OUTPUT_LOW },
 	{ EC_GPIO_011,		GPIO_INPUT },
-	{ RSMRST_PWRGD_G3SAF_P,	GPIO_INPUT },
-	{ RSMRST_PWRGD_MAF_P,	GPIO_INPUT },
 	{ ATX_DETECT,		GPIO_INPUT },
 	{ KBD_BKLT_CTRL,	GPIO_INPUT },
 	{ EC_GPIO_015,		GPIO_INPUT },
@@ -210,12 +208,14 @@ int board_init(void)
 		gpio_force_configure_pin(PM_RSMRST_MAF_P, GPIO_OUTPUT_HIGH);
 
 		/* LPM optimizations */
-		gpio_configure_pin(PM_RSMRST_G3SAF_P, GPIO_DISCONNECTED);
-		gpio_force_configure_pin(EC_GPIO_051, GPIO_DISCONNECTED);
+		gpio_force_configure_pin(PM_RSMRST_G3SAF_P, GPIO_DISCONNECTED);
+		gpio_force_configure_pin(EC_GPIO_002, GPIO_DISCONNECTED);
+		gpio_force_configure_pin(EC_GPIO_056, GPIO_DISCONNECTED);
 		gpio_force_configure_pin(EC_GPIO_223, GPIO_DISCONNECTED);
 		gpio_force_configure_pin(EC_GPIO_224, GPIO_DISCONNECTED);
 		gpio_force_configure_pin(EC_GPIO_016, GPIO_DISCONNECTED);
 	} else {
+		gpio_configure_pin(RSMRST_PWRGD_G3SAF_P, GPIO_INPUT);
 		gpio_configure_pin(PM_RSMRST_G3SAF_P, GPIO_OUTPUT_LOW);
 	}
 

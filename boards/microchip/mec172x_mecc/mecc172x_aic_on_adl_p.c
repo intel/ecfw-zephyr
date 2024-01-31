@@ -33,8 +33,6 @@ uint8_t platformskutype;
 struct gpio_ec_config mecc172x_cfg[] =  {
 /*      Port Signal			Config       */
 	{ PROCHOT,			GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
-	{ RSMRST_PWRGD_G3SAF_P,		GPIO_INPUT },
-	{ RSMRST_PWRGD_MAF_P,		GPIO_INPUT },
 	{ CPU_C10_GATE,			GPIO_INPUT },
 	{ KBD_BKLT_CTRL,		GPIO_OUTPUT_LOW },
 	{ PM_PWRBTN,			GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },

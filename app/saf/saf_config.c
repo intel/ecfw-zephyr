@@ -74,36 +74,70 @@ static int spi_send_cmd(uint8_t slave_index, struct saf_spi_transaction *cmd,
 {
 	int ret;
 	uint8_t data[MAX_SPI_RESPONSE];
+#ifdef CONFIG_SPI_XEC_QMSPI_LDMA
+	struct spi_buf rx[2];
+	struct spi_buf tx[2];
+	struct spi_buf_set rx_bufs = {
+		.buffers = rx,
+		.count = 1,
+	};
+	struct spi_buf_set tx_bufs = {
+		.buffers = tx,
+		.count = 1,
+	};
+#else
 	struct spi_buf rx;
 	struct spi_buf tx;
 	struct spi_buf_set rx_bufs = {
 		.buffers = NULL,
 		.count = 0,
 	};
-
 	struct spi_buf_set tx_bufs = {
 		.buffers = &tx,
 		.count = 1,
 	};
+#endif
 
+#ifdef CONFIG_SPI_XEC_QMSPI_LDMA
+	tx[0].buf = cmd->buf;
+	tx[0].len = cmd->tx_len;
+	tx[1].buf = NULL;
+	tx[1].len = cmd->rx_len;
+
+	rx[0].buf = NULL;
+	rx[0].len = cmd->tx_len;
+	rx[1].buf = data;
+	rx[1].len = cmd->rx_len;
+#else
 	tx.buf = cmd->buf;
 	tx.len = cmd->tx_len;
 	rx.buf = data;
 	rx.len = cmd->rx_len;
-
+#endif
 	/* Increase SPI driver compatibility, do not indicate RX buffer despite
 	 * of the buffers been empty
 	 */
 	if (cmd->rx_len) {
+#ifdef CONFIG_SPI_XEC_QMSPI_LDMA
+		rx_bufs.count = 2;
+		tx_bufs.count = 2;
+#else
 		rx_bufs.buffers = &rx;
 		rx_bufs.count = 1;
+#endif
 	}
 
 	spi_cfg.operation = SPI_OP_MODE_MASTER | SPI_TRANSFER_MSB
 			    | SPI_WORD_SET(8) | mode;
 	spi_cfg.slave = slave_index;
 
-	ret = spi_transceive(spi_dev, &spi_cfg, &tx_bufs, &rx_bufs);
+	/* Need to send empty rx buffer in dual/ quad mode for SPI LDMA driver */
+	if (IS_ENABLED(CONFIG_SPI_XEC_QMSPI_LDMA) && (mode != SPI_LINES_SINGLE)) {
+		ret = spi_transceive(spi_dev, &spi_cfg, &tx_bufs, NULL);
+	} else {
+		ret = spi_transceive(spi_dev, &spi_cfg, &tx_bufs, &rx_bufs);
+	}
+
 	if (ret < 0) {
 		LOG_ERR("SPI transceive error: %d", ret);
 		return ret;
@@ -234,7 +268,13 @@ static int qspi_exit_continuous_mode(uint8_t slave_index)
 			    | SPI_WORD_SET(8) | SPI_IO_LINES;
 	spi_cfg.slave = slave_index;
 
-	ret = spi_transceive(spi_dev, &spi_cfg, &tx_bufs, &rx_bufs);
+	/* Need to send empty rx buffer in dual/ quad mode for SPI LDMA driver */
+	if (IS_ENABLED(CONFIG_SPI_XEC_QMSPI_LDMA)) {
+		ret = spi_transceive(spi_dev, &spi_cfg, &tx_bufs, NULL);
+	} else {
+		ret = spi_transceive(spi_dev, &spi_cfg, &tx_bufs, &rx_bufs);
+	}
+
 	if (ret < 0) {
 		LOG_ERR("SPI transceive error: %d", ret);
 		return ret;

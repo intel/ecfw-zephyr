@@ -203,7 +203,9 @@
 		      &kso10_gpio123
 		      &kso11_gpio124
 		      &kso12_gpio125
-		      &kso13_gpio126 >;
+		      &kso13_gpio126
+		      &kso14_gpio152
+		      &kso15_gpio151>;
 	pinctrl-names = "default";
 };
 

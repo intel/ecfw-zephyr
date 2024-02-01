@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Supported Hardware &mdash; Zephyr-based Embedded controller firmware 1.51 documentation</title>
+  <title>Supported Hardware &mdash; Basic Open Embedded Controller Firmware 2.01.01 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,6 +11,9 @@
   <![endif]-->
   
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -30,10 +32,10 @@
           
           
           <a href="../index.html" class="icon icon-home">
-            Zephyr-based Embedded controller firmware
+            Basic Open Embedded Controller Firmware
           </a>
               <div class="version">
-                1.51
+                2.01.01
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -45,7 +47,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Documentation Home</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Project overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Supported Hardware</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#other-ec-soc">Other EC SoC</a></li>
@@ -64,7 +66,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Zephyr-based Embedded controller firmware</a>
+          <a href="../index.html">Basic Open Embedded Controller Firmware</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -82,8 +84,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="supported-hardware">
+  <div class="section" id="supported-hardware">
 <span id="id1"></span><h1>Supported Hardware<a class="headerlink" href="#supported-hardware" title="Permalink to this heading">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#other-ec-soc" id="id2">Other EC SoC</a></p></li>
+<li><p><a class="reference internal" href="#customize-ec-fw-framework-for-other-ec-soc" id="id3">Customize EC FW framework for other EC SoC</a></p></li>
+<li><p><a class="reference internal" href="#gpio-initialization" id="id4">GPIO initialization</a></p></li>
+<li><p><a class="reference internal" href="#hw-limitations" id="id5">HW limitations</a></p></li>
+</ul>
+</div>
 <p>The main hardware used is Intel Validation Platform (RVP) used in conjunction
 with a modular embedded control card (MECC) or when applicable the
 on-board EC.</p>
@@ -98,6 +108,11 @@ EC in an Intel RVP.</p>
 card. Refer to <a class="reference external" href="https://www.intel.com/content/www/us/en/programmable/documentation/lit-index.html">Platform design guide</a> for details.</p>
 </div>
 <table class="docutils align-default">
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 37%" />
+<col style="width: 40%" />
+</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Board</p></th>
 <th class="head"><p>EC HW configuration</p></th>
@@ -119,8 +134,8 @@ card. Refer to <a class="reference external" href="https://www.intel.com/content
 </tr>
 </tbody>
 </table>
-<section id="other-ec-soc">
-<h2>Other EC SoC<a class="headerlink" href="#other-ec-soc" title="Permalink to this heading">¶</a></h2>
+<div class="section" id="other-ec-soc">
+<h2><a class="toc-backref" href="#id2">Other EC SoC</a><a class="headerlink" href="#other-ec-soc" title="Permalink to this heading">¶</a></h2>
 <p>In order to use a different MECC card with a different EC SoC vendor, the vendor
 should add its Hardware Abstraction Layer (HAL) and board support package (BSP)
 to Zephyr RTOS. See <a class="reference external" href="https://docs.zephyrproject.org/latest/guides/porting/board_porting.html">Zephyr’s porting guide</a></p>
@@ -147,9 +162,9 @@ control.</p>
 <li><p>ADC - for thermal module</p></li>
 <li><p>PWM - for fan control</p></li>
 </ul>
-</section>
-<section id="customize-ec-fw-framework-for-other-ec-soc">
-<h2>Customize EC FW framework for other EC SoC<a class="headerlink" href="#customize-ec-fw-framework-for-other-ec-soc" title="Permalink to this heading">¶</a></h2>
+</div>
+<div class="section" id="customize-ec-fw-framework-for-other-ec-soc">
+<h2><a class="toc-backref" href="#id3">Customize EC FW framework for other EC SoC</a><a class="headerlink" href="#customize-ec-fw-framework-for-other-ec-soc" title="Permalink to this heading">¶</a></h2>
 <p>Zephyr uses device tree to describe hardware both EC SoC and board’s peripherals.
 The EC FW abstracts the device tree using friendly macros which can be customized when
 using different EC SoC and/or different board. See boards/&lt;vendor&gt; for more details</p>
@@ -157,9 +172,9 @@ using different EC SoC and/or different board. See boards/&lt;vendor&gt; for mor
 </pre></div>
 </div>
 <p>For more details, see <a class="reference external" href="https://docs.zephyrproject.org/latest/guides/dts/index.html">Zephyr’s device tree guide</a>.</p>
-</section>
-<section id="gpio-initialization">
-<h2>GPIO initialization<a class="headerlink" href="#gpio-initialization" title="Permalink to this heading">¶</a></h2>
+</div>
+<div class="section" id="gpio-initialization">
+<h2><a class="toc-backref" href="#id4">GPIO initialization</a><a class="headerlink" href="#gpio-initialization" title="Permalink to this heading">¶</a></h2>
 <p>EC FW app doesn’t control/configure all GPIOs on the chip but only the ones used
 by the app. This is an important delegation to BSP’s where generic app pins
 are not configured.</p>
@@ -169,8 +184,8 @@ are not configured.</p>
 </div>
 <p>When a pin is intended to be controlled by the EC FW framework it should be
 mapped under boardname_chipversion.h to corresponding Zephyr GPIO port and pin.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PCH_PWROK    EC_GPIO_106  </span><span class="cm">/* Board #1 Port A, Pin B */</span>
-<span class="cp">#define PCH_PWROK    EC_GPIO_036  </span><span class="cm">/* Board #2 Port B, Pin C */</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PCH_PWROK    EC_GPIO_106  </span><span class="cm">/* Board #1 Port A, Pin B */</span><span class="cp"></span>
+<span class="cp">#define PCH_PWROK    EC_GPIO_036  </span><span class="cm">/* Board #2 Port B, Pin C */</span><span class="cp"></span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -182,9 +197,9 @@ EC FW requires the flexibility to map a signal to different pins.</p>
 <p>Similarly, boardname_chipversion.c should contain the actual pin configuration
 required by the application input/output, open drain and so on.
 See <a class="reference external" href="https://docs.zephyrproject.org/latest/reference/peripherals/gpio.html">Zephyr’s GPIO reference</a> for Zephyr GPIO flags.</p>
-</section>
-<section id="hw-limitations">
-<h2>HW limitations<a class="headerlink" href="#hw-limitations" title="Permalink to this heading">¶</a></h2>
+</div>
+<div class="section" id="hw-limitations">
+<h2><a class="toc-backref" href="#id5">HW limitations</a><a class="headerlink" href="#hw-limitations" title="Permalink to this heading">¶</a></h2>
 <p>Most of the signals used by onboard EC are routed to MECC connector, however
 some signals may be missing on MECC compared to onboard EC.
 Refer to RVP schematics.</p>
@@ -197,6 +212,13 @@ vendors to adhere to the spec allowing more consistency.</p>
 <p>As indicated above some Intel RVP features available are reduced when using MECC
 card. Refer to table below for guidance about what can be verified end-to-end.</p>
 <table class="docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 37%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Area</p></th>
 <th class="head"><p>Feature</p></th>
@@ -322,8 +344,8 @@ card. MEC15xx/MEC17xx cards allow to use Fujitsu keyboard matrix.</p>
 <p>(4) Intel Meteorlake RVP UART connector cannot be used for EC serial
 logs. Use MECC USB instead.</p>
 </div>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
@@ -333,7 +355,7 @@ logs. Use MECC USB instead.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020 Intel Corporation.</p>
+    <p>&#169; Copyright 2020-2023 Intel Corporation.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

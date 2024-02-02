@@ -33,11 +33,11 @@
 		compatible = "pwm-leds";
 
 		pwm_led8: pwm_led8 {
-			pwms = <&pwm8 0 0>;
+			pwms = <&pwm8 0 0 0>;
 		};
 
 		pwm_led6: pwm_led6 {
-			pwms = <&pwm6 1 0>;
+			pwms = <&pwm6 1 0 0>;
 		};
 	};
 
@@ -52,6 +52,10 @@
 
 &cpu0 {
 	cpu-power-states = <&suspend_to_ram>;
+};
+
+&pcr {
+	status = "okay";
 };
 
 &uart2 {
@@ -128,6 +132,10 @@
 };
 
 &spi0 {
+	status = "okay";
+	lines = <4>;
+	port_sel = <0>;
+	chip_select = <0>;
 	pinctrl-0 = < &shd_cs0_n_gpio055 &shd_clk_gpio056
 			&shd_io0_gpio223 &shd_io1_gpio224
 			&shd_io2_gpio227 &shd_io3_gpio016 >;

@@ -1,3 +1,10 @@
+/ {
+	zephyr,user {
+		/* Set as GPIos. These are not in GPIO mode due to HW default or ROM */
+		pinctrl-0 = < &gpio000_gpio000 &gpio161_gpio161 &gpio162_gpio162>;
+		pinctrl-names = "default";
+	};
+};
 
 &i2c_smb_0 {
 	status = "okay";

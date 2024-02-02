@@ -43,6 +43,13 @@
 			min-residency-us = <100000>;
 		};
 	};
+
+	zephyr,user {
+		/* Set as GPIos. These are not in GPIO mode due to HW default or ROM */
+		pinctrl-0 = < &gpio000_gpio000 &gpio161_gpio161 &gpio162_gpio162 &gpio163_gpio163
+				&gpio172_gpio172 &gpio250_gpio250 &gpio253_gpio253>;
+		pinctrl-names = "default";
+	};
 };
 
 &cpu0 {

@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
+#include <zephyr/drivers/pinctrl.h>
 #include <soc.h>
 #include "i2c_hub.h"
 #include <zephyr/logging/log.h>
@@ -20,6 +21,27 @@ LOG_MODULE_REGISTER(board, CONFIG_BOARD_LOG_LEVEL);
 
 static uint16_t plat_data;
 static uint16_t io_data;
+
+#if DT_NODE_EXISTS(DT_PATH(zephyr_user))
+/* constant (code space) PINCTRL entry referencing our zephyr_user node */
+PINCTRL_DT_DEFINE(DT_PATH(zephyr_user));
+
+/* constant (code space) pointer to constant PINCTRL device structure */
+const struct pinctrl_dev_config *app_pinctrl_cfg =
+	PINCTRL_DT_DEV_CONFIG_GET(DT_PATH(zephyr_user));
+#endif
+
+inline int board_dts_pin_muxing(void)
+{
+#if DT_NODE_EXISTS(DT_PATH(zephyr_user))
+	int ret = pinctrl_apply_state(app_pinctrl_cfg, PINCTRL_STATE_DEFAULT);
+
+	LOG_DBG("User-defined dts node executed :%d", ret);
+	return ret;
+#else
+	return 0;
+#endif
+}
 
 int board_devices_check(void)
 {
@@ -51,7 +73,8 @@ int board_devices_check(void)
 		dev++;
 	}
 
-	return 0;
+	/* Apply board user-define pinctrl */
+	return board_dts_pin_muxing();
 }
 
 static inline int read_rvp_board_id(uint8_t *data)

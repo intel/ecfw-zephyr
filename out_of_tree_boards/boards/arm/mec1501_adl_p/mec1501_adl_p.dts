@@ -113,6 +113,18 @@
 	};
 };
 
+&i2c00_scl_gpio004 {
+	drive-open-drain;
+	output-enable;
+	output-high;
+};
+
+&i2c00_sda_gpio003 {
+	drive-open-drain;
+	output-enable;
+	output-high;
+};
+
 &i2c_smb_1 {
 	status = "okay";
 	port_sel = <1>;
@@ -120,6 +132,18 @@
 	scl-gpios = <&gpio_100_136 25 0>;
 	pinctrl-0 = < &i2c01_scl_gpio131 &i2c01_sda_gpio130 >;
 	pinctrl-names = "default";
+};
+
+&i2c01_scl_gpio131 {
+	drive-open-drain;
+	output-enable;
+	output-high;
+};
+
+&i2c01_sda_gpio130 {
+	drive-open-drain;
+	output-enable;
+	output-high;
 };
 
 &espi0 {

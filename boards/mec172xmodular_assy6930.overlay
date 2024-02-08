@@ -156,3 +156,30 @@
 	pinctrl-0 = < &pwm8_gpio035 >;
 	pinctrl-names = "default";
 };
+
+/* Disable unwanted VWs notifications
+ * Refer to include/zephyr/drivers/espi.h
+ */
+&vw_sus_stat_n {
+	status = "disabled";
+};
+
+&vw_smiout_n {
+	status = "disabled";
+};
+
+&vw_nmiout_n {
+	status = "disabled";
+};
+
+&vw_slp_lan_n {
+	status = "disabled";
+};
+
+&vw_slp_wlan_n {
+	status = "disabled";
+};
+
+&vw_host_c10 {
+	status = "disabled";
+};

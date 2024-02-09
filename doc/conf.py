@@ -60,7 +60,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Basic Open Embedded controller firmware'
+project = u'Basic Open Embedded Controller Firmware'
 copyright = u'2020-2023 Intel Corporation'
 author = u'Intel Embedded Controller Project'
 

@@ -132,6 +132,14 @@
 	pinctrl-names = "default";
 };
 
+&ps2_clk0a_gpio114 {
+	drive-open-drain;
+};
+
+&ps2_dat0a_gpio115 {
+	drive-open-drain;
+};
+
 &espi_saf0 {
 	status = "okay";
 };

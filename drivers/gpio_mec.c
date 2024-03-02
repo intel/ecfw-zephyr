@@ -50,15 +50,18 @@ uint32_t get_absolute_gpio_num(uint32_t port_pin)
 static int validate_device(uint32_t port_pin, struct gpio_port_pin *pp)
 {
 	uint32_t port_idx;
-	gpio_pin_t pin;
 
 	port_idx = gpio_get_port(port_pin);
-	pin = gpio_get_pin(port_pin);
+	pp->pin = gpio_get_pin(port_pin);
 
 	/* Fail gracefully when GPIO table is misconfigured which easily
 	 * results in a CPU fault
 	 */
 	if (port_idx >= ARRAY_SIZE(ports)) {
+		if (gpio_get_port(port_pin) == EC_DUMMY_GPIO_PORT) {
+			LOG_DBG("dummy port");
+		}
+
 		return -EINVAL;
 	}
 
@@ -68,10 +71,9 @@ static int validate_device(uint32_t port_pin, struct gpio_port_pin *pp)
 	}
 
 	LOG_DBG("%s: port idx: %d port ptr: %p pin: %d",
-		__func__, port_idx, ports[port_idx], pin);
+		__func__, port_idx, ports[port_idx], pp->pin);
 
 	pp->gpio_dev = ports[port_idx];
-	pp->pin = pin;
 
 	return 0;
 }

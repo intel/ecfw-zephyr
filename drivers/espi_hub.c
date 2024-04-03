@@ -15,7 +15,7 @@
 
 LOG_MODULE_REGISTER(espihub, CONFIG_ESPIHUB_LOG_LEVEL);
 
-#ifdef ENABLE_ESPI_LTR
+#ifdef CONFIG_ENABLE_ESPI_LTR
 /* LTR requirement enable */
 #define ESPI_LTR_REQ_ENABLE		1U
 /* LTR latency value in unit of scale */
@@ -267,21 +267,21 @@ static void espi_reset_handler(const struct device *dev,
 static void espi_ch_handler(const struct device *dev, struct espi_callback *cb,
 			    struct espi_event event)
 {
-#ifdef ENABLE_ESPI_LTR
-	int ltr_status;
-#endif
-
 	LOG_DBG("%d", event.evt_type);
 	if (event.evt_type == ESPI_BUS_EVENT_CHANNEL_READY) {
 		if (event.evt_details == ESPI_CHANNEL_VWIRE) {
-			LOG_INF("VW channel ready: %d", event.evt_data);
+			LOG_DBG("VW channel ready: %d", event.evt_data);
 			hub.host_vw_ready = event.evt_data;
-		}
-
-#ifdef ENABLE_ESPI_LTR
-		if (event.evt_details == ESPI_CHANNEL_PERIPHERAL) {
-			LOG_INF("PH channel is ready");
+		} else if (event.evt_details == ESPI_CHANNEL_OOB) {
+			LOG_DBG("OOB channel ready: %d", event.evt_data);
+		} else if (event.evt_details == ESPI_CHANNEL_FLASH) {
+			LOG_DBG("Flash channel ready: %d", event.evt_data);
+		} else if (event.evt_details == ESPI_CHANNEL_PERIPHERAL) {
+			LOG_DBG("PERIPH channel is ready");
+#ifdef CONFIG_ENABLE_ESPI_LTR
 			if (event.evt_data == ESPI_PC_EVT_BUS_MASTER_ENABLE) {
+				int ltr_status;
+
 				LOG_DBG("Sending ltr.... ");
 				ltr_status = espihub_send_ltr();
 				if (!ltr_status) {
@@ -291,8 +291,8 @@ static void espi_ch_handler(const struct device *dev, struct espi_callback *cb,
 						ltr_status);
 				}
 			}
-		}
 #endif
+		}
 	}
 }
 
@@ -656,7 +656,7 @@ int espihub_kbc_read(enum lpc_peripheral_opcode cmd, uint32_t *data)
 	return espi_read_lpc_request(espi_dev, cmd, data);
 }
 
-#ifdef ENABLE_ESPI_LTR
+#ifdef CONFIG_ENABLE_ESPI_LTR
 int espihub_send_ltr(void)
 {
 	struct ltr_cfg_pkt req;

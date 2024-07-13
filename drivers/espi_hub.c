@@ -390,6 +390,25 @@ static void espi_oob_rx_handler(const struct device *dev,
 }
 #endif
 
+#ifndef CONFIG_ESPI_AUTOMATIC_BOOT_DONE_ACKNOWLEDGE
+void espihub_send_target_bootdone(int error)
+{
+	int ret;
+	uint8_t boot_done;
+
+	ret = espi_receive_vwire(espi_dev, ESPI_VWIRE_SIGNAL_SLV_BOOT_DONE,
+				 &boot_done);
+	LOG_WRN("%s boot_done: %d", __func__, boot_done);
+	if (ret) {
+		LOG_WRN("Fail to retrieve slave boot done");
+	} else if (!boot_done) {
+		/* SLAVE_BOOT_DONE & SLAVE_LOAD_STS have to be sent together */
+		espi_send_vwire(espi_dev, ESPI_VWIRE_SIGNAL_SLV_BOOT_STS, error ? 0 : 1);
+		espi_send_vwire(espi_dev, ESPI_VWIRE_SIGNAL_SLV_BOOT_DONE, 1);
+	}
+}
+#endif
+
 void detect_boot_mode(void)
 {
 	bool flash_sts;
@@ -567,6 +586,27 @@ int espihub_wait_for_espi_reset(uint8_t exp_sts, uint32_t timeout)
 		if (exp_sts == hub.espi_rst_sts) {
 			break;
 		}
+		k_usleep(100);
+		loop_cnt--;
+	} while (loop_cnt > 0 || (timeout == WAIT_TIMEOUT_FOREVER) ||
+		 ec_timeout_status());
+
+	if (loop_cnt == 0) {
+		return -ETIMEDOUT;
+	}
+
+	return 0;
+}
+
+int espihub_wait_for_flash_channel(uint16_t timeout)
+{
+	int loop_cnt = timeout;
+
+	do {
+		if (espi_get_channel_status(espi_dev, ESPI_CHANNEL_FLASH)) {
+			break;
+		}
+
 		k_usleep(100);
 		loop_cnt--;
 	} while (loop_cnt > 0 || (timeout == WAIT_TIMEOUT_FOREVER) ||

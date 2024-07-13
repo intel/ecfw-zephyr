@@ -138,6 +138,16 @@ int espihub_wait_for_espi_reset(uint8_t exp_sts, uint32_t timeout);
 int espihub_wait_for_vwire(enum espi_vwire_signal signal, uint16_t timeout,
 		   uint8_t exp_level, bool ack_required);
 
+
+/**
+ * @brief Poll for eSPI flash channel negotiation to be complete.
+ *
+ * @param timeout value expressed in multiple of 100us.
+ *
+ * @retval -ETIMEDOUT or success.
+ */
+int espihub_wait_for_flash_channel(uint16_t timeout);
+
 /**
  * @brief Poll signal while monitoring eSPI virtual wire.
  *
@@ -336,4 +346,16 @@ int espihub_read_flash(struct espi_flash_packet *pckt);
  * @retval -EIO General input / output error, failed request to master.
  */
 int espihub_erase_flash(struct espi_flash_packet *pckt);
+
+/**
+ * @brief Signal EC FW fetching complete is complete by sending eSPI virtual wires
+ *
+ * This routine sends TARGET_BOOT_DONE and TARGET_BOOT_STATUS virtual wires
+ *
+ * @param error Indicates if EC FW fetching procedure completed successfully.
+ *
+ * @retval -EIO General input / output error.
+ */
+void espihub_send_target_bootdone(int error);
+
 #endif /* __ESPI_HUB_H__ */

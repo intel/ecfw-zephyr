@@ -559,7 +559,7 @@ int espihub_wait_for_vwire(enum espi_vwire_signal signal, uint16_t timeout,
 	return 0;
 }
 
-int espihub_wait_for_espi_reset(uint8_t exp_sts, uint16_t timeout)
+int espihub_wait_for_espi_reset(uint8_t exp_sts, uint32_t timeout)
 {
 	int loop_cnt = timeout;
 

@@ -123,7 +123,7 @@ bool espihub_dnx_status(void);
  *
  * @retval -ETIMEDOUT or 0 if success.
  */
-int espihub_wait_for_espi_reset(uint8_t exp_sts, uint16_t timeout);
+int espihub_wait_for_espi_reset(uint8_t exp_sts, uint32_t timeout);
 
 /**
  * @brief Poll eSPI virtual wire until asserted/de-asserted.

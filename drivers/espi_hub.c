@@ -388,21 +388,13 @@ int espihub_init(void)
 			   ESPI_BUS_EVENT_CHANNEL_READY);
 	espi_init_callback(&hub.vw_cb, vwire_handler,
 			   ESPI_BUS_EVENT_VWIRE_RECEIVED);
-	espi_init_callback(&hub.p80_cb, periph_handler,
+	espi_init_callback(&hub.periph_cb, periph_handler,
 			   ESPI_BUS_PERIPHERAL_NOTIFICATION);
 
 	espi_add_callback(espi_dev, &hub.espi_bus_cb);
 	espi_add_callback(espi_dev, &hub.vw_rdy_cb);
 	espi_add_callback(espi_dev, &hub.vw_cb);
-	espi_add_callback(espi_dev, &hub.p80_cb);
-
-#ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
-
-	espi_init_callback(&hub.kbc_cb, periph_handler,
-				ESPI_BUS_PERIPHERAL_NOTIFICATION);
-	espi_add_callback(espi_dev, &hub.kbc_cb);
-
-#endif
+	espi_add_callback(espi_dev, &hub.periph_cb);
 
 #ifdef CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC
 	espi_init_callback(&hub.oob_cb, espi_oob_rx_handler,

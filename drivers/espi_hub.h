@@ -73,10 +73,7 @@ struct espihub_context {
 	struct espi_callback espi_bus_cb;
 	struct espi_callback vw_rdy_cb;
 	struct espi_callback vw_cb;
-	struct espi_callback p80_cb;
-#ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
-	struct espi_callback kbc_cb;
-#endif
+	struct espi_callback periph_cb;
 #ifdef CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC
 	struct espi_callback oob_cb;
 #endif

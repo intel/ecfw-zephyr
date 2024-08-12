@@ -742,22 +742,10 @@ int kbc_enable_interface(void)
 void kbc_handler(uint8_t data, uint8_t cmd_data)
 {
 	struct host_byte host_data;
-	static uint8_t repeated_data_hack;
 
 	host_data.data = data;
 	host_data.cmd = cmd_data;
 
-	/* Until we understand why the isrs are retriggered. This hack
-	 * is necessary in order to avoid returning FE due to  repeated
-	 * data which is processed in the DEFAULT_STATE. Therefore, fe
-	 * is returned and the host does not want to process further
-	 */
-
-	if (repeated_data_hack == data) {
-		return;
-	}
-
-	repeated_data_hack = data;
 	k_msgq_put(&from_host_queue, &host_data, K_NO_WAIT);
 }
 

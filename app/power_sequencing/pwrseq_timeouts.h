@@ -24,6 +24,7 @@
 #define ALL_SYS_PWRGD_TIMEOUT       10000
 /* 500 ms */
 #define RSMRST_PWRDG_TIMEOUT        5000
+#define FLASH_CHANNEL_READY_TIMEOUT 5000
 /* 500 ms */
 #define ESPI_RST_TIMEOUT            5000
 /* 6s */

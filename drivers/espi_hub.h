@@ -26,12 +26,6 @@
 #define MAX_ACPI_HANDLERS         2u
 #define MAX_PERIPH_HANDLERS       2u
 
-/* TODO: Check if we can replace these macros */
-#ifdef CONFIG_SOC_FAMILY_MEC
-#define KBC_IBF_DATA(x)           (((x) >> E8042_ISR_DATA_POS) & 0xFFU)
-#define KBC_CMD_DATA(x)           ((x) & 0xFU)
-#endif
-
 /* TODO: Replace these macros with Zephyr byte order */
 #define ESPI_PERIPHERAL_TYPE(x)   ((x) & 0x0000FFFF)
 #define ESPI_PERIPHERAL_INDEX(x)  (((x) & 0xFFFF0000) >> 16)
@@ -42,7 +36,7 @@
 typedef void (*espi_acpi_handler_t)(void);
 typedef void (*espi_warn_handler_t)(uint8_t status);
 typedef void (*espi_state_handler_t)(uint32_t signal, uint32_t status);
-typedef void (*espi_kbc_handler_t)(uint8_t data, uint8_t status);
+typedef void (*espi_kbc_handler_t)(struct espi_evt_data_kbc *kbc);
 typedef void (*espi_postcode_handler_t)(uint8_t port_index, uint8_t code);
 
 #define	ESPIHUB_VW_LOW	0
@@ -74,9 +68,6 @@ struct espihub_context {
 	struct espi_callback vw_rdy_cb;
 	struct espi_callback vw_cb;
 	struct espi_callback p80_cb;
-#ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
-	struct espi_callback kbc_cb;
-#endif
 #ifdef CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC
 	struct espi_callback oob_cb;
 #endif

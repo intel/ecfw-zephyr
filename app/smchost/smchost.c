@@ -6,6 +6,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/drivers/espi.h>
 #include "board.h"
 #include "board_config.h"
 #include "smc.h"

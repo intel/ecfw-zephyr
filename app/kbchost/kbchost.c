@@ -739,25 +739,26 @@ int kbc_enable_interface(void)
 /* This handles the configuration data from the host for both,
  * keyboard and mouse
  */
-void kbc_handler(uint8_t data, uint8_t cmd_data)
+void kbc_handler(struct espi_evt_data_kbc *kbc_evt)
 {
 	struct host_byte host_data;
-	static uint8_t repeated_data_hack;
 
-	host_data.data = data;
-	host_data.cmd = cmd_data;
+	host_data.data = kbc_evt->data;
+	host_data.cmd = kbc_evt->type;
 
-	/* Until we understand why the isrs are retriggered. This hack
-	 * is necessary in order to avoid returning FE due to  repeated
-	 * data which is processed in the DEFAULT_STATE. Therefore, fe
-	 * is returned and the host does not want to process further
+	/* Discard irrelevant events, only KBC IBF events matter.
+	 * Some EC vendors send send HOST_KBC_EVT_IBF and HOST_KBC_EVT_OBE events.
+	 * Meanwhile others send only HOST_KBC_EVT_IBF and do not initialize the evt.evt field
+	 * Once that's standardized across all eSPI driver implementations the 2nd check
+	 * can be removed.
 	 */
 
-	if (repeated_data_hack == data) {
+	if (kbc_evt->evt != HOST_KBC_EVT_IBF && kbc_evt->evt != 0) {
+		LOG_WRN("%s evt %x data:%x cmd_data:%x", __func__, kbc_evt->evt,
+			host_data.data, host_data.cmd);
 		return;
 	}
 
-	repeated_data_hack = data;
 	k_msgq_put(&from_host_queue, &host_data, K_NO_WAIT);
 }
 

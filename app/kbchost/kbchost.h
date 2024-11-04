@@ -92,11 +92,9 @@
  * This routine receives IBF information from the emulated 8042 block. The
  * IBF information can be command or data.
  *
- * @param data This is what comes from the host through eSPI(port 60 or 64).
- * @param cmd_data The parameter received from the host is a command when
- * the value is 1, and 0 indicates data was received.
+ * @param kbc_evt details on the 8042 keyboard event as defined in eSPI driver API.
  */
-void kbc_handler(uint8_t data, uint8_t cmd_data);
+void kbc_handler(struct espi_evt_data_kbc *kbc_evt);
 
 /**
  * @brief Disable the IBF callback.

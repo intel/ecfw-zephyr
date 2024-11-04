@@ -7,6 +7,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/device.h>
+#include <zephyr/drivers/espi.h>
 #include "port80display.h"
 #include "board.h"
 #include "board_config.h"

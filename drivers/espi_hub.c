@@ -288,8 +288,9 @@ static void periph_handler(const struct device *dev, struct espi_callback *cb,
 		 * or data
 		 */
 		if (kbc_handler) {
-			kbc_handler(KBC_IBF_DATA(event.evt_data),
-				    KBC_CMD_DATA(event.evt_data));
+			struct espi_evt_data_kbc *kbc_evt =
+				(struct espi_evt_data_kbc *)&event.evt_data;
+			kbc_handler(kbc_evt);
 		} else {
 			LOG_WRN("No KBC handler registered");
 		}
@@ -397,14 +398,6 @@ int espihub_init(void)
 	espi_add_callback(espi_dev, &hub.vw_rdy_cb);
 	espi_add_callback(espi_dev, &hub.vw_cb);
 	espi_add_callback(espi_dev, &hub.p80_cb);
-
-#ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
-
-	espi_init_callback(&hub.kbc_cb, periph_handler,
-				ESPI_BUS_PERIPHERAL_NOTIFICATION);
-	espi_add_callback(espi_dev, &hub.kbc_cb);
-
-#endif
 
 #ifdef CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC
 	espi_init_callback(&hub.oob_cb, espi_oob_rx_handler,

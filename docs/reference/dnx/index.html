@@ -1,21 +1,19 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EC support for Intel Download and Execute &mdash; Basic Open Embedded Controller Firmware 2.01.01 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>EC support for Intel Download and Execute &mdash; Basic Open Embedded Controller Firmware 3.01.02 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=8f80eab9"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -34,9 +32,6 @@
           <a href="../../index.html" class="icon icon-home">
             Basic Open Embedded Controller Firmware
           </a>
-              <div class="version">
-                2.01.01
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -105,9 +100,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="ec-support-for-intel-download-and-execute">
+  <section id="ec-support-for-intel-download-and-execute">
 <span id="download-and-execute"></span><h1>EC support for Intel Download and Execute<a class="headerlink" href="#ec-support-for-intel-download-and-execute" title="Permalink to this heading">¶</a></h1>
-<div class="contents local topic" id="contents">
+<nav class="contents local" id="contents">
 <ul class="simple">
 <li><p><a class="reference internal" href="#dnx-overview" id="id1">DnX overview</a></p></li>
 <li><p><a class="reference internal" href="#ec-functional-requirements-for-dnx" id="id2">EC functional requirements for DnX</a></p>
@@ -126,13 +121,13 @@
 </ul>
 </li>
 </ul>
-</div>
+</nav>
 <p>This note describes the requirements and implementation details for EC FW
 to support Intel Download and execute (DnX) flows. It covers an overview of the
 EC role in the DnX flow validated in Intel RVP and a set of optional features
 available for derivative board designs.</p>
-<div class="section" id="dnx-overview">
-<h2><a class="toc-backref" href="#id1">DnX overview</a><a class="headerlink" href="#dnx-overview" title="Permalink to this heading">¶</a></h2>
+<section id="dnx-overview">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">DnX overview</a><a class="headerlink" href="#dnx-overview" title="Permalink to this heading">¶</a></h2>
 <p>DnX (download and execute) is a capability wherein Intel SoC CSE component can
 use USB port on the device and download content from a host machine. CSE can
 download content as an execution unit (it verifies the content and executes it)
@@ -148,9 +143,9 @@ or as a data unit (it writes the content in SPI/eMMC). Primary purposes:</p>
 <p class="admonition-title">Note</p>
 <p>For additional details do refer to Intel DnX Firmware specification.</p>
 </div>
-</div>
-<div class="section" id="ec-functional-requirements-for-dnx">
-<h2><a class="toc-backref" href="#id2">EC functional requirements for DnX</a><a class="headerlink" href="#ec-functional-requirements-for-dnx" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="ec-functional-requirements-for-dnx">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">EC functional requirements for DnX</a><a class="headerlink" href="#ec-functional-requirements-for-dnx" title="Permalink to this heading">¶</a></h2>
 <ol class="upperalpha simple">
 <li><p>Disable EC timeout mechanism after gaining awareness of system DnX entry.</p></li>
 <li><p>Detect user desire to trigger DnX entry (optional).</p></li>
@@ -162,8 +157,8 @@ or as a data unit (it writes the content in SPI/eMMC). Primary purposes:</p>
 which is required in designs where DnX capable USB port is exposed via USB-C
 connector. This is no longer required in newer architectures.</p>
 </div>
-<div class="section" id="ec-dnx-awareness-and-ec-timeout">
-<h3><a class="toc-backref" href="#id3">1. EC DnX awareness and EC timeout</a><a class="headerlink" href="#ec-dnx-awareness-and-ec-timeout" title="Permalink to this heading">¶</a></h3>
+<section id="ec-dnx-awareness-and-ec-timeout">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">1. EC DnX awareness and EC timeout</a><a class="headerlink" href="#ec-dnx-awareness-and-ec-timeout" title="Permalink to this heading">¶</a></h3>
 <p>As indicated in Intel <a class="reference external" href="https://intel.github.io/ecfw-zephyr/reference/power_sequencing/index.html#id7">EC FW reference documentation</a>, during system
 transitions (boot, resume, hibernate, shutdown) EC will check if certain
 conditions are met, if any of these conditions is not fulfilled within a
@@ -178,9 +173,9 @@ primary well.</p>
 If eSPI is not supported, Intel RVP and this reference code showcase the
 EC HW strap, that allows to disable EC FW timeout.</p>
 </div>
-</div>
-<div class="section" id="user-triggered-ec-assisted-dnx-entry">
-<h3><a class="toc-backref" href="#id4">2. User-triggered EC-assisted DnX entry</a><a class="headerlink" href="#user-triggered-ec-assisted-dnx-entry" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="user-triggered-ec-assisted-dnx-entry">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">2. User-triggered EC-assisted DnX entry</a><a class="headerlink" href="#user-triggered-ec-assisted-dnx-entry" title="Permalink to this heading">¶</a></h3>
 <p>Intel RVP does provide a jumper setting that allow to trigger DnX entry.
 The jumper is directly connected to SoC HW strap that triggers DnX when the
 system is powered up (G3 exit).</p>
@@ -218,9 +213,9 @@ desire to EC.</p>
 <p>Reference code provides support to trigger DnX entry via BIOS to EC
 command so alternatively BIOS can also implement a menu, or EFI application.</p>
 </div>
-</div>
-<div class="section" id="non-user-triggered-dnx-entry">
-<h3><a class="toc-backref" href="#id5">3. Non-user triggered DnX entry</a><a class="headerlink" href="#non-user-triggered-dnx-entry" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="non-user-triggered-dnx-entry">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">3. Non-user triggered DnX entry</a><a class="headerlink" href="#non-user-triggered-dnx-entry" title="Permalink to this heading">¶</a></h3>
 <p>Handle of virgin or blank SPI / corrupt EC FW.</p>
 <p>If a system has not yet been programmed with SPI flash image or its content is
 detected by CSE as corrupt, CSE automatically identifies this condition and
@@ -231,20 +226,14 @@ failures, however once DnX is entered, user can still update the SPI image.</p>
 virtual wire handshake or perform system reset (followed by EC soft reset)
 whenever the global reset occurs.
 In such cases, a manual system power cycle will be required.</p>
-</div>
-</div>
-<div class="section" id="implementation-details">
-<h2><a class="toc-backref" href="#id6">Implementation details</a><a class="headerlink" href="#implementation-details" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
+<section id="implementation-details">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Implementation details</a><a class="headerlink" href="#implementation-details" title="Permalink to this heading">¶</a></h2>
 <p>By default, in the reference code implementation only enables the EC DnX
 awareness feature. The additional DnX-related features can be enabled via
 KConfig.</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 21%" />
-<col style="width: 12%" />
-<col style="width: 10%" />
-<col style="width: 57%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Boot SPI cfg</p></th>
 <th class="head"><p>DnX
@@ -293,8 +282,8 @@ jumper</p></th>
 </tr>
 </tbody>
 </table>
-<div class="section" id="ec-fw-dnx-awareness">
-<h3><a class="toc-backref" href="#id7">EC FW DnX awareness</a><a class="headerlink" href="#ec-fw-dnx-awareness" title="Permalink to this heading">¶</a></h3>
+<section id="ec-fw-dnx-awareness">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">EC FW DnX awareness</a><a class="headerlink" href="#ec-fw-dnx-awareness" title="Permalink to this heading">¶</a></h3>
 <dl>
 <dt>Platform requirements:</dt><dd><blockquote>
 <div><p>eSPI-enabled platform
@@ -314,9 +303,9 @@ requiring EC flash access are allowed.</p>
 <p>4) If a global reset occurs while DnX WARN = 1, in addition to platform reset
 usually performed when eSPI reset occurs, EC shall perform a soft reset.
 This is required since this may be used to indicate FW update through DnX.</p>
-</div>
-<div class="section" id="ec-fw-dnx-related-optional-features">
-<h3><a class="toc-backref" href="#id8">EC FW DnX-related optional features</a><a class="headerlink" href="#ec-fw-dnx-related-optional-features" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="ec-fw-dnx-related-optional-features">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">EC FW DnX-related optional features</a><a class="headerlink" href="#ec-fw-dnx-related-optional-features" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>User-triggered EC-assisted DnX entry</p></li>
 </ol>
@@ -361,9 +350,9 @@ persistence across power cycles.
 In this case, EC will perform same GPIO handshake with SoC mentioned above.</p>
 <p>4) Instead of BIOS-triggered system restart, EC can request the system restart
 over eSPI once it gets notification of user desire to enter DnX.</p>
-</div>
-<div class="section" id="other-considerations">
-<h3><a class="toc-backref" href="#id9">Other considerations</a><a class="headerlink" href="#other-considerations" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="other-considerations">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">Other considerations</a><a class="headerlink" href="#other-considerations" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>DnX awareness flag persistence.</p></li>
 </ol>
@@ -380,9 +369,9 @@ the flag. Recommend cases are:</p>
 <p>Whenever there is dedicated DnX jumper in the system design EC should ensure
 GPIO pin is not driven or if board circuitry permits it to configure as open
 drain output to allow control if required.</p>
-</div>
-<div class="section" id="supporting-maf-boot-when-controlling-dnx-force-reload">
-<h3><a class="toc-backref" href="#id10">Supporting MAF boot when controlling DNX_FORCE_RELOAD</a><a class="headerlink" href="#supporting-maf-boot-when-controlling-dnx-force-reload" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="supporting-maf-boot-when-controlling-dnx-force-reload">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">Supporting MAF boot when controlling DNX_FORCE_RELOAD</a><a class="headerlink" href="#supporting-maf-boot-when-controlling-dnx-force-reload" title="Permalink to this heading">¶</a></h3>
 <p>Systems support MAF need to consider part of the boot flow is handled by
 EC-vendor specific bootloader. In most of cases it is as follows.</p>
 <ol class="arabic simple">
@@ -396,9 +385,9 @@ EC-vendor specific bootloader. In most of cases it is as follows.</p>
 since RSMRST is de-asserted by EC-vendor bootloader prior to EC FW been able
 to detect user trigger. Additionally, this requires EC vendor support to
 acknowledge Intel SoC eSPI warning when DnX is entered.</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

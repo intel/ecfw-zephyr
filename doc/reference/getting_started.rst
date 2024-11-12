@@ -31,8 +31,8 @@ Setting Up Zephyr environment
 Refer to the official `Zephyr's Getting Started Guide`_ while reviewing
 considerations below during each step.
 
-.. note:: Latest EC FW Open source project is based on Zephyr v3.2 so need to
-          refer to Zephyr v3.2 documentation and use Zephyr SDK 0.15.1.
+.. note:: Latest EC FW Open source project is based on Zephyr v3.4 so need to
+          refer to Zephyr v3.4 documentation and use Zephyr SDK 0.16.1.
 
 1) OS selection
 ---------------
@@ -107,9 +107,9 @@ See EC FW's dependencies
 +---------------+-----------------------+-------------+-----------------------------------------------------+
 | repo          | destination           | revision    | external repository                                 |
 +===============+=======================+=============+=====================================================+
-| zephyr        | zephyr_fork           | v3.2.0      | https://github.com/zephyrproject-rtos/zephyr        |
+| zephyr        | zephyr_fork           | v3.4.0      | https://github.com/zephyrproject-rtos/zephyr        |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
-| cmsis         | modules/hal/cmsis     | 093de61     | https://github.com/zephyrproject-rtos/cmsis         |
+| cmsis         | modules/hal/cmsis     | 74981bf     | https://github.com/zephyrproject-rtos/cmsis         |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
 | hal_microchip | modules/hal/microchip | 5d079f1     | https://github.com/zephyrproject-rtos/hal_microchip |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
@@ -135,7 +135,7 @@ Your directory structure should look like this:
 --------------------------
 Some additional patches are required to be applied to the Zephyr kernel
 for building the open source EC FW application. The latest release is based out
-of Zephyr v3.2 and hence these patches need to be applied on that branch.
+of Zephyr v3.4 and hence these patches need to be applied on that branch.
 
 These patches are expected to be part of the future Zephyr releases (if
 they are not already integrated).
@@ -155,7 +155,7 @@ main Intel Open source EC FW documentation.
 .. code-block:: bash
 
    cd ../ecfwwork/zephyr_fork
-   git am ../../ecfw-zephyr/zephyr_patches/patches_v3.2.patch
+   git am ../../ecfw-zephyr/zephyr_patches/patches_v3.4.patch
 
 
 Troubleshoot
@@ -190,7 +190,7 @@ for more details.
 .. code-block:: bash
 
    cd ~/sandbox/ecfw-zephyr
-   # Building for MTL-S (on-board EC)
+   # Building for MTL-S/ARL -S (on-board EC)
    west build -c -p auto -b mec172x_mtl_s
 
    # Building for MTL-P (on-board EC)

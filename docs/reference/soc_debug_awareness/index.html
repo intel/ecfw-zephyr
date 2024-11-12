@@ -1,21 +1,19 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EC support for Intel SoC Debug &mdash; Basic Open Embedded Controller Firmware 2.01.01 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>EC support for Intel SoC Debug &mdash; Basic Open Embedded Controller Firmware 3.01.02 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=8f80eab9"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -34,9 +32,6 @@
           <a href="../../index.html" class="icon icon-home">
             Basic Open Embedded Controller Firmware
           </a>
-              <div class="version">
-                2.01.01
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -94,9 +89,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="ec-support-for-intel-soc-debug">
+  <section id="ec-support-for-intel-soc-debug">
 <span id="ec-debug-awareness"></span><h1>EC support for Intel SoC Debug<a class="headerlink" href="#ec-support-for-intel-soc-debug" title="Permalink to this heading">¶</a></h1>
-<div class="contents local topic" id="contents">
+<nav class="contents local" id="contents">
 <ul class="simple">
 <li><p><a class="reference internal" href="#overview" id="id2">Overview</a></p>
 <ul>
@@ -119,15 +114,15 @@
 </ul>
 </li>
 </ul>
-</div>
-<div class="section" id="overview">
-<h2><a class="toc-backref" href="#id2">Overview</a><a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
+</nav>
+<section id="overview">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
 <p>This application note describes the requirements and implementation details for
 EC FW to avoid disruption Intel SoC debug tools. It covers an overview of the
 current constraint, EC role in SoC debug flows and recommended implementation
 as well as a set of optional features to provide flexibility.</p>
-<div class="section" id="soc-debug-while-ec-timeout-is-enabled">
-<h3><a class="toc-backref" href="#id3">SoC debug while EC timeout is enabled</a><a class="headerlink" href="#soc-debug-while-ec-timeout-is-enabled" title="Permalink to this heading">¶</a></h3>
+<section id="soc-debug-while-ec-timeout-is-enabled">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">SoC debug while EC timeout is enabled</a><a class="headerlink" href="#soc-debug-while-ec-timeout-is-enabled" title="Permalink to this heading">¶</a></h3>
 <p>As indicated in Intel <a class="reference external" href="https://intel.github.io/ecfw-zephyr/reference/power_sequencing/index.html#id7">EC FW reference documentation</a>, during system
 transitions (boot, resume, hibernate, shutdown) EC will check if certain
 conditions are met, if any of these conditions is not fulfilled within a
@@ -150,15 +145,15 @@ systems.</p>
 <blockquote>
 <div><img alt="../../_images/soc_debug_consent_jumper.png" class="align-center" src="../../_images/soc_debug_consent_jumper.png" />
 </div></blockquote>
-</div>
-</div>
-<div class="section" id="ec-soc-debug-awareness">
-<h2><a class="toc-backref" href="#id4">EC SoC-debug awareness</a><a class="headerlink" href="#ec-soc-debug-awareness" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
+<section id="ec-soc-debug-awareness">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">EC SoC-debug awareness</a><a class="headerlink" href="#ec-soc-debug-awareness" title="Permalink to this heading">¶</a></h2>
 <p>EC will become SoC-debug aware when debug Consent is communicated, when debug
 is enabled, EC WDT must be disabled to allow debug tool to perturb the normal
 operation at any time, in any power-state.</p>
-<div class="section" id="soc-debug-consent-via-soc-bootstall-gpio">
-<h3><a class="toc-backref" href="#id5">SoC-debug consent via SoC bootstall GPIO</a><a class="headerlink" href="#soc-debug-consent-via-soc-bootstall-gpio" title="Permalink to this heading">¶</a></h3>
+<section id="soc-debug-consent-via-soc-bootstall-gpio">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">SoC-debug consent via SoC bootstall GPIO</a><a class="headerlink" href="#soc-debug-consent-via-soc-bootstall-gpio" title="Permalink to this heading">¶</a></h3>
 <p>Intel recommends communicating the debug consent/intention physically to EC
 via SoC bootstall pin, so the debug tool perform this action.
 This is same pin where PMC_GPIO jumper is connected in Intel RVPs</p>
@@ -172,16 +167,16 @@ re-evaluate if EC WDT has to be disabled or not.</p>
 <blockquote>
 <div><img alt="../../_images/soc_debug_consent_soc_gpio_flow.png" class="align-center" src="../../_images/soc_debug_consent_soc_gpio_flow.png" />
 </div></blockquote>
-<div class="section" id="considerations">
-<h4><a class="toc-backref" href="#id6">Considerations</a><a class="headerlink" href="#considerations" title="Permalink to this heading">¶</a></h4>
+<section id="considerations">
+<h4><a class="toc-backref" href="#id6" role="doc-backlink">Considerations</a><a class="headerlink" href="#considerations" title="Permalink to this heading">¶</a></h4>
 <p>Special attention should be paid to any timeout loop to avoid race conditions
 and ensure PMC_GPIO update it is always processed.</p>
 <blockquote>
 <div><img alt="../../_images/soc_debug_consent_soc_gpio_considerations.png" class="align-center" src="../../_images/soc_debug_consent_soc_gpio_considerations.png" />
 </div></blockquote>
-</div>
-<div class="section" id="optional-extensions">
-<h4><a class="toc-backref" href="#id7">Optional extensions</a><a class="headerlink" href="#optional-extensions" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="optional-extensions">
+<h4><a class="toc-backref" href="#id7" role="doc-backlink">Optional extensions</a><a class="headerlink" href="#optional-extensions" title="Permalink to this heading">¶</a></h4>
 <p>In addition, to disable EC WDT mechanism, a debug consent flag could be saved
 in non-volatile memory, so the EC WDT remains disable across power cycles.</p>
 <p>If this is not implemented, if EC timeout mechanism is disabled or not will
@@ -191,12 +186,6 @@ whenever PMC_GPIO becomes HIGH for predetermined amount of time.</p>
 <p>Whenever available SoC bootstall GPIO is the preferred method to disable
 EC WDT, but if that’s not available below are list of alternatives.</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 22%" />
-<col style="width: 12%" />
-<col style="width: 15%" />
-<col style="width: 51%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>SoC bootstall</p></th>
 <th class="head"><p>EC WDT
@@ -227,10 +216,10 @@ jumper</p></th>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-<div class="section" id="soc-debug-consent-via-keyboard-matrix-hotkey">
-<h3><a class="toc-backref" href="#id8">SoC-debug consent via Keyboard matrix hotkey</a><a class="headerlink" href="#soc-debug-consent-via-keyboard-matrix-hotkey" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="soc-debug-consent-via-keyboard-matrix-hotkey">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">SoC-debug consent via Keyboard matrix hotkey</a><a class="headerlink" href="#soc-debug-consent-via-keyboard-matrix-hotkey" title="Permalink to this heading">¶</a></h3>
 <p>For closed-chassis systems without SoC GPIO bootstall support that have matrix
 keyboard attached, EC ODM can define a hotkey that when pressed will disable
 the EC WDT.</p>
@@ -247,18 +236,18 @@ system is powered up and allows other EC modules to query about any occurrence.
 Second item disables the EC WDT whenever then predefined hotkey is detected.
 Finally, last item indicate which key will be used. i.e., ALT + SHIFT + ‘D’</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef CONFIG_POWER_SEQUENCE_DISABLE_TIMEOUT_HOTKEY</span>
-<span class="w">     </span><span class="cm">/* Check if key already detected */</span><span class="w"></span>
-<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">pwreq_timeout_disabled</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"></span>
-<span class="w">         </span><span class="n">kbs_keyseq_boot_detect</span><span class="p">(</span><span class="n">KEYSEQ_TIMEOUT</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w"> </span><span class="n">pwrseq_timeout_disabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
-<span class="w"> </span><span class="n">LOG_WRN</span><span class="p">(</span><span class="s">&quot;EC timeout disabled via kbs&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">     </span><span class="cm">/* Check if key already detected */</span>
+<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">pwreq_timeout_disabled</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">         </span><span class="n">kbs_keyseq_boot_detect</span><span class="p">(</span><span class="n">KEYSEQ_TIMEOUT</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w"> </span><span class="n">pwrseq_timeout_disabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w"> </span><span class="n">LOG_WRN</span><span class="p">(</span><span class="s">&quot;EC timeout disabled via kbs&quot;</span><span class="p">);</span>
+<span class="w"> </span><span class="p">}</span>
 <span class="w"> </span><span class="cp">#endif</span>
 </pre></div>
 </div>
 <img alt="../../_images/soc_debug_consent_kbm_flow.png" class="align-center" src="../../_images/soc_debug_consent_kbm_flow.png" />
-<div class="section" id="id1">
-<h4><a class="toc-backref" href="#id9">Considerations</a><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
+<section id="id1">
+<h4><a class="toc-backref" href="#id9" role="doc-backlink">Considerations</a><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
 <p>Early hotkey detection upon power up a system is only constrained by 2 factors:</p>
 <p>1) Early EC FW configuration
 Zephyr Keyscan driver will load early on and will enable, nevertheless EC FW
@@ -278,10 +267,10 @@ timeout window. (which is configured as 6 seconds in reference code)</p>
 <p>This is only applicable for system designs where boot to S0 as soon
 system gets powered. (system where power button press is not required)</p>
 </div>
-</div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
+</section>
 
 
            </div>

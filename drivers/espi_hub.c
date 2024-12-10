@@ -181,7 +181,7 @@ bool espihub_dnx_status(void)
 
 static void host_warn_handler(uint32_t signal, uint32_t status)
 {
-	LOG_DBG("%s", __func__);
+	LOG_DBG("%d %d", signal, status);
 	switch (signal) {
 	case ESPI_VWIRE_SIGNAL_PLTRST:
 		LOG_INF("PLT_RST changed %d", status);
@@ -271,7 +271,7 @@ static void espi_ch_handler(const struct device *dev, struct espi_callback *cb,
 	int ltr_status;
 #endif
 
-	LOG_DBG("%s", __func__);
+	LOG_DBG("%d", event.evt_type);
 	if (event.evt_type == ESPI_BUS_EVENT_CHANNEL_READY) {
 		if (event.evt_details == ESPI_CHANNEL_VWIRE) {
 			LOG_INF("VW channel ready: %d", event.evt_data);
@@ -453,7 +453,7 @@ int espihub_init(void)
 		return -ENODEV;
 	}
 
-	LOG_DBG("About to configure eSPI device %s", __func__);
+	LOG_DBG("About to configure eSPI device");
 	ret = espi_config(espi_dev, &cfg);
 	if (ret) {
 		LOG_ERR("eSPI slave configured failed");
@@ -484,7 +484,7 @@ int espihub_init(void)
 						    ESPI_CHANNEL_VWIRE);
 	hub.espi_rst_sts = gpio_read_pin(ESPI_RESET_MAF);
 
-	LOG_DBG("%s hub.host_vw_ready: %d", __func__, hub.host_vw_ready);
+	LOG_DBG("hub.host_vw_ready: %d", hub.host_vw_ready);
 
 #if defined(CONFIG_SOC_SERIES_NPCX4)
 	uint32_t enable = 1;
@@ -499,7 +499,7 @@ static int handle_vw_ack(enum espi_vwire_signal signal, uint8_t value)
 {
 	int ret;
 
-	LOG_DBG("%s", __func__);
+	LOG_DBG("%d", value);
 	switch (signal) {
 	case ESPI_VWIRE_SIGNAL_SUS_WARN:
 		ret = espi_send_vwire(espi_dev, ESPI_VWIRE_SIGNAL_SUS_ACK,

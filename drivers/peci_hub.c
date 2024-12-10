@@ -265,7 +265,7 @@ static int espioob_peci_transfer(struct peci_msg *msg)
 	uint8_t oob_byte_cnt =  OOB_PECI_REQ_HDR_SIZE + msg->tx_buffer.len;
 	int ret;
 
-	LOG_DBG("%s:Msg TxLen-%d, RxLen-%d", __func__,
+	LOG_DBG("Msg TxLen-%d, RxLen-%d",
 			msg->tx_buffer.len, msg->rx_buffer.len);
 	oob_req.oob_dest_addr = PCH_OOB_PECI_SLV_ADDR;
 	oob_req.oob_cmd_code = PECI_OOB_CMD_CODE;
@@ -339,7 +339,7 @@ static int peci_exec_transfer(struct peci_msg *msg)
 	}
 
 	for (int i = 0; i < rd_len; i++) {
-		LOG_DBG("%s:Rx[%d]-%02x", __func__, i,
+		LOG_DBG("Rx[%d]-%02x", i,
 				msg->rx_buffer.buf[i]);
 	}
 

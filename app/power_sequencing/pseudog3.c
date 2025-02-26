@@ -85,6 +85,12 @@ static void pseudo_g3_trigger_exit(void)
 	k_msleep(10);
 	gpio_write_pin(EC_PG3_EXIT, 0);
 
+	/* Re-enable generic HID wake sources */
+	gpio_interrupt_configure_pin(SMC_LID, GPIO_INT_EDGE_BOTH);
+	gpio_interrupt_configure_pin(VOL_UP, GPIO_INT_EDGE_BOTH);
+	gpio_interrupt_configure_pin(VOL_DOWN, GPIO_INT_EDGE_BOTH);
+	gpio_interrupt_configure_pin(HOME_BUTTON, GPIO_INT_EDGE_BOTH);
+
 #ifdef CONFIG_PWRMGMT_PG3_EXIT_WAKE_FROM_SX
 	/* If needed to wake system from Sx after PG3 exit, send the wake. */
 	pwrbtn_trigger_wake();
@@ -199,6 +205,16 @@ static void pg3_handle_state_waiting_entry(void)
 			gpio_write_pin(PM_DS3, 0);
 
 			pseudo_g3_set_state(PG3_STATE_ENTERED);
+
+			/* Disable generic EC HID wake sources.
+			 * During PG3 entry the pull-ups for these signals lose power, which leads
+			 * to polling, so this prevents polling (and I2C when using IO expander)
+			 * And also, if EC LPM is entered prevents an immediate EC LPM wake.
+			 */
+			gpio_interrupt_configure_pin(SMC_LID, GPIO_INT_DISABLE);
+			gpio_interrupt_configure_pin(VOL_UP, GPIO_INT_DISABLE);
+			gpio_interrupt_configure_pin(VOL_DOWN, GPIO_INT_DISABLE);
+			gpio_interrupt_configure_pin(HOME_BUTTON, GPIO_INT_DISABLE);
 			return;
 		}
 	default:
@@ -236,7 +252,7 @@ static void pg3_handle_state_entered(void)
 			return;
 		}
 
-		if (gpio_read_pin(PM_RSMRST) > 0) {
+		if (gpio_read_pin(RSMRST_PWRGD) > 0) {
 			LOG_DBG("PG3 Wake triggered");
 			pseudo_g3_set_state(PG3_STATE_WAKE_WAIT);
 			return;
@@ -299,14 +315,19 @@ void pseudo_g3_enable(bool status)
 	LOG_DBG("pg3_enable_status:%d", status);
 }
 
-bool pseudo_g3_get_state(void)
+inline bool pseudo_g3_get_state(void)
 {
 	return (pg3_state == PG3_STATE_ENTERED);
 }
 
-bool pseudo_g3_get_prev_state(void)
+inline bool pseudo_g3_get_prev_state(void)
 {
 	return (pg3_prev_state == PG3_STATE_ENTERED);
+}
+
+inline bool is_pseudo_g3_enabled(void)
+{
+	return pg3_enable_status;
 }
 
 void manage_pseudog3(void)

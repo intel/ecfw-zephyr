@@ -24,6 +24,13 @@ enum pg3_counter {
 void pseudo_g3_enable(bool state);
 
 /**
+ * @brief Get the if Pseudo G3 is enabled in the system.
+ *
+ * @return true if system has pseudo g3 enabled otherwise false.
+ */
+bool is_pseudo_g3_enabled(void);
+
+/**
  * @brief Get the current state of Pseudo G3.
  *
  * @return true if system is in pseudo g3 otherwise false.

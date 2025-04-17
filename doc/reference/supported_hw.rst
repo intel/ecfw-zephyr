@@ -15,27 +15,44 @@ The reference HW used to showcase EC FW open source takes advantage of the
 Modular Embedded controller card (MECC) specification, which defines both
 pin mapping and provides general guidelines to use different Embedded Controller
 Soc to the on-board EC through an add-on card. This allows to evaluate different
-EC in an Intel RVP.
+EC vendors in an Intel RVP.
 
 .. note:: Reworks are required on RVP to be able to control the RVP from MECC
           card. Refer to `Platform design guide`_ for details.
 
-+---------------+-----------------------+-------------------------+
-| Board         | EC HW configuration   | Support                 |
-+===============+=======================+=========================+
-|  Meteorlake S | RVP (on-board EC)     |                         |
-+---------------+-----------------------+-------------------------+
-|  Meteorlake P | RVP (on-board EC)     | Recommended             |
-+---------------+-----------------------+-------------------------+
-|  Meteorlake P | RVP + MECC card       | Enable other EC vendor  |
-+---------------+-----------------------+-------------------------+
++--------------------+--------------------------+-------------------------+
+| Board              | EC HW configuration      | Support                 |
++====================+==========================+=========================+
+|  Tigerlake U       | RVP + MEC152x card       | Deprecated              |
++--------------------+--------------------------+-------------------------+
+|  Alderake S        | RVP (on-board MEC152x)   | Deprecated              |
++--------------------+--------------------------+-------------------------+
+|  Alderake P        | RVP (on-board MEC152x)   | Deprecated              |
++--------------------+--------------------------+-------------------------+
+|  Raptorlake S      |  RVP (on-board MEC152x)  | Not supported           |
++--------------------+--------------------------+-------------------------+
+|  Raptorlake P      |  RVP (on-board MEC152x)  | Not supported           |
++--------------------+--------------------------+-------------------------+
+|  Meteorlake S      |  RVP (on-board MEC172x)  | Supported               |
++--------------------+--------------------------+-------------------------+
+|  Meteorlake P      |  RVP (on-board MEC152x)  | * To be deprecated      |
+|                    |                          |                         |
+|                    |  RVP + MEC172x card      |                         |
++--------------------+--------------------------+-------------------------+
+|  Lunarlake M       | RVP (on-board MEC172x)   | No plans to support     |
++--------------------+--------------------------+-------------------------+
+| Pantherlake U/P    | RVP (on board MEC172x)   | * To be added           |
+|                    |                          |                         |
+|                    | RVP + NPCX4 card         |                         |
+|                    |                          |                         |
+|                    | RVP + ITE8002 card       |                         |
++--------------------+--------------------------+-------------------------+
 
 Other EC SoC
 ============
 In order to use a different MECC card with a different EC SoC vendor, the vendor
 should add its Hardware Abstraction Layer (HAL) and board support package (BSP)
 to Zephyr RTOS. See `Zephyr's porting guide`_
-
 
 The list below presents the minimum drivers required by the EC application to
 boot an eSPI-based Intel platform.

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Port Basic EC FW to custom HW design &mdash; Basic Open Embedded Controller Firmware 3.01.02 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="EC FW application modules" href="../modules.html" />
+    <link rel="prev" title="Supported Hardware" href="../supported_hw.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Basic Open Embedded Controller Firmware
+          </a>
+              <div class="version">
+                3.01.02
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Documentation Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Project overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../supported_hw.html">Supported Hardware</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../supported_hw.html#custom-hw">Custom HW</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Port Basic EC FW to custom HW design</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ec-porting-guidelines">EC porting guidelines</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../supported_hw.html#mecc-card-hw-limitations">MECC card HW limitations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">EC FW application modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../application_notes.html">EC FW application notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Basic Open Embedded Controller Firmware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../supported_hw.html">Supported Hardware</a></li>
+      <li class="breadcrumb-item active">Port Basic EC FW to custom HW design</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/reference/porting_ecfw_custom_hw/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="port-basic-ec-fw-to-custom-hw-design">
+<span id="porting-ecfw-custom-hw"></span><h1>Port Basic EC FW to custom HW design<a class="headerlink" href="#port-basic-ec-fw-to-custom-hw-design" title="Permalink to this heading">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#overview" id="id1">Overview</a></p>
+<ul>
+<li><p><a class="reference internal" href="#ec-soc-and-architecture" id="id2">EC SoC and architecture</a></p></li>
+<li><p><a class="reference internal" href="#board-support" id="id3">Board support</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#ec-porting-guidelines" id="id4">EC porting guidelines</a></p>
+<ul>
+<li><p><a class="reference internal" href="#create-device-tree-board-folder" id="id5">1. Create device tree board folder</a></p>
+<ul>
+<li><p><a class="reference internal" href="#mecc-cards" id="id6">MECC cards</a></p></li>
+<li><p><a class="reference internal" href="#custom-hw" id="id7">Custom HW</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#customize-ec-fw-for-a-board" id="id8">2. Customize EC FW for a board</a></p>
+<ul>
+<li><p><a class="reference internal" href="#map-ec-soc-drivers-to-application-features" id="id9">2.1 Map EC SoC drivers to application features</a></p></li>
+<li><p><a class="reference internal" href="#create-ec-gpio-mapping" id="id10">2.2 Create EC GPIO mapping</a></p></li>
+<li><p><a class="reference internal" href="#create-ec-board-configuration-override" id="id11">2.3 Create EC board configuration override</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#verify-ec-fw-build-for-new-board" id="id12">3. Verify EC FW build for new board</a></p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="overview">
+<h2><a class="toc-backref" href="#id1">Overview</a><a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
+<p>This application note contains generic guidelines to adapt basic EC open source
+to a custom HW design.</p>
+<p>Basic Open EC FW is designed as an application that runs on Zephyr RTOS, this project links to Zephyr and other dependencies.
+As such this repo contains only application-specific files, most of EC SoC HW support is contained under Zephyr project.</p>
+<blockquote>
+<div><img alt="../../_images/ecfw_zephyr_repos.png" class="align-center" src="../../_images/ecfw_zephyr_repos.png" />
+</div></blockquote>
+<div class="section" id="ec-soc-and-architecture">
+<h3><a class="toc-backref" href="#id2">EC SoC and architecture</a><a class="headerlink" href="#ec-soc-and-architecture" title="Permalink to this heading">¶</a></h3>
+<p>When porting the application to custom hardware, we must ensure the desired EC SoC and architecture are already supported by Zephyr RTOS.
+Zephyr project is not limited to embedded controllers, but it supports major EC vendors: Microchip, ITE, Nuvoton, Realtek.
+However, even if an EC vendor is supported not all their EC chips have Zephyr support.
+Refer to <a class="reference external" href="https://docs.zephyrproject.org/3.4.0/boards/index.html#">Zephyr’s board support</a></p>
+<p>Note that EC SoC support in Zephyr RTOS project needs to included all drivers required by
+Basic Open EC FW are available. The list below presents the minimum drivers required by the EC application to
+boot in an eSPI-based Intel platform.</p>
+<ul class="simple">
+<li><p>UART</p></li>
+<li><p>GPIO</p></li>
+<li><p>RTOS timer</p></li>
+<li><p>I2C - Port 80 visualization if board supports it.</p></li>
+<li><p>eSPI - Required by power sequencing module</p></li>
+<li><p>ACPI - Required by SMC host module (EC - BIOS interactions).</p></li>
+<li><p>eSPI TAF - Required for EC flash sharing boot and boot configuration for EC as root of trust.</p></li>
+</ul>
+<p>The following drivers are needed to exercise other non-boot critical features:</p>
+<ul class="simple">
+<li><p>PS/2 - for PS/2 devices management</p></li>
+<li><p>Keyscan - for keyboard matrix</p></li>
+</ul>
+<p>These drivers are required to enable advanced features such as thermal and fan
+control.</p>
+<ul class="simple">
+<li><p>PECI - for thermal module</p></li>
+<li><p>TACH - for thermal module</p></li>
+<li><p>ADC - for thermal module</p></li>
+<li><p>PWM - for fan control</p></li>
+</ul>
+</div>
+<div class="section" id="board-support">
+<h3><a class="toc-backref" href="#id3">Board support</a><a class="headerlink" href="#board-support" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference external" href="https://docs.zephyrproject.org/3.4.0/hardware/porting/board_porting.html#hardware-support-hierarchy">Zephyr’s RTOS HW model</a> is defined in device tree files, where a board describes at least one SoC and all its features.
+Zephyr RTOS project repository supports many of EC vendors’ evaluation boards which can be used in standalone mode.
+The board files enumerate all EC HW features enabled for a HW design and their settings e.g. EC CPU frequency, which pins are used as I2C, UART, if eSPI enabled or not, etc.</p>
+<blockquote>
+<div><img alt="https://docs.zephyrproject.org/3.4.0/_images/hierarchy.png" class="align-center" src="https://docs.zephyrproject.org/3.4.0/_images/hierarchy.png" />
+</div></blockquote>
+<p>On the other hand, in addition to EC FW application modules, this project provides additional out-of-tree boards for Intel Reference Platforms using an Embedded controller.
+These are based on EC SoC vendor reference evaluation board and modified using Zephyr board porting guide.
+Note the provided board device tree files are the same in all Intel RVP designs using same EC chip.
+This folder also contains the default KConfig for a board, this will list all Zephyr drivers to be enabled for a particular board.</p>
+<p>Within the EC FW folders, the other relevant set of files are the ones that indicate which pins that are in GPIO mode and under direct control of EC FW.
+These  files contain the EC GPIO mapping for a particular RVP design and their I/O configuration.
+Note that even among designs using same EC chip, the EC GPIOS could be mapped differently in each RVP family.</p>
+<blockquote>
+<div><img alt="../../_images/oot_boards_vs_boards.png" class="align-center" src="../../_images/oot_boards_vs_boards.png" />
+</div></blockquote>
+<p>Since the MECC cards are usually supported as part of Zephyr RTOS project, they are not part of out-of-tree folder.
+Override for customization in such cases is done via both device tree overlay files.</p>
+<blockquote>
+<div><img alt="../../_images/mecc_cards_overlay.png" class="align-center" src="../../_images/mecc_cards_overlay.png" />
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="ec-porting-guidelines">
+<h2><a class="toc-backref" href="#id4">EC porting guidelines</a><a class="headerlink" href="#ec-porting-guidelines" title="Permalink to this heading">¶</a></h2>
+<div class="section" id="create-device-tree-board-folder">
+<h3><a class="toc-backref" href="#id5">1. Create device tree board folder</a><a class="headerlink" href="#create-device-tree-board-folder" title="Permalink to this heading">¶</a></h3>
+<p>1.1. Locate the closest reference design which defines the desired features under out-of-tree boards and gpio-mapping folders, e.g. if the design is based on Meteor lake and is intended
+for a mobile design take Meteor lake P as reference. To see all reference designs files use the following command:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">tree</span><span class="w"> </span><span class="n">out_of_tree_boards</span><span class="o">/</span><span class="w"> </span><span class="o">-</span><span class="n">P</span><span class="w"> </span><span class="o">*</span><span class="p">.</span><span class="n">dts</span><span class="w"> </span><span class="o">-</span><span class="n">I</span><span class="w"> </span><span class="n">support</span>
+</pre></div>
+</div>
+<p>Above command will list all reference out-of-tree boards</p>
+<blockquote>
+<div><img alt="../../_images/oot_boards.png" class="align-center" src="../../_images/oot_boards.png" />
+</div></blockquote>
+<p>1.2. Copy the folder or modify the board as needed, e.g. MTL-S LJ is an example of customization that refers to MTL-S but using different packaging.</p>
+<div class="section" id="mecc-cards">
+<h4><a class="toc-backref" href="#id6">MECC cards</a><a class="headerlink" href="#mecc-cards" title="Permalink to this heading">¶</a></h4>
+<p>To use a different MECC card with a different EC SoC vendor, the vendor should add its Hardware Abstraction Layer (HAL) and board support package (BSP)
+to Zephyr RTOS. See <a class="reference external" href="https://docs.zephyrproject.org/3.4.0/hardware/porting/board_porting.html#board-porting-guide">Zephyr’s porting guide</a></p>
+</div>
+<div class="section" id="custom-hw">
+<h4><a class="toc-backref" href="#id7">Custom HW</a><a class="headerlink" href="#custom-hw" title="Permalink to this heading">¶</a></h4>
+<p>If the custom HW does not follow any of Intel RVP EC GPIO mapping, we need to create the board files using Zephyr generic guidelinesprovided by Zephyr
+<a class="reference external" href="https://docs.zephyrproject.org/latest/hardware/porting/board_porting.html#create-your-board-directory">https://docs.zephyrproject.org/latest/hardware/porting/board_porting.html#create-your-board-directory</a></p>
+</div>
+</div>
+<div class="section" id="customize-ec-fw-for-a-board">
+<h3><a class="toc-backref" href="#id8">2. Customize EC FW for a board</a><a class="headerlink" href="#customize-ec-fw-for-a-board" title="Permalink to this heading">¶</a></h3>
+<div class="section" id="map-ec-soc-drivers-to-application-features">
+<h4><a class="toc-backref" href="#id9">2.1 Map EC SoC drivers to application features</a><a class="headerlink" href="#map-ec-soc-drivers-to-application-features" title="Permalink to this heading">¶</a></h4>
+<p>Zephyr uses device tree to describe hardware both EC SoC and board’s peripherals.
+Currently, the EC FW abstracts the device tree using friendly macros which can be customized when
+using different EC SoC and/or different board. See boards/&lt;vendor&gt; for more details.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define I2C_BUS_0   DT_NODELABEL(i2c_smb_0)</span>
+</pre></div>
+</div>
+<p>For more details, see <a class="reference external" href="https://docs.zephyrproject.org/3.4.0/guides/dts/index.html">Zephyr’s device tree guide</a>.</p>
+</div>
+<div class="section" id="create-ec-gpio-mapping">
+<h4><a class="toc-backref" href="#id10">2.2 Create EC GPIO mapping</a><a class="headerlink" href="#create-ec-gpio-mapping" title="Permalink to this heading">¶</a></h4>
+<p>As indicated before, EC FW app does not control/configure all GPIOs in the chip but only the ones used
+by the app as GPIOs. When a pin is intended to be controlled by the EC FW framework it should be
+mapped under boardname_chipversion.h to corresponding Zephyr GPIO port and pin.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PCH_PWROK    EC_GPIO_106  </span><span class="cm">/* Board #1 Port A, Pin B */</span>
+<span class="cp">#define PCH_PWROK    EC_GPIO_036  </span><span class="cm">/* Board #2 Port B, Pin C */</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>EC_GPIO_XXX is a SoC specific macro, which abstracts GPIO port and
+GPIO pin number since Zephyr supports logical GPIO ports and
+EC FW requires the flexibility to map same signal to different port/pins.</p>
+</div>
+<p>Similarly, boardname_chipversion.c should contain the actual pin configuration
+required by the application input/output, open drain and so on.
+See <a class="reference external" href="https://docs.zephyrproject.org/3.4.0/reference/peripherals/gpio.html">Zephyr’s GPIO reference</a> for Zephyr GPIO flags.</p>
+<blockquote>
+<div><div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">tree</span><span class="w"> </span><span class="o">-</span><span class="n">L</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="n">boards</span><span class="o">/</span><span class="w"> </span><span class="o">-</span><span class="n">P</span><span class="w"> </span><span class="o">*</span><span class="p">.</span><span class="n">c</span>
+</pre></div>
+</div>
+<img alt="../../_images/board_ec_mapping.png" class="align-center" src="../../_images/board_ec_mapping.png" />
+</div></blockquote>
+</div>
+<div class="section" id="create-ec-board-configuration-override">
+<h4><a class="toc-backref" href="#id11">2.3 Create EC board configuration override</a><a class="headerlink" href="#create-ec-board-configuration-override" title="Permalink to this heading">¶</a></h4>
+<p>To customize EC FW features per board, use a project file configuration overlay.</p>
+<blockquote>
+<div><img alt="../../_images/mtl_p_board_specific_files.png" class="align-center" src="../../_images/mtl_p_board_specific_files.png" />
+</div></blockquote>
+<p>During compilation time, the board-specific settings will be applied after the overall EC FW default project settings and
+default board KConfig settings.
+This method allows to disabled features either unwanted or not yet ready to be evaluated.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Parsing ~/ecfw-zephyr/Kconfig
+Loaded configuration &#39;~/ecfw-zephyr/out_of_tree_boards/boards/arm/mec1501_mtl_p/mec1501_mtl_p_defconfig&#39;
+Merged configuration &#39;~/ecfw-zephyr/prj.conf&#39;
+Merged configuration &#39;~.ecfw-zephyr/boards/mec1501_mtl_p.conf&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="verify-ec-fw-build-for-new-board">
+<h3><a class="toc-backref" href="#id12">3. Verify EC FW build for new board</a><a class="headerlink" href="#verify-ec-fw-build-for-new-board" title="Permalink to this heading">¶</a></h3>
+<p>Once aforementioned files are added, the EC firmware can be built using the configuration as any other Zephyr application.</p>
+<p><a class="reference external" href="https://docs.zephyrproject.org/latest/hardware/porting/board_porting.html#build-test-and-fix">https://docs.zephyrproject.org/latest/hardware/porting/board_porting.html#build-test-and-fix</a></p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020-2023 Intel Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,19 +1,21 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Keyboard scan matrix &mdash; Basic Open Embedded Controller Firmware 3.01.02 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
-
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=8f80eab9"></script>
-      <script src="../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -32,6 +34,9 @@
           <a href="../../index.html" class="icon icon-home">
             Basic Open Embedded Controller Firmware
           </a>
+              <div class="version">
+                3.01.02
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -88,9 +93,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="keyboard-scan-matrix">
+  <div class="section" id="keyboard-scan-matrix">
 <span id="kscan-matrix"></span><h1>Keyboard scan matrix<a class="headerlink" href="#keyboard-scan-matrix" title="Permalink to this heading">¶</a></h1>
-<section id="introduction">
+<div class="section" id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
 <p>A keyboard matrix is composed of a grid of wires representing rows and
 columns. These rows and columns are connected to an embedded controller(KSC)
@@ -98,8 +103,8 @@ which continuously scans the state of all the grid. A circuit in the grid is
 closed when a key is pressed, and this is eventually sensed by the FW running
 in the EC. Once the row and column has been determined, the EC maps the grid
 coordinates to a scan code which is provided to the host as a set of bytes.</p>
-</section>
-<section id="implementation">
+</div>
+<div class="section" id="implementation">
 <h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading">¶</a></h2>
 <p>In this realization, state and data for a keyboard matrix are represented
 in the EC as an application module. This module depends on <a class="reference internal" href="../kbchost/index.html#kbchost"><span class="std std-ref">Keyboard System Controller Host</span></a> to
@@ -129,8 +134,8 @@ to the modular card. The TGL board has a scan matrix ribbon connector at the
 bottom, but it is not mapped to the modular card which means it can’t also be
 used. More information will be provided later.</p>
 </div>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>

@@ -48,75 +48,18 @@ EC vendors in an Intel RVP.
 |                    | RVP + ITE8002 card       |                         |
 +--------------------+--------------------------+-------------------------+
 
-Other EC SoC
-============
-In order to use a different MECC card with a different EC SoC vendor, the vendor
-should add its Hardware Abstraction Layer (HAL) and board support package (BSP)
-to Zephyr RTOS. See `Zephyr's porting guide`_
+Custom HW
+=========
+For generic guidelines to adapt basic EC open source to custom HW design.
 
-The list below presents the minimum drivers required by the EC application to
-boot an eSPI-based Intel platform.
+.. toctree::
+   :maxdepth: 1
 
-* UART
-* GPIO
-* RTOS timer
-* I2C - Port 80 visualization if board supports it.
-* eSPI - Required by power sequencing module
-* ACPI - Required by SMC host module (EC - BIOS interactions).
-
-The following drivers are needed to exercise other non-boot critical features:
-
-* PS/2 - for PS/2 devices management
-* Keyscan - for keyboard matrix
-
-These drivers are required to enable advanced features such as thermal and fan
-control.
-
-* PECI - for thermal module
-* TACH - for thermal module
-* ADC - for thermal module
-* PWM - for fan control
-
-Customize EC FW framework for other EC SoC
-==========================================
-
-Zephyr uses device tree to describe hardware both EC SoC and board's peripherals.
-The EC FW abstracts the device tree using friendly macros which can be customized when
-using different EC SoC and/or different board. See boards/<vendor> for more details
-
-.. code-block:: c
-
-   #define I2C_BUS_0   DT_NODELABEL(i2c_smb_0)
-
-For more details, see `Zephyr's device tree guide`_.
-
-GPIO initialization
-===================
-EC FW app doesn't control/configure all GPIOs on the chip but only the ones used
-by the app. This is an important delegation to BSP's where generic app pins
-are not configured.
-
-.. note::  For current supported HW via MECC card, see boards folder.
-
-When a pin is intended to be controlled by the EC FW framework it should be
-mapped under boardname_chipversion.h to corresponding Zephyr GPIO port and pin.
-
-.. code-block:: c
-
-   #define PCH_PWROK    EC_GPIO_106  /* Board #1 Port A, Pin B */
-   #define PCH_PWROK    EC_GPIO_036  /* Board #2 Port B, Pin C */
-
-.. note:: EC_GPIO_XXX is a SoC specific macro, which abstracts GPIO port and
-          GPIO pin number since Zephyr supports logical GPIO ports and
-          EC FW requires the flexibility to map a signal to different pins.
-
-Similarly, boardname_chipversion.c should contain the actual pin configuration
-required by the application input/output, open drain and so on.
-See `Zephyr's GPIO reference`_ for Zephyr GPIO flags.
+   porting_ecfw_custom_hw/index.rst
 
 
-HW limitations
-==============
+MECC card HW limitations
+========================
 
 Most of the signals used by onboard EC are routed to MECC connector, however
 some signals may be missing on MECC compared to onboard EC.
@@ -134,6 +77,8 @@ card. Refer to table below for guidance about what can be verified end-to-end.
 | Area             | Feature                  | MTL-P + | MTL-S   | MTL-P   |
 |                  |                          | MEC172x | onboard | onboard |
 +==================+==========================+=========+=========+=========+
+|                  |  MECC spec               | 1.0     | 1.0     | 1.0     |
++------------------+--------------------------+---------+---------+---------+
 | Power sequencing |  ACPI power (Sx)         | Yes     | Yes     | Yes     |
 +------------------+--------------------------+---------+---------+---------+
 |                  |  Deep sleep (DSx)        | No      | Yes     | No      |
@@ -165,6 +110,8 @@ card. Refer to table below for guidance about what can be verified end-to-end.
 |                  |  Serial port (UART)      | Yes(4)  | Yes     | Yes     |
 +------------------+--------------------------+---------+---------+---------+
 
+
+
 .. note:: (1) MEC172x HW revision 2 supports PS2 Keyboard on PortA and PS2 Mouse
           on PortB. Mouse has not been verified though.
 
@@ -180,12 +127,3 @@ card. Refer to table below for guidance about what can be verified end-to-end.
 
 .. _Platform design guide:
     https://www.intel.com/content/www/us/en/programmable/documentation/lit-index.html
-
-.. _Zephyr's porting guide:
-    https://docs.zephyrproject.org/latest/guides/porting/board_porting.html
-
-.. _Zephyr's device tree guide:
-    https://docs.zephyrproject.org/latest/guides/dts/index.html
-
-.. _Zephyr's GPIO reference:
-   https://docs.zephyrproject.org/latest/reference/peripherals/gpio.html

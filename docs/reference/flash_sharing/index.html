@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support for EC flash sharing &mdash; Basic Open Embedded Controller Firmware 3.01.02 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Add custom keyboard matrix" href="../custom_kscan/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Basic Open Embedded Controller Firmware
+          </a>
+              <div class="version">
+                3.01.02
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Documentation Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Project overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_hw.html">Supported Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">EC FW application modules</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../application_notes.html">EC FW application notes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../soc_debug_awareness/index.html">EC support for Intel SoC Debug</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../custom_kscan/index.html">Add custom keyboard matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../porting_ecfw_custom_hw/index.html">Port Basic EC FW to custom HW design</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Support for EC flash sharing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#espi-flash-sharing-overview">eSPI Flash sharing overview</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#controller-attached-flash">Controller Attached Flash</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#target-attached-flash">Target Attached Flash</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dedicated-ec-spi-flash-g3">Dedicated EC SPI flash (G3)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ec-fw-requirements-for-flash-sharing">EC FW requirements for flash sharing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ec-fw-flash-sharing-boot-config-detection-in-intel-rvp">EC FW flash sharing boot config detection in Intel RVP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#caf-maf-requirements">CAF(MAF) requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#taf-saf-requirements">TAF(SAF) requirements</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Basic Open Embedded Controller Firmware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../application_notes.html">EC FW application notes</a></li>
+      <li class="breadcrumb-item active">Support for EC flash sharing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/reference/flash_sharing/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="support-for-ec-flash-sharing">
+<span id="flash-sharing"></span><h1>Support for EC flash sharing<a class="headerlink" href="#support-for-ec-flash-sharing" title="Permalink to this heading">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#espi-flash-sharing-overview" id="id1">eSPI Flash sharing overview</a></p>
+<ul>
+<li><p><a class="reference internal" href="#controller-attached-flash" id="id2">Controller Attached Flash</a></p></li>
+<li><p><a class="reference internal" href="#target-attached-flash" id="id3">Target Attached Flash</a></p></li>
+<li><p><a class="reference internal" href="#dedicated-ec-spi-flash-g3" id="id4">Dedicated EC SPI flash (G3)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#ec-fw-requirements-for-flash-sharing" id="id5">EC FW requirements for flash sharing</a></p>
+<ul>
+<li><p><a class="reference internal" href="#ec-fw-flash-sharing-boot-config-detection-in-intel-rvp" id="id6">EC FW flash sharing boot config detection in Intel RVP</a></p></li>
+<li><p><a class="reference internal" href="#caf-maf-requirements" id="id7">CAF(MAF) requirements</a></p></li>
+<li><p><a class="reference internal" href="#taf-saf-requirements" id="id8">TAF(SAF) requirements</a></p>
+<ul>
+<li><p><a class="reference internal" href="#spi-flash-vendor-requirements-for-taf" id="id9">SPI flash vendor requirements for TAF</a></p></li>
+<li><p><a class="reference internal" href="#spi-flash-preparations" id="id10">SPI flash preparations</a></p></li>
+<li><p><a class="reference internal" href="#basic-taf-bridge-configuration" id="id11">Basic TAF bridge configuration</a></p></li>
+<li><p><a class="reference internal" href="#security-taf-bridge-configuration" id="id12">Security TAF bridge configuration</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="espi-flash-sharing-overview">
+<h2><a class="toc-backref" href="#id1">eSPI Flash sharing overview</a><a class="headerlink" href="#espi-flash-sharing-overview" title="Permalink to this heading">¶</a></h2>
+<p>Enhanced Serial Peripheral Interface (eSPI) is a public system management interface specification led by Intel; license free to OEMs/EC vendors.
+Flash sharing is one of the features supported by eSPI which its main intention is to save the cost of the dedicated EC flash (known sometimes as G3 boot in Intel documentation).
+This is achieved by removing the need to have dedicated internal/external SPI flash for the embedded controller, where EC will be sharing SPI flash with the rest of platform FW (Integrated firmware).
+The eSPI flash sharing model allows 2 additional configurations Controller Attached Flash (previously known as MAF) and Target Attached Flash (aka SAF).</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="../../_images/espi_spec_flash_sharing.png"><img alt="../../_images/espi_spec_flash_sharing.png" class="align-center" src="../../_images/espi_spec_flash_sharing.png" style="width: 606.4px; height: 404.0px;" /></a>
+</div></blockquote>
+<div class="section" id="controller-attached-flash">
+<h3><a class="toc-backref" href="#id2">Controller Attached Flash</a><a class="headerlink" href="#controller-attached-flash" title="Permalink to this heading">¶</a></h3>
+<p>In CAF (MAF) case, the SPI flash is directly connected to Intel SoC.
+EC ROM bootloaders commonly retrieve the EC FW by issuing eSPI Flash Channel read operations managed by the PCH SPI Flash Controller.
+Note that PCH SPI Flash Controller HW enforces security from all requesters.</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="../../_images/caf_flash_sharing_boot_config.png"><img alt="../../_images/caf_flash_sharing_boot_config.png" class="align-center" src="../../_images/caf_flash_sharing_boot_config.png" style="width: 253.2px; height: 226.2px;" /></a>
+</div></blockquote>
+</div>
+<div class="section" id="target-attached-flash">
+<h3><a class="toc-backref" href="#id3">Target Attached Flash</a><a class="headerlink" href="#target-attached-flash" title="Permalink to this heading">¶</a></h3>
+<p>In TAF (SAF) case, the SPI flash is connected to EC. Intel SoC IPs retrieve their FW over eSPI.
+PCH access SPI flash by issuing eSPI Flash Channel read and write operations which are overseen internally by the EC’s SPI Flash Controller.
+Concisely, EC needs to function as a bridge translating eSPI flash requests into SPI flash requests.</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="../../_images/taf_flash_sharing_boot_config.png"><img alt="../../_images/taf_flash_sharing_boot_config.png" class="align-center" src="../../_images/taf_flash_sharing_boot_config.png" style="width: 341.4px; height: 226.2px;" /></a>
+</div></blockquote>
+</div>
+<div class="section" id="dedicated-ec-spi-flash-g3">
+<h3><a class="toc-backref" href="#id4">Dedicated EC SPI flash (G3)</a><a class="headerlink" href="#dedicated-ec-spi-flash-g3" title="Permalink to this heading">¶</a></h3>
+<p>Even though it is possible that the EC SoC has an internal flash, Intel RVP uses the same SPI flash as the rest of Intel FW.
+The HW design allows EC temporary access to it prior to releasing RSMRST.
+While EC asserts RSMRST#, the PCH tristate the SPI bus pins, and the EC has exclusive access to the SPI flash. If RSMRST# is de-asserted, PCH has exclusive access to it.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If EC needs to access SPI flash in runtime after RSRMRST is de-asserted, EC can use eSPI driver flash APIs</p>
+<a class="reference internal image-reference" href="../../_images/g3_flash_sharing_boot_config.png"><img alt="../../_images/g3_flash_sharing_boot_config.png" class="align-center" src="../../_images/g3_flash_sharing_boot_config.png" style="width: 255.0px; height: 225.0px;" /></a>
+</div>
+</div>
+</div>
+<div class="section" id="ec-fw-requirements-for-flash-sharing">
+<h2><a class="toc-backref" href="#id5">EC FW requirements for flash sharing</a><a class="headerlink" href="#ec-fw-requirements-for-flash-sharing" title="Permalink to this heading">¶</a></h2>
+<p>Intel RVP designs are by default configured as CAF(MAF); however, the design allows us to evaluate the other flash sharing boot configurations via well-defined reworks.
+Since the EC FW is the same across all these configurations, it needs to discriminate in runtime the flash sharing boot configuration.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In a real design the boot configuration detection is known, so this detection flow is unnecessary.
+EC FW should only perform the actions relevant to individual configuration.</p>
+</div>
+<div class="section" id="ec-fw-flash-sharing-boot-config-detection-in-intel-rvp">
+<h3><a class="toc-backref" href="#id6">EC FW flash sharing boot config detection in Intel RVP</a><a class="headerlink" href="#ec-fw-flash-sharing-boot-config-detection-in-intel-rvp" title="Permalink to this heading">¶</a></h3>
+<blockquote>
+<div><a class="reference internal image-reference" href="../../_images/flash_sharing_boot_config_detection_flow.png"><img alt="../../_images/flash_sharing_boot_config_detection_flow.png" class="align-center" src="../../_images/flash_sharing_boot_config_detection_flow.png" style="width: 430.5px; height: 451.49999999999994px;" /></a>
+</div></blockquote>
+</div>
+<div class="section" id="caf-maf-requirements">
+<h3><a class="toc-backref" href="#id7">CAF(MAF) requirements</a><a class="headerlink" href="#caf-maf-requirements" title="Permalink to this heading">¶</a></h3>
+<p>Since EC ROM bootloader de-asserted RSMRST and performed eSPI channel negotiation handshake and Zephyr eSPI driver managed the rest.
+EC FW application responsibility regarding CAF is ensuring that during RSMRST pin configuration this is glitch free.</p>
+</div>
+<div class="section" id="taf-saf-requirements">
+<h3><a class="toc-backref" href="#id8">TAF(SAF) requirements</a><a class="headerlink" href="#taf-saf-requirements" title="Permalink to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>EC FW prepares SPI flash device for TAF bridge access.</p></li>
+<li><p>EC FW initializes EC HW TAF (SAF) bridge for autonomous flash access passing any additional information not available in the Zephyr TAF device tree node.</p></li>
+<li><p>EC FW activates the EC HW TAF (SAF) bridge.</p></li>
+<li><p>EC de-asserts RSMRST to indicate Intel SoC, this indicates that eSPI handshake can initiate.</p></li>
+</ol>
+<blockquote>
+<div><img alt="../../_images/flash_sharing_boot_config_detection_flow_details.png" class="align-center" src="../../_images/flash_sharing_boot_config_detection_flow_details.png" />
+</div></blockquote>
+<div class="section" id="spi-flash-vendor-requirements-for-taf">
+<h4><a class="toc-backref" href="#id9">SPI flash vendor requirements for TAF</a><a class="headerlink" href="#spi-flash-vendor-requirements-for-taf" title="Permalink to this heading">¶</a></h4>
+<p>Enabling SPI flash read continuous mode makes, the read instruction opcode optional; this reduces overhead during PCH eSPI flash read operations which is highly desirable.
+For this reason, TAF bridge assumes the SPI flash device used supports Quad mode (all SPI lines used) and continuous read mode.</p>
+</div>
+<div class="section" id="spi-flash-preparations">
+<h4><a class="toc-backref" href="#id10">SPI flash preparations</a><a class="headerlink" href="#spi-flash-preparations" title="Permalink to this heading">¶</a></h4>
+<p>As indicated before, EC FW TAF module prepares SPI flash device for TAF bridge access, which is enabling Quad and continuous modes if not already enabled.
+This should be done before de-asserting RSMRST to guarantee that Intel SoC does not attempt to perform any operations before the TAF bridge is ready.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>An EC Zephyr flash driver could perform this configuration too.
+Basic EC Open-source project uses CONFIG_FLASH Kconfig to discriminate these cases. Refer to the diagram above for details.</p>
+</div>
+</div>
+<div class="section" id="basic-taf-bridge-configuration">
+<h4><a class="toc-backref" href="#id11">Basic TAF bridge configuration</a><a class="headerlink" href="#basic-taf-bridge-configuration" title="Permalink to this heading">¶</a></h4>
+<p>Prior to the TAF bridge HW activation, need to configure the following SPI flash device details:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Number of SPI flash devices</p></li>
+<li><p>Capacity of each SPI flash device</p></li>
+</ul>
+</div></blockquote>
+<p>Additionally, it may be required to specify any opcodes for the specific SPI flash device not already supported by this project.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Write enable.</p></li>
+<li><p>Erase suspend.</p></li>
+<li><p>Program suspend.</p></li>
+<li><p>Read.</p></li>
+<li><p>Read status.</p></li>
+</ul>
+</div></blockquote>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 38%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>SPI flash vendor</p></th>
+<th class="head"><p>Status register opcode</p></th>
+<th class="head"><p>Busy bit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Winbond W25R512NWEIQ</p></td>
+<td><p>15h</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gigadevice GD25LR256EYIGR</p></td>
+<td><p>15h</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Macronix MX77U51250FZ4I42</p></td>
+<td><p>15h</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>Table 1: Common opcode across supported vendors to perform read status.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 38%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>SPI flash vendor</p></th>
+<th class="head"><p>Status2 register opcode</p></th>
+<th class="head"><p>Suspend bit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Winbond W25R512NWEIQ</p></td>
+<td><p>35h</p></td>
+<td><p>7</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gigadevice GD25LR256EYIGR</p></td>
+<td><p>70h</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-even"><td><p>Macronix MX77U51250FZ4I42</p></td>
+<td><p>2Bh</p></td>
+<td><p>3</p></td>
+</tr>
+</tbody>
+</table>
+<p>Table 2: Different read status2 opcode across supported vendors.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The use of the correct Register Status2 opcode to obtain the suspend bit status is key when enabling Intel SoC out-of-order TAF(SAF) requests support.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Commonly EC FW performs the SPI flash opcode configuration via Zephyr eSPI TAF API in runtime.
+However, it is possible that EC-specific Zephyr flash driver performs these settings using the static values in its device tree node properties.
+Refer to EC-vendor specific documentation regarding how to set these parameters.</p>
+</div>
+</div>
+<div class="section" id="security-taf-bridge-configuration">
+<h4><a class="toc-backref" href="#id12">Security TAF bridge configuration</a><a class="headerlink" href="#security-taf-bridge-configuration" title="Permalink to this heading">¶</a></h4>
+<p>In TAF(SAF) configuration, all Intel SoC/PCH SPI Flash transactions are routed over the eSPI Flash Access channel to EC.
+So these SPI Flash access transactions are not subject to Intel SoC and region security checks, instead EC is responsible for it all related access and security controls. This security mechanism is based on region protection and Tags in EC.
+This should be enabled via espi_saf_set_protection_regions API prior to TAF bridge activation.
+Basic EC open source does not provided reference code for this, refer to EC-specific vendor examples.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020-2023 Intel Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

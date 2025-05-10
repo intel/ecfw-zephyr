@@ -15,3 +15,4 @@ main flows, implementation details and configuration options supported.
    soc_debug_awareness/index.rst
    custom_kscan/index.rst
    porting_ecfw_custom_hw/index.rst
+   flash_sharing/index.rst

@@ -1,0 +1,28 @@
+#
+# Copyright (c) 2024, Intel Corporation.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+identifier: mec172x_ptl_uh
+name: MEC172X PTL_UH
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+ram: 128
+flash: 416
+supported:
+  - adc
+  - counter
+  - espi
+  - gpio
+  - i2c
+  - pinmux
+  - pwm
+  - watchdog
+  - ps2
+  - peci
+  - kscan
+  - sensor

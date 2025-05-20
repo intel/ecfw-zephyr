@@ -1,0 +1,217 @@
+/*
+ * Copyright (c) 2024, Intel Corporation Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <microchip/mec172xnsz.dtsi>
+#include <microchip/mec172x/mec172xnsz-pinctrl.dtsi>
+#include "../mec172x-espi-based-board.dtsi"
+
+/* Example of pin not defined in SoC DTS generic definitions */
+&pinctrl {
+	/omit-if-no-ref/ gpio063_gpio063: gpio063_gpio063 {
+		pinmux = < MCHP_XEC_PINMUX(063, MCHP_AF0) >;
+	};
+};
+
+/ {
+	model = "Intel MEC172X_PTL_UH Development board";
+	compatible = "microchip,mec172x_ptl_uh", "microchip,mec172xnsz";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,console = &uart0;
+	};
+
+	aliases {
+		pwm-0 = &pwm8;
+		peci-0 = &peci0;
+		i2c0 = &i2c_smb_0;
+		i2c1 = &i2c_smb_1;
+		i2c2 = &i2c_smb_2;
+
+	};
+
+	zephyr,user {
+		/* Set as GPIos. These are not in GPIO mode due to HW default or ROM */
+		pinctrl-0 = < &gpio000_gpio000 &gpio063_gpio063 &gpio161_gpio161 &gpio162_gpio162 >;
+		pinctrl-names = "default";
+	};
+
+	power-states {
+		suspend_to_ram_ov: suspend_to_ram {
+			compatible = "zephyr,power-state";
+			power-state-name = "suspend-to-ram";
+			min-residency-us = <100000>;
+		};
+	};
+};
+
+&cpu0 {
+	cpu-power-states = <&suspend_to_ram_ov>;
+	clock-frequency = <96000000>;
+	status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart0_tx_gpio104 &uart0_rx_gpio105>;
+	pinctrl-names = "default";
+};
+
+/* I2C */
+&i2c_smb_0 {
+	status = "okay";
+	port_sel = <0>;
+	pinctrl-0 = < &i2c00_scl_gpio004 &i2c00_sda_gpio003 >;
+	pinctrl-names = "default";
+
+	pca9555@22 {
+		compatible = "nxp,pca95xx";
+
+		/* Depends on JP53 for device address.
+		 * Pin 1-2 = A0, pin 3-4 = A1, pin 5-6 = A2.
+		 * Address is: 0100<A2><A1><A0>b.
+		 *
+		 * Default has pin 1-2 on JP53 connected,
+		 * resulting in device address 0x26.
+		 */
+		reg = <0x22>;
+
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	pca9555@23 {
+		compatible = "nxp,pca95xx";
+
+		/* Depends on JP53 for device address.
+		 * Pin 1-2 = A0, pin 3-4 = A1, pin 5-6 = A2.
+		 * Address is: 0100<A2><A1><A0>b.
+		 *
+		 * Default has pin 1-2 on JP53 connected,
+		 * resulting in device address 0x26.
+		 */
+		reg = <0x23>;
+		interrupt-gpios = <&gpio_040_076 18 GPIO_ACTIVE_LOW>;
+		gpio-controller;
+		#gpio-cells = <2>;
+		ngpios = <16>;
+	};
+};
+
+&i2c00_scl_gpio004 {
+	drive-open-drain;
+	output-enable;
+	output-high;
+};
+
+&i2c00_sda_gpio003 {
+	drive-open-drain;
+	output-enable;
+	output-high;
+};
+
+&i2c_smb_1 {
+	status = "okay";
+	port_sel = <6>;
+	pinctrl-0 = <&i2c06_scl_gpio140 &i2c06_sda_gpio132 >;
+	pinctrl-names = "default";
+};
+
+&i2c06_scl_gpio140 {
+	drive-open-drain;
+	output-enable;
+	output-high;
+};
+
+&i2c06_sda_gpio132 {
+	drive-open-drain;
+	output-enable;
+	output-high;
+};
+
+&i2c_smb_2 {
+	status = "okay";
+	port_sel = <5>;
+	pinctrl-0 = <&i2c05_scl_gpio142 &i2c05_sda_gpio141>;
+	pinctrl-names = "default";
+};
+
+&i2c05_scl_gpio142 {
+	drive-open-drain;
+	output-enable;
+	output-high;
+};
+
+&i2c05_sda_gpio141 {
+	drive-open-drain;
+	output-enable;
+	output-high;
+};
+
+&adc0 {
+	status = "okay";
+	pinctrl-0 = <&adc06_gpio206 &adc07_gpio207
+		     &adc04_gpio204 &adc05_gpio205
+		     &adc03_gpio203 &adc02_gpio202
+		     &adc01_gpio201>;
+	pinctrl-names = "default";
+};
+
+&tach0 {
+	status = "okay";
+	pinctrl-0 = < &tach0_gpio050 >;
+	pinctrl-names = "default";
+};
+
+&peci0 {
+	status = "okay";
+
+	pinctrl-0 = < &peci_dat_gpio042 &vref_vtt_gpio044 >;
+	pinctrl-names = "default";
+};
+
+
+&eeprom {
+	status = "okay";
+
+	pinctrl-0 = <&eeprom_cs_gpio116
+		      &eeprom_clk_gpio117
+		      &eeprom_mosi_gpio074
+		      &eeprom_miso_gpio075>;
+	pinctrl-names = "default";
+};
+
+&pwm8 {
+	status = "okay";
+
+	pinctrl-0 = < &pwm8_gpio035 >;
+	pinctrl-names = "default";
+};
+
+&bbled0 {
+	compatible = "microchip,xec-bbled";
+	pinctrl-0 = <&led0_gpio156>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&bbled1 {
+	compatible = "microchip,xec-bbled";
+	pinctrl-0 = <&led1_gpio157>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&bbled2 {
+	compatible = "microchip,xec-bbled";
+	pinctrl-0 = <&led2_gpio153>;
+	pinctrl-names = "default";
+	status = "okay";
+};

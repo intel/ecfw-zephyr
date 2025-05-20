@@ -48,6 +48,13 @@ target_sources_ifdef(CONFIG_BOARD_MEC172X_MTL_S app
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mtl_s_mec172x.h
     )
 
+target_sources_ifdef(CONFIG_BOARD_MEC172X_PTL_UH app
+    PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/microchip/ptl_uh_mec172x.c
+    PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}/microchip/ptl_uh_mec172x.h
+    )
+
 target_include_directories(app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}

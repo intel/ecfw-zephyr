@@ -11,16 +11,57 @@
 	};
 };
 
+
+/* Initialize ECIA. Does not initialize child devices */
+&ecia {
+	status = "okay";
+};
+
+/* Enable aggregated GIRQ24 and GIRQ25 for eSPI virtual wires interrupts */
+&girq24 {
+	status = "okay";
+};
+
+&girq25 {
+	status = "okay";
+};
+
+&rtimer {
+	status = "okay";
+};
+
+&pcr {
+	status = "okay";
+};
+
 &espi0 {
 	status = "okay";
-	io_girq = <19>;
-	vw_girqs = <24 25>;
-	pc_girq = <15>;
 	pinctrl-0 = < &espi_reset_n_gpio061 &espi_cs_n_gpio066
-		  &espi_alert_n_gpio063 &espi_clk_gpio065
-		  &espi_io0_gpio070 &espi_io1_gpio071
-		  &espi_io2_gpio072 &espi_io3_gpio073 >;
+		      &espi_clk_gpio065 &espi_io0_gpio070
+		      &espi_io1_gpio071 &espi_io2_gpio072
+		      &espi_io3_gpio073 >;
 	pinctrl-names = "default";
+};
+
+/* enable various eSPI child devices (host facing) */
+&kbc0 {
+	status = "okay";
+};
+
+&acpi_ec0 {
+	status = "okay";
+};
+
+&acpi_ec1 {
+	status = "okay";
+};
+
+&emi0 {
+	status = "okay";
+};
+
+&p80bd0 {
+	status = "okay";
 };
 
 &espi_saf0 {
@@ -29,37 +70,27 @@
 
 &spi0 {
 	status = "okay";
-	chip_select = <0>;
-	port_sel = <0>; /* Shared SPI */
+	compatible = "microchip,xec-qmspi-ldma";
+	clock-frequency = <4000000>;
 	lines = <4>;
-	pinctrl-0 = < &shd_cs0_n_gpio055 &shd_clk_gpio056
-			&shd_io0_gpio223 &shd_io1_gpio224
-			&shd_io2_gpio227 &shd_io3_gpio016 >;
+	chip-select = <0>;
+
+	pinctrl-0 = < &shd_cs0_n_gpio055
+		      &shd_clk_gpio056
+		      &shd_io0_gpio223
+		      &shd_io1_gpio224
+		      &shd_io2_gpio227
+		      &shd_io3_gpio016 >;
 	pinctrl-names = "default";
 };
 
-&timer5 {
+&timer3 {
 	status = "okay";
-};
-
-&pcr {
-	status = "okay";
-};
-
-&ps2_0 {
-	status = "okay";
-	pinctrl-0 = < &ps2_clk0b_gpio007 &ps2_dat0b_gpio010 >;
-	pinctrl-names = "default";
-};
-
-&peci0 {
-	status = "okay";
-	pinctrl-0 = < &peci_dat_gpio042 &vref_vtt_gpio044 >;
-	pinctrl-names = "default";
 };
 
 &kscan0 {
 	status = "okay";
+
 	pinctrl-0 = < &ksi0_gpio017
 		      &ksi1_gpio020
 		      &ksi2_gpio021
@@ -81,10 +112,41 @@
 		      &kso10_gpio123
 		      &kso11_gpio124
 		      &kso12_gpio125
-		      &kso13_gpio126 >;
+		      &kso13_gpio126
+		      &kso14_gpio152
+		      &kso15_gpio151 >;
 	pinctrl-names = "default";
 };
 
-&wdog {
+&ps2_0 {
 	status = "okay";
+
+	pinctrl-0 = < &ps2_clk0b_gpio007 &ps2_dat0b_gpio010 >;
+	pinctrl-names = "default";
+};
+
+
+/* Disable unwanted eSPI VWs notifications which are enabled by default */
+&vw_sus_stat_n {
+	status = "disabled";
+};
+
+&vw_smiout_n {
+	status = "disabled";
+};
+
+&vw_nmiout_n {
+	status = "disabled";
+};
+
+&vw_slp_lan_n {
+	status = "disabled";
+};
+
+&vw_slp_wlan_n {
+	status = "disabled";
+};
+
+&vw_host_c10 {
+	status = "disabled";
 };

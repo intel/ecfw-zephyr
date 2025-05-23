@@ -43,6 +43,38 @@
 	pinctrl-names = "default";
 };
 
+&espi_alert_n_gpio063 {
+	drive-strength = "1x";
+};
+
+&espi_reset_n_gpio061 {
+	drive-strength = "1x";
+};
+
+&espi_cs_n_gpio066 {
+	drive-strength = "1x";
+};
+
+&espi_clk_gpio065 {
+	drive-strength = "1x";
+};
+
+&espi_io0_gpio070 {
+	drive-strength = "1x";
+};
+
+&espi_io1_gpio071 {
+	drive-strength = "1x";
+};
+
+&espi_io2_gpio072 {
+	drive-strength = "1x";
+};
+
+&espi_io3_gpio073 {
+	drive-strength = "1x";
+};
+
 /* enable various eSPI child devices (host facing) */
 &kbc0 {
 	status = "okay";
@@ -71,7 +103,7 @@
 &spi0 {
 	status = "okay";
 	compatible = "microchip,xec-qmspi-ldma";
-	clock-frequency = <4000000>;
+	clock-frequency = <12000000>;
 	lines = <4>;
 	chip-select = <0>;
 

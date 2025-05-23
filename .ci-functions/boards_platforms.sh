@@ -5,13 +5,14 @@
 declare -a R01=("adl_p"			"mec1501_adl_p"			"")
 declare -a R04=("mtl_p"			"mec1501_mtl_p"			"")
 declare -a R05=("mtl_s"			"mec172x_mtl_s"			"")
+declare -a R06=("ptl_uh"			"mec172x_ptl_uh"			"")
 
 #               Platform (folder name)  Board config               Additional cfg
 declare -a S03=("mtlp_mec172x_card"	"mec172xmodular_assy6930"	"")
 
 declare -a SUPPORTED_PLATFORMS=( \
 	# Regular RVP
-	"R01" "R04" "R05" \
+	"R01" "R04" "R05" "R06" \
 	# MECC enablement
 	"S03"
 	# Special binaries

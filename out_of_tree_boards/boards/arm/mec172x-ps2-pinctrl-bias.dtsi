@@ -1,0 +1,13 @@
+/*
+ * Copyright (c) 2024, Intel Corporation.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+&ps2_clk0b_gpio007 {
+	drive-open-drain;
+};
+
+&ps2_dat0b_gpio010 {
+	drive-open-drain;
+};

@@ -9,6 +9,9 @@
 #include <microchip/mec172xnsz.dtsi>
 #include <microchip/mec172x/mec172xnsz-pinctrl.dtsi>
 #include "../mec172x-espi-based-board.dtsi"
+#include "../mec172x-kscan-pinctrl-bias.dtsi"
+#include "../mec172x-ps2-pinctrl-bias.dtsi"
+#include "../mec172x-vw-ocp.dtsi"
 
 /* Example of pin not defined in SoC DTS generic definitions */
 &pinctrl {

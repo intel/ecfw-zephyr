@@ -1,0 +1,35 @@
+/*
+ * Copyright (c) 2024, Intel Corporation.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* Enable Target to Controller Virtual Wires required
+ * Platform-specific generic virtual wires 0 to 3
+ * are used to convey platform overcurrent protection
+ * status for USB-C ports 0-4 respectively
+ * Refer to include/zephyr/drivers/espi.h
+ */
+&vw_t2c_gpio_0 {
+	status = "okay";
+	reset-state = "1";
+	reset-source = "ESPI_RESET";
+};
+
+&vw_t2c_gpio_1 {
+	status = "okay";
+	reset-state = "1";
+	reset-source = "ESPI_RESET";
+};
+
+&vw_t2c_gpio_2 {
+	status = "okay";
+	reset-state = "1";
+	reset-source = "ESPI_RESET";
+};
+
+&vw_t2c_gpio_3 {
+	status = "okay";
+	reset-state = "1";
+	reset-source = "ESPI_RESET";
+};

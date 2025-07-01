@@ -74,7 +74,7 @@ enum i2c_addr_set {
 #define WAKE_SCI			EC_GPIO_034
 
 #define SLP_S0_PLT_EC_N			EC_GPIO_052
-//#define MIC_PRIVACY_EC			EC_GPIO_053
+#define MIC_PRIVACY_EC			EC_GPIO_053
 #define PM_RSMRST_G3SAF_P		EC_GPIO_054
 #define PM_RSMRST_MAF_P			EC_GPIO_055
 #define PM_RSMRST			((boot_mode_maf == 1) ? \
@@ -85,7 +85,6 @@ enum i2c_addr_set {
 
 #define FAN_PWR_DISABLE_N		EC_GPIO_060
 #define ESPI_RESET_MAF			EC_GPIO_061
-#define PCA9555_1_R_INT_N		EC_GPIO_062
 
 #define PCH_PWROK			EC_GPIO_100
 #define SYS_PWROK			EC_DUMMY_GPIO_LOW

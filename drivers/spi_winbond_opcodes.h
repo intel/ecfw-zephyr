@@ -10,11 +10,20 @@
 /* Winbond SPI commands */
 #define READ_STATUS_1_OPCODE           0x05U
 #define WRITE_ENABLE_OPCODE            0x06U
+#ifdef CONFIG_SPI_VENDOR_MACRONIX
+#define READ_STATUS_2_OPCODE           0x2BU
+#else
 #define READ_STATUS_2_OPCODE           0x35U
+#endif
 #define BLOCK_ERASE_32K_OPCODE         0x52U
 #define ENABLE_RESET_OPCODE            0x66U
+#ifdef CONFIG_SPI_VENDOR_MACRONIX
+#define ERASE_SUSPEND_OPCODE           0xB0U
+#define ERASE_RESUME_OPCODE            0x30U
+#else
 #define ERASE_SUSPEND_OPCODE           0x75U
 #define ERASE_RESUME_OPCODE            0x7AU
+#endif
 #define RESET_OPCODE                   0x99U
 #define CONTINUOUS_MODE_OPCODE         0xA5U
 #define FOUR_BYTE_ADDRESS_ENTER_OPCODE 0xB7U
@@ -26,6 +35,9 @@
 
 #define READ_VOLATILE_CFG_OPCODE       0x85U
 #define WRITE_VOLATILE_CFG_OPCODE      0x81U
+
+/* Macronix SPI commands */
+#define MXIC_SAF_POLL_MASK             0xfff3U
 
 /* Map opcodes based on SPI flash capacity, since first require use 2-byte
  * addresses and later required 3-byte addresses.

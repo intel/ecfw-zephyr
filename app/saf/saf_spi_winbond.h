@@ -59,7 +59,11 @@
 
 /* Capacity adjustments */
 #if (CONFIG_SAF_SPI_CAPACITY > 16)
+#ifdef CONFIG_SPI_VENDOR_MACRONIX
+#define SAF_POLL_MASK		(MXIC_SAF_POLL_MASK)
+#else
 #define SAF_POLL_MASK		(MCHP_W25Q256_POLL2_MASK)
+#endif
 
 #if DT_PROP(DT_SPI_INST, lines) == 4
 #define SAF_FLAGS		(MCHP_FLASH_FLAG_ADDR32)

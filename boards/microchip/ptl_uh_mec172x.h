@@ -103,8 +103,8 @@ enum i2c_addr_set {
 #define PM_BATLOW			EC_GPIO_165
 
 #define PROCHOT				EC_GPIO_171
-//#define M2_BT_LED2_N_EC			EC_GPIO_175
-//#define EDP1_BKLT_EN			EC_GPIO_200
+#define M2_BT_LED2_N_EC			EC_GPIO_175
+#define EDP1_BKLT_EN			EC_GPIO_200
 
 #define RETIMER_FORCE_PWR_BTP_EC_R	EC_GPIO_221
 
@@ -148,7 +148,7 @@ enum i2c_addr_set {
 /* IO expander pin mapping is in hex decimal format instead of octal*/
 /* Net name TP_ESPI_TESTCRD_DET */
 #define THERM_STRAP			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x08)
-//#define PD_AIC_DETECT_SLOT_ID		EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x0A)
+#define PD_AIC_DETECT_SLOT_ID		EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x0A)
 #define KBC_SCROLL_LOCK			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x0D)
 #define C10_GATE_LED			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x0E)
 #define CS_INDICATE_LED			EC_GPIO_PORT_PIN(EC_EXP_PORT_2, 0x0F)
@@ -240,7 +240,7 @@ enum i2c_addr_set {
  * N – Sub Minor Version
  */
 #define TIPD_UCSI_MAJOR_VERSION 0x02
-#define TIPD_UCSI_MINOR_VERSION 0x0
+#define TIPD_UCSI_MINOR_VERSION 0x01
 #define TIPD_UCSI_SUB_MINOR_VERSION 0x0
 
 /* __MEC172x_PTL_UH__ */

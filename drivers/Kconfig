@@ -82,6 +82,9 @@ choice
 	config SPI_VENDOR_GIGADEVICE
 	bool "GIGADEVICE SPI FLASH"
 
+	config SPI_VENDOR_MACRONIX
+	bool "MACRONIX SPI FLASH"
+
 endchoice
 
 menu "EC basic drivers logging control"

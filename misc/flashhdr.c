@@ -12,7 +12,7 @@
 #define KSC_MAJOR_VER     3
 #define KSC_MINOR_VER     1
 #define KSC_PATCH_ID      2
-#define KSC_QS_BUILD_VER  3
+#define KSC_QS_BUILD_VER  4
 
 __in_section(ecfw_info, static, var) struct ksc_img_hdr header = {
 	/* This is replaced by real checksum in build. */

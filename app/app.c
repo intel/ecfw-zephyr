@@ -18,7 +18,7 @@
 #include "softstrap.h"
 LOG_MODULE_REGISTER(ecfw, CONFIG_EC_LOG_LEVEL);
 
-void main(void)
+int main(void)
 {
 	int ret;
 
@@ -36,7 +36,7 @@ void main(void)
 	ret = board_devices_check();
 	if (ret) {
 		LOG_ERR("Device drivers check fail %d", ret);
-		return;
+		return ret;
 	}
 
 	/* The espi block needs to be initialized before the GPIOS. This is
@@ -46,13 +46,13 @@ void main(void)
 	ret = espihub_init();
 	if (ret) {
 		LOG_ERR("Failed to init espi %d", ret);
-		return;
+		return ret;
 	}
 
 	ret = board_init();
 	if (ret) {
 		LOG_ERR("Failed to init board %d", ret);
-		return;
+		return ret;
 	}
 
 	strap_init();

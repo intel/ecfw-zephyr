@@ -37,7 +37,7 @@
 	};
 
 	power-states {
-		suspend_to_ram: suspend_to_ram {
+		suspend_to_ram_ov: suspend_to_ram {
 			compatible = "zephyr,power-state";
 			power-state-name = "suspend-to-ram";
 			min-residency-us = <100000>;
@@ -53,7 +53,7 @@
 };
 
 &cpu0 {
-	cpu-power-states = <&suspend_to_ram>;
+	cpu-power-states = <&suspend_to_ram_ov>;
 };
 
 &pcr {

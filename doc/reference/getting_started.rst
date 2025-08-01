@@ -257,10 +257,10 @@ Dediprog. Refer to `Intel documentation`_.
    https://docs.zephyrproject.org/latest/develop/west/index.html
 
 .. _MEC15xx EVB Setup guide:
-   https://docs.zephyrproject.org/latest/boards/arm/mec1501modular_assy6885/doc/index.html#programming-and-debugging
+   https://docs.zephyrproject.org/latest/boards/microchip/mec1501modular_assy6885/doc/index.html#programming-and-debugging
 
 .. _MEC172x EVB Setup guide:
-   https://docs.zephyrproject.org/latest/boards/arm/mec172xevb_assy6906/doc/index.html#programming-and-debugging
+   https://docs.zephyrproject.org/latest/boards/microchip/mec172xevb_assy6906/doc/index.html#programming-and-debugging
 
 .. _MEC SPI generator tools:
    https://github.com/MicrochipTech/CPGZephyrDocs

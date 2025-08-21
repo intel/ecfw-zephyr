@@ -28,10 +28,19 @@ endif()
   endif()
 
 if (NOT MEC172X_SPI_GEN STREQUAL MEC172X_SPI_GEN-NOTFOUND AND NOT MEC172X_SPI_CFG STREQUAL MEC172X_SPI_CFG-NOTFOUND)
+
+  # SPI generator has a limitation to generate files with a size multiple of 128KB
+  # Generate dummy file to allow merging into it the output from SPI generator
+  set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
+    COMMAND dd if=/dev/zero ibs=1k count=576 | tr "\\000" "\\377" >
+    ${BOARD_DIR}/support/dummy576.bin
+  )
+
   set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
     COMMAND ${MEC172X_SPI_GEN}
     -i ${MEC172X_SPI_CFG}
     -o ${PROJECT_BINARY_DIR}/${SPI_IMAGE_NAME}
+    -m ${BOARD_DIR}/support/dummy576.bin
   )
 
   unset(MEC172X_SPI_GEN)

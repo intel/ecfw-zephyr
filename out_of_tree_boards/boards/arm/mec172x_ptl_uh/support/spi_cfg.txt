@@ -54,7 +54,7 @@ Comp1DrvValue = 0x20
 Comp1DrvMask = 0x60
 
 [IMAGE "1"]
-ImageLocation = 0x40000
+ImageLocation = 0x48000
 SpiFreqMHz = 12
 SpiReadCommand = Quad
 SpiDriveStrength = 8

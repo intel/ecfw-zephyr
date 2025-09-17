@@ -14,7 +14,7 @@ git checkout main
 
 2) Apply zephyr patches on to the kernel branch
 cd ../ecfwwork/zephyr_fork
-git am ../../ecfw-zephyr/zephyr_patches/patches_v3_2.patch
+git am ../../ecfw-zephyr/zephyr_patches/patches_v3_6.patch
 
 3) Building the code for MTL-S (for e.g)
 cd ../../ecfw-zephyr

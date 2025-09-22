@@ -1,0 +1,6 @@
+
+build:
+  settings:
+    board_root: out_of_tree_boards
+    dts_root: .
+    soc_root: .

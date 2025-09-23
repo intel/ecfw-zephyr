@@ -59,7 +59,7 @@ int board_devices_check(void)
 
 	while (dev < devlist_end) {
 		if ((dev->name != NULL) && (strlen(dev->name) != 0)) {
-			if (z_device_is_ready(dev)) {
+			if (device_is_ready(dev)) {
 				LOG_DBG("%s ready", dev->name);
 			} else {
 				LOG_WRN("%s not ready. Check dts", dev->name);

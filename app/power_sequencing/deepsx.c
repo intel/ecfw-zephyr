@@ -12,7 +12,7 @@
 #include "board_config.h"
 #include "deepsx.h"
 #include "dswmode.h"
-#ifdef CONFIG_SOC_FAMILY_MEC
+#ifdef CONFIG_SOC_FAMILY_MICROCHIP_MEC
 #include "vci.h"
 #endif
 #include "system.h"
@@ -352,7 +352,7 @@ void deep_sx_enter(void)
 	if (espihub_reset_status() && !sus_wrn) {
 		gpio_write_pin(PM_DS3, 1);
 
-		#ifdef CONFIG_SOC_FAMILY_MEC
+		#ifdef CONFIG_SOC_FAMILY_MICROCHIP_MEC
 		vci_enable();
 		#endif
 
@@ -393,7 +393,7 @@ void deep_sx_enter(void)
 
 void deep_sx_exit(void)
 {
-	#ifdef CONFIG_SOC_FAMILY_MEC
+	#ifdef CONFIG_SOC_FAMILY_MICROCHIP_MEC
 	switch (vci_wake_reason()) {
 	case VCI_POWER_BUTTON:
 		/* If power button press detected by VCI, wake the system */

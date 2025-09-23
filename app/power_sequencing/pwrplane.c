@@ -32,7 +32,7 @@
 #endif
 #include "pwrseq_timeouts.h"
 #include "errcodes.h"
-#ifdef CONFIG_SOC_FAMILY_MEC
+#ifdef CONFIG_SOC_FAMILY_MICROCHIP_MEC
 #include "vci.h"
 #endif
 #include "fan.h"
@@ -383,7 +383,7 @@ static inline int pwrseq_task_init(void)
 	handle_spi_sharing(espihub_boot_mode());
 	gpio_write_pin(PM_PWRBTN, 1);
 
-	#ifdef CONFIG_SOC_FAMILY_MEC
+	#ifdef CONFIG_SOC_FAMILY_MICROCHIP_MEC
 	/* Disable VBAT powered VCI logic */
 	vci_disable();
 	#endif

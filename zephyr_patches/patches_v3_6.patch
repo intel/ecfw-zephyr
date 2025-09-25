@@ -1,7 +1,7 @@
-From 357e896c61bd35c5e1348274acf04d4c47c4f340 Mon Sep 17 00:00:00 2001
+From 6b8f8e1a1541f853e8d86ea42fc80c6d75d14b3b Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Mon, 21 Aug 2023 14:09:40 -0700
-Subject: [PATCH 01/42] soc: arm: microchip: mec172x: Add macro to get pin mux
+Subject: [PATCH 01/39] soc: arm: microchip: mec172x: Add macro to get pin mux
  value
 
 Add macro to read pin mux control value
@@ -29,10 +29,10 @@ index 39ed59d27..f013ba69a 100644
 2.17.1
 
 
-From bf5d0f98de5dc2e383af6b979885bee844afe3c6 Mon Sep 17 00:00:00 2001
+From d447956a7bd8931e08d2da9a403f768676132c9b Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Mon, 21 Aug 2023 14:51:56 -0700
-Subject: [PATCH 02/42] drivers: gpio: mec172x: Add message to warn about pins
+Subject: [PATCH 02/39] drivers: gpio: mec172x: Add message to warn about pins
  not in GPIO mode
 
 Warn about potential device tree errors for cases when driver's
@@ -82,10 +82,10 @@ index 3c89ed79c..67697b1e3 100644
 2.17.1
 
 
-From a16fd4c78195610aac45d78a5abc45203fe22355 Mon Sep 17 00:00:00 2001
+From 0e45e8ea6298183df7cc862de3184a8a5164e1c5 Mon Sep 17 00:00:00 2001
 From: Mulin Chao <mlchao@nuvoton.com>
 Date: Tue, 23 Jan 2024 18:43:19 -0800
-Subject: [PATCH 03/42] drivers: espi: npcx: add ESPI_OOB_CHANNEL_RX_ASYNC
+Subject: [PATCH 03/39] drivers: espi: npcx: add ESPI_OOB_CHANNEL_RX_ASYNC
  support
 
 Add CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC support in npcx espi driver.
@@ -173,10 +173,10 @@ index fc6712575..628de8426 100644
 2.17.1
 
 
-From b790fae5a73b6a273f731ccfb28876d4b95983a2 Mon Sep 17 00:00:00 2001
+From 1fea82eb4d8baea05a1ccd88c58efca22cda8af9 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Tue, 5 Mar 2024 11:15:37 +0800
-Subject: [PATCH 04/42] drivers: espi: npcx: workaround Global Reset issue
+Subject: [PATCH 04/39] drivers: espi: npcx: workaround Global Reset issue
 
 Apply the workaround for the issue "eSPI global reset" in the
 NPCX49nF_Errata
@@ -289,10 +289,10 @@ index 628de8426..d506c1ec9 100644
 2.17.1
 
 
-From cde369a5ebeeb8ec50040cdf25f1eedad3fa974e Mon Sep 17 00:00:00 2001
+From ba312ab3775c8d2383f292782e8afa3e815f47c4 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Tue, 9 Apr 2024 14:15:26 +0800
-Subject: [PATCH 05/42] drivers: espi: npcx: support multi-byte for dp80
+Subject: [PATCH 05/39] drivers: espi: npcx: support multi-byte for dp80
 
 This CL adds multi-byte support for debug port 80 on npcx4.
 
@@ -319,10 +319,10 @@ index d746d89f9..d67f1a481 100644
 2.17.1
 
 
-From 9234c932454ea6ada2c0404faab02aa5f32ad182 Mon Sep 17 00:00:00 2001
+From da27d89d2d685f79836dd1f2fc415055fa45b86f Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 6 May 2024 15:42:54 +0800
-Subject: [PATCH 06/42] pinctrl: npcx: add nodes for Serial Port SIO clock
+Subject: [PATCH 06/39] pinctrl: npcx: add nodes for Serial Port SIO clock
  selection
 
 This commits adds required pinctrl node to provide the corresponding SIO
@@ -404,10 +404,10 @@ index 2ba0b78fd..583b5352f 100644
 2.17.1
 
 
-From 97117cf015bf1f888044f8dc10d9e90fa0967373 Mon Sep 17 00:00:00 2001
+From 29fa0e60b116c5e2de9aa4cdc9944c63417f117f Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 6 May 2024 15:43:09 +0800
-Subject: [PATCH 07/42] driver: espi: npcx: enable the Serial Port
+Subject: [PATCH 07/39] driver: espi: npcx: enable the Serial Port
 
 Initialize and enable the Serial Port/Host UART when
 CONFIG_ESPI_PERIPHERAL_UART=y.
@@ -516,10 +516,10 @@ index 418106666..51802586c 100644
 2.17.1
 
 
-From 8b04bd771e5c782451bd4035353e98891dc8f9b5 Mon Sep 17 00:00:00 2001
+From f46317a453f58a3db0884163a4f1b11f1d847ab8 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Mon, 22 Apr 2024 18:18:24 +0800
-Subject: [PATCH 08/42] drivers: espi: npcx: update espi taf driver
+Subject: [PATCH 08/39] drivers: espi: npcx: update espi taf driver
 
 This CL updates the read, write, erase, and get_channel_status
 implementations of NPCX chip.
@@ -1012,10 +1012,10 @@ index a8755e080..90b98cbb6 100644
 2.17.1
 
 
-From 71aab98613efbd5c54f39c59567e24f148d79352 Mon Sep 17 00:00:00 2001
+From 3b40d9df775b8a5adbc185005d4fb5dc898f6b56 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Wed, 24 Apr 2024 11:25:15 +0800
-Subject: [PATCH 09/42] drivers: espi: npcx: select RING_BUFFER for p80
+Subject: [PATCH 09/39] drivers: espi: npcx: select RING_BUFFER for p80
 
 This CL adds automatic select CONFIG_RING_BUFFER for port 80 multi-byte.
 
@@ -1041,10 +1041,10 @@ index d67f1a481..035db2415 100644
 2.17.1
 
 
-From 45960d1003cc133cabf68ce6b028af7a7acc14ab Mon Sep 17 00:00:00 2001
+From accdfac4488eb8f7b1e85b126189834d2cf14394 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Thu, 30 May 2024 13:45:47 +0800
-Subject: [PATCH 10/42] drivers: espi: npcx: add support 66MHz eSPI clock
+Subject: [PATCH 10/39] drivers: espi: npcx: add support 66MHz eSPI clock
 
 This CL adds support 66MHz eSPI clock for NPCX4.
 
@@ -1082,10 +1082,10 @@ index 89d46c367..302aff132 100644
 2.17.1
 
 
-From 4824c98d84d9c615ab34aa60e07ea678d922ec57 Mon Sep 17 00:00:00 2001
+From a5ce1bfca99a9ba5efe03e65f321b46c97e21407 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 1 Apr 2024 10:34:25 +0800
-Subject: [PATCH 11/42] driver: reset: npcx: add driver support for reset
+Subject: [PATCH 11/39] driver: reset: npcx: add driver support for reset
  controller
 
 Nuvoton NPCX chips have reset registers which allow to reset the
@@ -1683,10 +1683,10 @@ index 8c4ed132b..e12b3bc10 100644
 2.17.1
 
 
-From 3f4f2203f2c5a0f14584872aab2f1cc643e467b4 Mon Sep 17 00:00:00 2001
+From 717c8c11290cbc74b006dd55aa14d210de6d293f Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Wed, 6 Mar 2024 10:23:33 +0800
-Subject: [PATCH 12/42] drivers: espi: npcx: fix warning when using
+Subject: [PATCH 12/39] drivers: espi: npcx: fix warning when using
  ESPI_OOB_RX_ASYNC macro
 
 This CL prevents unused warnings when CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC
@@ -1728,10 +1728,10 @@ index 302aff132..42e559a8b 100644
 2.17.1
 
 
-From 579eac0af607bbc0de865832efa578a4ecdc56ee Mon Sep 17 00:00:00 2001
+From 5a3c36cea856536f9601fee6c28f273f194112ce Mon Sep 17 00:00:00 2001
 From: Alvis Sun <yfsun@nuvoton.com>
 Date: Wed, 17 Apr 2024 11:03:50 +0800
-Subject: [PATCH 13/42] dts: arm: nuvoton: add I3C device nodes
+Subject: [PATCH 13/39] dts: arm: nuvoton: add I3C device nodes
 
 Add I3C device nodes.
 
@@ -1840,10 +1840,10 @@ index 9070b4a71..1a02a70d2 100644
 2.17.1
 
 
-From f3af417090f8b2394c63c8b93baa0bcef7507530 Mon Sep 17 00:00:00 2001
+From b979b4453ad0826b55295a06bf9128053119a989 Mon Sep 17 00:00:00 2001
 From: Alvis Sun <yfsun@nuvoton.com>
 Date: Wed, 17 Apr 2024 11:04:47 +0800
-Subject: [PATCH 14/42] boards: nuvoton: npcx4m8f_evb: add i3c pinctrl
+Subject: [PATCH 14/39] boards: nuvoton: npcx4m8f_evb: add i3c pinctrl
 
 Add I3C pinmux configuration.
 
@@ -1880,10 +1880,10 @@ index a34002e8b..b90d94b0c 100644
 2.17.1
 
 
-From 225adc2a34a91a0b56c0a5bf2052b10a957e0ce5 Mon Sep 17 00:00:00 2001
+From a46679a2699bf11f1312a32ab14e77be4acd5cb0 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Tue, 23 Apr 2024 14:32:36 +0800
-Subject: [PATCH 15/42] driver: uart: npcx: fix coding style
+Subject: [PATCH 15/39] driver: uart: npcx: fix coding style
 
 Fix the coding style by clang-format tool.
 
@@ -2061,10 +2061,10 @@ index 979cbd038..a698130ff 100644
 2.17.1
 
 
-From 0ed4f37b082b5b5c6dbc669b19b4b6982347f0b3 Mon Sep 17 00:00:00 2001
+From 49cc6aab7018a54486dfb3fbb9c62bfe35167623 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Tue, 23 Apr 2024 14:33:09 +0800
-Subject: [PATCH 16/42] drivers: uart: npcx: add asychronous API support
+Subject: [PATCH 16/39] drivers: uart: npcx: add asychronous API support
 
 This commit implement the UART asynchronous API mode support.
 When the API is used, the UART hardware cooperates with the DMA (MDMA)
@@ -3015,10 +3015,10 @@ index 01b4a365e..214eadd47 100644
 2.17.1
 
 
-From 7703bb131e303dd7fed730d5c65e3695cdf32313 Mon Sep 17 00:00:00 2001
+From c29abc4ef95015e93931aa97ed3f3e912b4502dd Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Wed, 24 Apr 2024 10:31:54 +0800
-Subject: [PATCH 17/42] drivers: uart: npcx: extend the UART baudrate support
+Subject: [PATCH 17/39] drivers: uart: npcx: extend the UART baudrate support
 
 1. support the baudrate = 3MHz.
 2. add baudrate = 115200 setting when UART source clock = 25/30/48/50 MHz.
@@ -3078,10 +3078,10 @@ index 8e25da50d..085f7cccd 100644
 2.17.1
 
 
-From be7eb47dd11d7785ee91d4f79f4b94a6a2e7a829 Mon Sep 17 00:00:00 2001
+From 2aa10cf1a1c41cd5a91f3ab1899d57c26353ac5e Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 15 Jul 2024 10:17:52 +0800
-Subject: [PATCH 18/42] drivers: espi: host_subs: npcx: fix LDN register
+Subject: [PATCH 18/39] drivers: espi: host_subs: npcx: fix LDN register
  definition of PMCH
 
 The register offset definition of the I/O port Data Base Address
@@ -3141,10 +3141,10 @@ index 51802586c..d92516fa0 100644
 2.17.1
 
 
-From 005d7fa7e37d1bc515b14ad2c20cb196613ab4b7 Mon Sep 17 00:00:00 2001
+From 7bdb4416f98d2be7e7837b81ebf3c26dac035165 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Fri, 19 Jul 2024 09:59:12 +0800
-Subject: [PATCH 19/42] soc: npcx: scfg: select host interface type in global
+Subject: [PATCH 19/39] soc: npcx: scfg: select host interface type in global
 
 The Host Interface Type in the DEVCNT register sets the HIF type
 (either eSPI or LPC).
@@ -3215,10 +3215,10 @@ index a5bb9adad..e30de1295 100644
 2.17.1
 
 
-From 233bee628af7dd08b032cdcd83bf24b17b14d8f6 Mon Sep 17 00:00:00 2001
+From baa7754541515b4189be3906167a5da653854b98 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Tue, 13 Aug 2024 19:47:13 -0700
-Subject: [PATCH 20/42] drivers: espi: npcx: Fix TAF driver dependency
+Subject: [PATCH 20/39] drivers: espi: npcx: Fix TAF driver dependency
 
 Set correct dependency for TAF driver protected regions
 
@@ -3252,10 +3252,10 @@ index 035db2415..9a731426a 100644
 2.17.1
 
 
-From 9ba4af72e4c62faeb0051da50ac2a7535d485024 Mon Sep 17 00:00:00 2001
+From 86b7a7b3b1dc501b71158ee9ecba30c2ea26a8e0 Mon Sep 17 00:00:00 2001
 From: Vijay Hiremath <vijay.p.hiremath@intel.com>
 Date: Thu, 7 Nov 2024 18:48:29 -0800
-Subject: [PATCH 21/42] eSPI: NPCX/ITE: Enable conditional virtual wire valid
+Subject: [PATCH 21/39] eSPI: NPCX/ITE: Enable conditional virtual wire valid
  bit check
 
 On the new Intel SoC, the "Valid" bit of the Virtual Wire is set only for
@@ -3351,10 +3351,10 @@ index 9233b1708..8c5ebb33c 100644
 2.17.1
 
 
-From 66585301ef696cf8a5727bcc64ce1870e16f7cd0 Mon Sep 17 00:00:00 2001
+From 88778f2632eb9eb72597362127af36028466964b Mon Sep 17 00:00:00 2001
 From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
 Date: Mon, 9 May 2022 10:59:51 +0530
-Subject: [PATCH 22/42] drivers: peci: increased peci write time delay 2ms
+Subject: [PATCH 22/39] drivers: peci: increased peci write time delay 2ms
 
 peci delay is increased to 2ms as peci write is failing with 1ms
 
@@ -3384,10 +3384,10 @@ index e03181e0f..202d0f0bb 100644
 2.17.1
 
 
-From c58bd71a15da9ec47675ea941f866af1082eb78d Mon Sep 17 00:00:00 2001
+From 778e796545873f1a4d76a50c1fd3b508673de687 Mon Sep 17 00:00:00 2001
 From: NagarajuGundimi <nagaraju.gundimi@intel.com>
 Date: Thu, 29 Dec 2022 03:29:54 -0500
-Subject: [PATCH 23/42] ite: Defined GPIO ports and delta changes for Zephyr
+Subject: [PATCH 23/39] ite: Defined GPIO ports and delta changes for Zephyr
  v3.2
 
 Defined GPIO ports and delta changes for Zephyr v3.2
@@ -3607,10 +3607,10 @@ index 000000000..38290ba40
 2.17.1
 
 
-From fa0d595db70602c1d44179a5d5770d7350a87b81 Mon Sep 17 00:00:00 2001
+From a681163f12c7f5905926be236eebd4db9e234a20 Mon Sep 17 00:00:00 2001
 From: NagarajuGundimi <nagaraju.gundimi@intel.com>
 Date: Thu, 29 Dec 2022 04:29:40 -0500
-Subject: [PATCH 24/42] ite: eSPI: WA for ACPI IBF flag clear at driver level
+Subject: [PATCH 24/39] ite: eSPI: WA for ACPI IBF flag clear at driver level
 
 WA for ACPI IBF flag clear due to PM1DI read at driver.
 
@@ -3639,10 +3639,10 @@ index e8bb5d581..0a41b24b1 100644
 2.17.1
 
 
-From d1d1e84bb825c8070b25cfd7b466135ef1994062 Mon Sep 17 00:00:00 2001
+From 92b3908e04dd8cbee616af17a049f785ebf38156 Mon Sep 17 00:00:00 2001
 From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
 Date: Tue, 29 Nov 2022 20:52:52 +0530
-Subject: [PATCH 25/42] drivers: espi: Nuvoton: Do not read Input Buffer
+Subject: [PATCH 25/39] drivers: espi: Nuvoton: Do not read Input Buffer
 
 Reading the HIPMDI register will clear the IBF bit in ACPI
 and Host command handling. This will end up breaking the EC
@@ -3698,10 +3698,10 @@ index d92516fa0..0eacd6911 100644
 2.17.1
 
 
-From cd7b006d8b862311932ae3bc29453ca081fa4afc Mon Sep 17 00:00:00 2001
+From dacb7e372f25bb4cbecb3d9dfe9e9fae07eb255a Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Fri, 15 Mar 2024 17:22:23 -0700
-Subject: [PATCH 26/42] boards: mec172x: Do not enable KSCAN PM device pinctrl
+Subject: [PATCH 26/39] boards: mec172x: Do not enable KSCAN PM device pinctrl
 
 Remove sleep pinctrl from KSCAN device
 
@@ -3763,10 +3763,10 @@ index d355f19af..631f7ca15 100644
 2.17.1
 
 
-From 6c316a2bca1040fa281cb999344ea2bf2bb43abb Mon Sep 17 00:00:00 2001
+From 048360b148d92eef863144bc6c5f3f6646ae9ea5 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Mon, 15 Apr 2024 12:15:52 -0700
-Subject: [PATCH 27/42] soc: arm: npcx: ECST add support to generated
+Subject: [PATCH 27/39] soc: arm: npcx: ECST add support to generated
  bootloader header
 
 Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
@@ -3919,10 +3919,10 @@ index ab1aad770..f22f4011a 100755
 2.17.1
 
 
-From c7fc2708435208670b528fdce763e991cea8f547 Mon Sep 17 00:00:00 2001
+From 2e4e015e55501ecb4558a31eda21702540531cd8 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Thu, 11 Jan 2024 21:54:10 -0800
-Subject: [PATCH 28/42] boards: arm: npcx: Allow to generate EC region SPI
+Subject: [PATCH 28/39] boards: arm: npcx: Allow to generate EC region SPI
  layout
 
 Add post build command to generate EC region SPI layout
@@ -4103,10 +4103,10 @@ index 000000000..d766972ca
 2.17.1
 
 
-From 62647c30cbf62a19c1bd71d1ac32bd3d7cb5acc2 Mon Sep 17 00:00:00 2001
+From 4d3afb5bdf78937d292c32fe8bf653a826b1f490 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Tue, 23 Apr 2024 19:43:16 -0700
-Subject: [PATCH 29/42] include: drivers: espi: Postcode multibyte support
+Subject: [PATCH 29/39] include: drivers: espi: Postcode multibyte support
 
 Add structure for multi-byte support
 
@@ -4138,10 +4138,10 @@ index d2f77622f..ca04f52e0 100644
 2.17.1
 
 
-From d1ded0824f726aeaa8c8e319d2dc2ca1c727e74c Mon Sep 17 00:00:00 2001
+From 76417d02e4f0e046d32cca94ca6925bc878e2153 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Thu, 11 Jul 2024 14:31:04 -0700
-Subject: [PATCH 30/42] dts: arm: nuvoton: Add support for PM3 channel as ACPI
+Subject: [PATCH 30/39] dts: arm: nuvoton: Add support for PM3 channel as ACPI
 
 Enable PM3 channel as ACPI PVT interface
 
@@ -4171,10 +4171,10 @@ index 6c9a82f01..b395c3802 100644
 2.17.1
 
 
-From 92228068d8436f5dca75b62845bc558fb39792ca Mon Sep 17 00:00:00 2001
+From 11bec58b9d298fbd85930f4741ca7b0ad0cc410d Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Thu, 11 Jul 2024 14:49:51 -0700
-Subject: [PATCH 31/42] drivers: espi: npcx: Add support for ACPI PVT port
+Subject: [PATCH 31/39] drivers: espi: npcx: Add support for ACPI PVT port
 
 Use PM3 channel as ACPI PVT interface
 
@@ -4310,10 +4310,10 @@ index 0eacd6911..ba692c034 100644
 2.17.1
 
 
-From 4ea2f19e3706ca39a057215f41d52ff3ecd19c7f Mon Sep 17 00:00:00 2001
+From caae2ea2f54f5eb559dde64b7d6009c1eadaafa5 Mon Sep 17 00:00:00 2001
 From: "Veturi, Sameer" <sameer.veturi@intel.com>
 Date: Mon, 7 Oct 2024 16:17:11 +0530
-Subject: [PATCH 32/42] soc: ite: ITE Zephyr fork delta changes for v3.6
+Subject: [PATCH 32/39] soc: ite: ITE Zephyr fork delta changes for v3.6
 
 ITE Zephyr fork delta changes for v3.6
 
@@ -4545,10 +4545,10 @@ index 527152601..d4fb6f68e 100644
 2.17.1
 
 
-From 2bcfe8373c89ed903bc25528d767cd6cd8b6ba5b Mon Sep 17 00:00:00 2001
+From bac0b1ed258f56485187058d0e3367f5c76ad219 Mon Sep 17 00:00:00 2001
 From: Aditya Bhutada <aditya.bhutada@intel.com>
 Date: Mon, 14 Apr 2025 15:27:37 -0700
-Subject: [PATCH 33/42] drivers: espi: espi_mchp_xec: Fix the VW change check
+Subject: [PATCH 33/39] drivers: espi: espi_mchp_xec: Fix the VW change check
  time
 
 Adjusted the VW change check timings:
@@ -4639,10 +4639,10 @@ index a1a5acefd..67e4d9a68 100644
 2.17.1
 
 
-From 37f58c342043b991658a62b4aac4c4a5ecfcbb32 Mon Sep 17 00:00:00 2001
+From 7b15f526dc65fb5aa18879d92a38fe92c5d326b3 Mon Sep 17 00:00:00 2001
 From: Aditya Bhutada <aditya.bhutada@intel.com>
 Date: Mon, 14 Apr 2025 15:29:26 -0700
-Subject: [PATCH 34/42] drivers: espi: Add return value to eSPI send_vwire API
+Subject: [PATCH 34/39] drivers: espi: Add return value to eSPI send_vwire API
 
 Added note about return value to the eSPI send_vwire API in the header:
 -ETIMEDOUT & _EINVAL.
@@ -4669,293 +4669,10 @@ index ca04f52e0..985bba316 100644
 2.17.1
 
 
-From cbb456b4a4c9a6b2701024b8460566f867587a13 Mon Sep 17 00:00:00 2001
-From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
-Date: Mon, 23 Jun 2025 19:14:10 -0700
-Subject: [PATCH 35/42] dts: bindings: sensor: Add Samsung PM9E1 SSD dummy
- binding
-
-Add Samsung SSD as I3C device
-
-Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
----
- dts/bindings/sensor/samsung,pm9e1.yaml | 9 +++++++++
- 1 file changed, 9 insertions(+)
- create mode 100644 dts/bindings/sensor/samsung,pm9e1.yaml
-
-diff --git a/dts/bindings/sensor/samsung,pm9e1.yaml b/dts/bindings/sensor/samsung,pm9e1.yaml
-new file mode 100644
-index 000000000..07ffbc186
---- /dev/null
-+++ b/dts/bindings/sensor/samsung,pm9e1.yaml
-@@ -0,0 +1,9 @@
-+# Copyright (c) 2025 Intel Corporation
-+# SPDX-License-Identifier: Apache-2.0
-+
-+description: |
-+    Samsung solid state dummy driver for device connected to I3C bus
-+
-+compatible: "samsung,pm9e1"
-+
-+include: ["i3c-device.yaml"]
--- 
-2.17.1
-
-
-From 068d7fa7a1f501f9b70a91b64caf9eaa7ddad535 Mon Sep 17 00:00:00 2001
-From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
-Date: Mon, 23 Jun 2025 19:15:14 -0700
-Subject: [PATCH 36/42] drivers: sensor: pm9e1: Add Samsung PM9E1 SSD dummy
- driver
-
-Add dummy implementation for Samsung PM9E1 SSD driver
-that allows device tree enumeration.
-
-Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
----
- drivers/sensor/CMakeLists.txt        |  1 +
- drivers/sensor/Kconfig               |  1 +
- drivers/sensor/pm9e1/CMakeLists.txt  |  6 +++
- drivers/sensor/pm9e1/Kconfig         | 13 +++++
- drivers/sensor/pm9e1/samsung_pm9e1.c | 76 ++++++++++++++++++++++++++++
- drivers/sensor/pm9e1/samsung_pm9e1.h | 29 +++++++++++
- 6 files changed, 126 insertions(+)
- create mode 100644 drivers/sensor/pm9e1/CMakeLists.txt
- create mode 100644 drivers/sensor/pm9e1/Kconfig
- create mode 100644 drivers/sensor/pm9e1/samsung_pm9e1.c
- create mode 100644 drivers/sensor/pm9e1/samsung_pm9e1.h
-
-diff --git a/drivers/sensor/CMakeLists.txt b/drivers/sensor/CMakeLists.txt
-index d73a50c44..82d85f6f1 100644
---- a/drivers/sensor/CMakeLists.txt
-+++ b/drivers/sensor/CMakeLists.txt
-@@ -122,6 +122,7 @@ add_subdirectory_ifdef(CONFIG_QDEC_NRFX qdec_nrfx)
- add_subdirectory_ifdef(CONFIG_QDEC_SAM qdec_sam)
- add_subdirectory_ifdef(CONFIG_QDEC_STM32 qdec_stm32)
- add_subdirectory_ifdef(CONFIG_RPI_PICO_TEMP rpi_pico_temp)
-+add_subdirectory_ifdef(CONFIG_SAMSUNG_PM9E1 pm9e1)
- add_subdirectory_ifdef(CONFIG_S11059 s11059)
- add_subdirectory_ifdef(CONFIG_SBS_GAUGE sbs_gauge)
- add_subdirectory_ifdef(CONFIG_SGP40 sgp40)
-diff --git a/drivers/sensor/Kconfig b/drivers/sensor/Kconfig
-index dbc193154..d09db688b 100644
---- a/drivers/sensor/Kconfig
-+++ b/drivers/sensor/Kconfig
-@@ -200,6 +200,7 @@ source "drivers/sensor/nxp_kinetis_temp/Kconfig"
- source "drivers/sensor/nxp_tempmon/Kconfig"
- source "drivers/sensor/opt3001/Kconfig"
- source "drivers/sensor/pcnt_esp32/Kconfig"
-+source "drivers/sensor/pm9e1/Kconfig"
- source "drivers/sensor/pms7003/Kconfig"
- source "drivers/sensor/qdec_mcux/Kconfig"
- source "drivers/sensor/qdec_nxp_s32/Kconfig"
-diff --git a/drivers/sensor/pm9e1/CMakeLists.txt b/drivers/sensor/pm9e1/CMakeLists.txt
-new file mode 100644
-index 000000000..5814c7ea8
---- /dev/null
-+++ b/drivers/sensor/pm9e1/CMakeLists.txt
-@@ -0,0 +1,6 @@
-+# Copyright (c) 2025 Intel Corporation
-+#
-+# SPDX-License-Identifier: Apache-2.0
-+#
-+zephyr_library()
-+zephyr_library_sources(samsung_pm9e1.c)
-diff --git a/drivers/sensor/pm9e1/Kconfig b/drivers/sensor/pm9e1/Kconfig
-new file mode 100644
-index 000000000..cb18d5e2c
---- /dev/null
-+++ b/drivers/sensor/pm9e1/Kconfig
-@@ -0,0 +1,13 @@
-+# Copyright (c) 2025 Intel Corporation
-+#
-+# SPDX-License-Identifier: Apache-2.0
-+#
-+
-+menuconfig SAMSUNG_PM9E1
-+	bool "Dummy solid stte storage device"
-+	default y
-+	depends on DT_HAS_SAMSUNG_PM9E1_ENABLED
-+	select I3C if $(dt_compat_on_bus,$(DT_COMPAT_SAMSUNG_PM9E1),i3c)
-+	help
-+	  Enable dummy driver for I3C solid state driver.
-+	  This allows runtime access due discovery restriction to device tree devices.
-diff --git a/drivers/sensor/pm9e1/samsung_pm9e1.c b/drivers/sensor/pm9e1/samsung_pm9e1.c
-new file mode 100644
-index 000000000..b79b6a9d6
---- /dev/null
-+++ b/drivers/sensor/pm9e1/samsung_pm9e1.c
-@@ -0,0 +1,76 @@
-+/*
-+ * Copyright (c) 2025 Intel Corporation
-+ *
-+ * SPDX-License-Identifier: Apache-2.0
-+ */
-+
-+#define DT_DRV_COMPAT samsung_pm9e1
-+
-+#include <zephyr/drivers/sensor.h>
-+#include <zephyr/kernel.h>
-+#include <zephyr/device.h>
-+#include <zephyr/init.h>
-+#include <zephyr/logging/log.h>
-+
-+#include "samsung_pm9e1.h"
-+
-+LOG_MODULE_REGISTER(PM9E1, CONFIG_SENSOR_LOG_LEVEL);
-+
-+static int samsung_pm9e1_attr_set(const struct device *dev,
-+			    enum sensor_channel chan,
-+			    enum sensor_attribute attr,
-+			    const struct sensor_value *val)
-+{
-+		return -ENOTSUP;
-+}
-+
-+static const struct sensor_driver_api samsung_pm9e1_driver_api = {
-+	.attr_set = samsung_pm9e1_attr_set,
-+};
-+
-+
-+static int samsung_pm9e1_ssd_init(const struct device *dev)
-+{
-+	const struct pm9e1_ssd_config * const cfg = dev->config;
-+	struct pm9e1_ssd_data *data = dev->data;
-+
-+	LOG_DBG("Samsung PM9E1 init");
-+	ARG_UNUSED(data);
-+	ARG_UNUSED(cfg);
-+#if DT_ANY_INST_ON_BUS_STATUS_OKAY(i3c)
-+	if (cfg->bus != NULL) {
-+		/*
-+		 * Need to grab the pointer to the I3C device descriptor
-+		 * before we can talk to the sensor.
-+		 */
-+		data->i3c_dev = i3c_device_find(cfg->bus, &cfg->dev_id);
-+		if (data->i3c_dev == NULL) {
-+			LOG_ERR("Cannot find I3C device descriptor");
-+			return -ENODEV;
-+		}
-+	}
-+#endif
-+	return 0;
-+}
-+
-+/*
-+ * Instantiation macros used when a device is on an I3C bus.
-+ */
-+
-+#define PM9E1_CONFIG_I3C(inst)					\
-+	{								\
-+		.bus = DEVICE_DT_GET(DT_INST_BUS(inst)),		\
-+		.dev_id = I3C_DEVICE_ID_DT_INST(inst),		\
-+	}
-+
-+
-+static const struct pm9e1_ssd_config pm9e1_ssd_config_0 = {
-+		.bus = DEVICE_DT_GET(DT_INST_BUS(0)),
-+		.dev_id = I3C_DEVICE_ID_DT_INST(0),
-+};
-+
-+static struct pm9e1_ssd_data pm9e1_ssd_data_0;
-+
-+SENSOR_DEVICE_DT_INST_DEFINE(0, samsung_pm9e1_ssd_init, NULL, &pm9e1_ssd_data_0,
-+		&pm9e1_ssd_config_0, POST_KERNEL,
-+		CONFIG_SENSOR_INIT_PRIORITY, &samsung_pm9e1_driver_api);
-diff --git a/drivers/sensor/pm9e1/samsung_pm9e1.h b/drivers/sensor/pm9e1/samsung_pm9e1.h
-new file mode 100644
-index 000000000..9ffc7dcdf
---- /dev/null
-+++ b/drivers/sensor/pm9e1/samsung_pm9e1.h
-@@ -0,0 +1,29 @@
-+/*
-+ * Copyright (c) 2025 Intel Corporation
-+ *
-+ * SPDX-License-Identifier: Apache-2.0
-+ */
-+
-+#ifndef __SAMSUNG_PM9E1_H__
-+#define __SAMSUNG_PM9E1_H__
-+
-+#if DT_ANY_INST_ON_BUS_STATUS_OKAY(i3c)
-+#include <zephyr/drivers/i3c.h>
-+#endif /* DT_ANY_INST_ON_BUS_STATUS_OKAY(i3c) */
-+
-+struct pm9e1_ssd_config {
-+#if DT_ANY_INST_ON_BUS_STATUS_OKAY(i3c)
-+	const struct device *bus;
-+	const struct i3c_device_id dev_id;
-+#endif
-+	uint8_t dummy;
-+};
-+
-+struct pm9e1_ssd_data {
-+	const struct device *dev;
-+	struct i3c_device_desc *i3c_dev;
-+	uint8_t dummy;
-+};
-+
-+
-+#endif /* __SAMSUNG_PM9E1_H__ */
--- 
-2.17.1
-
-
-From c8299723b8a6c72023c2bef65e1c00492bede081 Mon Sep 17 00:00:00 2001
-From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
-Date: Wed, 2 Jul 2025 18:21:35 -0700
-Subject: [PATCH 37/42] drivers: sensors: pm9e1: Refactor driver initialization
-
-Use macros to allow multiple devices
-
-Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
----
- drivers/sensor/pm9e1/samsung_pm9e1.c | 22 ++++++++++------------
- 1 file changed, 10 insertions(+), 12 deletions(-)
-
-diff --git a/drivers/sensor/pm9e1/samsung_pm9e1.c b/drivers/sensor/pm9e1/samsung_pm9e1.c
-index b79b6a9d6..34afd3fe9 100644
---- a/drivers/sensor/pm9e1/samsung_pm9e1.c
-+++ b/drivers/sensor/pm9e1/samsung_pm9e1.c
-@@ -57,20 +57,18 @@ static int samsung_pm9e1_ssd_init(const struct device *dev)
-  * Instantiation macros used when a device is on an I3C bus.
-  */
- 
--#define PM9E1_CONFIG_I3C(inst)					\
-+#define PM9E1_CONFIG_I3C(inst)						\
-+	static const struct pm9e1_ssd_config pm9e1_ssd_config_##inst =	\
- 	{								\
- 		.bus = DEVICE_DT_GET(DT_INST_BUS(inst)),		\
--		.dev_id = I3C_DEVICE_ID_DT_INST(inst),		\
-+		.dev_id = I3C_DEVICE_ID_DT_INST(inst),			\
- 	}
- 
--
--static const struct pm9e1_ssd_config pm9e1_ssd_config_0 = {
--		.bus = DEVICE_DT_GET(DT_INST_BUS(0)),
--		.dev_id = I3C_DEVICE_ID_DT_INST(0),
--};
--
--static struct pm9e1_ssd_data pm9e1_ssd_data_0;
--
--SENSOR_DEVICE_DT_INST_DEFINE(0, samsung_pm9e1_ssd_init, NULL, &pm9e1_ssd_data_0,
--		&pm9e1_ssd_config_0, POST_KERNEL,
-+#define PM9E1_DEFINE(inst)									\
-+	static struct pm9e1_ssd_data pm9e1_ssd_data_##inst;					\
-+	PM9E1_CONFIG_I3C(inst);									\
-+	SENSOR_DEVICE_DT_INST_DEFINE(inst, samsung_pm9e1_ssd_init, NULL, &pm9e1_ssd_data_##inst,\
-+		&pm9e1_ssd_config_##inst, POST_KERNEL,						\
- 		CONFIG_SENSOR_INIT_PRIORITY, &samsung_pm9e1_driver_api);
-+
-+DT_INST_FOREACH_STATUS_OKAY(PM9E1_DEFINE)
--- 
-2.17.1
-
-
-From 8a741d1dee00204bf02fe90466f34332eafd90e9 Mon Sep 17 00:00:00 2001
+From f647b22e542476670f0ba9b2f136de0bce7d60d3 Mon Sep 17 00:00:00 2001
 From: Ederson de Souza <ederson.desouza@intel.com>
 Date: Fri, 5 Jan 2024 13:29:20 -0800
-Subject: [PATCH 38/42] kernel: Device deferred initialization
+Subject: [PATCH 35/39] kernel: Device deferred initialization
 
 Currently, all devices are initialized at boot time (following their
 level and priority order). This patch introduces deferred
@@ -5201,10 +4918,10 @@ index e4637d3af..e41301956 100644
 2.17.1
 
 
-From 58c35ffb1b16669c212ed6aa4dc2f225368e4647 Mon Sep 17 00:00:00 2001
+From 87d6e67de167a8f5dce46a5f7f75affb39ebdeff Mon Sep 17 00:00:00 2001
 From: Ederson de Souza <ederson.desouza@intel.com>
 Date: Fri, 5 Jan 2024 13:33:25 -0800
-Subject: [PATCH 39/42] tests/kernel/device: Add tests for device deferred init
+Subject: [PATCH 36/39] tests/kernel/device: Add tests for device deferred init
 
 Ensure that devices are not ready before calling `device_init()`, but
 are after the call.
@@ -5365,10 +5082,10 @@ index 4c02a52ce..437f2ae05 100644
 2.17.1
 
 
-From 84e38bc682224a3dd1ecd32f868d6e2d78992bac Mon Sep 17 00:00:00 2001
+From 1dbd269449cf3f627e17cf5cfc9fc5038f19e32b Mon Sep 17 00:00:00 2001
 From: Adrien Ricciardi <aricciardi@baylibre.com>
 Date: Wed, 15 May 2024 11:28:34 +0200
-Subject: [PATCH 40/42] sys: util: Add SIZEOF_FIELD() macro
+Subject: [PATCH 37/39] sys: util: Add SIZEOF_FIELD() macro
 
 This macro allows to know the size of a struct member at compile time.
 
@@ -5432,10 +5149,10 @@ index 3ae9778ae..1299d5567 100644
 2.17.1
 
 
-From 4887468ffb476ca52158f48e1b480b177517b3d6 Mon Sep 17 00:00:00 2001
+From c4e0a779032f099198530e05ac4ef0e2566d52a2 Mon Sep 17 00:00:00 2001
 From: Alvis Sun <yfsun@nuvoton.com>
 Date: Mon, 7 Oct 2024 18:26:53 +0800
-Subject: [PATCH 41/42] soc: nuvoton: reg: add i3c target registers and soc
+Subject: [PATCH 38/39] soc: nuvoton: reg: add i3c target registers and soc
  functions
 
 As title.
@@ -5559,10 +5276,10 @@ index 93b5d601c..143aad6b5 100644
 2.17.1
 
 
-From 4adec2473bfdadbf4e7e0905888c86fc5eb77870 Mon Sep 17 00:00:00 2001
+From 7b46816b1c5e13007b0f23ae530e56e31594fae9 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Fri, 1 Nov 2024 16:40:27 +0800
-Subject: [PATCH 42/42] board: npcx: remove CONFIG_PINCTRL from defconfig of
+Subject: [PATCH 39/39] board: npcx: remove CONFIG_PINCTRL from defconfig of
  npcx boards
 
 The CONFIG_PINCTRL is removed from the board's defconfig files.

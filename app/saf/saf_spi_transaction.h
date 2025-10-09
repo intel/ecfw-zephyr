@@ -41,4 +41,6 @@ struct saf_spi_transaction {
 	uint8_t mode;
 };
 
+int saf_spi_init(uint8_t slave_index);
+
 #endif /* __SAF_SPI_TRANSACTION_H__ */

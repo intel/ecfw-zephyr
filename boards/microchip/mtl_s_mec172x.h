@@ -7,6 +7,7 @@
 #include <soc.h>
 #include "mec172x_pin.h"
 #include "common_mec172x.h"
+#include "board.h"
 
 #ifndef __MEC172x_MTL_S__
 #define __MEC172x_MTL_S__
@@ -44,6 +45,11 @@ enum platform_skus {
 #define BRD_ID_MTL_S_HSIO_RVP		0x27u
 #define BRD_ID_MTL_S_SODIMM_2DPC_CRB		0x29u
 #define BRD_ID_MTL_S_uATX_6L_CRB		0x2A
+
+/* since the ARL HX DT design remains same as MTL S, adding the board
+ * of ARL HX DT sku here
+ */
+#define BRD_ID_ARL_HX_DT_RVP7		0x32u
 
 /* I2C addresses */
 #define EEPROM_DRIVER_I2C_ADDR          0x50
@@ -156,7 +162,9 @@ enum platform_skus {
 
 /* Device instance names */
 #define I2C_BUS_0			DT_NODELABEL(i2c_smb_0)
+#if DT_NODE_HAS_STATUS(DT_NODELABEL(i2c_smb_1), okay)
 #define I2C_BUS_1			DT_NODELABEL(i2c_smb_1)
+#endif
 #define PS2_KEYBOARD			DT_NODELABEL(ps2_0)
 #define PS2_MOUSE			DT_NODELABEL(ps2_0)
 #define ESPI_0				DT_NODELABEL(espi0)
@@ -175,8 +183,10 @@ enum platform_skus {
 #define VIRTUAL_BAT_INIT_POS		1
 #define VIRTUAL_DOCK_INIT_POS		1
 
-#define TIPD_PORT_0_I2C_ADDR	0x23U
-#define TIPD_PORT_1_I2C_ADDR	0x27U
+#define TIPD_PORT_0_I2C_ADDR	((get_board_id() == BRD_ID_MTL_S_SODIMM_1DPC_CRB) ? \
+					0x20U : 0x23U)
+#define TIPD_PORT_1_I2C_ADDR	((get_board_id() == BRD_ID_MTL_S_SODIMM_1DPC_CRB) ? \
+					0x24U : 0x27U)
 #define TIPD_PORT_2_I2C_ADDR	0x21U
 #define TIPD_PORT_3_I2C_ADDR	0x25U
 
@@ -195,4 +205,5 @@ enum platform_skus {
 #define TIPD_UCSI_MINOR_VERSION 0x0
 #define TIPD_UCSI_SUB_MINOR_VERSION 0x0
 
+#define UCSI_VERSION_DEFAULT	UCSI_VERSION_2_0
 #endif /* __MEC172x_MTL_S__ */

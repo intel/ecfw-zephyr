@@ -33,31 +33,77 @@ LOG_MODULE_DECLARE(board, CONFIG_BOARD_LOG_LEVEL);
 /* APP-owned gpios */
 struct gpio_ec_config mecc172x_cfg[] = {
 	{ PM_SLP_SUS,		GPIO_INPUT },
-	{ EC_SPI_CS1_N,		GPIO_OUTPUT_HIGH},
-	{ EC_GPIO_011,		GPIO_INPUT },
+	/* Confirmed no secondary SPI flash for SAF, make it disconnected */
+	{ EC_SPI_CS1_N,		GPIO_DISCONNECTED},
+	/* Mic privacy feature not enabled */
+	{ EC_GPIO_011,		GPIO_DISCONNECTED },
 	{ ATX_DETECT,		GPIO_INPUT },
-	{ KBD_BKLT_CTRL,	GPIO_INPUT },
-	{ EC_GPIO_015,		GPIO_INPUT },
+	/* Not used, consumes 0.080 mA*/
+	{ EC_GPIO_014,	GPIO_DISCONNECTED },
+	/* No batttery led*/
+	{ EC_GPIO_015,		GPIO_DISCONNECTED },
+	/* KSI0 */
+	{ EC_GPIO_017,		GPIO_DISCONNECTED },
+	{ EC_GPIO_020,		GPIO_DISCONNECTED },
+	/* KSI */
+	{ EC_GPIO_021,		GPIO_DISCONNECTED },
+	/* STD ADP presence not required */
+	{ EC_GPIO_024,		GPIO_DISCONNECTED },
+	/* Batt id not required */
+	{ EC_GPIO_025,		GPIO_DISCONNECTED },
+	/* KSI pins */
+	{ EC_GPIO_026,		GPIO_DISCONNECTED },
+	{ EC_GPIO_027,		GPIO_DISCONNECTED },
+	{ EC_GPIO_030,		GPIO_DISCONNECTED },
+	{ EC_GPIO_031,		GPIO_DISCONNECTED },
+	{ EC_GPIO_032,		GPIO_DISCONNECTED },
+	{ EC_GPIO_034,		GPIO_DISCONNECTED },
+	/* DG2 not required */
+	{ EC_GPIO_036,		GPIO_DISCONNECTED },
+	/* KSI pin*/
+	{ EC_GPIO_040,		GPIO_DISCONNECTED },
+#ifndef CONFIG_LED
+	{ KBD_BKLT_CTRL,	GPIO_DISCONNECTED },
+#endif
 	{ POWER_STATE,		GPIO_OUTPUT_HIGH },
 	{ EC_GPIO_023,		GPIO_INPUT },
-	{ EC_GPIO_025,		GPIO_INPUT },
 	{ SMC_LID,		GPIO_INPUT },
-	{ EC_GPIO_036,		GPIO_INPUT },
 	{ SYS_PWROK,		GPIO_OUTPUT_LOW | GPIO_OPEN_DRAIN },
+	/* CR strap */
+	{ EC_GPIO_045,		GPIO_DISCONNECTED },
+	/* KSO pins / BCM pins not used */
+	{ EC_GPIO_046,		GPIO_DISCONNECTED },
 	{ SLP_S0_PLT_EC_N,	GPIO_INPUT },
-	{ EC_GPIO_052,		GPIO_INPUT },
+	{ EC_GPIO_052,		GPIO_DISCONNECTED },
 	{ ALL_SYS_PWRGD,	GPIO_INPUT },
 	{ FAN_PWR_DISABLE_N,	GPIO_OUTPUT_HIGH },
 	{ KBC_SCROLL_LOCK,	GPIO_OUTPUT_LOW },
-	{ EC_GPIO_067,		GPIO_INPUT },
-	{ EC_GPIO_100,		GPIO_INPUT },
+	/* eSPI Alert pin not used in favor of eSPI in-band alert */
+	{ EC_GPIO_063,		GPIO_DISCONNECTED },
+	/* No battery status */
+	{ EC_GPIO_064,		GPIO_DISCONNECTED },
+	/* No Mic privacy switch */
+	{ EC_GPIO_100,		GPIO_DISCONNECTED },
 	{ PCH_PWROK,		GPIO_OUTPUT_LOW },
+	/* KSCAN */
+	{ EC_GPIO_112,		GPIO_DISCONNECTED },
+	{ EC_GPIO_113,		GPIO_DISCONNECTED },
+	{ EC_GPIO_120,		GPIO_DISCONNECTED },
+	{ EC_GPIO_121,		GPIO_DISCONNECTED },
+	{ EC_GPIO_122,		GPIO_DISCONNECTED },
+	{ EC_GPIO_123,		GPIO_DISCONNECTED },
+	{ EC_GPIO_124,		GPIO_DISCONNECTED },
+	{ EC_GPIO_125,		GPIO_DISCONNECTED },
+	{ EC_GPIO_126,		GPIO_DISCONNECTED },
 	{ WAKE_SCI,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
-	{ DNX_FORCE_RELOAD_EC,	GPIO_INPUT },
 	{ KBC_CAPS_LOCK,	GPIO_OUTPUT_LOW },
 	{ TYPEC_EC_SMBUS_ALERT_0_R,	GPIO_INPUT },
-	/* PM_BATLOW NA for S platfroms, so make it input */
-	{ PM_BATLOW,		GPIO_INPUT },
+	/* PM_BATLOW NA for S platforms */
+	{ EC_GPIO_144,		GPIO_DISCONNECTED },
+	/* KSCAN */
+	{ EC_GPIO_151,		GPIO_DISCONNECTED },
+	{ EC_GPIO_152,		GPIO_DISCONNECTED },
+	/* 0.040 mA contribution */
 	{ CATERR_LED_DRV,	GPIO_INPUT },
 	{ CS_INDICATE_LED,	GPIO_OUTPUT_LOW },
 	{ PS_ON_IN_EC_N,	GPIO_INPUT },
@@ -65,21 +111,23 @@ struct gpio_ec_config mecc172x_cfg[] = {
 	{ PWRBTN_EC_IN_N,	GPIO_INPUT | GPIO_INT_EDGE_BOTH },
 	{ PS_ON_OUT,		GPIO_OUTPUT_HIGH },
 	{ CPU_C10_GATE,		GPIO_INPUT },
+	/* SMI no longer supported */
 	{ EC_SMI,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
 	{ PM_SLP_S0_CS,		GPIO_INPUT },
 	{ RECOVERY_INDICATOR_N,	GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
 	{ WAKE_CLK,		GPIO_INPUT },
-/* <work around> Volup/Down requires internal pull up because external
- * pull up is on wrong power rail, causing auto wake in connected standby.
- */
 	{ VOL_UP,		GPIO_INPUT | GPIO_INT_EDGE_BOTH},
-	{ TOP_SWAP_OVERRIDE_GPIO,	GPIO_OUTPUT },
+	{ TOP_SWAP_OVERRIDE_GPIO,	GPIO_OUTPUT_LOW },
 	{ VOL_DOWN,		GPIO_INPUT | GPIO_INT_EDGE_BOTH},
 	{ PROCHOT,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
 	{ EC_M_2_SSD_PLN,	GPIO_OUTPUT_HIGH },
 	{ EC_S0IX_ENTRY_REQ,		GPIO_INPUT},
-	{ EC_S0IX_ENTRY_ACK,		GPIO_OUTPUT_HIGH},
-	{ EC_GPIO_036,		GPIO_DISCONNECTED },
+	{ EC_S0IX_ENTRY_ACK,		GPIO_OUTPUT_LOW},
+#ifdef CONFIG_DNX_EC_ASSISTED_TRIGGER
+	{ DNX_FORCE_RELOAD_EC,	GPIO_OUTPUT_LOW},
+#else
+	{ DNX_FORCE_RELOAD_EC,	GPIO_DISCONNECTED},
+#endif
 };
 
 /* APP-owned GPIOs for MTL-S CRB */
@@ -155,15 +203,17 @@ void board_config_io_buffer(void)
 {
 	int ret;
 
-	/* PS2 requires additional configuration not possible in pinmux */
-	ret = gpio_interrupt_configure_pin(PS2_MB_DATA, GPIO_INT_EDGE_FALLING);
-	if (ret) {
-		LOG_ERR("Failed to enable PS2 MB interrupt");
-	}
-
-	ret = gpio_interrupt_configure_pin(PS2_KB_DATA, GPIO_INT_EDGE_FALLING);
-	if (ret) {
-		LOG_ERR("Failed to enable PS2 KB interrupt");
+	/* PS2 requires additional configuration not possible via device tree */
+	if (IS_ENABLED(CONFIG_PS2_KEYBOARD)) {
+		ret = gpio_interrupt_configure_pin(PS2_KB_DATA, GPIO_INT_EDGE_FALLING);
+		if (ret) {
+			LOG_ERR("Failed to enable PS2 KB interrupt");
+		}
+	} else if (IS_ENABLED(CONFIG_PS2_MOUSE)) {
+		ret = gpio_interrupt_configure_pin(PS2_MB_DATA, GPIO_INT_EDGE_FALLING);
+		if (ret) {
+			LOG_ERR("Failed to enable PS2 MB interrupt");
+		}
 	}
 }
 
@@ -184,6 +234,7 @@ void update_platform_sku_type(void)
 	case BRD_ID_MTL_S_HSIO_RVP:
 	case BRD_ID_MTL_S_SODIMM_2DPC_CRB:
 	case BRD_ID_MTL_S_uATX_6L_CRB:
+	case BRD_ID_ARL_HX_DT_RVP7:
 		platformskutype = PLATFORM_MTL_S_CRB_SKUs;
 		break;
 	default:
@@ -211,12 +262,13 @@ int board_init(void)
 		return ret;
 	}
 
+#ifdef I2C_BUS_1
 	LOG_WRN("%s about to initialize i2c1", __func__);
 	ret = i2c_hub_config(I2C_1);
 	if (ret) {
 		return ret;
 	}
-
+#endif
 	LOG_WRN("%s about to read board id", __func__);
 	ret = read_board_id();
 	if (ret) {
@@ -247,6 +299,13 @@ int board_init(void)
 	if (espihub_boot_mode() == FLASH_BOOT_MODE_MAF) {
 		gpio_force_configure_pin(RSMRST_PWRGD_MAF_P, GPIO_INPUT);
 		gpio_force_configure_pin(PM_RSMRST_MAF_P, GPIO_OUTPUT_HIGH);
+		/* LPM optimizations, cannot be done via dts due to QMSPI HW block for SAF */
+		gpio_force_configure_pin(PM_RSMRST_G3SAF_P, GPIO_DISCONNECTED);
+		gpio_force_configure_pin(EC_GPIO_002, GPIO_DISCONNECTED);
+		gpio_force_configure_pin(EC_GPIO_056, GPIO_DISCONNECTED);
+		gpio_force_configure_pin(EC_GPIO_223, GPIO_DISCONNECTED);
+		gpio_force_configure_pin(EC_GPIO_224, GPIO_DISCONNECTED);
+		gpio_force_configure_pin(EC_GPIO_016, GPIO_DISCONNECTED);
 	} else {
 		gpio_configure_pin(RSMRST_PWRGD_G3SAF_P, GPIO_INPUT);
 		gpio_configure_pin(PM_RSMRST_G3SAF_P, GPIO_OUTPUT_LOW);
@@ -265,7 +324,9 @@ int board_init(void)
 		break;
 	}
 
+#ifdef CONFIG_PS2
 	board_config_io_buffer();
+#endif
 
 	return 0;
 }

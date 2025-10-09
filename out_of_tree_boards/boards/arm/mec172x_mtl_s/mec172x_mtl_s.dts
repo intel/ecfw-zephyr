@@ -27,7 +27,8 @@
 		i2c-0 = &i2c_smb_0;
 		i2c1 = &i2c_smb_1;
 		i2c7 = &i2c_smb_2;
-
+		espitaf = &espi_saf0;
+		spi0 = &spi0;
 	};
 
 	zephyr,user {

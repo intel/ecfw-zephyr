@@ -32,6 +32,7 @@ config SAF_SPI_FREQ_MHZ
 
 config SAF_ENABLE_XIP
 	bool "Enable XIP when supported"
+	depends on SPI
 	depends on ESPI_SAF
 	help
 	  Indicate SPI flash has no continuous read enabled by default.
@@ -39,6 +40,7 @@ config SAF_ENABLE_XIP
 choice
 	prompt "Select your SAF SPI flash device"
 	default SAF_SPI_WINBOND
+	depends on SPI
 	depends on ESPI_SAF
 	help
 	 Select your SPI flash device vendor to allow to select correct

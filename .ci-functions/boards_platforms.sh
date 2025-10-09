@@ -12,8 +12,7 @@ declare -a S03=("mtlp_mec172x_card"	"mec172xmodular_assy6930"	"")
 
 declare -a SUPPORTED_PLATFORMS=( \
 	# Regular RVP
-	"R01" "R04" "R05" "R06" \
+	"R05" "R06" \
 	# MECC enablement
-	"S03"
 	# Special binaries
 	)

@@ -4,3 +4,4 @@
 config BOARD_MEC172X_PTL_UH
 	bool "Intel MEC172X PTL UH RVP board"
 	depends on SOC_MEC172X_NSZ
+

@@ -37,6 +37,8 @@
 #define WRITE_VOLATILE_CFG_OPCODE      0x81U
 
 /* Macronix SPI commands */
+#define MXIC_SECTOR_ERASE_OPCODE       0x21U
+#define MXIC_QUAD_WRITE_DATA_OPCODE    0x02U
 #define MXIC_SAF_POLL_MASK             0xfff3U
 
 /* Map opcodes based on SPI flash capacity, since first require use 2-byte

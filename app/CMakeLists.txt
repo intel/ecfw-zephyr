@@ -103,19 +103,7 @@ target_sources_ifdef(CONFIG_ESPI_PERIPHERAL_8042_KBC app
     ${CMAKE_CURRENT_LIST_DIR}/kbchost/keyboard_utility.h
     )
 
-target_sources_ifdef(CONFIG_ESPI_SAF app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/saf/saf_config.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/saf/saf_config.h
-    )
-
-target_sources_ifdef(CONFIG_SAF_SPI_WINBOND app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/saf/saf_spi_winbond.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/saf/saf_spi_winbond.h
-    )
+include(${CMAKE_CURRENT_LIST_DIR}/saf/CMakeLists.txt)
 
 target_include_directories(app
     PRIVATE

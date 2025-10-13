@@ -9,6 +9,7 @@ declare -a R06=("ptl_uh"			"mec172x_ptl_uh"			"")
 
 #               Platform (folder name)  Board config               Additional cfg
 declare -a S03=("mtlp_mec172x_card"	"mec172xmodular_assy6930"	"")
+declare -a S07=("ptl_npcx4_card"	"npcx4m8f_ptl"			"")
 
 declare -a SUPPORTED_PLATFORMS=( \
 	# Regular RVP

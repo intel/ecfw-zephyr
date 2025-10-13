@@ -1,0 +1,222 @@
+/*
+ * Copyright (c) 2024 Intel Corporation.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <nuvoton/npcx4m8f.dtsi>
+#include "npcx4m8f_ptl-pinctrl.dtsi"
+
+/ {
+	model = "PTL plus Nuvoton NPCX4M8F evaluation board";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,console = &uart1;
+		zephyr,flash = &flash0;
+	};
+
+	aliases {
+		i2c0 = &i2c2_0;
+		i2c1 = &i2c0_0;
+		ssd-i3c-bus = &i3c2;
+		ssd-i3c-dev = &i3c_dev1;
+		pwm0 = &pwm6;
+		watchdog0 = &twd0;
+		peci-0 = &peci0;
+		taf-flash = &shd_flash1;
+		espitaf = &espi_taf;
+		spi-flash0 = &qspi_fiu1;
+		ps2-port0 = &ps2_channel0;
+	};
+
+	leds-pwm {
+		compatible = "pwm-leds";
+		pwm_led0_green: pwm_led_0 {
+			pwms = <&pwm6 0 PWM_MSEC(20) PWM_POLARITY_INVERTED>;
+			label = "User D7 green";
+		};
+	};
+
+	power-states {
+		suspend_to_idle2: suspend-to-idle2 {
+			compatible = "zephyr,power-state";
+			power-state-name = "suspend-to-idle";
+			substate-id = <0>;
+			min-residency-us = <300000>;
+		};
+	};
+};
+
+/* Overwrite default device properties with overlays in board dt file here. */
+&uart1 {
+	status = "okay";
+	current-speed = <115200>;
+	/* Use UART1_SL2 ie. PIN64.65 */
+	pinctrl-0 = <&uart1_2_sin_gp64 &uart1_2_sout_gp65>;
+	pinctrl-names = "default";
+};
+
+/* Cannot use same UART HW block for BIOS logs
+ * Need to match SIO_CLK to main clock
+ */
+&host_uart {
+	compatible = "nuvoton,npcx-host-uart";
+	status = "okay";
+	pinctrl-0 = <&huart_rxd_gp75 &huart_txd_gp86 &sio_clk_sel_90m>;
+	pinctrl-names = "default";
+};
+
+/* Slow I2C devices */
+
+&i2c2_0 {
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+	pinctrl-0 = <&i2c2_0_sda_scl_gp91_92>;
+	pinctrl-names = "default";
+
+	pca9555@22 {
+		compatible = "nxp,pca95xx";
+		reg = < 0x22 >;
+		gpio-controller;
+		#gpio-cells = < 0x2 >;
+	};
+	pca9555@23 {
+		compatible = "nxp,pca95xx";
+		reg = < 0x23 >;
+		interrupt-gpios = <&gpiod 3 GPIO_ACTIVE_LOW>; /* IO expander interrupt is GPIOD3 */
+		gpio-controller;
+		#gpio-cells = < 0x2 >;
+	};
+};
+
+&i2c_ctrl2 {
+	status = "okay";
+};
+
+/* PD */
+&i2c_ctrl0 {
+	status = "okay";
+};
+
+&i2c0_0 {
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+	pinctrl-0 = <&i2c0_0_sda_scl_gpb4_b5>;
+	pinctrl-names = "default";
+};
+
+&adc1 {
+	status = "okay";
+	/* DDR_THERM_IN, SKIN_THERM_IN, VR_THERM_IN */
+	pinctrl-0 = <&adc0_chan3_gp42 &adc0_chan1_gp44 &adc0_chan0_gp45>;
+	pinctrl-names = "default";
+};
+
+&espi0 {
+	status = "okay";
+	pinctrl-0 = <&espi_lpc_gp46_47_51_52_53_54_55_57>;
+	pinctrl-names = "default";
+};
+
+&pwm0 {
+	status = "okay";
+	pinctrl-0 = <&pwm0_gpc3>;
+	pinctrl-names = "default";
+};
+
+&tach1 {
+	status = "okay";
+	pinctrl-0 = <&ta1_1_in_gp40>;
+	pinctrl-names = "default";
+	port = <NPCX_TACH_PORT_A>;
+	sample-clk = <NPCX_TACH_FREQ_LFCLK>;
+	pulses-per-round = <2>;
+};
+
+&peci0 {
+	status = "okay";
+	pinctrl-0 = <&peci_dat_gp81>;
+	pinctrl-names = "default";
+};
+
+&pcc {
+	clock-frequency = <DT_FREQ_M(90)>; /* OFMCLK runs at 90MHz */
+	core-prescaler = <3>; /* CORE_CLK runs at 30MHz */
+	apb1-prescaler = <6>; /* APB1_CLK runs at 15MHz */
+	apb2-prescaler = <6>; /* APB2_CLK runs at 15MHz */
+	apb3-prescaler = <6>; /* APB3_CLK runs at 15MHz */
+	apb4-prescaler = <3>; /* APB4_CLK runs at 30MHz */
+};
+
+&rctl {
+	status = "okay";
+};
+
+&qspi_fiu1 {
+	status = "okay";
+	en-direct-access-2dev;
+
+	/* NOR flash */
+	shd_flash1: w25q128@1 {
+		compatible ="nuvoton,npcx-fiu-nor";
+		size = <0x10000000>;  /* 32Mbytes size in bits */
+		max-timeout = <86784>;
+		reg = <0>;
+		quad-enable-requirements = "S2B1v1";
+		enter-4byte-addr = <0xB7>;
+		status = "okay";
+
+		/* Config for npcx4 SVB board - CS0 */
+		qspi-flags = <NPCX_QSPI_SW_CS0>;
+		mapped-addr = <0x68000000>;
+		pinctrl-0 = <&fiu_ext_io0_io1_clk_cs_gpa4_96_a2_a0
+			     &fiu_ext_quad_io2_io3_gp93_a7
+			     &ext_flash_tris_off>;
+		pinctrl-names = "default";
+
+	};
+};
+
+&espi_taf {
+	mapped-addr = <0x68000000>;
+	max-read-sz = "NPCX_ESPI_TAF_MAX_READ_REQ_64B";
+	erase-sz = "NPCX_ESPI_TAF_ERASE_BLOCK_SIZE_4KB";
+	status = "okay";
+};
+
+&ps2_channel0 {
+	status = "okay";
+	pinctrl-0 = <&ps2_0_dat_clk_gp67_70>;
+	pinctrl-names = "default";
+};
+
+&ps2_0_dat_clk_gp67_70 {
+	drive-open-drain;
+};
+
+&i3c2 {
+	status = "okay";
+	i3c-scl-hz = <12500000>;
+	i3c-od-scl-hz = <4170000>;
+	pinctrl-0 = <&i3c3_sda_scl_gpf4_f5>;
+	pinctrl-names = "default";
+	/* required for Zephyr 4.1 with I3C target support */
+	bcr = <0x67>; /* Set for controller mode */
+
+	/* SSD */
+	i3c_dev1: i3c-dev1@d0fefff1fd10 {
+		compatible = "samsung,pm9e1";
+		reg = <0x0 0x0000d0fe 0xfff1fd10>;
+		status = "okay";
+	};
+
+	/* LSMOD sensor using dummy driver for test purposes */
+	i3c_dev2: i3c-dev2@208006c100b {
+		compatible = "samsung,pm9e1";
+		reg = <0x0 0x00000208 0x006c100b>;
+		status = "okay";
+	};
+};

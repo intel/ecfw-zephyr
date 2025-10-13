@@ -93,6 +93,15 @@ target_sources_ifdef(CONFIG_SOC_SERIES_MEC172X app
     PUBLIC
     )
 
+target_sources_ifdef(CONFIG_SOC_NPCX4M8F app
+    PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/gpio_npcx.c
+    ${CMAKE_CURRENT_LIST_DIR}/fan_npcx.c
+    ${CMAKE_CURRENT_LIST_DIR}/led.c
+    ${CMAKE_CURRENT_LIST_DIR}/acpi_npcx.c
+    PUBLIC
+    )
+
 target_include_directories(app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}

@@ -1,0 +1,12 @@
+[SPI]
+ECOffsetBytes = 0x4000
+ECRegionSizeKB = 512
+ECFWSizeKB = 224
+
+[IMAGE "0"]
+ImageLocation0 = 0x0
+FwBinFile = zephyr.bin
+
+[IMAGE "1"]
+ImageLocation1 = 0x3C000
+FwBinFile = zephyr.bin

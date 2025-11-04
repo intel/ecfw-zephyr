@@ -63,4 +63,14 @@ target_include_directories(app
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mec172x_mecc
     )
 
+elseif(CONFIG_SOC_SERIES_NPCX4)
+
+include(${CMAKE_CURRENT_LIST_DIR}/nuvoton/npcx4m8f_mecc/CMakeLists.txt)
+
+target_include_directories(app
+    PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/nuvoton
+    ${CMAKE_CURRENT_LIST_DIR}/nuvoton/npcx4m8f_mecc    )
+
 endif()

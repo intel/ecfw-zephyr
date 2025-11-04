@@ -34,7 +34,7 @@ uint8_t pd_i2c_addr_set;
  *
  */
 
-static const struct gpio_ec_config mecc_npcx9_cfg[] =  {
+static struct gpio_ec_config mecc_npcx9_cfg[] =  {
 /*      Port Signal			Config       */
 	{ PWRBTN_EC_IN_N,		GPIO_INPUT | GPIO_INT_EDGE_BOTH },
 	{ SMC_LID,			GPIO_INPUT  | GPIO_INT_EDGE_BOTH },
@@ -73,7 +73,7 @@ static const struct gpio_ec_config mecc_npcx9_cfg[] =  {
 };
 
 /* Any IO expanders pins should be defined here */
-static const struct gpio_ec_config expander_cfg[] = {
+static struct gpio_ec_config expander_cfg[] = {
 #ifdef CONFIG_GPIO_PCA95XX
 	{ SPD_PRSNT,		GPIO_INPUT },
 	{ MOD_TCSS1_DETECT,	GPIO_INPUT },
@@ -92,11 +92,11 @@ static const struct gpio_ec_config expander_cfg[] = {
 };
 
 /* This action is performed explicitly, just adding here as reference */
-static const struct gpio_ec_config mecc_npcx9_cfg_sus[] =  {
+static struct gpio_ec_config mecc_npcx9_cfg_sus[] =  {
 	{ PCH_PWROK,			GPIO_OUTPUT_LOW },
 };
 
-static const struct gpio_ec_config mecc_npcx9_cfg_res[] =  {
+static struct gpio_ec_config mecc_npcx9_cfg_res[] =  {
 	{ PCH_PWROK,			GPIO_OUTPUT_HIGH },
 };
 

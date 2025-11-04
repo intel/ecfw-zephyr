@@ -37,7 +37,7 @@ extern uint8_t boot_mode_maf;
 #endif /* CONFIG_BOARD_MEC1501MODULAR_ASSY6885 */
 
 #elif defined(CONFIG_SOC_SERIES_NPCX4)
-#if defined(CONFIG_BOARD_NPCX4M8F_EVB)
+#if defined(CONFIG_BOARD_NPCX4M8F_PTL)
 #include "npcx4m8f_aic_rvp_selection.h"
 #endif
 

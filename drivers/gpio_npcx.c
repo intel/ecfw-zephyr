@@ -134,7 +134,7 @@ int gpio_configure_pin(uint32_t port_pin, gpio_flags_t flags)
 	return 0;
 }
 
-int gpio_configure_array(const struct gpio_ec_config *gpios, uint32_t len)
+int gpio_configure_array(struct gpio_ec_config *gpios, uint32_t len)
 {
 	int ret;
 	struct gpio_port_pin pp;

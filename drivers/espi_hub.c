@@ -22,6 +22,9 @@ LOG_MODULE_REGISTER(espihub, CONFIG_ESPIHUB_LOG_LEVEL);
 #define ESPI_LTR_LATENCY		2U
 #endif
 
+/* VW enum S3 starts at 0 */
+#define SLP_SX_STATE(vw)	(vw + 3)
+
 static const struct device *espi_dev;
 static struct espihub_context hub;
 static espi_state_handler_t state_handler;
@@ -309,7 +312,7 @@ static void vwire_handler(const struct device *dev, struct espi_callback *cb,
 		case ESPI_VWIRE_SIGNAL_SLP_S3:
 		case ESPI_VWIRE_SIGNAL_SLP_S4:
 		case ESPI_VWIRE_SIGNAL_SLP_S5:
-			LOG_INF("SLP %d changed %d", event.evt_details,
+			LOG_INF("SLP %d changed to %d", SLP_SX_STATE(event.evt_details),
 				event.evt_data);
 			if (state_handler) {
 				state_handler(event.evt_details,

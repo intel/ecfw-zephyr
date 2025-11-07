@@ -1,7 +1,7 @@
 From 3592b0f11ece89f389d6c0d73110850a0232ef34 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Mon, 21 Aug 2023 14:09:40 -0700
-Subject: [PATCH 01/40] soc: arm: microchip: mec172x: Add macro to get pin mux
+Subject: [PATCH 01/42] soc: arm: microchip: mec172x: Add macro to get pin mux
  value
 
 Add macro to read pin mux control value
@@ -32,7 +32,7 @@ index 39ed59d27..f013ba69a 100644
 From a0db96f2d008283e575c26dc9d57b52468a5e165 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Mon, 21 Aug 2023 14:51:56 -0700
-Subject: [PATCH 02/40] drivers: gpio: mec172x: Add message to warn about pins
+Subject: [PATCH 02/42] drivers: gpio: mec172x: Add message to warn about pins
  not in GPIO mode
 
 Warn about potential device tree errors for cases when driver's
@@ -85,7 +85,7 @@ index 3c89ed79c..67697b1e3 100644
 From c2bff70e3fecbf8509a4c08504485d21f29e4875 Mon Sep 17 00:00:00 2001
 From: Mulin Chao <mlchao@nuvoton.com>
 Date: Tue, 23 Jan 2024 18:43:19 -0800
-Subject: [PATCH 03/40] drivers: espi: npcx: add ESPI_OOB_CHANNEL_RX_ASYNC
+Subject: [PATCH 03/42] drivers: espi: npcx: add ESPI_OOB_CHANNEL_RX_ASYNC
  support
 
 Add CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC support in npcx espi driver.
@@ -176,7 +176,7 @@ index fc6712575..628de8426 100644
 From 9b8d9300e303aefb22c32060b11c72d5d3287a6c Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Tue, 5 Mar 2024 11:15:37 +0800
-Subject: [PATCH 04/40] drivers: espi: npcx: workaround Global Reset issue
+Subject: [PATCH 04/42] drivers: espi: npcx: workaround Global Reset issue
 
 Apply the workaround for the issue "eSPI global reset" in the
 NPCX49nF_Errata
@@ -292,7 +292,7 @@ index 628de8426..d506c1ec9 100644
 From a88028125521561b0b468b06297202ffbc9752c4 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Tue, 9 Apr 2024 14:15:26 +0800
-Subject: [PATCH 05/40] drivers: espi: npcx: support multi-byte for dp80
+Subject: [PATCH 05/42] drivers: espi: npcx: support multi-byte for dp80
 
 This CL adds multi-byte support for debug port 80 on npcx4.
 
@@ -322,7 +322,7 @@ index d746d89f9..d67f1a481 100644
 From 30817d34cb3f0069d5c84bebd4ede3b155930ef3 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 6 May 2024 15:42:54 +0800
-Subject: [PATCH 06/40] pinctrl: npcx: add nodes for Serial Port SIO clock
+Subject: [PATCH 06/42] pinctrl: npcx: add nodes for Serial Port SIO clock
  selection
 
 This commits adds required pinctrl node to provide the corresponding SIO
@@ -407,7 +407,7 @@ index 2ba0b78fd..583b5352f 100644
 From 8b7001eb493f21e9cbe00de49ccf5ba9639d6aea Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 6 May 2024 15:43:09 +0800
-Subject: [PATCH 07/40] driver: espi: npcx: enable the Serial Port
+Subject: [PATCH 07/42] driver: espi: npcx: enable the Serial Port
 
 Initialize and enable the Serial Port/Host UART when
 CONFIG_ESPI_PERIPHERAL_UART=y.
@@ -519,7 +519,7 @@ index 418106666..51802586c 100644
 From c7806332927c35c39fa85828aaf454871d6f88d9 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Mon, 22 Apr 2024 18:18:24 +0800
-Subject: [PATCH 08/40] drivers: espi: npcx: update espi taf driver
+Subject: [PATCH 08/42] drivers: espi: npcx: update espi taf driver
 
 This CL updates the read, write, erase, and get_channel_status
 implementations of NPCX chip.
@@ -1015,7 +1015,7 @@ index a8755e080..90b98cbb6 100644
 From 933a65ecf1d98dd6210844e7d7ac2055538cefa5 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Wed, 24 Apr 2024 11:25:15 +0800
-Subject: [PATCH 09/40] drivers: espi: npcx: select RING_BUFFER for p80
+Subject: [PATCH 09/42] drivers: espi: npcx: select RING_BUFFER for p80
 
 This CL adds automatic select CONFIG_RING_BUFFER for port 80 multi-byte.
 
@@ -1044,7 +1044,7 @@ index d67f1a481..035db2415 100644
 From b5d387d5f279bc2e2208e65d4188bfd71932df4c Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Thu, 30 May 2024 13:45:47 +0800
-Subject: [PATCH 10/40] drivers: espi: npcx: add support 66MHz eSPI clock
+Subject: [PATCH 10/42] drivers: espi: npcx: add support 66MHz eSPI clock
 
 This CL adds support 66MHz eSPI clock for NPCX4.
 
@@ -1085,7 +1085,7 @@ index 89d46c367..302aff132 100644
 From 015a6073a933a5722abb68e0e9fafc735225b0b0 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 1 Apr 2024 10:34:25 +0800
-Subject: [PATCH 11/40] driver: reset: npcx: add driver support for reset
+Subject: [PATCH 11/42] driver: reset: npcx: add driver support for reset
  controller
 
 Nuvoton NPCX chips have reset registers which allow to reset the
@@ -1686,7 +1686,7 @@ index 8c4ed132b..e12b3bc10 100644
 From 21b06523433ba49b088b085e3f937580c21c0889 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Wed, 6 Mar 2024 10:23:33 +0800
-Subject: [PATCH 12/40] drivers: espi: npcx: fix warning when using
+Subject: [PATCH 12/42] drivers: espi: npcx: fix warning when using
  ESPI_OOB_RX_ASYNC macro
 
 This CL prevents unused warnings when CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC
@@ -1731,7 +1731,7 @@ index 302aff132..42e559a8b 100644
 From 57060f5d454537037d097becbcbb1b78004a96c5 Mon Sep 17 00:00:00 2001
 From: Alvis Sun <yfsun@nuvoton.com>
 Date: Wed, 17 Apr 2024 11:03:50 +0800
-Subject: [PATCH 13/40] dts: arm: nuvoton: add I3C device nodes
+Subject: [PATCH 13/42] dts: arm: nuvoton: add I3C device nodes
 
 Add I3C device nodes.
 
@@ -1843,7 +1843,7 @@ index 9070b4a71..1a02a70d2 100644
 From 7fbef831827ab0423ec4826644f99c45061f679c Mon Sep 17 00:00:00 2001
 From: Alvis Sun <yfsun@nuvoton.com>
 Date: Wed, 17 Apr 2024 11:04:47 +0800
-Subject: [PATCH 14/40] boards: nuvoton: npcx4m8f_evb: add i3c pinctrl
+Subject: [PATCH 14/42] boards: nuvoton: npcx4m8f_evb: add i3c pinctrl
 
 Add I3C pinmux configuration.
 
@@ -1883,7 +1883,7 @@ index a34002e8b..b90d94b0c 100644
 From 444e125bddc1968edf9f00dc50ec66a4e6c46180 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Tue, 23 Apr 2024 14:32:36 +0800
-Subject: [PATCH 15/40] driver: uart: npcx: fix coding style
+Subject: [PATCH 15/42] driver: uart: npcx: fix coding style
 
 Fix the coding style by clang-format tool.
 
@@ -2064,7 +2064,7 @@ index 979cbd038..a698130ff 100644
 From 7b4859ed1e6d8250220e6b7c35950335e180bce1 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Tue, 23 Apr 2024 14:33:09 +0800
-Subject: [PATCH 16/40] drivers: uart: npcx: add asychronous API support
+Subject: [PATCH 16/42] drivers: uart: npcx: add asychronous API support
 
 This commit implement the UART asynchronous API mode support.
 When the API is used, the UART hardware cooperates with the DMA (MDMA)
@@ -3018,7 +3018,7 @@ index 01b4a365e..214eadd47 100644
 From 0ced59561750d9eb8d4bae91bfea073efdeaa7a7 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Wed, 24 Apr 2024 10:31:54 +0800
-Subject: [PATCH 17/40] drivers: uart: npcx: extend the UART baudrate support
+Subject: [PATCH 17/42] drivers: uart: npcx: extend the UART baudrate support
 
 1. support the baudrate = 3MHz.
 2. add baudrate = 115200 setting when UART source clock = 25/30/48/50 MHz.
@@ -3081,7 +3081,7 @@ index 8e25da50d..085f7cccd 100644
 From 31f12cd789c2287dc480f7b3780b2f6b089a3ac4 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 15 Jul 2024 10:17:52 +0800
-Subject: [PATCH 18/40] drivers: espi: host_subs: npcx: fix LDN register
+Subject: [PATCH 18/42] drivers: espi: host_subs: npcx: fix LDN register
  definition of PMCH
 
 The register offset definition of the I/O port Data Base Address
@@ -3144,7 +3144,7 @@ index 51802586c..d92516fa0 100644
 From 91a9750d3025dfffd9422b5c5564d0e1bbcb23c1 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Fri, 19 Jul 2024 09:59:12 +0800
-Subject: [PATCH 19/40] soc: npcx: scfg: select host interface type in global
+Subject: [PATCH 19/42] soc: npcx: scfg: select host interface type in global
 
 The Host Interface Type in the DEVCNT register sets the HIF type
 (either eSPI or LPC).
@@ -3218,7 +3218,7 @@ index a5bb9adad..e30de1295 100644
 From 8bc454b508964d100d657e0bfbee9bb908529334 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Tue, 13 Aug 2024 19:47:13 -0700
-Subject: [PATCH 20/40] drivers: espi: npcx: Fix TAF driver dependency
+Subject: [PATCH 20/42] drivers: espi: npcx: Fix TAF driver dependency
 
 Set correct dependency for TAF driver protected regions
 
@@ -3255,7 +3255,7 @@ index 035db2415..9a731426a 100644
 From 259b2c0f9f3cef7958560ae5161e729d70dcbf57 Mon Sep 17 00:00:00 2001
 From: Vijay Hiremath <vijay.p.hiremath@intel.com>
 Date: Thu, 7 Nov 2024 18:48:29 -0800
-Subject: [PATCH 21/40] eSPI: NPCX/ITE: Enable conditional virtual wire valid
+Subject: [PATCH 21/42] eSPI: NPCX/ITE: Enable conditional virtual wire valid
  bit check
 
 On the new Intel SoC, the "Valid" bit of the Virtual Wire is set only for
@@ -3354,7 +3354,7 @@ index 9233b1708..8c5ebb33c 100644
 From fd074000504b7d47bd816070f27cfbbc4d85546f Mon Sep 17 00:00:00 2001
 From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
 Date: Mon, 9 May 2022 10:59:51 +0530
-Subject: [PATCH 22/40] drivers: peci: increased peci write time delay 2ms
+Subject: [PATCH 22/42] drivers: peci: increased peci write time delay 2ms
 
 peci delay is increased to 2ms as peci write is failing with 1ms
 
@@ -3387,7 +3387,7 @@ index e03181e0f..202d0f0bb 100644
 From eaf72d6f8f3a3aca8077efcdd2cb57d234179898 Mon Sep 17 00:00:00 2001
 From: NagarajuGundimi <nagaraju.gundimi@intel.com>
 Date: Thu, 29 Dec 2022 03:29:54 -0500
-Subject: [PATCH 23/40] ite: Defined GPIO ports and delta changes for Zephyr
+Subject: [PATCH 23/42] ite: Defined GPIO ports and delta changes for Zephyr
  v3.2
 
 Defined GPIO ports and delta changes for Zephyr v3.2
@@ -3610,7 +3610,7 @@ index 000000000..38290ba40
 From b3312c4c59791500d9f90e806484231f6d456320 Mon Sep 17 00:00:00 2001
 From: NagarajuGundimi <nagaraju.gundimi@intel.com>
 Date: Thu, 29 Dec 2022 04:29:40 -0500
-Subject: [PATCH 24/40] ite: eSPI: WA for ACPI IBF flag clear at driver level
+Subject: [PATCH 24/42] ite: eSPI: WA for ACPI IBF flag clear at driver level
 
 WA for ACPI IBF flag clear due to PM1DI read at driver.
 
@@ -3642,7 +3642,7 @@ index e8bb5d581..0a41b24b1 100644
 From fde8ca97ab780d82681575bba95b4242d716ed69 Mon Sep 17 00:00:00 2001
 From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
 Date: Tue, 29 Nov 2022 20:52:52 +0530
-Subject: [PATCH 25/40] drivers: espi: Nuvoton: Do not read Input Buffer
+Subject: [PATCH 25/42] drivers: espi: Nuvoton: Do not read Input Buffer
 
 Reading the HIPMDI register will clear the IBF bit in ACPI
 and Host command handling. This will end up breaking the EC
@@ -3701,7 +3701,7 @@ index d92516fa0..0eacd6911 100644
 From eea0e4a9320ea76b104c5b41375e3699c48ef73c Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Fri, 15 Mar 2024 17:22:23 -0700
-Subject: [PATCH 26/40] boards: mec172x: Do not enable KSCAN PM device pinctrl
+Subject: [PATCH 26/42] boards: mec172x: Do not enable KSCAN PM device pinctrl
 
 Remove sleep pinctrl from KSCAN device
 
@@ -3766,7 +3766,7 @@ index d355f19af..631f7ca15 100644
 From 86fb6ab1a6e620ffa2fd9b99785deaef6c945b61 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Mon, 15 Apr 2024 12:15:52 -0700
-Subject: [PATCH 27/40] soc: arm: npcx: ECST add support to generated
+Subject: [PATCH 27/42] soc: arm: npcx: ECST add support to generated
  bootloader header
 
 Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
@@ -3922,7 +3922,7 @@ index ab1aad770..f22f4011a 100755
 From 1ba2340ffd66c29b5eaf5952a81f149d85921762 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Thu, 11 Jan 2024 21:54:10 -0800
-Subject: [PATCH 28/40] boards: arm: npcx: Allow to generate EC region SPI
+Subject: [PATCH 28/42] boards: arm: npcx: Allow to generate EC region SPI
  layout
 
 Add post build command to generate EC region SPI layout
@@ -4106,7 +4106,7 @@ index 000000000..d766972ca
 From 257b825ce4d90bb31dcc7613cc57d60071fcdf79 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Tue, 23 Apr 2024 19:43:16 -0700
-Subject: [PATCH 29/40] include: drivers: espi: Postcode multibyte support
+Subject: [PATCH 29/42] include: drivers: espi: Postcode multibyte support
 
 Add structure for multi-byte support
 
@@ -4141,7 +4141,7 @@ index d2f77622f..ca04f52e0 100644
 From 846f60998feb15d90b187acbf738c5aa6a5b4063 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Thu, 11 Jul 2024 14:31:04 -0700
-Subject: [PATCH 30/40] dts: arm: nuvoton: Add support for PM3 channel as ACPI
+Subject: [PATCH 30/42] dts: arm: nuvoton: Add support for PM3 channel as ACPI
 
 Enable PM3 channel as ACPI PVT interface
 
@@ -4174,7 +4174,7 @@ index 6c9a82f01..b395c3802 100644
 From b33da47725fdeeedabc95021c3b3ca9fc56375df Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Thu, 11 Jul 2024 14:49:51 -0700
-Subject: [PATCH 31/40] drivers: espi: npcx: Add support for ACPI PVT port
+Subject: [PATCH 31/42] drivers: espi: npcx: Add support for ACPI PVT port
 
 Use PM3 channel as ACPI PVT interface
 
@@ -4313,7 +4313,7 @@ index 0eacd6911..ba692c034 100644
 From a8a0b2900ffcd608a70bc0bba7aca289289996fe Mon Sep 17 00:00:00 2001
 From: "Veturi, Sameer" <sameer.veturi@intel.com>
 Date: Mon, 7 Oct 2024 16:17:11 +0530
-Subject: [PATCH 32/40] soc: ite: ITE Zephyr fork delta changes for v3.6
+Subject: [PATCH 32/42] soc: ite: ITE Zephyr fork delta changes for v3.6
 
 ITE Zephyr fork delta changes for v3.6
 
@@ -4548,7 +4548,7 @@ index 527152601..d4fb6f68e 100644
 From 3740bf9dea6f1a16452dc8964ec572dde1f4d997 Mon Sep 17 00:00:00 2001
 From: Aditya Bhutada <aditya.bhutada@intel.com>
 Date: Mon, 14 Apr 2025 15:27:37 -0700
-Subject: [PATCH 33/40] drivers: espi: espi_mchp_xec: Fix the VW change check
+Subject: [PATCH 33/42] drivers: espi: espi_mchp_xec: Fix the VW change check
  time
 
 Adjusted the VW change check timings:
@@ -4642,7 +4642,7 @@ index a1a5acefd..67e4d9a68 100644
 From 3a76f9e41f0253cd3f5549a6166c810d93740c3e Mon Sep 17 00:00:00 2001
 From: Aditya Bhutada <aditya.bhutada@intel.com>
 Date: Mon, 14 Apr 2025 15:29:26 -0700
-Subject: [PATCH 34/40] drivers: espi: Add return value to eSPI send_vwire API
+Subject: [PATCH 34/42] drivers: espi: Add return value to eSPI send_vwire API
 
 Added note about return value to the eSPI send_vwire API in the header:
 -ETIMEDOUT & _EINVAL.
@@ -4672,7 +4672,7 @@ index ca04f52e0..985bba316 100644
 From 0aa84a11ba13809abc787044f269eae79d0bb27e Mon Sep 17 00:00:00 2001
 From: Ederson de Souza <ederson.desouza@intel.com>
 Date: Fri, 5 Jan 2024 13:29:20 -0800
-Subject: [PATCH 35/40] kernel: Device deferred initialization
+Subject: [PATCH 35/42] kernel: Device deferred initialization
 
 Currently, all devices are initialized at boot time (following their
 level and priority order). This patch introduces deferred
@@ -4921,7 +4921,7 @@ index e4637d3af..e41301956 100644
 From 4371bc4fc186863b502c2624a41876fffbae6331 Mon Sep 17 00:00:00 2001
 From: Ederson de Souza <ederson.desouza@intel.com>
 Date: Fri, 5 Jan 2024 13:33:25 -0800
-Subject: [PATCH 36/40] tests/kernel/device: Add tests for device deferred init
+Subject: [PATCH 36/42] tests/kernel/device: Add tests for device deferred init
 
 Ensure that devices are not ready before calling `device_init()`, but
 are after the call.
@@ -5085,7 +5085,7 @@ index 4c02a52ce..437f2ae05 100644
 From b2b50f480687c23a6504c6cf821ec13d857c8efd Mon Sep 17 00:00:00 2001
 From: Adrien Ricciardi <aricciardi@baylibre.com>
 Date: Wed, 15 May 2024 11:28:34 +0200
-Subject: [PATCH 37/40] sys: util: Add SIZEOF_FIELD() macro
+Subject: [PATCH 37/42] sys: util: Add SIZEOF_FIELD() macro
 
 This macro allows to know the size of a struct member at compile time.
 
@@ -5149,137 +5149,10 @@ index 3ae9778ae..1299d5567 100644
 2.17.1
 
 
-From 6945a2c6f2ec463cadf082306c86098cfa5d77f3 Mon Sep 17 00:00:00 2001
-From: Alvis Sun <yfsun@nuvoton.com>
-Date: Mon, 7 Oct 2024 18:26:53 +0800
-Subject: [PATCH 38/40] soc: nuvoton: reg: add i3c target registers and soc
- functions
-
-As title.
-
-Signed-off-by: Alvis Sun <yfsun@nuvoton.com>
----
- include/zephyr/drivers/i3c/i3c_npcx.h  | 55 ++++++++++++++++++++++++++
- soc/arm/nuvoton_npcx/common/scfg.c     | 15 +++++++
- soc/arm/nuvoton_npcx/common/soc_pins.h |  9 +++++
- 3 files changed, 79 insertions(+)
- create mode 100644 include/zephyr/drivers/i3c/i3c_npcx.h
-
-diff --git a/include/zephyr/drivers/i3c/i3c_npcx.h b/include/zephyr/drivers/i3c/i3c_npcx.h
-new file mode 100644
-index 000000000..2bd546e8e
---- /dev/null
-+++ b/include/zephyr/drivers/i3c/i3c_npcx.h
-@@ -0,0 +1,55 @@
-+/*
-+ * Copyright (c) 2020 Nuvoton Technology Corporation.
-+ *
-+ * SPDX-License-Identifier: Apache-2.0
-+ */
-+
-+#ifndef ZEPHYR_DRIVERS_I3C_I3C_NPCX_H_
-+#define ZEPHYR_DRIVERS_I3C_I3C_NPCX_H_
-+
-+#include <zephyr/device.h>
-+
-+#ifdef __cplusplus
-+extern "C" {
-+#endif
-+
-+#ifdef CONFIG_I3C_NPCX_DMA
-+
-+/**
-+ * @brief Configures the application's buffer for use in MDMA mode.
-+ *
-+ * @param dev Pointer to the device structure for the driver instance.
-+ * @param mdma_rd_buf Pointer to storage for read data
-+ * @param mdma_rd_buf_size Length of the buffer to storage for read data
-+ * @param mdma_wr_buf Pointer to the data to be written
-+ * @param mdma_wr_buf_size Length of the buffer to be written
-+ */
-+void npcx_i3c_target_set_mdma_buff(const struct device *dev, uint8_t *mdma_rd_buf,
-+				   uint16_t mdma_rd_buf_size, uint8_t *mdma_wr_buf,
-+				   uint16_t mdma_wr_buf_size);
-+
-+/**
-+ * @brief Retrieves the count of data received via MDMA.
-+ *
-+ * @param dev Pointer to the device structure for the driver instance.
-+ *
-+ * @return The number of data bytes read from the bus.
-+ */
-+uint16_t npcx_i3c_target_get_mdmafb_count(const struct device *dev);
-+
-+/**
-+ * @brief Retrieves the count of data written to the bus via MDMA.
-+ *
-+ * @param dev Pointer to the device structure for the driver instance.
-+ *
-+ * @return The number of data bytes written to the bus.
-+ */
-+uint16_t npcx_i3c_target_get_mdmatb_count(const struct device *dev);
-+
-+#endif
-+
-+#ifdef __cplusplus
-+}
-+#endif
-+
-+#endif /* ZEPHYR_DRIVERS_I3C_I3C_NPCX_H_ */
-diff --git a/soc/arm/nuvoton_npcx/common/scfg.c b/soc/arm/nuvoton_npcx/common/scfg.c
-index 6dac027cb..6d3142e7a 100644
---- a/soc/arm/nuvoton_npcx/common/scfg.c
-+++ b/soc/arm/nuvoton_npcx/common/scfg.c
-@@ -131,6 +131,21 @@ void npcx_host_interface_sel(enum npcx_hif_type hif_type)
- 	SET_FIELD(inst_scfg->DEVCNT, NPCX_DEVCNT_HIF_TYP_SEL_FIELD, hif_type);
- }
- 
-+void npcx_i3c_target_sel(uint8_t module_id, bool enable)
-+{
-+#if defined(CONFIG_SOC_SERIES_NPCX4)
-+	struct scfg_reg *inst_scfg = HAL_SFCG_INST();
-+
-+	if (enable == true) {
-+		inst_scfg->DEV_CTL3 |= NPCX_DEV_CTL3_I3C_MODE_BIT(module_id);
-+	} else {
-+		inst_scfg->DEV_CTL3 &= ~NPCX_DEV_CTL3_I3C_MODE_BIT(module_id);
-+	}
-+#else
-+	LOG_ERR("%s: i3c target select not supported yet", __func__);
-+#endif
-+}
-+
- void npcx_dbg_freeze_enable(bool enable)
- {
- 	const uintptr_t dbg_base = npcx_scfg_cfg.base_dbg;
-diff --git a/soc/arm/nuvoton_npcx/common/soc_pins.h b/soc/arm/nuvoton_npcx/common/soc_pins.h
-index 93b5d601c..143aad6b5 100644
---- a/soc/arm/nuvoton_npcx/common/soc_pins.h
-+++ b/soc/arm/nuvoton_npcx/common/soc_pins.h
-@@ -85,6 +85,15 @@ bool npcx_lvol_get_detect_level(int lvol_ctrl, int lvol_bit);
-  */
- void npcx_host_interface_sel(enum npcx_hif_type hif_type);
- 
-+/**
-+ * @brief Select the I3C module controller or target mode for the mdma
-+ *        module operation.
-+ *
-+ * @param module i3c device
-+ * @param enable true to enable target mode, false to controller mode.
-+ */
-+void npcx_i3c_target_sel(uint8_t module, bool enable);
-+
- #ifdef __cplusplus
- }
- #endif
--- 
-2.17.1
-
-
-From af23ff58119e4e1294fd0f162aab860c4814a71e Mon Sep 17 00:00:00 2001
+From d22afe0b99680d8b638a316cd1ddd8b0b3b2c6fd Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Fri, 1 Nov 2024 16:40:27 +0800
-Subject: [PATCH 39/40] board: npcx: remove CONFIG_PINCTRL from defconfig of
+Subject: [PATCH 38/42] board: npcx: remove CONFIG_PINCTRL from defconfig of
  npcx boards
 
 The CONFIG_PINCTRL is removed from the board's defconfig files.
@@ -5484,10 +5357,10 @@ index de9ec9205..396e3146f 100644
 2.17.1
 
 
-From 305f197bc11d25ff9e01934dffc615e97af51476 Mon Sep 17 00:00:00 2001
+From 07941634e605ca1b97f9b3d09111c67ce5d435e6 Mon Sep 17 00:00:00 2001
 From: Alvis Sun <yfsun@nuvoton.com>
 Date: Wed, 17 Apr 2024 10:28:16 +0800
-Subject: [PATCH 40/40] drivers: clock_control: npcx: add MCLKD as i3c source
+Subject: [PATCH 39/42] drivers: clock_control: npcx: add MCLKD as i3c source
  clock
 
 1. The only valid values of MCLKD clock frequency
@@ -5590,6 +5463,3763 @@ index d43a70d45..4ec4c591b 100644
  
  /**
   * @brief Function to notify clock driver that backup the counter value of
+-- 
+2.17.1
+
+
+From 56b54981dfe223167b1b4e293efd3834a6e88c9a Mon Sep 17 00:00:00 2001
+From: Alvis Sun <yfsun@nuvoton.com>
+Date: Mon, 22 Apr 2024 14:24:44 +0800
+Subject: [PATCH 40/42] drivers: i3c: npcx: introduce NPCX I3C driver
+
+This implements basic driver to utilize the I3C IP block
+on NPCX.
+
+1. I3C mode: Main controller mode only.
+2. Transfer: Support SDR only.
+3. IBI: Support Hot-Join, IBI(MDB).
+   Controller request is not supported.
+4. Support 3 I3C modules:
+   I3C1(3.3V), I3C2(1.8V, espi mode), (I3C3 1.8V or 3.3V)
+
+Signed-off-by: Alvis Sun <yfsun@nuvoton.com>
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ drivers/i3c/CMakeLists.txt                |    5 +
+ drivers/i3c/Kconfig                       |    1 +
+ drivers/i3c/Kconfig.npcx                  |   35 +
+ drivers/i3c/i3c_npcx.c                    | 2052 +++++++++++++++++++++
+ dts/arm/nuvoton/npcx/npcx4.dtsi           |    2 +-
+ dts/bindings/i3c/nuvoton,npcx-i3c.yaml    |   52 +
+ soc/arm/nuvoton_npcx/common/reg/reg_def.h |  224 ++-
+ soc/arm/nuvoton_npcx/common/registers.c   |   27 +
+ soc/arm/nuvoton_npcx/common/soc_dt.h      |   14 +
+ 9 files changed, 2410 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/i3c/Kconfig.npcx
+ create mode 100644 drivers/i3c/i3c_npcx.c
+ create mode 100644 dts/bindings/i3c/nuvoton,npcx-i3c.yaml
+
+diff --git a/drivers/i3c/CMakeLists.txt b/drivers/i3c/CMakeLists.txt
+index 71a7dc6eb..252b81669 100644
+--- a/drivers/i3c/CMakeLists.txt
++++ b/drivers/i3c/CMakeLists.txt
+@@ -31,6 +31,11 @@ zephyr_library_sources_ifdef(
+   i3c_cdns.c
+ )
+ 
++zephyr_library_sources_ifdef(
++  CONFIG_I3C_NPCX
++  i3c_npcx.c
++)
++
+ zephyr_library_sources_ifdef(
+   CONFIG_I3C_TEST
+   i3c_test.c
+diff --git a/drivers/i3c/Kconfig b/drivers/i3c/Kconfig
+index 2b524c2bf..9d6b89141 100644
+--- a/drivers/i3c/Kconfig
++++ b/drivers/i3c/Kconfig
+@@ -100,6 +100,7 @@ comment "Device Drivers"
+ 
+ rsource "Kconfig.nxp"
+ rsource "Kconfig.cdns"
++rsource "Kconfig.npcx"
+ rsource "Kconfig.test"
+ 
+ endif # I3C
+diff --git a/drivers/i3c/Kconfig.npcx b/drivers/i3c/Kconfig.npcx
+new file mode 100644
+index 000000000..b3b317a6f
+--- /dev/null
++++ b/drivers/i3c/Kconfig.npcx
+@@ -0,0 +1,35 @@
++# NPCX I3C driver configuration options
++
++# Copyright (c) 2024 Nuvoton Technology Corporation.
++# SPDX-License-Identifier: Apache-2.0
++
++DT_I3C_NPCX := $(dt_nodelabel_path,i3c0)
++
++config I3C_NPCX
++	bool "Nuvoton NPCX embedded controller (EC) I3C driver"
++	depends on DT_HAS_NUVOTON_NPCX_I3C_ENABLED
++	select RESET
++	select I3C_IBI_WORKQUEUE if I3C_USE_IBI
++	default y
++	help
++	  This option enables the I3C driver for NPCX family of
++	  processors.
++	  Say y if you wish to use I3C channels on NPCX MCU.
++
++# Expose this option when the 'reg' property includes the MDMA base address
++# as the second group in the phandle-array.
++# i.e. I3C node example in dtsi file.
++# i3c0: i3c@400f0000 {
++#	....
++#	/* reg[0]: I3C_1 register, reg[1]: MDMA5 register */
++#	reg-names = "i3c1", "mdma5";
++#	reg = <0x400f0000 0x2000>,
++#	      <0x40011500 0x100>;
++#  	....
++# }
++config I3C_NPCX_DMA
++	bool "Nuvoton NPCX embedded controller (EC) serial driver DMA support"
++	depends on I3C_NPCX && "$(dt_node_reg_addr_hex,$(DT_I3C_NPCX),1)" != 0
++	default y
++	help
++	  Enable support for npcx I3C DMA mode.
+diff --git a/drivers/i3c/i3c_npcx.c b/drivers/i3c/i3c_npcx.c
+new file mode 100644
+index 000000000..9790e5939
+--- /dev/null
++++ b/drivers/i3c/i3c_npcx.c
+@@ -0,0 +1,2052 @@
++/*
++ * Copyright (c) 2024 Nuvoton Technology Corporation.
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++/*132*/
++#define DT_DRV_COMPAT nuvoton_npcx_i3c
++
++#include <string.h>
++
++#include <zephyr/device.h>
++#include <zephyr/irq.h>
++#include <zephyr/sys/__assert.h>
++#include <zephyr/sys/sys_io.h>
++
++#include <zephyr/drivers/clock_control.h>
++#include <zephyr/drivers/i3c.h>
++#include <zephyr/drivers/pinctrl.h>
++#include <zephyr/drivers/reset.h>
++
++#include <zephyr/logging/log.h>
++LOG_MODULE_REGISTER(npcx_i3c, CONFIG_I3C_LOG_LEVEL);
++
++#define NPCX_I3C_CHK_TIMEOUT_US 10000 /* Timeout for checking register status */
++#define I3C_SCL_PP_FREQ_MAX_MHZ 12500000
++#define I3C_SCL_OD_FREQ_MAX_MHZ 4170000
++
++#define I3C_BUS_TLOW_PP_MIN_NS  24  /* T_LOW period in push-pull mode */
++#define I3C_BUS_THigh_PP_MIN_NS 24  /* T_High period in push-pull mode */
++#define I3C_BUS_TLOW_OD_MIN_NS  200 /* T_LOW period in open-drain mode */
++
++#define PPBAUD_DIV_MAX (BIT(GET_FIELD_SZ(NPCX_I3C_MCONFIG_PPBAUD)) - 1) /* PPBAUD divider max */
++
++#define DAA_TGT_INFO_SZ 0x8 /* 8 bytes = PID(6) + BCR(1) + DCR(1) */
++#define BAMATCH_DIV     0x4 /* BAMATCH = APB4_CLK divided by four */
++
++/* Default maximum time we allow for an I3C transfer */
++#define I3C_TRANS_TIMEOUT_MS K_MSEC(100)
++
++#define MCLKD_FREQ_45_MHZ MHZ(45)
++
++#define I3C_STATUS_CLR_MASK                                                 \
++	(BIT(NPCX_I3C_MSTATUS_TGTSTART) | BIT(NPCX_I3C_MSTATUS_MCTRLDONE) | \
++	 BIT(NPCX_I3C_MSTATUS_COMPLETE) | BIT(NPCX_I3C_MSTATUS_IBIWON) |    \
++	 BIT(NPCX_I3C_MSTATUS_NOWCNTLR))
++
++/* Supported I3C MCLKD frequency */
++enum npcx_i3c_speed {
++	NPCX_I3C_BUS_SPEED_45MHZ,
++};
++
++/* Operation type */
++enum npcx_i3c_oper_state {
++	NPCX_I3C_IDLE,
++	NPCX_I3C_WR,
++	NPCX_I3C_RD,
++};
++
++/* I3C timing configuration for each i3c speed */
++struct npcx_i3c_timing_cfg {
++	uint8_t ppbaud; /* Push-Pull high period */
++	uint8_t pplow;  /* Push-Pull low period */
++	uint8_t odhpp;  /* Open-Drain high period */
++	uint8_t odbaud; /* Open-Drain low period */
++};
++
++/* Recommended I3C timing values are based on MCLKD 45 MHz */
++static const struct npcx_i3c_timing_cfg npcx_def_speed_cfg[] = {
++	/* PP = 12.5 mhz, OD = 4.17 Mhz */
++	[NPCX_I3C_BUS_SPEED_45MHZ] = {.ppbaud = 1, .pplow = 0, .odhpp = 1, .odbaud = 4},
++};
++
++struct npcx_i3c_config {
++	/* Common I3C Driver Config */
++	struct i3c_driver_config common;
++
++	/* Pointer to controller registers. */
++	struct i3c_reg *base;
++
++	/* Pointer to the clock device. */
++	const struct device *clock_dev;
++
++	/* Reset controller */
++	struct reset_dt_spec reset;
++
++	/* Clock control subsys related struct. */
++	struct npcx_clk_cfg clock_subsys;
++
++	/* Reference clock to determine 1 μs bus available time */
++	struct npcx_clk_cfg ref_clk_subsys;
++
++	/* Pointer to pin control device. */
++	const struct pinctrl_dev_config *pincfg;
++
++	/* Interrupt configuration function. */
++	void (*irq_config_func)(const struct device *dev);
++
++	struct {
++		uint32_t i3c_pp_scl_hz; /* I3C push pull clock frequency in Hz. */
++		uint32_t i3c_od_scl_hz; /* I3C open drain clock frequency in Hz. */
++	} clocks;
++
++#ifdef CONFIG_I3C_NPCX_DMA
++	struct npcx_clk_cfg mdma_clk_subsys;
++	struct mdma_reg *mdma_base;
++#endif
++};
++
++struct npcx_i3c_data {
++	struct i3c_driver_data common;       /* Common i3c driver data */
++	struct k_mutex lock_mutex;           /* Mutex of i3c controller */
++	struct k_sem sync_sem;               /* Semaphore used for synchronization */
++	struct k_sem ibi_lock_sem;           /* Semaphore used for ibi */
++	enum npcx_i3c_oper_state oper_state; /* controller operation state */
++
++#ifdef CONFIG_I3C_USE_IBI
++	struct {
++		/* List of addresses used in the MIBIRULES register. */
++		uint8_t addr[5];
++
++		/* Number of valid addresses in MIBIRULES. */
++		uint8_t num_addr;
++
++		/* True if all addresses have MSB set. */
++		bool msb;
++
++		/*
++		 * True if all target devices require mandatory byte
++		 * for IBI.
++		 */
++		bool has_mandatory_byte;
++	} ibi;
++#endif
++};
++
++static void npcx_i3c_mutex_lock(const struct device *dev)
++{
++	struct npcx_i3c_data *const data = dev->data;
++
++	k_mutex_lock(&data->lock_mutex, K_FOREVER);
++}
++
++static void npcx_i3c_mutex_unlock(const struct device *dev)
++{
++	struct npcx_i3c_data *const data = dev->data;
++
++	k_mutex_unlock(&data->lock_mutex);
++}
++
++#ifdef CONFIG_I3C_NPCX_DMA
++static void i3c_ctrl_notify(const struct device *dev)
++{
++	struct npcx_i3c_data *const data = dev->data;
++
++	k_sem_give(&data->sync_sem);
++}
++
++static int i3c_ctrl_wait_completion(const struct device *dev)
++{
++	struct npcx_i3c_data *const data = dev->data;
++
++	return k_sem_take(&data->sync_sem, I3C_TRANS_TIMEOUT_MS);
++}
++
++static enum npcx_i3c_oper_state get_oper_state(const struct device *dev)
++{
++	struct npcx_i3c_data *const data = dev->data;
++
++	return data->oper_state;
++}
++#endif /* CONFIG_I3C_NPCX_DMA */
++
++static void set_oper_state(const struct device *dev, enum npcx_i3c_oper_state state)
++{
++	struct npcx_i3c_data *const data = dev->data;
++
++	data->oper_state = state;
++}
++
++/*
++ * brief:  Wait for status bit done and clear the status
++ *
++ * param[in] inst  Pointer to I3C register.
++ *
++ * return  0, success
++ *         -ETIMEDOUT: check status timeout.
++ */
++static inline int npcx_i3c_status_wait_clear(struct i3c_reg *inst, uint8_t bit_offset)
++{
++	if (WAIT_FOR(IS_BIT_SET(inst->MSTATUS, bit_offset), NPCX_I3C_CHK_TIMEOUT_US, NULL) ==
++	    false) {
++		return -ETIMEDOUT;
++	}
++
++	inst->MSTATUS = BIT(bit_offset); /* W1C */
++
++	return 0;
++}
++
++static inline uint32_t npcx_i3c_state_get(struct i3c_reg *inst)
++{
++	return GET_FIELD(inst->MSTATUS, NPCX_I3C_MSTATUS_STATE);
++}
++
++static inline void npcx_i3c_interrupt_all_disable(struct i3c_reg *inst)
++{
++	uint32_t intmask = inst->MINTSET;
++
++	inst->MINTCLR = intmask;
++}
++
++static inline void npcx_i3c_interrupt_enable(struct i3c_reg *inst, uint32_t mask)
++{
++	inst->MINTSET = mask;
++}
++
++static bool npcx_i3c_has_error(struct i3c_reg *inst)
++{
++	if (IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_ERRWARN)) {
++		LOG_WRN("ERROR: MSTATUS 0x%08x MERRWARN 0x%08x", inst->MSTATUS, inst->MERRWARN);
++
++		return true;
++	}
++
++	return false;
++}
++
++static inline void npcx_i3c_status_clear_all(struct i3c_reg *inst)
++{
++	uint32_t mask = I3C_STATUS_CLR_MASK;
++
++	inst->MSTATUS = mask;
++}
++
++static inline void npcx_i3c_errwarn_clear_all(struct i3c_reg *inst)
++{
++	inst->MERRWARN = inst->MERRWARN;
++}
++
++static inline void npcx_i3c_fifo_flush(struct i3c_reg *inst)
++{
++	inst->MDATACTRL |= (BIT(NPCX_I3C_MDATACTRL_FLUSHTB) | BIT(NPCX_I3C_MDATACTRL_FLUSHFB));
++}
++
++/*
++ * brief:  Send request and check the request is valid
++ *
++ * param[in] inst  Pointer to I3C register.
++ *
++ * return  0, success
++ *         -ETIMEDOUT check MCTRLDONE timeout.
++ *         -ENOSYS    invalid use of request.
++ */
++static inline int npcx_i3c_send_request(struct i3c_reg *inst, uint32_t mctrl_val)
++{
++	inst->MCTRL = mctrl_val;
++
++	if (npcx_i3c_status_wait_clear(inst, NPCX_I3C_MSTATUS_MCTRLDONE) != 0) {
++		return -ETIMEDOUT;
++	}
++
++	/* Check invalid use of request */
++	if (IS_BIT_SET(inst->MERRWARN, NPCX_I3C_MERRWARN_INVERQ)) {
++		LOG_ERR("%s: Invalid request, merrwarn: %#x", __func__, inst->MERRWARN);
++		return -ENOSYS;
++	}
++
++	return 0;
++}
++
++/* Start DAA procedure and continue the DAA with a Repeated START */
++static inline int npcx_i3c_request_daa(struct i3c_reg *inst)
++{
++	uint32_t val = 0;
++	int ret;
++
++	/* Set IBI response NACK while processing DAA */
++	SET_FIELD(val, NPCX_I3C_MCTRL_IBIRESP, MCTRL_IBIRESP_NACK);
++
++	/* Send DAA request */
++	SET_FIELD(val, NPCX_I3C_MCTRL_REQUEST, MCTRL_REQUEST_PROCESSDAA);
++
++	ret = npcx_i3c_send_request(inst, val);
++	if (ret != 0) {
++		LOG_ERR("Request DAA error, %d", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++/* Tell controller to start auto IBI */
++static inline int npcx_i3c_request_auto_ibi(struct i3c_reg *inst)
++{
++	uint32_t val = 0;
++	int ret;
++
++	SET_FIELD(val, NPCX_I3C_MCTRL_IBIRESP, MCTRL_IBIRESP_ACK);
++	SET_FIELD(val, NPCX_I3C_MCTRL_REQUEST, MCTRL_REQUEST_AUTOIBI);
++
++	ret = npcx_i3c_send_request(inst, val);
++	if (ret != 0) {
++		LOG_ERR("Request auto ibi error, %d", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++/*
++ * brief:  Controller emit start and send address
++ *
++ * param[in] inst     Pointer to I3C register.
++ * param[in] addr     Dyamic address for xfer or 0x7E for CCC command.
++ * param[in] op_type  Request type.
++ * param[in] is_read  Read(true) or write(false) operation.
++ * param[in] read_sz  Read size.
++ *
++ * return  0, success
++ *         else, error
++ */
++static int npcx_i3c_request_emit_start(struct i3c_reg *inst, uint8_t addr,
++				       enum npcx_i3c_mctrl_type op_type, bool is_read,
++				       size_t read_sz)
++{
++	uint32_t mctrl = 0;
++	int ret;
++
++	/* Set request and target address*/
++	SET_FIELD(mctrl, NPCX_I3C_MCTRL_REQUEST, MCTRL_REQUEST_EMITSTARTADDR);
++
++	/* Set operation type */
++	SET_FIELD(mctrl, NPCX_I3C_MCTRL_TYPE, op_type);
++
++	/* Set IBI response NACK in emit start */
++	SET_FIELD(mctrl, NPCX_I3C_MCTRL_IBIRESP, MCTRL_IBIRESP_NACK);
++
++	/* Set dynamic address */
++	SET_FIELD(mctrl, NPCX_I3C_MCTRL_ADDR, addr);
++
++	/* Set read(1) or write(0) */
++	if (is_read) {
++		mctrl |= BIT(NPCX_I3C_MCTRL_DIR);
++		SET_FIELD(mctrl, NPCX_I3C_MCTRL_RDTERM, read_sz); /* Set read length */
++	} else {
++		mctrl &= ~BIT(NPCX_I3C_MCTRL_DIR);
++	}
++
++	ret = npcx_i3c_send_request(inst, mctrl);
++	if (ret != 0) {
++		LOG_ERR("Request start error, %d", ret);
++		return ret;
++	}
++
++	/* Check NACK after MCTRLDONE is get */
++	if (IS_BIT_SET(inst->MERRWARN, NPCX_I3C_MERRWARN_NACK)) {
++		LOG_DBG("%s: nack", __func__);
++		return -ENODEV;
++	}
++
++	return 0;
++}
++
++/*
++ * brief:  Controller emit STOP.
++ *
++ * This emits STOP when controller is in NORMACT state.
++ *
++ * param[in] inst  Pointer to I3C register.
++ *
++ * return  0 success
++ *         -ECANCELED i3c state not as expected.
++ *         -ETIMEDOUT check MCTRLDONE timeout.
++ *         -ENOSYS    invalid use of request.
++ */
++static inline int npcx_i3c_request_emit_stop(struct i3c_reg *inst)
++{
++	uint32_t val = 0;
++	int ret;
++	uint32_t i3c_state = npcx_i3c_state_get(inst);
++
++	/* Make sure we are in a state where we can emit STOP */
++	if ((i3c_state != MSTATUS_STATE_NORMACT) && (i3c_state != MSTATUS_STATE_DAA)) {
++		LOG_ERR("Request stop state error, state= %#x", i3c_state);
++		return -ECANCELED;
++	}
++
++	SET_FIELD(val, NPCX_I3C_MCTRL_REQUEST, MCTRL_REQUEST_EMITSTOP);
++
++	ret = npcx_i3c_send_request(inst, val);
++	if (ret != 0) {
++		LOG_ERR("Request stop error, %d", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++static inline int npcx_i3c_ibi_respond_nack(struct i3c_reg *inst)
++{
++	uint32_t val = 0;
++	int ret;
++
++	SET_FIELD(val, NPCX_I3C_MCTRL_IBIRESP, MCTRL_IBIRESP_NACK);
++	SET_FIELD(val, NPCX_I3C_MCTRL_REQUEST, MCTRL_REQUEST_IBIACKNACK);
++
++	ret = npcx_i3c_send_request(inst, val);
++	if (ret != 0) {
++		LOG_ERR("Request ibi_rsp nack error, %d", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++static inline int npcx_i3c_ibi_respond_ack(struct i3c_reg *inst)
++{
++	uint32_t val = 0;
++	int ret;
++
++	SET_FIELD(val, NPCX_I3C_MCTRL_IBIRESP, MCTRL_IBIRESP_ACK);
++	SET_FIELD(val, NPCX_I3C_MCTRL_REQUEST, MCTRL_REQUEST_IBIACKNACK);
++
++	ret = npcx_i3c_send_request(inst, val);
++	if (ret != 0) {
++		LOG_ERR("Request ibi_rsp ack error %d", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++/*
++ * brief:  Find a registered I3C target device.
++ *
++ * This returns the I3C device descriptor of the I3C device
++ * matching the incoming id.
++ *
++ * param[in] dev  Pointer to controller device driver instance.
++ * param[in] id   Pointer to I3C device ID.
++ *
++ * return  see i3c_device_find.
++ */
++static inline struct i3c_device_desc *npcx_i3c_device_find(const struct device *dev,
++							   const struct i3c_device_id *id)
++{
++	const struct npcx_i3c_config *config = dev->config;
++
++	return i3c_dev_list_find(&config->common.dev_list, id);
++}
++
++/*
++ * brief:  Perform bus recovery.
++ *
++ * param[in] dev  Pointer to controller device driver instance.
++ *
++ * return 0 success, otherwise error
++ */
++static int npcx_i3c_recover_bus(const struct device *dev)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct i3c_reg *inst = config->base;
++
++	/*
++	 * If the controller is in NORMACT state, tells it to emit STOP
++	 * so it can return to IDLE, or is ready to clear any pending
++	 * target initiated IBIs.
++	 */
++	if (npcx_i3c_state_get(inst) == MSTATUS_STATE_NORMACT) {
++		npcx_i3c_request_emit_stop(inst);
++	};
++
++	/* Exhaust all target initiated IBI */
++	while (IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_TGTSTART)) {
++		/* Tell the controller to perform auto IBI. */
++		npcx_i3c_request_auto_ibi(inst);
++
++		if (WAIT_FOR(IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_COMPLETE),
++			     NPCX_I3C_CHK_TIMEOUT_US, NULL) == false) {
++			break;
++		}
++
++		/* Once auto IBI is done, discard bytes in FIFO. */
++		while (IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_RXPEND)) {
++			/* Flush FIFO as long as RXPEND is set. */
++			npcx_i3c_fifo_flush(inst);
++		}
++
++		/*
++		 * There might be other IBIs waiting.
++		 * So pause a bit to let other targets initiates
++		 * their IBIs.
++		 */
++		k_busy_wait(100);
++	}
++
++	/* Check IDLE state */
++	if (WAIT_FOR((npcx_i3c_state_get(inst) == MSTATUS_STATE_IDLE), NPCX_I3C_CHK_TIMEOUT_US,
++		     NULL) == false) {
++		return -EBUSY;
++	}
++
++	return 0;
++}
++
++static inline void npcx_i3c_xfer_reset(struct i3c_reg *inst)
++{
++	npcx_i3c_status_clear_all(inst);
++	npcx_i3c_errwarn_clear_all(inst);
++	npcx_i3c_fifo_flush(inst);
++}
++
++/*
++ * brief:  Perform one write transaction.
++ *
++ * This writes all data in buf to TX FIFO or time out
++ * waiting for FIFO spaces.
++ *
++ * param[in] inst       Pointer to controller registers.
++ * param[in] buf        Buffer containing data to be sent.
++ * param[in] buf_sz     Number of bytes in buf to send.
++ * param[in] no_ending  True, not including ending byte in message.
++ *                       False, including ending byte in message
++ *
++ * return  Number of bytes written, or negative if error.
++ *
++ */
++static int npcx_i3c_xfer_write_fifo(struct i3c_reg *inst, uint8_t *buf, uint8_t buf_sz,
++				    bool no_ending)
++{
++	int offset = 0;
++	int remaining = buf_sz;
++
++	while (remaining > 0) {
++		/* Check tx fifo not full */
++		if (WAIT_FOR(!IS_BIT_SET(inst->MDATACTRL, NPCX_I3C_MDATACTRL_TXFULL),
++			     NPCX_I3C_CHK_TIMEOUT_US, NULL) == false) {
++			LOG_DBG("%s: Check tx fifo not full timed out", __func__);
++			return -ETIMEDOUT;
++		}
++
++		if ((remaining > 1) || no_ending) {
++			inst->MWDATAB = (uint32_t)buf[offset];
++		} else {
++			inst->MWDATABE = (uint32_t)buf[offset]; /* Set last byte */
++		}
++
++		offset += 1;
++		remaining -= 1;
++	}
++
++	return offset;
++}
++
++/*
++ * brief:  Perform read transaction.
++ *
++ * This reads from RX FIFO until COMPLETE bit is set in MSTATUS
++ * or time out.
++ *
++ * param[in] inst    Pointer to controller registers.
++ * param[in] buf     Buffer to store data.
++ * param[in] buf_sz  Number of bytes to read.
++ *
++ * return  Number of bytes read, or negative if error.
++ *
++ */
++static int npcx_i3c_xfer_read_fifo(struct i3c_reg *inst, uint8_t *buf, uint8_t rd_sz)
++{
++	bool is_done = false;
++	int offset = 0;
++
++	while (is_done == false) {
++		/* Check message is terminated */
++		if (IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_COMPLETE)) {
++			is_done = true;
++		}
++
++		/* Check I3C bus error */
++		if (npcx_i3c_has_error(inst)) {
++			/* Check timeout*/
++			if (IS_BIT_SET(inst->MERRWARN, NPCX_I3C_MERRWARN_TIMEOUT)) {
++				LOG_WRN("%s: ERR: timeout", __func__);
++			}
++
++			inst->MERRWARN = inst->MERRWARN;
++
++			return -EIO;
++		}
++
++		/* Check rx not empty */
++		if (IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_RXPEND)) {
++
++			/* Receive all the data in this round.
++			 * Read in a tight loop to reduce chance of losing
++			 * FIFO data when the i3c speed is high.
++			 */
++			while (offset < rd_sz) {
++				if (GET_FIELD(inst->MDATACTRL, NPCX_I3C_MDATACTRL_RXCOUNT) == 0) {
++					break;
++				}
++
++				buf[offset++] = (uint8_t)inst->MRDATAB;
++			}
++		}
++	}
++
++	return offset;
++}
++
++#ifdef CONFIG_I3C_NPCX_DMA
++/*
++ * brief:  Perform DMA write transaction.
++ *
++ * For write end, use the interrupt generated by COMPLETE bit in MSTATUS register.
++ *
++ * param[in] dev     Pointer to controller device driver instance.
++ * param[in] buf     Buffer to store data.
++ * param[in] buf_sz  Number of bytes to read.
++ *
++ * return  Number of bytes read, or negative if error.
++ *
++ */
++static int npcx_i3c_xfer_write_fifo_dma(const struct device *dev, uint8_t *buf, uint8_t buf_sz)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct i3c_reg *i3c_inst = config->base;
++	struct mdma_reg *mdma_inst = config->mdma_base;
++	int ret;
++
++	set_oper_state(dev, NPCX_I3C_WR);
++
++	/* Enable I3C MDMA write for one frame */
++	SET_FIELD(i3c_inst->MDMACTRL, NPCX_I3C_MDMACTRL_DMATB, MDMA_DMATB_EN_ONE_FRAME);
++	i3c_inst->MINTSET |= BIT(NPCX_I3C_MINTCLR_COMPLETE); /* Enable I3C complete interrupt */
++
++	/* Write Operation (MDMA CH_1) */
++	mdma_inst->MDMA_TCNT1 = buf_sz;                    /* Set MDMA transfer count */
++	mdma_inst->MDMA_SRCB1 = (uint32_t)buf;             /* Set source address */
++	mdma_inst->MDMA_CTL1 |= BIT(NPCX_MDMA_CTL_MDMAEN); /* Start DMA transfer */
++
++	/* Wait I3C COMPLETE */
++	ret = i3c_ctrl_wait_completion(dev);
++	if (ret < 0) {
++		LOG_DBG("%s: Check complete time out, buf_size:%d", __func__, buf_sz);
++		goto out_wr_fifo_dma;
++	}
++
++	/* Check and clear DMA TC after complete */
++	if (!IS_BIT_SET(mdma_inst->MDMA_CTL1, NPCX_MDMA_CTL_TC)) {
++		LOG_DBG("%s: DMA busy, TC=%d", __func__,
++			IS_BIT_SET(mdma_inst->MDMA_CTL1, NPCX_MDMA_CTL_TC));
++		ret = -EBUSY;
++		goto out_wr_fifo_dma;
++	}
++
++	mdma_inst->MDMA_CTL1 &= ~BIT(NPCX_MDMA_CTL_TC); /* Clear TC, W0C */
++	ret = buf_sz - mdma_inst->MDMA_CTCNT1;          /* Set transferred count */
++	LOG_DBG("Write cnt=%d", ret);
++
++out_wr_fifo_dma:
++	i3c_inst->MINTCLR |= BIT(NPCX_I3C_MINTCLR_COMPLETE); /* Disable I3C complete interrupt */
++	npcx_i3c_fifo_flush(i3c_inst);
++	set_oper_state(dev, NPCX_I3C_IDLE);
++
++	return ret;
++}
++
++/*
++ * brief:  Perform DMA read transaction.
++ *
++ * For read end, use the MDMA end-of-transfer interrupt(SIEN bit)
++ * instead of using the I3CI interrupt generated by COMPLETE bit in MSTATUS register.
++ *
++ * param[in] dev     Pointer to controller device driver instance.
++ * param[in] buf     Buffer to store data.
++ * param[in] buf_sz  Number of bytes to read.
++ *
++ * return  Number of bytes read, or negative if error.
++ *
++ */
++static int npcx_i3c_xfer_read_fifo_dma(const struct device *dev, uint8_t *buf, uint8_t buf_sz)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct i3c_reg *i3c_inst = config->base;
++	struct mdma_reg *mdma_inst = config->mdma_base;
++	int ret;
++
++	set_oper_state(dev, NPCX_I3C_RD);
++
++	/* Enable DMA until DMA is disabled by setting DMAFB to 00 */
++	SET_FIELD(i3c_inst->MDMACTRL, NPCX_I3C_MDMACTRL_DMAFB, MDMA_DMAFB_EN_MANUAL);
++
++	/* Read Operation (MDMA CH_0) */
++	mdma_inst->MDMA_TCNT0 = buf_sz;                    /* Set MDMA transfer count */
++	mdma_inst->MDMA_DSTB0 = (uint32_t)buf;             /* Set destination address */
++	mdma_inst->MDMA_CTL0 |= BIT(NPCX_MDMA_CTL_SIEN);   /* Enable stop interrupt */
++	mdma_inst->MDMA_CTL0 |= BIT(NPCX_MDMA_CTL_MDMAEN); /* Start DMA transfer */
++
++	/* Wait MDMA TC */
++	ret = i3c_ctrl_wait_completion(dev);
++	if (ret < 0) {
++		LOG_DBG("%s: Check DMA done time out", __func__);
++	} else {
++		ret = buf_sz - mdma_inst->MDMA_CTCNT0; /* Set transferred count */
++		LOG_DBG("Read cnt=%d", ret);
++	}
++
++	mdma_inst->MDMA_CTL0 &= ~BIT(NPCX_MDMA_CTL_SIEN); /* Disable stop interrupt */
++	/* Disable I3C MDMA read */
++	SET_FIELD(i3c_inst->MDMACTRL, NPCX_I3C_MDMACTRL_DMAFB, MDMA_DMAFB_DISABLE);
++	npcx_i3c_fifo_flush(i3c_inst);
++	set_oper_state(dev, NPCX_I3C_IDLE);
++
++	return ret;
++}
++
++/*
++ * brief:  Perform one transfer transaction by DMA.
++ *
++ * param[in] inst        Pointer to controller registers.
++ * param[in] addr        Target address.
++ * param[in] op_type     Request type.
++ * param[in] buf         Buffer for data to be sent or received.
++ * param[in] buf_sz      Buffer size in bytes.
++ * param[in] is_read     True if this is a read transaction, false if write.
++ * param[in] emit_start  True if START is needed before read/write.
++ * param[in] emit_stop   True if STOP is needed after read/write.
++ *
++ * return  Number of bytes read/written, or negative if error.
++ */
++static int npcx_i3c_do_one_xfer_dma(const struct device *dev, uint8_t addr,
++				    enum npcx_i3c_mctrl_type op_type, uint8_t *buf, size_t buf_sz,
++				    bool is_read, bool emit_start, bool emit_stop)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct i3c_reg *inst = config->base;
++	int ret = 0;
++
++	npcx_i3c_status_clear_all(inst);
++	npcx_i3c_errwarn_clear_all(inst);
++
++	/* Emit START if needed */
++	if (emit_start) {
++		ret = npcx_i3c_request_emit_start(inst, addr, op_type, is_read, buf_sz);
++		if (ret != 0) {
++			LOG_ERR("%s: emit start fail", __func__);
++			goto out_do_one_xfer_dma;
++		}
++	}
++
++	/* No data to be transferred */
++	if ((buf == NULL) || (buf_sz == 0)) {
++		goto out_do_one_xfer_dma;
++	}
++
++	/* Select read or write operation */
++	if (is_read) {
++		ret = npcx_i3c_xfer_read_fifo_dma(dev, buf, buf_sz);
++	} else {
++		ret = npcx_i3c_xfer_write_fifo_dma(dev, buf, buf_sz);
++	}
++
++	if (ret < 0) {
++		LOG_ERR("%s: %s fifo fail", __func__, is_read ? "read" : "write");
++		goto out_do_one_xfer_dma;
++	}
++
++	/* Check I3C bus error */
++	if (npcx_i3c_has_error(inst)) {
++		ret = -EIO;
++		LOG_ERR("%s: I3C bus error", __func__);
++	}
++
++out_do_one_xfer_dma:
++	/* Emit STOP if needed */
++	if (emit_stop) {
++		npcx_i3c_request_emit_stop(inst);
++	}
++
++	return ret;
++}
++#endif /* End of CONFIG_I3C_NPCX_DMA */
++
++/*
++ * brief:  Perform one transfer transaction.
++ *
++ * param[in] inst        Pointer to controller registers.
++ * param[in] addr        Target address.
++ * param[in] op_type     Request type.
++ * param[in] buf         Buffer for data to be sent or received.
++ * param[in] buf_sz      Buffer size in bytes.
++ * param[in] is_read     True if this is a read transaction, false if write.
++ * param[in] emit_start  True if START is needed before read/write.
++ * param[in] emit_stop   True if STOP is needed after read/write.
++ * param[in] no_ending   True if not to signal end of write message.
++ *
++ * return  Number of bytes read/written, or negative if error.
++ */
++static int npcx_i3c_do_one_xfer(struct i3c_reg *inst, uint8_t addr,
++				enum npcx_i3c_mctrl_type op_type, uint8_t *buf, size_t buf_sz,
++				bool is_read, bool emit_start, bool emit_stop, bool no_ending)
++{
++	int ret = 0;
++
++	npcx_i3c_status_clear_all(inst);
++	npcx_i3c_errwarn_clear_all(inst);
++
++	/* Emit START if needed */
++	if (emit_start) {
++		ret = npcx_i3c_request_emit_start(inst, addr, op_type, is_read, buf_sz);
++		if (ret != 0) {
++			LOG_ERR("%s: emit start fail", __func__);
++			goto out_do_one_xfer;
++		}
++	}
++
++	/* No data to be transferred */
++	if ((buf == NULL) || (buf_sz == 0)) {
++		goto out_do_one_xfer;
++	}
++
++	/* Select read or write operation */
++	if (is_read) {
++		ret = npcx_i3c_xfer_read_fifo(inst, buf, buf_sz);
++	} else {
++		ret = npcx_i3c_xfer_write_fifo(inst, buf, buf_sz, no_ending);
++	}
++
++	if (ret < 0) {
++		LOG_ERR("%s: %s fifo fail", __func__, is_read ? "read" : "write");
++		goto out_do_one_xfer;
++	}
++
++	/* Check message complete if is a read transaction or
++	 * ending byte of a write transaction.
++	 */
++	if (is_read || !no_ending) {
++		/* Wait message transfer complete */
++		if (WAIT_FOR(IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_COMPLETE),
++			     NPCX_I3C_CHK_TIMEOUT_US, NULL) == false) {
++			LOG_DBG("%s: timed out addr 0x%02x, buf_sz %u", __func__, addr, buf_sz);
++
++			ret = -ETIMEDOUT;
++			emit_stop = true;
++
++			goto out_do_one_xfer;
++		}
++
++		inst->MSTATUS = BIT(NPCX_I3C_MSTATUS_COMPLETE); /* W1C */
++	}
++
++	/* Check I3C bus error */
++	if (npcx_i3c_has_error(inst)) {
++		ret = -EIO;
++		LOG_ERR("%s: I3C bus error", __func__);
++	}
++
++out_do_one_xfer:
++	/* Emit STOP if needed */
++	if (emit_stop) {
++		npcx_i3c_request_emit_stop(inst);
++	}
++
++	return ret;
++}
++
++/*
++ * brief:  Transfer messages in I3C mode.
++ *
++ * see i3c_transfer
++ *
++ * param[in] dev       Pointer to device driver instance.
++ * param[in] target    Pointer to target device descriptor.
++ * param[in] msgs      Pointer to I3C messages.
++ * param[in] num_msgs  Number of messages to transfers.
++ *
++ * return  see i3c_transfer
++ */
++static int npcx_i3c_transfer(const struct device *dev, struct i3c_device_desc *target,
++			     struct i3c_msg *msgs, uint8_t num_msgs)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct i3c_reg *inst = config->base;
++	uint32_t intmask;
++	int xfered_len, ret = 0;
++	bool send_broadcast = true;
++	bool is_xfer_done = true;
++
++	if (msgs == NULL) {
++		return -EINVAL;
++	}
++
++	if (target->dynamic_addr == 0U) {
++		return -EINVAL;
++	}
++
++	npcx_i3c_mutex_lock(dev);
++
++	/* Check bus in idle state */
++	if (WAIT_FOR((npcx_i3c_state_get(inst) == MSTATUS_STATE_IDLE), NPCX_I3C_CHK_TIMEOUT_US,
++		     NULL) == false) {
++		LOG_ERR("%s: xfer state error: %d", __func__, npcx_i3c_state_get(inst));
++		npcx_i3c_mutex_unlock(dev);
++		return -ETIMEDOUT;
++	}
++
++	/* Disable interrupt */
++	intmask = inst->MINTSET;
++	npcx_i3c_interrupt_all_disable(inst);
++
++	npcx_i3c_xfer_reset(inst);
++
++	/* Iterate over all the messages */
++	for (int i = 0; i < num_msgs; i++) {
++
++		/*
++		 * Check message is read or write operaion.
++		 * For write operation, check the last data byte of a transmit message.
++		 */
++		bool is_read = (msgs[i].flags & I3C_MSG_RW_MASK) == I3C_MSG_READ;
++		bool no_ending = false;
++
++		/*
++		 * Emit start if this is the first message or that
++		 * the RESTART flag is set in message.
++		 */
++		bool emit_start =
++			(i == 0) || ((msgs[i].flags & I3C_MSG_RESTART) == I3C_MSG_RESTART);
++
++		bool emit_stop = (msgs[i].flags & I3C_MSG_STOP) == I3C_MSG_STOP;
++
++		/*
++		 * The controller requires special treatment of last byte of
++		 * a write message. Since the API permits having a bunch of
++		 * write messages without RESTART in between, this is just some
++		 * logic to determine whether to treat the last byte of this
++		 * message to be the last byte of a series of write mssages.
++		 * If not, tell the write function not to treat it that way.
++		 */
++		if (!is_read && !emit_stop && ((i + 1) != num_msgs)) {
++			bool next_is_write = (msgs[i + 1].flags & I3C_MSG_RW_MASK) == I3C_MSG_WRITE;
++			bool next_is_restart =
++				((msgs[i + 1].flags & I3C_MSG_RESTART) == I3C_MSG_RESTART);
++
++			/* Check next msg is still write operation and not including Sr */
++			if (next_is_write && !next_is_restart) {
++				no_ending = true;
++			}
++		}
++
++#ifdef CONFIG_I3C_NPCX_DMA
++		/* Current DMA not support multi-message write */
++		if (!is_read && no_ending) {
++			LOG_ERR("I3C DMA transfer not support multi-message write");
++			ret = -EINVAL;
++			break;
++		}
++#endif
++
++		/*
++		 * Two ways to do read/write transfer .
++		 * 1. [S] + [0x7E]    + [address] + [data] + [Sr or P]
++		 * 2. [S] + [address] + [data]    + [Sr or P]
++		 *
++		 * Send broadcast header(0x7E) on first transfer or after a STOP,
++		 * unless flag is set not to.
++		 */
++		if (!(msgs[i].flags & I3C_MSG_NBCH) && (send_broadcast)) {
++			ret = npcx_i3c_request_emit_start(inst, I3C_BROADCAST_ADDR,
++							  NPCX_I3C_MCTRL_TYPE_I3C, false, 0);
++			if (ret < 0) {
++				LOG_ERR("%s: emit start of broadcast addr failed, error (%d)",
++					__func__, ret);
++				break;
++			}
++			send_broadcast = false;
++		}
++
++#ifdef CONFIG_I3C_NPCX_DMA
++		/* Do transfer with target device */
++		xfered_len = npcx_i3c_do_one_xfer_dma(dev, target->dynamic_addr,
++						      NPCX_I3C_MCTRL_TYPE_I3C, msgs[i].buf,
++						      msgs[i].len, is_read, emit_start, emit_stop);
++#else
++		xfered_len = npcx_i3c_do_one_xfer(inst, target->dynamic_addr,
++						  NPCX_I3C_MCTRL_TYPE_I3C, msgs[i].buf, msgs[i].len,
++						  is_read, emit_start, emit_stop, no_ending);
++#endif
++		if (xfered_len < 0) {
++			LOG_ERR("%s: do xfer fail", __func__);
++			ret = xfered_len; /* Set error code to ret */
++			break;
++		}
++
++		/* Write back the total number of bytes transferred */
++		msgs[i].num_xfer = xfered_len;
++
++		if (emit_stop) {
++			/* After a STOP, send broadcast header before next msg */
++			send_broadcast = true;
++		}
++
++		/* Check emit stop flag including in the final msg */
++		if ((i == num_msgs - 1) && (emit_stop == false)) {
++			is_xfer_done = false;
++		}
++	}
++
++	/* Emit stop if error occurs or stop flag not in the msg */
++	if ((ret != 0) || (is_xfer_done == false)) {
++		npcx_i3c_request_emit_stop(inst);
++	}
++
++	npcx_i3c_errwarn_clear_all(inst);
++	npcx_i3c_status_clear_all(inst);
++
++	npcx_i3c_interrupt_enable(inst, intmask);
++
++	npcx_i3c_mutex_unlock(dev);
++
++	return ret;
++}
++
++/*
++ * brief:  Perform Dynamic Address Assignment.
++ *
++ * param[in] dev  Pointer to controller device driver instance.
++ *
++ * return  0 If successful.
++ *         -EBUSY Bus is busy.
++ *         -EIO General input / output error.
++ *         -ENODEV If a provisioned ID does not match to any target devices
++ *                 in the registered device list.
++ *         -ENOSPC No more free addresses can be assigned to target.
++ *         -ENOSYS Dynamic address assignment is not supported by
++ *                 the controller driver.
++ */
++static int npcx_i3c_do_daa(const struct device *dev)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct npcx_i3c_data *data = dev->data;
++	struct i3c_reg *inst = config->base;
++	int ret = 0;
++	uint8_t rx_buf[8];
++	size_t rx_count;
++	uint32_t intmask;
++
++	npcx_i3c_mutex_lock(dev);
++
++	memset(rx_buf, 0xff, sizeof(rx_buf));
++
++	/* Check bus in idle state */
++	if (WAIT_FOR((npcx_i3c_state_get(inst) == MSTATUS_STATE_IDLE), NPCX_I3C_CHK_TIMEOUT_US,
++		     NULL) == false) {
++		LOG_ERR("%s: DAA state error: %d", __func__, npcx_i3c_state_get(inst));
++		npcx_i3c_mutex_unlock(dev);
++		return -ETIMEDOUT;
++	}
++
++	LOG_DBG("DAA: ENTDAA");
++
++	/* Disable interrupt */
++	intmask = inst->MINTSET;
++	npcx_i3c_interrupt_all_disable(inst);
++
++	npcx_i3c_xfer_reset(inst);
++
++	/* Emit process DAA */
++	if (npcx_i3c_request_daa(inst) != 0) {
++		ret = -ETIMEDOUT;
++		LOG_ERR("Emit process DAA error");
++		goto out_do_daa;
++	}
++
++	/* Loop until no more responses from devices */
++	do {
++		/* Check ERRWARN bit set */
++		if (npcx_i3c_has_error(inst)) {
++			ret = -EIO;
++			LOG_ERR("DAA recv error");
++			break;
++		}
++
++		/* Receive Provisioned ID, BCR and DCR (total 8 bytes) */
++		rx_count = GET_FIELD(inst->MDATACTRL, NPCX_I3C_MDATACTRL_RXCOUNT);
++
++		if (rx_count == DAA_TGT_INFO_SZ) {
++			for (int i = 0; i < rx_count; i++) {
++				rx_buf[i] = (uint8_t)inst->MRDATAB;
++			}
++		} else {
++			/* Data count not as expected, exit DAA */
++			ret = -EBADMSG;
++			LOG_DBG("Rx count not as expected %d, abort DAA", rx_count);
++			break;
++		}
++
++		/* Start assign dynamic address */
++		if ((npcx_i3c_state_get(inst) == MSTATUS_STATE_DAA) &&
++		    IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_BETWEEN)) {
++			struct i3c_device_desc *target;
++			uint16_t vendor_id;
++			uint32_t part_no;
++			uint64_t pid;
++			uint8_t dyn_addr = 0;
++
++			/* PID[47:33] = manufacturer ID */
++			vendor_id = (((uint16_t)rx_buf[0] << 8U) | (uint16_t)rx_buf[1]) & 0xFFFEU;
++
++			/* PID[31:0] = vendor fixed falue or random value */
++			part_no = (uint32_t)rx_buf[2] << 24U | (uint32_t)rx_buf[3] << 16U |
++				  (uint32_t)rx_buf[4] << 8U | (uint32_t)rx_buf[5];
++
++			/* Combine into one Provisioned ID */
++			pid = (uint64_t)vendor_id << 32U | (uint64_t)part_no;
++
++			LOG_DBG("DAA: Rcvd PID 0x%04x%08x", vendor_id, part_no);
++
++			/* Find a usable address during ENTDAA */
++			ret = i3c_dev_list_daa_addr_helper(&data->common.attached_dev.addr_slots,
++							   &config->common.dev_list, pid, false,
++							   false, &target, &dyn_addr);
++			if (ret != 0) {
++				LOG_ERR("%s: Assign new DA error", __func__);
++				break;
++			}
++
++			if (target == NULL) {
++				LOG_INF("%s: PID 0x%04x%08x is not in registered device "
++					"list, given dynamic address 0x%02x",
++					dev->name, vendor_id, part_no, dyn_addr);
++			} else {
++				/* Update target descriptor */
++				target->dynamic_addr = dyn_addr;
++				target->bcr = rx_buf[6];
++				target->dcr = rx_buf[7];
++			}
++
++			/* Mark the address as I3C device */
++			i3c_addr_slots_mark_i3c(&data->common.attached_dev.addr_slots, dyn_addr);
++
++			/*
++			 * If the device has static address, after address assignment,
++			 * the device will not respond to the static address anymore.
++			 * So free the static one from address slots if different from
++			 * newly assigned one.
++			 */
++			if ((target != NULL) && (target->static_addr != 0U) &&
++			    (dyn_addr != target->static_addr)) {
++				i3c_addr_slots_mark_free(&data->common.attached_dev.addr_slots,
++							 dyn_addr);
++			}
++
++			/* Emit process DAA again to send the address to the device */
++			inst->MWDATAB = dyn_addr;
++			ret = npcx_i3c_request_daa(inst);
++			if (ret != 0) {
++				LOG_ERR("%s: Assign DA timeout", __func__);
++				break;
++			}
++
++			LOG_DBG("PID 0x%04x%08x assigned dynamic address 0x%02x", vendor_id,
++				part_no, dyn_addr);
++
++			/* Target did not accept the assigned DA, exit DAA */
++			if (IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_NACKED)) {
++				ret = -EFAULT;
++				LOG_DBG("TGT NACK assigned DA %#x", dyn_addr);
++
++				/* Free the reserved DA */
++				i3c_addr_slots_mark_free(&data->common.attached_dev.addr_slots,
++							 dyn_addr);
++
++				/* 0 if address has not been assigned */
++				if (target != NULL) {
++					target->dynamic_addr = 0;
++				}
++
++				break;
++			}
++		}
++
++		/* Check all targets have been assigned DA and DAA complete */
++	} while ((!IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_COMPLETE)) &&
++		 npcx_i3c_state_get(inst) != MSTATUS_STATE_IDLE);
++
++out_do_daa:
++	/* Exit DAA mode when error occurs */
++	if (ret != 0) {
++		npcx_i3c_request_emit_stop(inst);
++	}
++
++	/* Clear all flags. */
++	npcx_i3c_errwarn_clear_all(inst);
++	npcx_i3c_status_clear_all(inst);
++
++	/* Re-Enable I3C IRQ sources. */
++	npcx_i3c_interrupt_enable(inst, intmask);
++
++	npcx_i3c_fifo_flush(inst);
++	npcx_i3c_mutex_unlock(dev);
++
++	return ret;
++}
++
++/*
++ * brief:  Send Common Command Code (CCC).
++ *
++ * param[in] dev      Pointer to controller device driver instance.
++ * param[in] payload  Pointer to CCC payload.
++ *
++ * return:  The same as i3c_do_ccc()
++ *          0 If successful.
++ *          -EBUSY Bus is busy.
++ *          -EIO General Input / output error.
++ *          -EINVAL Invalid valid set in the payload structure.
++ *          -ENOSYS Not implemented.
++ */
++static int npcx_i3c_do_ccc(const struct device *dev, struct i3c_ccc_payload *payload)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	int ret;
++	struct i3c_reg *inst = config->base;
++	uint32_t intmask;
++	int xfered_len;
++
++	if (dev == NULL || payload == NULL) {
++		return -EINVAL;
++	}
++
++	npcx_i3c_mutex_lock(dev);
++
++	/* Disable interrupt */
++	intmask = inst->MINTSET;
++	npcx_i3c_interrupt_all_disable(inst);
++
++	/* Clear status and flush fifo */
++	npcx_i3c_xfer_reset(inst);
++
++	LOG_DBG("CCC[0x%02x]", payload->ccc.id);
++
++	/* Write emit START and broadcast address (0x7E) */
++	ret = npcx_i3c_request_emit_start(inst, I3C_BROADCAST_ADDR, NPCX_I3C_MCTRL_TYPE_I3C, false,
++					  0);
++	if (ret < 0) {
++		LOG_ERR("CCC[0x%02x] %s START error (%d)", payload->ccc.id,
++			i3c_ccc_is_payload_broadcast(payload) ? "broadcast" : "direct", ret);
++
++		goto out_do_ccc;
++	}
++
++	/* Write CCC command */
++	npcx_i3c_status_clear_all(inst);
++	npcx_i3c_errwarn_clear_all(inst);
++	xfered_len = npcx_i3c_xfer_write_fifo(inst, &payload->ccc.id, 1, payload->ccc.data_len > 0);
++	if (xfered_len < 0) {
++		LOG_ERR("CCC[0x%02x] %s command error (%d)", payload->ccc.id,
++			i3c_ccc_is_payload_broadcast(payload) ? "broadcast" : "direct", ret);
++		ret = xfered_len;
++
++		goto out_do_ccc;
++	}
++
++	/* Write data (defining byte or data bytes) for CCC if needed */
++	if (payload->ccc.data_len > 0) {
++		npcx_i3c_status_clear_all(inst);
++		npcx_i3c_errwarn_clear_all(inst);
++		xfered_len = npcx_i3c_xfer_write_fifo(inst, payload->ccc.data,
++						      payload->ccc.data_len, false);
++		if (xfered_len < 0) {
++			LOG_ERR("CCC[0x%02x] %s command payload error (%d)", payload->ccc.id,
++				i3c_ccc_is_payload_broadcast(payload) ? "broadcast" : "direct",
++				ret);
++			ret = xfered_len;
++
++			goto out_do_ccc;
++		}
++
++		/* Write back the transferred bytes */
++		payload->ccc.num_xfer = xfered_len;
++	}
++
++	/* Wait message transfer complete */
++	if (WAIT_FOR(IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_COMPLETE), NPCX_I3C_CHK_TIMEOUT_US,
++		     NULL) == false) {
++		ret = -ETIMEDOUT;
++		LOG_DBG("Check complete timeout");
++		goto out_do_ccc;
++	}
++
++	inst->MSTATUS = BIT(NPCX_I3C_MSTATUS_COMPLETE); /* W1C */
++
++	/* For direct CCC */
++	if (!i3c_ccc_is_payload_broadcast(payload)) {
++		/*
++		 * If there are payload(s) for each target,
++		 * RESTART and then send payload for each target.
++		 */
++		for (int idx = 0; idx < payload->targets.num_targets; idx++) {
++			struct i3c_ccc_target_payload *tgt_payload =
++				&payload->targets.payloads[idx];
++
++			bool is_read = (tgt_payload->rnw == 1U);
++
++			xfered_len = npcx_i3c_do_one_xfer(
++				inst, tgt_payload->addr, NPCX_I3C_MCTRL_TYPE_I3C, tgt_payload->data,
++				tgt_payload->data_len, is_read, true, false, false);
++			if (xfered_len < 0) {
++				LOG_ERR("CCC[0x%02x] target payload error (%d)", payload->ccc.id,
++					ret);
++				ret = xfered_len;
++
++				goto out_do_ccc;
++			}
++
++			/* Write back the total number of bytes transferred */
++			tgt_payload->num_xfer = xfered_len;
++		}
++	}
++
++out_do_ccc:
++	npcx_i3c_request_emit_stop(inst);
++
++	npcx_i3c_interrupt_enable(inst, intmask);
++
++	npcx_i3c_mutex_unlock(dev);
++
++	return ret;
++}
++
++#ifdef CONFIG_I3C_USE_IBI
++/*
++ * brief  Callback to service target initiated IBIs in workqueue.
++ *
++ * param[in] work  Pointer to k_work item.
++ */
++static void npcx_i3c_ibi_work(struct k_work *work)
++{
++	uint8_t payload[CONFIG_I3C_IBI_MAX_PAYLOAD_SIZE];
++	size_t payload_sz = 0;
++
++	struct i3c_ibi_work *i3c_ibi_work = CONTAINER_OF(work, struct i3c_ibi_work, work);
++	const struct device *dev = i3c_ibi_work->controller;
++	const struct npcx_i3c_config *config = dev->config;
++	struct npcx_i3c_data *data = dev->data;
++	struct i3c_dev_attached_list *dev_list = &data->common.attached_dev;
++	struct i3c_reg *inst = config->base;
++	struct i3c_device_desc *target = NULL;
++	uint32_t ibitype, ibiaddr;
++	int ret;
++
++	k_sem_take(&data->ibi_lock_sem, K_FOREVER);
++
++	if (npcx_i3c_state_get(inst) != MSTATUS_STATE_TGTREQ) {
++		LOG_DBG("IBI work %p running not because of IBI", work);
++		LOG_ERR("%s: MSTATUS 0x%08x MERRWARN 0x%08x", __func__, inst->MSTATUS,
++			inst->MERRWARN);
++
++		npcx_i3c_request_emit_stop(inst);
++
++		goto out_ibi_work;
++	};
++
++	/* Use auto IBI to service the IBI */
++	npcx_i3c_request_auto_ibi(inst);
++
++	/* Wait for target to win address arbitration (ibitype and ibiaddr) */
++	if (WAIT_FOR(IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_IBIWON), NPCX_I3C_CHK_TIMEOUT_US,
++		     NULL) == false) {
++		LOG_ERR("IBI work, IBIWON timeout");
++
++		goto out_ibi_work;
++	}
++
++	ibitype = GET_FIELD(inst->MSTATUS, NPCX_I3C_MSTATUS_IBITYPE);
++	ibiaddr = GET_FIELD(inst->MSTATUS, NPCX_I3C_MSTATUS_IBIADDR);
++
++	switch (ibitype) {
++	case MSTATUS_IBITYPE_IBI:
++		target = i3c_dev_list_i3c_addr_find(dev_list, (uint8_t)ibiaddr);
++		if (target != NULL) {
++			ret = npcx_i3c_xfer_read_fifo(inst, &payload[0], sizeof(payload));
++			if (ret >= 0) {
++				payload_sz = (size_t)ret;
++			} else {
++				LOG_ERR("Error reading IBI payload");
++
++				npcx_i3c_request_emit_stop(inst);
++
++				goto out_ibi_work;
++			}
++		} else {
++			/* NACK IBI coming from unknown device */
++			npcx_i3c_ibi_respond_nack(inst);
++		}
++		break;
++	case MSTATUS_IBITYPE_HJ:
++		npcx_i3c_ibi_respond_ack(inst);
++		npcx_i3c_request_emit_stop(inst);
++		break;
++	case MSTATUS_IBITYPE_CR:
++		LOG_DBG("Controller role handoff not supported");
++		npcx_i3c_ibi_respond_nack(inst);
++		break;
++	default:
++		break;
++	}
++
++	if (npcx_i3c_has_error(inst)) {
++		/*
++		 * If the controller detects any errors, simply
++		 * emit a STOP to abort the IBI. The target will
++		 * raise IBI again if so desired.
++		 */
++		npcx_i3c_request_emit_stop(inst);
++
++		goto out_ibi_work;
++	}
++
++	switch (ibitype) {
++	case MSTATUS_IBITYPE_IBI:
++		if (target != NULL) {
++			if (i3c_ibi_work_enqueue_target_irq(target, &payload[0], payload_sz) != 0) {
++				LOG_ERR("Error enqueue IBI IRQ work");
++			}
++		}
++
++		/* Finishing the IBI transaction */
++		npcx_i3c_request_emit_stop(inst);
++		break;
++	case MSTATUS_IBITYPE_HJ:
++		if (i3c_ibi_work_enqueue_hotjoin(dev) != 0) {
++			LOG_ERR("Error enqueue IBI HJ work");
++		}
++		break;
++	case MSTATUS_IBITYPE_CR:
++		/* Not supported */
++		break;
++	default:
++		break;
++	}
++
++out_ibi_work:
++	npcx_i3c_xfer_reset(inst);
++
++	k_sem_give(&data->ibi_lock_sem);
++
++	/* Re-enable target initiated IBI interrupt. */
++	inst->MINTSET = BIT(NPCX_I3C_MINTSET_TGTSTART);
++}
++
++/* Set local IBI information to IBIRULES register */
++static void npcx_i3c_ibi_rules_setup(struct npcx_i3c_data *data, struct i3c_reg *inst)
++{
++	uint32_t ibi_rules;
++	int idx;
++
++	ibi_rules = 0;
++
++	for (idx = 0; idx < ARRAY_SIZE(data->ibi.addr); idx++) {
++		uint32_t addr_6bit;
++
++		/* Extract the lower 6-bit of target address */
++		addr_6bit = (uint32_t)data->ibi.addr[idx] & IBIRULES_ADDR_MSK;
++
++		/* Shift into correct place */
++		addr_6bit <<= idx * IBIRULES_ADDR_SHIFT;
++
++		/* Put into the temporary IBI Rules register */
++		ibi_rules |= addr_6bit;
++	}
++
++	if (!data->ibi.msb) {
++		/* The MSB0 field is 1 if MSB is 0 */
++		ibi_rules |= BIT(NPCX_I3C_IBIRULES_MSB0);
++	}
++
++	if (!data->ibi.has_mandatory_byte) {
++		/* The NOBYTE field is 1 if there is no mandatory byte */
++		ibi_rules |= BIT(NPCX_I3C_IBIRULES_NOBYTE);
++	}
++
++	/* Update the register */
++	inst->IBIRULES = ibi_rules;
++
++	LOG_DBG("MIBIRULES 0x%08x", ibi_rules);
++}
++
++static int npcx_i3c_ibi_enable(const struct device *dev, struct i3c_device_desc *target)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct npcx_i3c_data *data = dev->data;
++	struct i3c_reg *inst = config->base;
++	struct i3c_ccc_events i3c_events;
++	uint8_t idx;
++	bool msb, has_mandatory_byte;
++	int ret;
++
++	/* Check target IBI request capable */
++	if (!i3c_device_is_ibi_capable(target)) {
++		LOG_ERR("%s: device is not ibi capable", __func__);
++		return -EINVAL;
++	}
++
++	if (data->ibi.num_addr >= ARRAY_SIZE(data->ibi.addr)) {
++		/* No more free entries in the IBI Rules table */
++		LOG_ERR("%s: no more free space in the IBI rules table", __func__);
++		return -ENOMEM;
++	}
++
++	/* Check whether the selected target is already in the list */
++	for (idx = 0; idx < ARRAY_SIZE(data->ibi.addr); idx++) {
++		if (data->ibi.addr[idx] == target->dynamic_addr) {
++			LOG_ERR("%s: selected target is already in the list", __func__);
++			return -EINVAL;
++		}
++	}
++
++	/* Disable controller interrupt while we configure IBI rules. */
++	inst->MINTCLR = BIT(NPCX_I3C_MINTCLR_TGTSTART);
++
++	LOG_DBG("IBI enabling for 0x%02x (BCR 0x%02x)", target->dynamic_addr, target->bcr);
++
++	msb = (target->dynamic_addr & BIT(6)) == BIT(6); /* Check addess(7-bit) MSB enable */
++	has_mandatory_byte = i3c_ibi_has_payload(target);
++
++	/*
++	 * If there are already addresses in the table, we must
++	 * check if the incoming entry is compatible with
++	 * the existing ones.
++	 *
++	 * All targets in the list should follow the same IBI rules.
++	 */
++	if (data->ibi.num_addr > 0) {
++		/*
++		 * 1. All devices in the table must all use mandatory
++		 *    bytes, or do not.
++		 *
++		 * 2. Each address in entry only captures the lowest 6-bit.
++		 *    The MSB (7th bit) is captured separated in another bit
++		 *    in the register. So all addresses must have the same MSB.
++		 */
++		if ((has_mandatory_byte != data->ibi.has_mandatory_byte) ||
++		    (msb != data->ibi.msb)) {
++			ret = -EINVAL;
++			LOG_ERR("%s: New IBI does not have same mandatory byte or msb"
++				" as previous IBI", __func__);
++			goto out_ibi_enable;
++		}
++
++		/* Find an empty address slot */
++		for (idx = 0; idx < ARRAY_SIZE(data->ibi.addr); idx++) {
++			if (data->ibi.addr[idx] == 0U) {
++				break;
++			}
++		}
++
++		if (idx >= ARRAY_SIZE(data->ibi.addr)) {
++			ret = -ENOTSUP;
++			LOG_ERR("Cannot support more IBIs");
++			goto out_ibi_enable;
++		}
++	} else {
++		/*
++		 * If the incoming address is the first in the table,
++		 * it dictates future compatibilities.
++		 */
++		data->ibi.has_mandatory_byte = has_mandatory_byte;
++		data->ibi.msb = msb;
++
++		idx = 0;
++	}
++
++	data->ibi.addr[idx] = target->dynamic_addr;
++	data->ibi.num_addr += 1U;
++
++	npcx_i3c_ibi_rules_setup(data, inst);
++
++	/* Enable target IBI event by ENEC command */
++	i3c_events.events = I3C_CCC_EVT_INTR;
++	ret = i3c_ccc_do_events_set(target, true, &i3c_events);
++	if (ret != 0) {
++		LOG_ERR("Error sending IBI ENEC for 0x%02x (%d)", target->dynamic_addr, ret);
++	}
++
++out_ibi_enable:
++	if (data->ibi.num_addr > 0U) {
++		/*
++		 * If there is more than 1 target in the list,
++		 * enable controller to raise interrupt when a target
++		 * initiates IBI.
++		 */
++		inst->MINTSET = BIT(NPCX_I3C_MINTSET_TGTSTART);
++	}
++
++	return ret;
++}
++
++static int npcx_i3c_ibi_disable(const struct device *dev, struct i3c_device_desc *target)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct npcx_i3c_data *data = dev->data;
++	struct i3c_reg *inst = config->base;
++	struct i3c_ccc_events i3c_events;
++	int ret;
++	int idx;
++
++	if (!i3c_device_is_ibi_capable(target)) {
++		LOG_ERR("%s: device is not ibi capable", __func__);
++		return -EINVAL;
++	}
++
++	for (idx = 0; idx < ARRAY_SIZE(data->ibi.addr); idx++) {
++		if (target->dynamic_addr == data->ibi.addr[idx]) {
++			break;
++		}
++	}
++
++	if (idx == ARRAY_SIZE(data->ibi.addr)) {
++		LOG_ERR("%s: target is not in list of registered addresses", __func__);
++		return -ENODEV;
++	}
++
++	/* Disable controller interrupt while we configure IBI rules. */
++	inst->MINTCLR = BIT(NPCX_I3C_MINTCLR_TGTSTART);
++
++	/* Clear the ibi rule data */
++	data->ibi.addr[idx] = 0U;
++	data->ibi.num_addr -= 1U;
++
++	/* Disable disable target IBI */
++	i3c_events.events = I3C_CCC_EVT_INTR;
++	ret = i3c_ccc_do_events_set(target, false, &i3c_events);
++	if (ret != 0) {
++		LOG_ERR("Error sending IBI DISEC for 0x%02x (%d)", target->dynamic_addr, ret);
++	}
++
++	npcx_i3c_ibi_rules_setup(data, inst);
++
++	if (data->ibi.num_addr > 0U) {
++		/*
++		 * Enable controller to raise interrupt when a target
++		 * initiates IBI.
++		 */
++		inst->MINTSET = BIT(NPCX_I3C_MINTSET_TGTSTART);
++	}
++
++	return ret;
++}
++#endif /* CONFIG_I3C_USE_IBI */
++
++static void npcx_i3c_isr(const struct device *dev)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct i3c_reg *inst = config->base;
++
++#ifdef CONFIG_I3C_NPCX_DMA
++	struct mdma_reg *mdma_inst = config->mdma_base;
++
++	if (IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_COMPLETE)) {
++		inst->MSTATUS = BIT(NPCX_I3C_MSTATUS_COMPLETE); /* W1C */
++
++		/* MDMA write */
++		if (get_oper_state(dev) == NPCX_I3C_WR) {
++			return i3c_ctrl_notify(dev);
++		}
++	}
++
++	if (IS_BIT_SET(mdma_inst->MDMA_CTL0, NPCX_MDMA_CTL_TC)) {
++		mdma_inst->MDMA_CTL0 &= ~BIT(NPCX_MDMA_CTL_TC); /* W0C */
++
++		/* MDMA read */
++		if (get_oper_state(dev) == NPCX_I3C_RD) {
++			return i3c_ctrl_notify(dev);
++		}
++
++	}
++#endif /* CONFIG_I3C_NPCX_DMA */
++
++#ifdef CONFIG_I3C_USE_IBI
++	/* Target start detected */
++	if (IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_TGTSTART)) {
++		/* Disable further target initiated IBI interrupt */
++		inst->MINTCLR = BIT(NPCX_I3C_MINTCLR_TGTSTART);
++
++		/* Handle IBI in workqueue */
++		i3c_ibi_work_enqueue_cb(dev, npcx_i3c_ibi_work);
++	}
++#endif /* CONFIG_I3C_USE_IBI */
++
++}
++
++static int npcx_i3c_get_scl_config(struct npcx_i3c_timing_cfg *cfg, uint32_t i3c_src_clk,
++				   uint32_t pp_baudrate_hz, uint32_t od_baudrate_hz)
++{
++	uint32_t i3c_div, freq;
++	uint32_t ppbaud, odbaud;
++	uint32_t pplow_ns, odlow_ns;
++
++	if (cfg == NULL) {
++		LOG_ERR("Freq config NULL");
++		return -EINVAL;
++	}
++
++	if ((pp_baudrate_hz == 0) || (pp_baudrate_hz > I3C_SCL_PP_FREQ_MAX_MHZ) ||
++	    (od_baudrate_hz == 0) || (od_baudrate_hz > I3C_SCL_OD_FREQ_MAX_MHZ)) {
++		LOG_ERR("I3C PP_SCL should within 12.5 Mhz, input: %d", pp_baudrate_hz);
++		LOG_ERR("I3C OD_SCL should within 4.17 Mhz, input: %d", od_baudrate_hz);
++		return -EINVAL;
++	}
++
++	/* Fixed PPLOW = 0 to achieve 50% duty cycle */
++	/* pp_freq = ((f_mclkd / 2) / (PPBAUD+1)) */
++	freq = i3c_src_clk / 2UL;
++
++	i3c_div = freq / pp_baudrate_hz;
++	i3c_div = (i3c_div == 0UL) ? 1UL : i3c_div;
++	if (freq / i3c_div > pp_baudrate_hz) {
++		i3c_div++;
++	}
++
++	if (i3c_div > PPBAUD_DIV_MAX) {
++		LOG_ERR("PPBAUD out of range");
++		return -EINVAL;
++	}
++
++	ppbaud = i3c_div - 1UL;
++	freq /= i3c_div;
++
++	/* Check PP low period in spec (should be the same as PPHIGH) */
++	pplow_ns = (uint32_t)(NSEC_PER_SEC / (2UL * freq));
++	if (pplow_ns < I3C_BUS_TLOW_PP_MIN_NS) {
++		LOG_ERR("PPLOW ns out of spec");
++		return -EINVAL;
++	}
++
++	/* Fixed odhpp = 1 configuration */
++	/* odFreq = (2*freq) / (ODBAUD + 2), 1 <= ODBAUD <= 255 */
++	i3c_div = (2UL * freq) / od_baudrate_hz;
++	i3c_div = i3c_div < 2UL ? 2UL : i3c_div;
++	if ((2UL * freq / i3c_div) > od_baudrate_hz) {
++		i3c_div++;
++	}
++
++	odbaud = i3c_div - 2UL;
++	freq = (2UL * freq) / i3c_div; /* For I2C usage in the future */
++
++	/* Check OD low period in spec */
++	odlow_ns = (odbaud + 1UL) * pplow_ns;
++	if (odlow_ns < I3C_BUS_TLOW_OD_MIN_NS) {
++		LOG_ERR("ODBAUD ns out of spec");
++		return -EINVAL;
++	}
++
++	cfg->pplow = 0;
++	cfg->odhpp = 1;
++	cfg->ppbaud = ppbaud;
++	cfg->odbaud = odbaud;
++
++	return 0;
++}
++
++static int npcx_i3c_freq_init(const struct device *dev)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct npcx_i3c_data *data = dev->data;
++	struct i3c_reg *inst = config->base;
++	const struct device *const clk_dev = config->clock_dev;
++	struct i3c_config_controller *ctrl_config = &data->common.ctrl_config;
++	uint32_t scl_pp = ctrl_config->scl.i3c;
++	uint32_t scl_od = config->clocks.i3c_od_scl_hz;
++	struct npcx_i3c_timing_cfg timing_cfg;
++	uint32_t mclkd;
++	int ret;
++
++	ret = clock_control_get_rate(clk_dev, (clock_control_subsys_t)&config->clock_subsys,
++				     &mclkd);
++	if (ret != 0x0) {
++		LOG_ERR("Get I3C source clock fail %d", ret);
++		return -EINVAL;
++	}
++
++	LOG_DBG("MCLKD: %d", mclkd);
++	LOG_DBG("SCL_PP_FEQ MAX: %d", I3C_SCL_PP_FREQ_MAX_MHZ);
++	LOG_DBG("SCL_OD_FEQ MAX: %d", I3C_SCL_OD_FREQ_MAX_MHZ);
++	LOG_DBG("scl_pp: %d", scl_pp);
++	LOG_DBG("scl_od: %d", scl_od);
++	LOG_DBG("hdr: %d", ctrl_config->supported_hdr);
++
++	/* MCLKD = MCLK / I3C_DIV(1 or 2)
++	 * MCLKD must between 40 mhz to 50 mhz.
++	 */
++	if (mclkd == MCLKD_FREQ_45_MHZ) {
++		/* Set default I3C_SCL configuration */
++		timing_cfg = npcx_def_speed_cfg[NPCX_I3C_BUS_SPEED_45MHZ];
++	} else {
++		LOG_ERR("Unsupported MCLKD freq for %s.", dev->name);
++		return -EINVAL;
++	}
++
++	ret = npcx_i3c_get_scl_config(&timing_cfg, mclkd, scl_pp, scl_od);
++	if (ret != 0x0) {
++		LOG_ERR("Adjust I3C frequency fail");
++		return -EINVAL;
++	}
++
++	/* Apply SCL_PP and SCL_OD */
++	SET_FIELD(inst->MCONFIG, NPCX_I3C_MCONFIG_PPBAUD, timing_cfg.ppbaud);
++	SET_FIELD(inst->MCONFIG, NPCX_I3C_MCONFIG_PPLOW, timing_cfg.pplow);
++	SET_FIELD(inst->MCONFIG, NPCX_I3C_MCONFIG_ODBAUD, timing_cfg.odbaud);
++	if (timing_cfg.odhpp != 0) {
++		inst->MCONFIG |= BIT(NPCX_I3C_MCONFIG_ODHPP);
++	} else {
++		inst->MCONFIG &= ~BIT(NPCX_I3C_MCONFIG_ODHPP);
++	}
++
++	LOG_DBG("ppbaud: %d", GET_FIELD(inst->MCONFIG, NPCX_I3C_MCONFIG_PPBAUD));
++	LOG_DBG("odbaud: %d", GET_FIELD(inst->MCONFIG, NPCX_I3C_MCONFIG_ODBAUD));
++	LOG_DBG("pplow: %d", GET_FIELD(inst->MCONFIG, NPCX_I3C_MCONFIG_PPLOW));
++	LOG_DBG("odhpp: %d", IS_BIT_SET(inst->MCONFIG, NPCX_I3C_MCONFIG_ODHPP));
++
++	return 0;
++}
++
++static int npcx_i3c_cntlr_init(const struct device *dev)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct i3c_reg *inst = config->base;
++	const struct device *const clk_dev = config->clock_dev;
++	uint32_t apb4_rate;
++	uint8_t bamatch;
++	int ret;
++
++	/* Reset I3C module */
++	reset_line_toggle_dt(&config->reset);
++
++	/* Disable all interrupts */
++	npcx_i3c_interrupt_all_disable(inst);
++
++	/* Initial baudrate. PPLOW=1, PPBAUD, ODHPP=1, ODBAUD */
++	if (npcx_i3c_freq_init(dev) != 0x0) {
++		return -EINVAL;
++	}
++
++	/* Enable main controller mode */
++	SET_FIELD(inst->MCONFIG, NPCX_I3C_MCONFIG_CTRENA, MCONFIG_CTRENA_ON);
++	/* Enable external high-keeper */
++	SET_FIELD(inst->MCONFIG, NPCX_I3C_MCONFIG_HKEEP, MCONFIG_HKEEP_EXT_SDA_SCL);
++	/* Enable open-drain stop */
++	inst->MCONFIG |= BIT(NPCX_I3C_MCONFIG_ODSTOP);
++	/* Enable timeout */
++	inst->MCONFIG &= ~BIT(NPCX_I3C_MCONFIG_DISTO);
++	/* Flush tx and tx FIFO buffer */
++	npcx_i3c_fifo_flush(inst);
++
++	/* Set bus available match value in target register */
++	ret = clock_control_get_rate(clk_dev, (clock_control_subsys_t)&config->ref_clk_subsys,
++				     &apb4_rate);
++	LOG_DBG("APB4_CLK: %d", apb4_rate);
++
++	if (ret != 0x0) {
++		LOG_ERR("Get APb4 source clock fail %d", ret);
++		return -EINVAL;
++	}
++
++	bamatch = DIV_ROUND_UP(apb4_rate, MHZ(1));
++	bamatch = DIV_ROUND_UP(bamatch, BAMATCH_DIV);
++	LOG_DBG("BAMATCH: %d", bamatch);
++
++	SET_FIELD(inst->CONFIG, NPCX_I3C_CONFIG_BAMATCH, bamatch);
++
++	return 0;
++}
++
++static int npcx_i3c_configure(const struct device *dev, enum i3c_config_type type, void *config)
++{
++	struct npcx_i3c_data *dev_data = dev->data;
++	struct i3c_config_controller *cntlr_cfg = config;
++
++	if (type == I3C_CONFIG_CONTROLLER) {
++		/*
++		 * Check for valid configuration parameters.
++		 * Currently, must be the primary controller.
++		 */
++		if ((cntlr_cfg->is_secondary) || (cntlr_cfg->scl.i3c == 0U)) {
++			return -EINVAL;
++		}
++
++		/* Save requested config to dev */
++		(void)memcpy(&dev_data->common.ctrl_config, cntlr_cfg, sizeof(*cntlr_cfg));
++
++		/* Controller init */
++		return npcx_i3c_cntlr_init(dev);
++	}
++
++	LOG_ERR("Support controller mode only");
++	return -EINVAL;
++}
++
++static int npcx_i3c_config_get(const struct device *dev, enum i3c_config_type type, void *config)
++{
++	struct npcx_i3c_data *data = dev->data;
++
++	if ((type != I3C_CONFIG_CONTROLLER) || (config == NULL)) {
++		return -EINVAL;
++	}
++
++	(void)memcpy(config, &data->common.ctrl_config, sizeof(data->common.ctrl_config));
++
++	return 0;
++}
++
++static int npcx_i3c_init(const struct device *dev)
++{
++	const struct npcx_i3c_config *config = dev->config;
++	struct npcx_i3c_data *data = dev->data;
++	struct i3c_config_controller *ctrl_config = &data->common.ctrl_config;
++	const struct device *const clk_dev = config->clock_dev;
++	int ret;
++
++	/* Check clock device ready */
++	if (!device_is_ready(clk_dev)) {
++		LOG_ERR("%s Clk device not ready", clk_dev->name);
++		return -ENODEV;
++	}
++
++	/* Set I3C_PD operational */
++	ret = clock_control_on(clk_dev, (clock_control_subsys_t)&config->clock_subsys);
++	if (ret < 0) {
++		LOG_ERR("Turn on I3C clock fail %d", ret);
++		return ret;
++	}
++
++#ifdef CONFIG_I3C_NPCX_DMA
++	ret = clock_control_on(clk_dev, (clock_control_subsys_t)&config->mdma_clk_subsys);
++	if (ret < 0) {
++		LOG_ERR("Turn on I3C MDMA clock fail %d", ret);
++		return ret;
++	}
++#endif
++
++	/* Apply pin-muxing */
++	ret = pinctrl_apply_state(config->pincfg, PINCTRL_STATE_DEFAULT);
++	if (ret != 0) {
++		LOG_ERR("Apply pinctrl fail %d", ret);
++		return ret;
++	}
++
++	k_mutex_init(&data->lock_mutex);
++	k_sem_init(&data->sync_sem, 0, 1);
++	k_sem_init(&data->ibi_lock_sem, 1, 1);
++
++	ret = i3c_addr_slots_init(dev);
++	if (ret != 0) {
++		LOG_ERR("Addr slots init fail %d", ret);
++		return ret;
++	}
++
++	ctrl_config->is_secondary = false; /* Currently can only act as primary controller. */
++	ctrl_config->supported_hdr = 0U;   /* HDR mode not supported at the moment. */
++	ctrl_config->scl.i3c = config->clocks.i3c_pp_scl_hz; /* Set I3C frequency */
++
++	ret = npcx_i3c_configure(dev, I3C_CONFIG_CONTROLLER, ctrl_config);
++	if (ret != 0) {
++		LOG_ERR("Apply i3c_configure() fail %d", ret);
++		return ret;
++	}
++
++	/* Just in case the bus is not in idle. */
++	ret = npcx_i3c_recover_bus(dev);
++	if (ret != 0) {
++		LOG_ERR("Apply i3c_recover_bus() fail %d", ret);
++		return ret;
++	}
++
++	/* Configure interrupt */
++	config->irq_config_func(dev);
++
++	/* Initialize driver status machine */
++	set_oper_state(dev, NPCX_I3C_IDLE);
++
++	/* Check I3C target device exist in device tree */
++	if (config->common.dev_list.num_i3c > 0) {
++		/* Perform bus initialization */
++		ret = i3c_bus_init(dev, &config->common.dev_list);
++		if (ret != 0) {
++			LOG_ERR("Apply i3c_bus_init() fail %d", ret);
++			return ret;
++		}
++	}
++
++	return 0;
++}
++
++static const struct i3c_driver_api npcx_i3c_driver_api = {
++	.configure = npcx_i3c_configure,
++	.config_get = npcx_i3c_config_get,
++
++	.recover_bus = npcx_i3c_recover_bus,
++
++	.do_daa = npcx_i3c_do_daa,
++	.do_ccc = npcx_i3c_do_ccc,
++
++	.i3c_device_find = npcx_i3c_device_find,
++
++	.i3c_xfers = npcx_i3c_transfer,
++
++#ifdef CONFIG_I3C_USE_IBI
++	.ibi_enable = npcx_i3c_ibi_enable,
++	.ibi_disable = npcx_i3c_ibi_disable,
++#endif
++};
++
++#define I3C_NPCX_DEVICE(id)                                                                        \
++	PINCTRL_DT_INST_DEFINE(id);                                                                \
++	static void npcx_i3c_config_func_##id(const struct device *dev)                            \
++	{                                                                                          \
++		IRQ_CONNECT(DT_INST_IRQN(id), DT_INST_IRQ(id, priority), npcx_i3c_isr,             \
++			    DEVICE_DT_INST_GET(id), 0);                                            \
++		irq_enable(DT_INST_IRQN(id));                                                      \
++	};                                                                                         \
++	static struct i3c_device_desc npcx_i3c_device_array_##id[] = I3C_DEVICE_ARRAY_DT_INST(id); \
++	static struct i3c_i2c_device_desc npcx_i3c_i2c_device_array_##id[] =                       \
++		I3C_I2C_DEVICE_ARRAY_DT_INST(id);                                                  \
++	static const struct npcx_i3c_config npcx_i3c_config_##id = {                               \
++		.base = (struct i3c_reg *)DT_INST_REG_ADDR(id),                                    \
++		.clock_dev = DEVICE_DT_GET(NPCX_CLK_CTRL_NODE),                                    \
++		.reset = RESET_DT_SPEC_INST_GET(id),                                               \
++		.clock_subsys = NPCX_DT_CLK_CFG_ITEM_BY_NAME(id, mclkd),                           \
++		.ref_clk_subsys = NPCX_DT_CLK_CFG_ITEM_BY_NAME(id, apb4),                          \
++		.irq_config_func = npcx_i3c_config_func_##id,                                      \
++		.common.dev_list.i3c = npcx_i3c_device_array_##id,                                 \
++		.common.dev_list.num_i3c = ARRAY_SIZE(npcx_i3c_device_array_##id),                 \
++		.common.dev_list.i2c = npcx_i3c_i2c_device_array_##id,                             \
++		.common.dev_list.num_i2c = ARRAY_SIZE(npcx_i3c_i2c_device_array_##id),             \
++		.pincfg = PINCTRL_DT_INST_DEV_CONFIG_GET(id),                                      \
++		.clocks.i3c_pp_scl_hz = DT_INST_PROP_OR(id, i3c_scl_hz, 0),                        \
++		.clocks.i3c_od_scl_hz = DT_INST_PROP_OR(id, i3c_od_scl_hz, 0),                     \
++		IF_ENABLED(CONFIG_I3C_NPCX_DMA, (                                                  \
++			.mdma_clk_subsys = NPCX_DT_CLK_CFG_ITEM_BY_IDX(id, 2),                     \
++		))                                                                                 \
++		IF_ENABLED(CONFIG_I3C_NPCX_DMA, (                                                  \
++			.mdma_base = (struct mdma_reg *)DT_INST_REG_ADDR_BY_IDX(id, 1),            \
++		))                                                                                 \
++	};                                                                                         \
++	static struct npcx_i3c_data npcx_i3c_data_##id;                                            \
++	DEVICE_DT_INST_DEFINE(id, npcx_i3c_init, NULL, &npcx_i3c_data_##id, &npcx_i3c_config_##id, \
++			      POST_KERNEL, CONFIG_I3C_CONTROLLER_INIT_PRIORITY,                    \
++			      &npcx_i3c_driver_api);
++
++DT_INST_FOREACH_STATUS_OKAY(I3C_NPCX_DEVICE)
+diff --git a/dts/arm/nuvoton/npcx/npcx4.dtsi b/dts/arm/nuvoton/npcx/npcx4.dtsi
+index b2f6a55a8..c9be91140 100644
+--- a/dts/arm/nuvoton/npcx/npcx4.dtsi
++++ b/dts/arm/nuvoton/npcx/npcx4.dtsi
+@@ -14,7 +14,7 @@
+ #include "npcx4/npcx4-espi-vws-map.dtsi"
+ /* npcx4 series low-voltage io controls mapping table */
+ #include "npcx4/npcx4-lvol-ctrl-map.dtsi"
+-/* npcx4 series reset mapping table*/
++/* npcx4 series reset mapping table */
+ #include "zephyr/dt-bindings/reset/npcx4_reset.h"
+ 
+ /* Device tree declarations of npcx soc family */
+diff --git a/dts/bindings/i3c/nuvoton,npcx-i3c.yaml b/dts/bindings/i3c/nuvoton,npcx-i3c.yaml
+new file mode 100644
+index 000000000..0633da8e9
+--- /dev/null
++++ b/dts/bindings/i3c/nuvoton,npcx-i3c.yaml
+@@ -0,0 +1,52 @@
++# Copyright (c) 2024 Nuvoton Technology Corporation.
++# SPDX-License-Identifier: Apache-2.0
++
++description: |
++    Nuvoton I3C controller
++
++    Representation:
++
++    /* If CONFIG_I3C_NPCX is enabled, the suggested clock configuration is as follows: */
++    &pcc {
++      clock-frequency = <DT_FREQ_M(90)>; /* OFMCLK runs at 90MHz */
++      core-prescaler = <3>; /* CORE_CLK runs at 30MHz */
++      apb1-prescaler = <6>; /* APB1_CLK runs at 15MHz */
++      apb2-prescaler = <6>; /* APB2_CLK runs at 15MHz */
++      apb3-prescaler = <6>; /* APB3_CLK runs at 15MHz */
++      apb4-prescaler = <3>; /* APB4_CLK runs at 30MHz */
++    };
++
++    &rst {
++      status = "okay";
++    };
++
++    &i3c0 {
++      status = "okay";
++
++      /* I3C clock frequency suggestion = <PP_SCL, OD_SCL> */
++       * Full speed = <12500000, 4170000>
++       * Normal speed = <7500000, 1500000>
++       */
++      i3c-scl-hz = <12500000>;
++      i3c-od-scl-hz = <4170000>;
++    };
++
++compatible: "nuvoton,npcx-i3c"
++
++include: [i3c-controller.yaml, pinctrl-device.yaml, reset-device.yaml]
++
++properties:
++  reg:
++    required: true
++
++  interrupts:
++    required: true
++
++  resets:
++    required: true
++
++  i3c-od-scl-hz:
++    type: int
++    description: |
++      Open Drain Frequency for the I3C controller. When undefined, use
++      the controller default or as specified by the I3C specification.
+diff --git a/soc/arm/nuvoton_npcx/common/reg/reg_def.h b/soc/arm/nuvoton_npcx/common/reg/reg_def.h
+index 214eadd47..78abce3c6 100644
+--- a/soc/arm/nuvoton_npcx/common/reg/reg_def.h
++++ b/soc/arm/nuvoton_npcx/common/reg/reg_def.h
+@@ -78,7 +78,10 @@ struct cdcg_reg {
+ 	volatile uint8_t reserved7;
+ 	/* 0x014: HFCG Bus Clock Dividers */
+ 	volatile uint8_t HFCBCD2;
+-	volatile uint8_t reserved8[235];
++	volatile uint8_t reserved12[8];
++	/* 0x01d: HFCG Bus Clock Dividers */
++	volatile uint8_t HFCBCD3;
++	volatile uint8_t reserved8[226];
+ 
+ 	/* Low Frequency Clock Generator (LFCG) registers */
+ 	/* 0x100: LFCG Control */
+@@ -1757,4 +1760,223 @@ struct swrst_reg {
+ 	volatile uint32_t SWRST_CTL[4];
+ };
+ 
++/* Improved Inter Integrated Circuit  (I3C) device registers */
++struct i3c_reg {
++	/* 0x000: Controller Configuration */
++	volatile uint32_t MCONFIG;
++	/* 0x004: Target Configuration */
++	volatile uint32_t CONFIG;
++	volatile uint32_t reserved1[31];
++	/* 0x084: Controller Control  */
++	volatile uint32_t MCTRL;
++	/* 0x088: Controller Status */
++	volatile uint32_t MSTATUS;
++	/* 0x08C: IBI Registry and Rules */
++	volatile uint32_t IBIRULES;
++	/* 0x090: Controller Interrupt Enable Set  */
++	volatile uint32_t MINTSET;
++	/* 0x094: Controller Interrupt Enable Clear */
++	volatile uint32_t MINTCLR;
++	/* 0x098: Controller Interrupt Masked */
++	volatile uint32_t MINTMASKED;
++	/* 0x09C: Controller Error and Warning */
++	volatile uint32_t MERRWARN;
++	/* 0x0A0: Controller DMA Control */
++	volatile uint32_t MDMACTRL;
++	volatile uint32_t reserved2[2];
++	/* 0x0AC: Controller Data Control */
++	volatile uint32_t MDATACTRL;
++	/* 0x0B0: Controller Write Byte Data */
++	volatile uint32_t MWDATAB;
++	/* 0x0B4: Controller Write Byte Data as End */
++	volatile uint32_t MWDATABE;
++	/* 0x0B8: Controller Write Half-Word Data */
++	volatile uint32_t MWDATAH;
++	/* 0x0BC: Controller Write Half-Word Data as End */
++	volatile uint32_t MWDATAHE;
++	/* 0x0C0: Controller Read Byte Data */
++	volatile uint32_t MRDATAB;
++	volatile uint32_t reserved3;
++	/* 0x0C8: Controller Read Half-Word Data */
++	volatile uint32_t MRDATAH;
++	volatile uint32_t reserved4[3];
++	/* 0x0D8: Start or Continue DDR Message */
++	volatile uint32_t MWMSG_DDR;
++	/* 0x0DC: Read DDR Message Data */
++	volatile uint32_t MRMSG_DDR;
++	volatile uint32_t reserved5;
++	/* 0x0E4: Controller Dynamic Address */
++	volatile uint32_t MDYNADDR;
++};
++
++/* I3C register fields */
++#define NPCX_I3C_CONFIG_BAMATCH    FIELD(16, 7)
++#define NPCX_I3C_MCONFIG_CTRENA    FIELD(0, 2)
++#define NPCX_I3C_MCONFIG_DISTO     3
++#define NPCX_I3C_MCONFIG_HKEEP     FIELD(4, 2) /* Must be '11' */
++#define NPCX_I3C_MCONFIG_ODSTOP    6
++#define NPCX_I3C_MCONFIG_PPBAUD    FIELD(8, 4)
++#define NPCX_I3C_MCONFIG_PPLOW     FIELD(12, 4)
++#define NPCX_I3C_MCONFIG_ODBAUD    FIELD(16, 8)
++#define NPCX_I3C_MCONFIG_ODHPP     24
++#define NPCX_I3C_MCONFIG_SKEW      FIELD(25, 3)
++#define NPCX_I3C_MCONFIG_I2CBAUD   FIELD(28, 4)
++#define NPCX_I3C_MCTRL_REQUEST     FIELD(0, 3)
++#define NPCX_I3C_MCTRL_TYPE        FIELD(4, 2)
++#define NPCX_I3C_MCTRL_IBIRESP     FIELD(6, 2)
++#define NPCX_I3C_MCTRL_DIR         8
++#define NPCX_I3C_MCTRL_ADDR        FIELD(9, 7)
++#define NPCX_I3C_MCTRL_RDTERM      FIELD(16, 8)
++#define NPCX_I3C_MSTATUS_STATE     FIELD(0, 3)
++#define NPCX_I3C_MSTATUS_BETWEEN   4
++#define NPCX_I3C_MSTATUS_NACKED    5
++#define NPCX_I3C_MSTATUS_IBITYPE   FIELD(6, 2)
++#define NPCX_I3C_MSTATUS_TGTSTART  8
++#define NPCX_I3C_MSTATUS_MCTRLDONE 9
++#define NPCX_I3C_MSTATUS_COMPLETE  10
++#define NPCX_I3C_MSTATUS_RXPEND    11
++#define NPCX_I3C_MSTATUS_TXNOTFULL 12
++#define NPCX_I3C_MSTATUS_IBIWON    13
++#define NPCX_I3C_MSTATUS_ERRWARN   15
++#define NPCX_I3C_MSTATUS_NOWCNTLR  19
++#define NPCX_I3C_MSTATUS_IBIADDR   FIELD(24, 7)
++#define NPCX_I3C_IBIRULES_MSB0     30
++#define NPCX_I3C_IBIRULES_NOBYTE   31
++#define NPCX_I3C_MINTSET_TGTSTART  8
++#define NPCX_I3C_MINTSET_MCTRLDONE 9
++#define NPCX_I3C_MINTSET_COMPLETE  10
++#define NPCX_I3C_MINTSET_RXPEND    11
++#define NPCX_I3C_MINTSET_TXNOTFULL 12
++#define NPCX_I3C_MINTSET_IBIWON    13
++#define NPCX_I3C_MINTSET_ERRWARN   15
++#define NPCX_I3C_MINTSET_NOWCNTLR  19
++#define NPCX_I3C_MINTCLR_TGTSTART  8
++#define NPCX_I3C_MINTCLR_MCTRLDONE 9
++#define NPCX_I3C_MINTCLR_COMPLETE  10
++#define NPCX_I3C_MINTCLR_RXPEND    11
++#define NPCX_I3C_MINTCLR_TXNOTFULL 12
++#define NPCX_I3C_MINTCLR_IBIWON    13
++#define NPCX_I3C_MINTCLR_ERRWARN   15
++#define NPCX_I3C_MINTCLR_NOWCNTLR  19
++#define NPCX_I3C_MDATACTRL_FLUSHTB 0
++#define NPCX_I3C_MDATACTRL_FLUSHFB 1
++#define NPCX_I3C_MDATACTRL_UNLOCK  3
++#define NPCX_I3C_MDATACTRL_TXTRIG  FIELD(4, 2)
++#define NPCX_I3C_MDATACTRL_RXTRIG  FIELD(6, 2)
++#define NPCX_I3C_MDATACTRL_TXCOUNT FIELD(16, 5)
++#define NPCX_I3C_MDATACTRL_RXCOUNT FIELD(24, 5)
++#define NPCX_I3C_MDATACTRL_TXFULL  30
++#define NPCX_I3C_MDATACTRL_RXEMPTY 31
++#define NPCX_I3C_MERRWARN_NACK     2
++#define NPCX_I3C_MERRWARN_WRABT    3
++#define NPCX_I3C_MERRWARN_TERM     4
++#define NPCX_I3C_MERRWARN_HPAR     9
++#define NPCX_I3C_MERRWARN_HCRC     10
++#define NPCX_I3C_MERRWARN_OREAD    16
++#define NPCX_I3C_MERRWARN_OWRITE   17
++#define NPCX_I3C_MERRWARN_MSGERR   18
++#define NPCX_I3C_MERRWARN_INVERQ   19
++#define NPCX_I3C_MERRWARN_TIMEOUT  20
++#define NPCX_I3C_MDMACTRL_DMAFB    FIELD(0, 2)
++#define NPCX_I3C_MDMACTRL_DMATB    FIELD(2, 2)
++
++
++/* MCONFIG options */
++#define MCONFIG_CTRENA_OFF        0x0
++#define MCONFIG_CTRENA_ON         0x1
++#define MCONFIG_CTRENA_CAPABLE    0x2
++#define MCONFIG_HKEEP_EXT_SDA_SCL 0x3
++
++/* MCTRL options */
++#define MCTRL_REQUEST_NONE          0 /* None */
++#define MCTRL_REQUEST_EMITSTARTADDR 1 /* Emit a START */
++#define MCTRL_REQUEST_EMITSTOP      2 /* Emit a STOP */
++#define MCTRL_REQUEST_IBIACKNACK    3 /* Manually ACK or NACK an IBI */
++#define MCTRL_REQUEST_PROCESSDAA    4 /* Starts the DAA process */
++#define MCTRL_REQUEST_FORCEEXIT     6 /* Emit HDR Exit Pattern  */
++/* Emits a START with address 7Eh when a slave pulls I3C_SDA low to request an IBI */
++#define MCTRL_REQUEST_AUTOIBI       7
++
++/* ACK with mandatory byte determined by IBIRULES or ACK with no mandatory byte */
++#define MCTRL_IBIRESP_ACK           0
++#define MCTRL_IBIRESP_NACK          1 /* NACK */
++#define MCTRL_IBIRESP_ACK_MANDATORY 2 /* ACK with mandatory byte  */
++#define MCTRL_IBIRESP_MANUAL        3
++
++enum npcx_i3c_mctrl_type {
++	NPCX_I3C_MCTRL_TYPE_I3C,
++	NPCX_I3C_MCTRL_TYPE_I2C,
++	NPCX_I3C_MCTRL_TYPE_I3C_HDR_DDR,
++};
++
++/* MSTATUS options */
++#define MSTATUS_STATE_IDLE    0x0
++#define MSTATUS_STATE_TGTREQ  0x1
++#define MSTATUS_STATE_NORMACT 0x3 /* SDR message mode */
++#define MSTATUS_STATE_MSGDDR  0x4
++#define MSTATUS_STATE_DAA     0x5
++#define MSTATUS_STATE_IBIACK  0x6
++#define MSTATUS_STATE_IBIRCV  0x7
++#define MSTATUS_IBITYPE_NONE  0x0
++#define MSTATUS_IBITYPE_IBI   0x1
++#define MSTATUS_IBITYPE_CR    0x2
++#define MSTATUS_IBITYPE_HJ    0x3
++
++/* IBIRULES */
++#define IBIRULES_ADDR_MSK   0x3F
++#define IBIRULES_ADDR_SHIFT 0x6
++
++/* MDMACTRL options */
++#define MDMA_DMAFB_DISABLE      0x0
++#define MDMA_DMAFB_EN_ONE_FRAME 0x1
++#define MDMA_DMAFB_EN_MANUAL    0x2
++#define MDMA_DMATB_DISABLE      0x0
++#define MDMA_DMATB_EN_ONE_FRAME 0x1
++#define MDMA_DMATB_EN_MANUAL    0x2
++
++/* MDMA Controller registers */
++struct mdma_reg {
++	/* Channel 0 */
++	/* 0x000: Channel 0 Control */
++	volatile uint32_t MDMA_CTL0;
++	/* 0x004: Channel 0 Source Base Address */
++	volatile uint32_t MDMA_SRCB0;
++	/* 0x008: Channel 0 Destination Base Address */
++	volatile uint32_t MDMA_DSTB0;
++	/* 0x00C: Channel 0 Transfer Count */
++	volatile uint32_t MDMA_TCNT0;
++	/* 0x010: reserved1 */
++	volatile uint32_t reserved1;
++	/* 0x014: Channel 0 Current Destination */
++	volatile uint32_t MDMA_CDST0;
++	/* 0x018: Channel 0 Current Transfer Count */
++	volatile uint32_t MDMA_CTCNT0;
++	/* 0x01C: reserved2 */
++	volatile uint32_t reserved2;
++
++	/* Channel 1 */
++	/* 0x020: Channel 1 Control */
++	volatile uint32_t MDMA_CTL1;
++	/* 0x024: Channel 1 Source Base Address */
++	volatile uint32_t MDMA_SRCB1;
++	/* 0x028: Channel 1 Destination Base Address */
++	volatile uint32_t MDMA_DSTB1;
++	/* 0x02C: Channel 1 Transfer Count */
++	volatile uint32_t MDMA_TCNT1;
++	/* 0x030: Channel 1 Current Source */
++	volatile uint32_t MDMA_CSRC1;
++	/* 0x034: reserved3 */
++	volatile uint32_t reserved3;
++	/* 0x038: Channel 1 Current Transfer Count */
++	volatile uint32_t MDMA_CTCNT1;
++};
++
++/* MDMA register fields */
++#define NPCX_MDMA_CTL_MDMAEN    0
++#define NPCX_MDMA_CTL_MPD       1
++#define NPCX_MDMA_CTL_SIEN      8
++#define NPCX_MDMA_CTL_MPS       14
++#define NPCX_MDMA_CTL_TC        18
++#define NPCX_MDMA_TCNT_TFR_CNT  FIELD(0, 12)
++
+ #endif /* _NUVOTON_NPCX_REG_DEF_H */
+diff --git a/soc/arm/nuvoton_npcx/common/registers.c b/soc/arm/nuvoton_npcx/common/registers.c
+index e12b3bc10..00ee142b1 100644
+--- a/soc/arm/nuvoton_npcx/common/registers.c
++++ b/soc/arm/nuvoton_npcx/common/registers.c
+@@ -197,3 +197,30 @@ NPCX_REG_OFFSET_CHECK(swrst_reg, SWRST_CTL[0], 0x004);
+ NPCX_REG_OFFSET_CHECK(swrst_reg, SWRST_CTL[1], 0x008);
+ NPCX_REG_OFFSET_CHECK(swrst_reg, SWRST_CTL[2], 0x00c);
+ NPCX_REG_OFFSET_CHECK(swrst_reg, SWRST_CTL[3], 0x010);
++
++/* I3C register structure check */
++NPCX_REG_SIZE_CHECK(i3c_reg, 0x0E8);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MCONFIG, 0x000);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MCTRL, 0x084);
++NPCX_REG_OFFSET_CHECK(i3c_reg, IBIRULES, 0x08C);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MINTSET, 0x090);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MINTCLR, 0x094);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MINTMASKED, 0x098);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MERRWARN, 0x09C);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MDATACTRL, 0x0AC);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MWDATAB, 0x0B0);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MWDATABE, 0x0B4);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MWDATAH, 0x0B8);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MWDATAHE, 0x0BC);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MRDATAB, 0x0C0);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MRDATAH, 0x0C8);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MWMSG_DDR, 0x0D8);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MRMSG_DDR, 0x0DC);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MDYNADDR, 0x0E4);
++
++/* MDMA register structure check */
++NPCX_REG_SIZE_CHECK(mdma_reg, 0x03C);
++NPCX_REG_OFFSET_CHECK(mdma_reg, MDMA_SRCB0, 0x004);
++NPCX_REG_OFFSET_CHECK(mdma_reg, MDMA_CTCNT0, 0x018);
++NPCX_REG_OFFSET_CHECK(mdma_reg, MDMA_CTL1, 0x020);
++NPCX_REG_OFFSET_CHECK(mdma_reg, MDMA_CTCNT1, 0x038);
+diff --git a/soc/arm/nuvoton_npcx/common/soc_dt.h b/soc/arm/nuvoton_npcx/common/soc_dt.h
+index 6bcf2e416..64ddcf5f1 100644
+--- a/soc/arm/nuvoton_npcx/common/soc_dt.h
++++ b/soc/arm/nuvoton_npcx/common/soc_dt.h
+@@ -80,6 +80,20 @@
+ 	  .bit  = DT_CLOCKS_CELL_BY_IDX(DT_DRV_INST(inst), i, bit),            \
+ 	}
+ 
++/**
++ * @brief Construct a npcx_clk_cfg structure from 'clocks' with the same clock 'name'.
++ *
++ * @param inst instance number for compatible defined in DT_DRV_COMPAT.
++ * @param name name of the clock
++ * @return npcx_clk_cfg item from 'clocks' property with the same clock 'name'
++ */
++#define NPCX_DT_CLK_CFG_ITEM_BY_NAME(inst, name)                               \
++	{                                                                      \
++	  .bus  = DT_CLOCKS_CELL_BY_NAME(DT_DRV_INST(inst), name, bus),        \
++	  .ctrl = DT_CLOCKS_CELL_BY_NAME(DT_DRV_INST(inst), name, ctl),        \
++	  .bit  = DT_CLOCKS_CELL_BY_NAME(DT_DRV_INST(inst), name, bit),        \
++	}
++
+ /**
+  * @brief Length of 'clocks' property which type is 'phandle-array'
+  *
+-- 
+2.17.1
+
+
+From 2a0b352a18615152817ef9e37e18e9555c4314ef Mon Sep 17 00:00:00 2001
+From: Alvis Sun <yfsun@nuvoton.com>
+Date: Wed, 8 May 2024 11:20:04 +0800
+Subject: [PATCH 41/42] drivers: i3c: npcx: add HDR-DDR mode for transfer
+
+1. Support HDR-DDR DMA transfer.
+2. Remove polling mode in transfer.
+
+Signed-off-by: Alvis Sun <yfsun@nuvoton.com>
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ drivers/i3c/i3c_npcx.c                    | 185 ++++++++++++++++++----
+ soc/arm/nuvoton_npcx/common/reg/reg_def.h |   5 +
+ 2 files changed, 155 insertions(+), 35 deletions(-)
+
+diff --git a/drivers/i3c/i3c_npcx.c b/drivers/i3c/i3c_npcx.c
+index 9790e5939..75b9c73c9 100644
+--- a/drivers/i3c/i3c_npcx.c
++++ b/drivers/i3c/i3c_npcx.c
+@@ -39,11 +39,14 @@ LOG_MODULE_REGISTER(npcx_i3c, CONFIG_I3C_LOG_LEVEL);
+ 
+ #define MCLKD_FREQ_45_MHZ MHZ(45)
+ 
+-#define I3C_STATUS_CLR_MASK                                                 \
+-	(BIT(NPCX_I3C_MSTATUS_TGTSTART) | BIT(NPCX_I3C_MSTATUS_MCTRLDONE) | \
+-	 BIT(NPCX_I3C_MSTATUS_COMPLETE) | BIT(NPCX_I3C_MSTATUS_IBIWON) |    \
++#define I3C_STATUS_CLR_MASK                                                                        \
++	(BIT(NPCX_I3C_MSTATUS_TGTSTART) | BIT(NPCX_I3C_MSTATUS_MCTRLDONE) |                        \
++	 BIT(NPCX_I3C_MSTATUS_COMPLETE) | BIT(NPCX_I3C_MSTATUS_IBIWON) |                           \
+ 	 BIT(NPCX_I3C_MSTATUS_NOWCNTLR))
+ 
++#define HDR_DDR_CMD_AND_CRC_SZ_WORD 0x2 /* 2 words =  Command(1 word) + CRC(1 word) */
++#define HDR_RD_CMD                  0x80
++
+ /* Supported I3C MCLKD frequency */
+ enum npcx_i3c_speed {
+ 	NPCX_I3C_BUS_SPEED_45MHZ,
+@@ -217,7 +220,7 @@ static inline void npcx_i3c_interrupt_enable(struct i3c_reg *inst, uint32_t mask
+ static bool npcx_i3c_has_error(struct i3c_reg *inst)
+ {
+ 	if (IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_ERRWARN)) {
+-		LOG_WRN("ERROR: MSTATUS 0x%08x MERRWARN 0x%08x", inst->MSTATUS, inst->MERRWARN);
++		LOG_ERR("ERROR: MSTATUS 0x%08x MERRWARN 0x%08x", inst->MSTATUS, inst->MERRWARN);
+ 
+ 		return true;
+ 	}
+@@ -314,7 +317,8 @@ static inline int npcx_i3c_request_auto_ibi(struct i3c_reg *inst)
+  * param[in] addr     Dyamic address for xfer or 0x7E for CCC command.
+  * param[in] op_type  Request type.
+  * param[in] is_read  Read(true) or write(false) operation.
+- * param[in] read_sz  Read size.
++ * param[in] read_sz  Read size in bytes.
++ *                    If op_tye is HDR-DDR, the read_sz must be the number of words.
+  *
+  * return  0, success
+  *         else, error
+@@ -396,6 +400,56 @@ static inline int npcx_i3c_request_emit_stop(struct i3c_reg *inst)
+ 	return 0;
+ }
+ 
++static inline int npcx_i3c_request_hdr_exit(struct i3c_reg *inst)
++{
++	uint32_t val = 0;
++	uint32_t state;
++	int ret;
++
++	/* Before sending the HDR exit command, check the HDR mode */
++	state = npcx_i3c_state_get(inst);
++	if (state != MSTATUS_STATE_MSGDDR) {
++		LOG_ERR("%s, state error: %#x", __func__, state);
++		return -EPERM;
++	}
++
++	SET_FIELD(val, NPCX_I3C_MCTRL_TYPE, MCTRL_TYPE_HDR_EXIT);
++	SET_FIELD(val, NPCX_I3C_MCTRL_REQUEST, MCTRL_REQUEST_FORCEEXIT);
++
++	ret = npcx_i3c_send_request(inst, val);
++	if (ret != 0) {
++		LOG_ERR("Request hdr exit error %d", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++static inline int npcx_i3c_xfer_stop(struct i3c_reg *inst)
++{
++	uint32_t state;
++	int ret;
++
++	state = npcx_i3c_state_get(inst);
++	LOG_DBG("%s, state=%d", __func__, state);
++
++	switch (state) {
++	case MSTATUS_STATE_NORMACT: /* SDR */
++		ret = npcx_i3c_request_emit_stop(inst);
++		break;
++	case MSTATUS_STATE_MSGDDR:  /* HDR-DDR */
++		ret = npcx_i3c_request_hdr_exit(inst);
++		break;
++	default:
++		/* Not supported */
++		ret = -ENOTSUP;
++		LOG_WRN("xfer_stop state not supported, state:%d", state);
++		break;
++	}
++
++	return ret;
++}
++
+ static inline int npcx_i3c_ibi_respond_nack(struct i3c_reg *inst)
+ {
+ 	uint32_t val = 0;
+@@ -668,6 +722,7 @@ out_wr_fifo_dma:
+ 
+ /*
+  * brief:  Perform DMA read transaction.
++ *         (Data width used for DMA transfers is "byte")
+  *
+  * For read end, use the MDMA end-of-transfer interrupt(SIEN bit)
+  * instead of using the I3CI interrupt generated by COMPLETE bit in MSTATUS register.
+@@ -717,6 +772,7 @@ static int npcx_i3c_xfer_read_fifo_dma(const struct device *dev, uint8_t *buf, u
+ 
+ /*
+  * brief:  Perform one transfer transaction by DMA.
++ *         (Support SDR and HDR-DDR)
+  *
+  * param[in] inst        Pointer to controller registers.
+  * param[in] addr        Target address.
+@@ -731,18 +787,45 @@ static int npcx_i3c_xfer_read_fifo_dma(const struct device *dev, uint8_t *buf, u
+  */
+ static int npcx_i3c_do_one_xfer_dma(const struct device *dev, uint8_t addr,
+ 				    enum npcx_i3c_mctrl_type op_type, uint8_t *buf, size_t buf_sz,
+-				    bool is_read, bool emit_start, bool emit_stop)
++				    bool is_read, bool emit_start, bool emit_stop, uint8_t hdr_cmd)
+ {
+ 	const struct npcx_i3c_config *config = dev->config;
+ 	struct i3c_reg *inst = config->base;
+ 	int ret = 0;
++	bool is_hdr_ddr = (op_type == NPCX_I3C_MCTRL_TYPE_I3C_HDR_DDR) ? true : false;
++	size_t rd_len = buf_sz;
+ 
+ 	npcx_i3c_status_clear_all(inst);
+ 	npcx_i3c_errwarn_clear_all(inst);
+ 
++	/* Check HDR-DDR moves data by words */
++	if (is_hdr_ddr && (buf_sz % 2 != 0)) {
++		LOG_ERR("%s, HDR-DDR data length should be even, len=%#x", __func__, buf_sz);
++		return -EINVAL;
++	}
++
+ 	/* Emit START if needed */
+ 	if (emit_start) {
+-		ret = npcx_i3c_request_emit_start(inst, addr, op_type, is_read, buf_sz);
++		/*
++		 * For HDR-DDR mode read, RDTERM also includes one word (16 bits) for CRC.
++		 * For example, to read 8 bytes, set RDTERM to 6.
++		 * (1 word HDR-DDR command + 4 words data + 1 word for CRC)
++		 */
++		if (is_hdr_ddr) {
++			if (is_read) {
++				/* The unit of rd_len is "word" in DDR mode */
++				rd_len /= sizeof(uint16_t);    /* byte to word */
++				rd_len += HDR_DDR_CMD_AND_CRC_SZ_WORD;
++				hdr_cmd |= HDR_RD_CMD;
++			} else {
++				hdr_cmd &= ~HDR_RD_CMD;
++			}
++
++			/* Write the command code for the HDR-DDR message */
++			inst->MWDATAB = hdr_cmd;
++		}
++
++		ret = npcx_i3c_request_emit_start(inst, addr, op_type, is_read, rd_len);
+ 		if (ret != 0) {
+ 			LOG_ERR("%s: emit start fail", __func__);
+ 			goto out_do_one_xfer_dma;
+@@ -773,9 +856,9 @@ static int npcx_i3c_do_one_xfer_dma(const struct device *dev, uint8_t addr,
+ 	}
+ 
+ out_do_one_xfer_dma:
+-	/* Emit STOP if needed */
++	/* Emit STOP or exit DDR if needed */
+ 	if (emit_stop) {
+-		npcx_i3c_request_emit_stop(inst);
++		npcx_i3c_xfer_stop(inst);
+ 	}
+ 
+ 	return ret;
+@@ -784,6 +867,7 @@ out_do_one_xfer_dma:
+ 
+ /*
+  * brief:  Perform one transfer transaction.
++ *         (Support SDR only)
+  *
+  * param[in] inst        Pointer to controller registers.
+  * param[in] addr        Target address.
+@@ -882,10 +966,12 @@ static int npcx_i3c_transfer(const struct device *dev, struct i3c_device_desc *t
+ {
+ 	const struct npcx_i3c_config *config = dev->config;
+ 	struct i3c_reg *inst = config->base;
++	struct npcx_i3c_data *data = dev->data;
+ 	uint32_t intmask;
+ 	int xfered_len, ret = 0;
+ 	bool send_broadcast = true;
+ 	bool is_xfer_done = true;
++	enum npcx_i3c_mctrl_type op_type;
+ 
+ 	if (msgs == NULL) {
+ 		return -EINVAL;
+@@ -913,7 +999,6 @@ static int npcx_i3c_transfer(const struct device *dev, struct i3c_device_desc *t
+ 
+ 	/* Iterate over all the messages */
+ 	for (int i = 0; i < num_msgs; i++) {
+-
+ 		/*
+ 		 * Check message is read or write operaion.
+ 		 * For write operation, check the last data byte of a transmit message.
+@@ -958,35 +1043,63 @@ static int npcx_i3c_transfer(const struct device *dev, struct i3c_device_desc *t
+ 		}
+ #endif
+ 
+-		/*
+-		 * Two ways to do read/write transfer .
+-		 * 1. [S] + [0x7E]    + [address] + [data] + [Sr or P]
+-		 * 2. [S] + [address] + [data]    + [Sr or P]
+-		 *
+-		 * Send broadcast header(0x7E) on first transfer or after a STOP,
+-		 * unless flag is set not to.
+-		 */
+-		if (!(msgs[i].flags & I3C_MSG_NBCH) && (send_broadcast)) {
+-			ret = npcx_i3c_request_emit_start(inst, I3C_BROADCAST_ADDR,
+-							  NPCX_I3C_MCTRL_TYPE_I3C, false, 0);
+-			if (ret < 0) {
+-				LOG_ERR("%s: emit start of broadcast addr failed, error (%d)",
+-					__func__, ret);
++		/* Check message SDR or HDR mode */
++		bool is_msg_hdr = (msgs[i].flags & I3C_MSG_HDR) == I3C_MSG_HDR;
++
++		/* Set emit start type SDR or HDR-DDR mode */
++		if (!is_msg_hdr || msgs[i].hdr_mode == 0) {
++			op_type = NPCX_I3C_MCTRL_TYPE_I3C; /* Set operation type SDR */
++
++			/*
++			 * SDR, send boradcast header(0x7E)
++			 *
++			 * Two ways to do read/write transfer (SDR mode).
++			 * 1. [S] + [0x7E]    + [address] + [data] + [Sr or P]
++			 * 2. [S] + [address] + [data]    + [Sr or P]
++			 *
++			 * Send broadcast header(0x7E) on first transfer or after a STOP,
++			 * unless flag is set not to.
++			 */
++			if (!(msgs[i].flags & I3C_MSG_NBCH) && send_broadcast) {
++				ret = npcx_i3c_request_emit_start(inst, I3C_BROADCAST_ADDR,
++								  NPCX_I3C_MCTRL_TYPE_I3C, false,
++								  0);
++				if (ret < 0) {
++					LOG_ERR("%s: emit start of broadcast addr failed, error "
++						"(%d)",
++						__func__, ret);
++					break;
++				}
++				send_broadcast = false;
++			}
++		} else if ((data->common.ctrl_config.supported_hdr & I3C_MSG_HDR_DDR) &&
++			   (msgs[i].hdr_mode == I3C_MSG_HDR_DDR) && is_msg_hdr) {
++
++			op_type = NPCX_I3C_MCTRL_TYPE_I3C_HDR_DDR; /* Set operation type DDR */
++
++			/* Check HDR-DDR moves data by words */
++			if ((msgs[i].len % 2) != 0x0) {
++				LOG_ERR("HDR-DDR data length should be number of words , xfer "
++					"len=%d", msgs[i].num_xfer);
++				ret = -EINVAL;
+ 				break;
+ 			}
+-			send_broadcast = false;
++		} else {
++			LOG_ERR("%s: %s controller HDR Mode %#x\r\n"
++				"msg HDR mode %#x, msg flag %#x",
++				__func__, dev->name, data->common.ctrl_config.supported_hdr,
++				msgs[i].hdr_mode, msgs[i].flags);
++			ret = -ENOTSUP;
++			break;
+ 		}
+ 
+ #ifdef CONFIG_I3C_NPCX_DMA
+ 		/* Do transfer with target device */
+-		xfered_len = npcx_i3c_do_one_xfer_dma(dev, target->dynamic_addr,
+-						      NPCX_I3C_MCTRL_TYPE_I3C, msgs[i].buf,
+-						      msgs[i].len, is_read, emit_start, emit_stop);
+-#else
+-		xfered_len = npcx_i3c_do_one_xfer(inst, target->dynamic_addr,
+-						  NPCX_I3C_MCTRL_TYPE_I3C, msgs[i].buf, msgs[i].len,
+-						  is_read, emit_start, emit_stop, no_ending);
++		xfered_len = npcx_i3c_do_one_xfer_dma(dev, target->dynamic_addr, op_type,
++						      msgs[i].buf, msgs[i].len, is_read, emit_start,
++						      emit_stop, msgs[i].hdr_cmd_code);
+ #endif
++
+ 		if (xfered_len < 0) {
+ 			LOG_ERR("%s: do xfer fail", __func__);
+ 			ret = xfered_len; /* Set error code to ret */
+@@ -997,7 +1110,7 @@ static int npcx_i3c_transfer(const struct device *dev, struct i3c_device_desc *t
+ 		msgs[i].num_xfer = xfered_len;
+ 
+ 		if (emit_stop) {
+-			/* After a STOP, send broadcast header before next msg */
++			/* SDR. After a STOP, send broadcast header before next msg */
+ 			send_broadcast = true;
+ 		}
+ 
+@@ -1009,7 +1122,7 @@ static int npcx_i3c_transfer(const struct device *dev, struct i3c_device_desc *t
+ 
+ 	/* Emit stop if error occurs or stop flag not in the msg */
+ 	if ((ret != 0) || (is_xfer_done == false)) {
+-		npcx_i3c_request_emit_stop(inst);
++		npcx_i3c_xfer_stop(inst);
+ 	}
+ 
+ 	npcx_i3c_errwarn_clear_all(inst);
+@@ -1681,6 +1794,8 @@ static void npcx_i3c_isr(const struct device *dev)
+ #ifdef CONFIG_I3C_USE_IBI
+ 	/* Target start detected */
+ 	if (IS_BIT_SET(inst->MSTATUS, NPCX_I3C_MSTATUS_TGTSTART)) {
++		LOG_DBG("ISR TGTSTART !");
++
+ 		/* Disable further target initiated IBI interrupt */
+ 		inst->MINTCLR = BIT(NPCX_I3C_MINTCLR_TGTSTART);
+ 
+@@ -1958,7 +2073,7 @@ static int npcx_i3c_init(const struct device *dev)
+ 	}
+ 
+ 	ctrl_config->is_secondary = false; /* Currently can only act as primary controller. */
+-	ctrl_config->supported_hdr = 0U;   /* HDR mode not supported at the moment. */
++	ctrl_config->supported_hdr = I3C_MSG_HDR_DDR; /* HDR-DDR mode is supported. */
+ 	ctrl_config->scl.i3c = config->clocks.i3c_pp_scl_hz; /* Set I3C frequency */
+ 
+ 	ret = npcx_i3c_configure(dev, I3C_CONFIG_CONTROLLER, ctrl_config);
+diff --git a/soc/arm/nuvoton_npcx/common/reg/reg_def.h b/soc/arm/nuvoton_npcx/common/reg/reg_def.h
+index 78abce3c6..f4e13d952 100644
+--- a/soc/arm/nuvoton_npcx/common/reg/reg_def.h
++++ b/soc/arm/nuvoton_npcx/common/reg/reg_def.h
+@@ -1903,12 +1903,17 @@ struct i3c_reg {
+ #define MCTRL_IBIRESP_ACK_MANDATORY 2 /* ACK with mandatory byte  */
+ #define MCTRL_IBIRESP_MANUAL        3
+ 
++/* For REQUEST = EmitStartAddr */
+ enum npcx_i3c_mctrl_type {
+ 	NPCX_I3C_MCTRL_TYPE_I3C,
+ 	NPCX_I3C_MCTRL_TYPE_I2C,
+ 	NPCX_I3C_MCTRL_TYPE_I3C_HDR_DDR,
+ };
+ 
++/* For REQUEST = ForceExit/Target Reset */
++#define MCTRL_TYPE_HDR_EXIT    0
++#define MCTRL_TYPE_TGT_RESTART 2
++
+ /* MSTATUS options */
+ #define MSTATUS_STATE_IDLE    0x0
+ #define MSTATUS_STATE_TGTREQ  0x1
+-- 
+2.17.1
+
+
+From 65ddbce7d22be1f88e65c489927d9269ba709fcb Mon Sep 17 00:00:00 2001
+From: Alvis Sun <yfsun@nuvoton.com>
+Date: Mon, 7 Oct 2024 18:26:53 +0800
+Subject: [PATCH 42/42] soc: nuvoton: reg: add i3c target registers and soc
+ functions
+
+As title.
+
+Signed-off-by: Alvis Sun <yfsun@nuvoton.com>
+---
+ drivers/i3c/i3c_npcx.c                    |  73 +++
+ include/zephyr/drivers/i3c/i3c_npcx.h     |  55 +++
+ soc/arm/nuvoton_npcx/common/reg/reg_def.h | 536 ++++++++++++++++------
+ soc/arm/nuvoton_npcx/common/registers.c   |  14 +-
+ soc/arm/nuvoton_npcx/common/scfg.c        |  15 +
+ soc/arm/nuvoton_npcx/common/soc_pins.h    |   9 +
+ 6 files changed, 556 insertions(+), 146 deletions(-)
+ create mode 100644 include/zephyr/drivers/i3c/i3c_npcx.h
+
+diff --git a/drivers/i3c/i3c_npcx.c b/drivers/i3c/i3c_npcx.c
+index 75b9c73c9..69fc158a1 100644
+--- a/drivers/i3c/i3c_npcx.c
++++ b/drivers/i3c/i3c_npcx.c
+@@ -21,6 +21,79 @@
+ #include <zephyr/logging/log.h>
+ LOG_MODULE_REGISTER(npcx_i3c, CONFIG_I3C_LOG_LEVEL);
+ 
++/* MCONFIG options */
++#define MCONFIG_CTRENA_OFF        0x0
++#define MCONFIG_CTRENA_ON         0x1
++#define MCONFIG_CTRENA_CAPABLE    0x2
++#define MCONFIG_HKEEP_EXT_SDA_SCL 0x3
++
++/* MCTRL options */
++#define MCTRL_REQUEST_NONE          0 /* None */
++#define MCTRL_REQUEST_EMITSTARTADDR 1 /* Emit a START */
++#define MCTRL_REQUEST_EMITSTOP      2 /* Emit a STOP */
++#define MCTRL_REQUEST_IBIACKNACK    3 /* Manually ACK or NACK an IBI */
++#define MCTRL_REQUEST_PROCESSDAA    4 /* Starts the DAA process */
++#define MCTRL_REQUEST_FORCEEXIT     6 /* Emit HDR Exit Pattern  */
++/* Emits a START with address 7Eh when a slave pulls I3C_SDA low to request an IBI */
++#define MCTRL_REQUEST_AUTOIBI       7
++
++/* ACK with mandatory byte determined by IBIRULES or ACK with no mandatory byte */
++#define MCTRL_IBIRESP_ACK           0
++#define MCTRL_IBIRESP_NACK          1 /* NACK */
++#define MCTRL_IBIRESP_ACK_MANDATORY 2 /* ACK with mandatory byte  */
++#define MCTRL_IBIRESP_MANUAL        3
++
++/* For REQUEST = EmitStartAddr */
++enum npcx_i3c_mctrl_type {
++	NPCX_I3C_MCTRL_TYPE_I3C,
++	NPCX_I3C_MCTRL_TYPE_I2C,
++	NPCX_I3C_MCTRL_TYPE_I3C_HDR_DDR,
++};
++
++/* For REQUEST = ForceExit/Target Reset */
++#define MCTRL_TYPE_HDR_EXIT    0
++#define MCTRL_TYPE_TGT_RESTART 2
++
++/* MSTATUS options */
++#define MSTATUS_STATE_IDLE    0x0
++#define MSTATUS_STATE_TGTREQ  0x1
++#define MSTATUS_STATE_NORMACT 0x3 /* SDR message mode */
++#define MSTATUS_STATE_MSGDDR  0x4
++#define MSTATUS_STATE_DAA     0x5
++#define MSTATUS_STATE_IBIACK  0x6
++#define MSTATUS_STATE_IBIRCV  0x7
++#define MSTATUS_IBITYPE_NONE  0x0
++#define MSTATUS_IBITYPE_IBI   0x1
++#define MSTATUS_IBITYPE_CR    0x2
++#define MSTATUS_IBITYPE_HJ    0x3
++
++/* IBIRULES */
++#define IBIRULES_ADDR_MSK   0x3F
++#define IBIRULES_ADDR_SHIFT 0x6
++
++/* MDMACTRL options */
++#define MDMA_DMAFB_DISABLE      0x0
++#define MDMA_DMAFB_EN_ONE_FRAME 0x1
++#define MDMA_DMAFB_EN_MANUAL    0x2
++#define MDMA_DMATB_DISABLE      0x0
++#define MDMA_DMATB_EN_ONE_FRAME 0x1
++#define MDMA_DMATB_EN_MANUAL    0x2
++
++/* CTRL options */
++#define CTRL_EVENT_NORMAL    0
++#define CTRL_EVENT_IBI       1
++#define CTRL_EVENT_CNTLR_REQ 2
++#define CTRL_EVENT_HJ        3
++
++/* STATUS options */
++#define STATUS_EVDET_NONE            0
++#define STATUS_EVDET_REQ_NOT_SENT    1
++#define STATUS_EVDET_REQ_SENT_NACKED 2
++#define STATUS_EVDET_REQ_SENT_ACKED  3
++
++/*******************************************************************************
++ * Local Constants Definition
++ ******************************************************************************/
+ #define NPCX_I3C_CHK_TIMEOUT_US 10000 /* Timeout for checking register status */
+ #define I3C_SCL_PP_FREQ_MAX_MHZ 12500000
+ #define I3C_SCL_OD_FREQ_MAX_MHZ 4170000
+diff --git a/include/zephyr/drivers/i3c/i3c_npcx.h b/include/zephyr/drivers/i3c/i3c_npcx.h
+new file mode 100644
+index 000000000..2bd546e8e
+--- /dev/null
++++ b/include/zephyr/drivers/i3c/i3c_npcx.h
+@@ -0,0 +1,55 @@
++/*
++ * Copyright (c) 2020 Nuvoton Technology Corporation.
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++#ifndef ZEPHYR_DRIVERS_I3C_I3C_NPCX_H_
++#define ZEPHYR_DRIVERS_I3C_I3C_NPCX_H_
++
++#include <zephyr/device.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#ifdef CONFIG_I3C_NPCX_DMA
++
++/**
++ * @brief Configures the application's buffer for use in MDMA mode.
++ *
++ * @param dev Pointer to the device structure for the driver instance.
++ * @param mdma_rd_buf Pointer to storage for read data
++ * @param mdma_rd_buf_size Length of the buffer to storage for read data
++ * @param mdma_wr_buf Pointer to the data to be written
++ * @param mdma_wr_buf_size Length of the buffer to be written
++ */
++void npcx_i3c_target_set_mdma_buff(const struct device *dev, uint8_t *mdma_rd_buf,
++				   uint16_t mdma_rd_buf_size, uint8_t *mdma_wr_buf,
++				   uint16_t mdma_wr_buf_size);
++
++/**
++ * @brief Retrieves the count of data received via MDMA.
++ *
++ * @param dev Pointer to the device structure for the driver instance.
++ *
++ * @return The number of data bytes read from the bus.
++ */
++uint16_t npcx_i3c_target_get_mdmafb_count(const struct device *dev);
++
++/**
++ * @brief Retrieves the count of data written to the bus via MDMA.
++ *
++ * @param dev Pointer to the device structure for the driver instance.
++ *
++ * @return The number of data bytes written to the bus.
++ */
++uint16_t npcx_i3c_target_get_mdmatb_count(const struct device *dev);
++
++#endif
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* ZEPHYR_DRIVERS_I3C_I3C_NPCX_H_ */
+diff --git a/soc/arm/nuvoton_npcx/common/reg/reg_def.h b/soc/arm/nuvoton_npcx/common/reg/reg_def.h
+index f4e13d952..08deaaa3c 100644
+--- a/soc/arm/nuvoton_npcx/common/reg/reg_def.h
++++ b/soc/arm/nuvoton_npcx/common/reg/reg_def.h
+@@ -213,16 +213,19 @@ struct scfg_reg {
+ 	volatile uint8_t STRPST;
+ 	/* 0x002: Reset Control and Status */
+ 	volatile uint8_t RSTCTL;
+-	volatile uint8_t reserved1[3];
++	volatile uint8_t reserved1;
++	/* 0x004: Device Control 3*/
++	volatile uint8_t DEV_CTL3;
++	volatile uint8_t reserved2;
+ 	/* 0x006: Device Control 4 */
+ 	volatile uint8_t DEV_CTL4;
+-	volatile uint8_t reserved2[9];
++	volatile uint8_t reserved3[9];
+ 	/* 0x010 - 1F: Device Alternate Function 0 - F */
+ 	volatile uint8_t DEVALT0[16];
+-	volatile uint8_t reserved3[6];
++	volatile uint8_t reserved4[6];
+ 	/* 0x026: Low-Voltage GPIO Pins Control 5 */
+ 	volatile uint8_t LV_GPIO_CTL5[1];
+-	volatile uint8_t reserved4;
++	volatile uint8_t reserved5;
+ 	/* 0x028: Pull-Up/Pull-Down Enable 0 */
+ 	volatile uint8_t PUPD_EN0;
+ 	/* 0x029: Pull-Up/Pull-Down Enable 1 */
+@@ -258,6 +261,12 @@ struct scfg_reg {
+ #define NPCX_RSTCTL_VCC1_RST_SCRATCH          3
+ #define NPCX_RSTCTL_LRESET_PLTRST_MODE        5
+ #define NPCX_RSTCTL_HIPRST_MODE               6
++#define NPCX_DEV_CTL3_RNGINT_MD               1
++#define NPCX_DEV_CTL3_FVCC1_PURST_EN          2
++#define NPCX_DEV_CTL3_I3C1_MS                 3
++#define NPCX_DEV_CTL3_I3C2_MS                 4
++#define NPCX_DEV_CTL3_I3C3_MS                 5
++#define NPCX_DEV_CTL3_SIO_CLK_SEL             FIELD(6, 2)
+ #define NPCX_DEV_CTL4_F_SPI_SLLK              2
+ #define NPCX_DEV_CTL4_SPI_SP_SEL              4
+ #define NPCX_DEV_CTL4_WP_IF                   5
+@@ -269,6 +278,11 @@ struct scfg_reg {
+ #define NPCX_DEVPU0_I2C3_0_PUE                6
+ #define NPCX_DEVPU1_F_SPI_PUD_EN              7
+ 
++#if defined(CONFIG_SOC_SERIES_NPCX4)
++/* I3C module controller, target mode for the MDMA module operation */
++#define NPCX_DEV_CTL3_I3C_MODE_BIT(inst_id) BIT(inst_id + 3)
++#endif /* End of CONFIG_SOC_SERIES_NPCX4 */
++
+ /* Supported host interface type for HIF_TYP_SEL FILED in DEVCNT register. */
+ enum npcx_hif_type {
+ 	NPCX_HIF_TYPE_NONE,
+@@ -276,6 +290,14 @@ enum npcx_hif_type {
+ 	NPCX_HIF_TYPE_ESPI_SHI,
+ };
+ 
++/* Supported VOSCCLK frequency for SIO_CLK_SEL FILED in DEV_CTL3 register. */
++enum npcx_voscclk_type {
++	NPCX_VOSCCLK_96MHz,
++	NPCX_VOSCCLK_100MHz,
++	NPCX_VOSCCLK_120MHz,
++	NPCX_VOSCCLK_90MHz,
++};
++
+ /*
+  * System Glue (GLUE) device registers
+  */
+@@ -1766,7 +1788,60 @@ struct i3c_reg {
+ 	volatile uint32_t MCONFIG;
+ 	/* 0x004: Target Configuration */
+ 	volatile uint32_t CONFIG;
+-	volatile uint32_t reserved1[31];
++	/* 0x008: Target Status */
++	volatile uint32_t STATUS;
++	/* 0x00C: Target Control  */
++	volatile uint32_t CTRL;
++	/* 0x010: Target Interrupt Enable Set  */
++	volatile uint32_t INTSET;
++	/* 0x014: Target Interrupt Enable Clear */
++	volatile uint32_t INTCLR;
++	/* 0x018: Target Interrupt Masked */
++	volatile uint32_t INTMASKED;
++	/* 0x01C: Target Error and Warning */
++	volatile uint32_t ERRWARN;
++	/* 0x020: Target DMA Control */
++	volatile uint32_t DMACTRL;
++	/* 0x024-0x02B: reserved */
++	volatile uint32_t reserved0[2];
++	/* 0x02C: Target Data Control */
++	volatile uint32_t DATACTRL;
++	/* 0x030: Target Write Byte Data */
++	volatile uint32_t WDATAB;
++	/* 0x034: Target Write Byte Data as End */
++	volatile uint32_t WDATABE;
++	/* 0x038: Target Write Half-Word Data */
++	volatile uint32_t WDATAH;
++	/* 0x03C: Target Write Half-Word Data as End */
++	volatile uint32_t WDATAHE;
++	/* 0x040: Target Read Byte Data */
++	volatile uint32_t RDATAB;
++	/* 0x044: reserved */
++	volatile uint32_t reserved1;
++	/* 0x048: Target Read Half-Word Data */
++	volatile uint32_t RDATAH;
++	/* 0x04C-0x05B: reserved */
++	volatile uint32_t reserved2[4];
++	/* 0x05C: Target Capabilities 2 */
++	volatile uint32_t CCAPABILITIES2;
++	/* 0x060: Target Capabilities */
++	volatile uint32_t CCAPABILITIES;
++	/* 0x064: Target Dynamic Address */
++	volatile uint32_t DYNADDR;
++	/* 0x068: Target Maximum Limits */
++	volatile uint32_t MAXLIMITS;
++	/* 0x06C: Target Part Number */
++	volatile uint32_t PARTNO;
++	/* 0x070: Target ID Extension */
++	volatile uint32_t IDEXT;
++	/* 0x074: Target Vendor ID */
++	volatile uint32_t VENDORID;
++	/* 0x078: Target Timing Control Clock */
++	volatile uint32_t TCCLOCK;
++	/* 0x07C: Target Matching Address Index */
++	volatile uint32_t MSGLAST;
++	/* 0x080: reserved */
++	volatile uint32_t reserved3;
+ 	/* 0x084: Controller Control  */
+ 	volatile uint32_t MCTRL;
+ 	/* 0x088: Controller Status */
+@@ -1783,7 +1858,8 @@ struct i3c_reg {
+ 	volatile uint32_t MERRWARN;
+ 	/* 0x0A0: Controller DMA Control */
+ 	volatile uint32_t MDMACTRL;
+-	volatile uint32_t reserved2[2];
++	/* 0x0A0-0x0AB: reserved */
++	volatile uint32_t reserved4[2];
+ 	/* 0x0AC: Controller Data Control */
+ 	volatile uint32_t MDATACTRL;
+ 	/* 0x0B0: Controller Write Byte Data */
+@@ -1796,148 +1872,315 @@ struct i3c_reg {
+ 	volatile uint32_t MWDATAHE;
+ 	/* 0x0C0: Controller Read Byte Data */
+ 	volatile uint32_t MRDATAB;
+-	volatile uint32_t reserved3;
++	/* 0x0C4: reserved */
++	volatile uint32_t reserved5;
+ 	/* 0x0C8: Controller Read Half-Word Data */
+ 	volatile uint32_t MRDATAH;
+-	volatile uint32_t reserved4[3];
++	/* 0x0CC-0x0D7: reserved */
++	volatile uint32_t reserved6[3];
+ 	/* 0x0D8: Start or Continue DDR Message */
+ 	volatile uint32_t MWMSG_DDR;
+ 	/* 0x0DC: Read DDR Message Data */
+ 	volatile uint32_t MRMSG_DDR;
+-	volatile uint32_t reserved5;
++	/* 0x0E0: reserved */
++	volatile uint32_t reserved7;
+ 	/* 0x0E4: Controller Dynamic Address */
+ 	volatile uint32_t MDYNADDR;
++	/* 0x0E8-0x0FF reserved */
++	volatile uint32_t reserved8[6];
++	/* 0x100: Target Reset Recovery Time */
++	volatile uint32_t RSTACTTIME;
++	/* 0x104: reserved */
++	volatile uint32_t reserved9;
++	/* 0x108: Target HDR Command Byte */
++	volatile uint32_t HDRCMD;
++	/* 0x10C-0x113: reserved */
++	volatile uint32_t reserved10[2];
++	/* 0x114: Target Group Definition */
++	volatile uint32_t GROUPDEF;
++	/* 0x118: reserved */
++	volatile uint32_t reserved11;
++	/* 0x11C: Target Map Control 0 */
++	volatile uint32_t MAPCTRL0;
++	/* 0x120: Target Map Control 1 */
++	volatile uint32_t MAPCTRL1;
++	/* 0x124: Target Map Control 2 */
++	volatile uint32_t MAPCTRL2;
++	/* 0x128: Target Map Control 3 */
++	volatile uint32_t MAPCTRL3;
++	/* 0x12C: Target Map Control 4 */
++	volatile uint32_t MAPCTRL4;
++	/* 0x130: Target Map Control 5 */
++	volatile uint32_t MAPCTRL5;
++	/* 0x134: Target Map Control 6 */
++	volatile uint32_t MAPCTRL6;
++	/* 0x138: Target Map Control 7 */
++	volatile uint32_t MAPCTRL7;
++	/* 0x13C: Target Map Control 8 */
++	volatile uint32_t MAPCTRL8;
++	/* 0x140: Target Extended IBI Data 1 */
++	volatile uint32_t IBIEXT1;
++	/* 0x144: Target Extended IBI Data 2 */
++	volatile uint32_t IBIEXT2;
+ };
+ 
+-/* I3C register fields */
+-#define NPCX_I3C_CONFIG_BAMATCH    FIELD(16, 7)
+-#define NPCX_I3C_MCONFIG_CTRENA    FIELD(0, 2)
+-#define NPCX_I3C_MCONFIG_DISTO     3
+-#define NPCX_I3C_MCONFIG_HKEEP     FIELD(4, 2) /* Must be '11' */
+-#define NPCX_I3C_MCONFIG_ODSTOP    6
+-#define NPCX_I3C_MCONFIG_PPBAUD    FIELD(8, 4)
+-#define NPCX_I3C_MCONFIG_PPLOW     FIELD(12, 4)
+-#define NPCX_I3C_MCONFIG_ODBAUD    FIELD(16, 8)
+-#define NPCX_I3C_MCONFIG_ODHPP     24
+-#define NPCX_I3C_MCONFIG_SKEW      FIELD(25, 3)
+-#define NPCX_I3C_MCONFIG_I2CBAUD   FIELD(28, 4)
+-#define NPCX_I3C_MCTRL_REQUEST     FIELD(0, 3)
+-#define NPCX_I3C_MCTRL_TYPE        FIELD(4, 2)
+-#define NPCX_I3C_MCTRL_IBIRESP     FIELD(6, 2)
+-#define NPCX_I3C_MCTRL_DIR         8
+-#define NPCX_I3C_MCTRL_ADDR        FIELD(9, 7)
+-#define NPCX_I3C_MCTRL_RDTERM      FIELD(16, 8)
+-#define NPCX_I3C_MSTATUS_STATE     FIELD(0, 3)
+-#define NPCX_I3C_MSTATUS_BETWEEN   4
+-#define NPCX_I3C_MSTATUS_NACKED    5
+-#define NPCX_I3C_MSTATUS_IBITYPE   FIELD(6, 2)
+-#define NPCX_I3C_MSTATUS_TGTSTART  8
+-#define NPCX_I3C_MSTATUS_MCTRLDONE 9
+-#define NPCX_I3C_MSTATUS_COMPLETE  10
+-#define NPCX_I3C_MSTATUS_RXPEND    11
+-#define NPCX_I3C_MSTATUS_TXNOTFULL 12
+-#define NPCX_I3C_MSTATUS_IBIWON    13
+-#define NPCX_I3C_MSTATUS_ERRWARN   15
+-#define NPCX_I3C_MSTATUS_NOWCNTLR  19
+-#define NPCX_I3C_MSTATUS_IBIADDR   FIELD(24, 7)
+-#define NPCX_I3C_IBIRULES_MSB0     30
+-#define NPCX_I3C_IBIRULES_NOBYTE   31
+-#define NPCX_I3C_MINTSET_TGTSTART  8
+-#define NPCX_I3C_MINTSET_MCTRLDONE 9
+-#define NPCX_I3C_MINTSET_COMPLETE  10
+-#define NPCX_I3C_MINTSET_RXPEND    11
+-#define NPCX_I3C_MINTSET_TXNOTFULL 12
+-#define NPCX_I3C_MINTSET_IBIWON    13
+-#define NPCX_I3C_MINTSET_ERRWARN   15
+-#define NPCX_I3C_MINTSET_NOWCNTLR  19
+-#define NPCX_I3C_MINTCLR_TGTSTART  8
+-#define NPCX_I3C_MINTCLR_MCTRLDONE 9
+-#define NPCX_I3C_MINTCLR_COMPLETE  10
+-#define NPCX_I3C_MINTCLR_RXPEND    11
+-#define NPCX_I3C_MINTCLR_TXNOTFULL 12
+-#define NPCX_I3C_MINTCLR_IBIWON    13
+-#define NPCX_I3C_MINTCLR_ERRWARN   15
+-#define NPCX_I3C_MINTCLR_NOWCNTLR  19
+-#define NPCX_I3C_MDATACTRL_FLUSHTB 0
+-#define NPCX_I3C_MDATACTRL_FLUSHFB 1
+-#define NPCX_I3C_MDATACTRL_UNLOCK  3
+-#define NPCX_I3C_MDATACTRL_TXTRIG  FIELD(4, 2)
+-#define NPCX_I3C_MDATACTRL_RXTRIG  FIELD(6, 2)
+-#define NPCX_I3C_MDATACTRL_TXCOUNT FIELD(16, 5)
+-#define NPCX_I3C_MDATACTRL_RXCOUNT FIELD(24, 5)
+-#define NPCX_I3C_MDATACTRL_TXFULL  30
+-#define NPCX_I3C_MDATACTRL_RXEMPTY 31
+-#define NPCX_I3C_MERRWARN_NACK     2
+-#define NPCX_I3C_MERRWARN_WRABT    3
+-#define NPCX_I3C_MERRWARN_TERM     4
+-#define NPCX_I3C_MERRWARN_HPAR     9
+-#define NPCX_I3C_MERRWARN_HCRC     10
+-#define NPCX_I3C_MERRWARN_OREAD    16
+-#define NPCX_I3C_MERRWARN_OWRITE   17
+-#define NPCX_I3C_MERRWARN_MSGERR   18
+-#define NPCX_I3C_MERRWARN_INVERQ   19
+-#define NPCX_I3C_MERRWARN_TIMEOUT  20
+-#define NPCX_I3C_MDMACTRL_DMAFB    FIELD(0, 2)
+-#define NPCX_I3C_MDMACTRL_DMATB    FIELD(2, 2)
+-
+-
+-/* MCONFIG options */
+-#define MCONFIG_CTRENA_OFF        0x0
+-#define MCONFIG_CTRENA_ON         0x1
+-#define MCONFIG_CTRENA_CAPABLE    0x2
+-#define MCONFIG_HKEEP_EXT_SDA_SCL 0x3
+-
+-/* MCTRL options */
+-#define MCTRL_REQUEST_NONE          0 /* None */
+-#define MCTRL_REQUEST_EMITSTARTADDR 1 /* Emit a START */
+-#define MCTRL_REQUEST_EMITSTOP      2 /* Emit a STOP */
+-#define MCTRL_REQUEST_IBIACKNACK    3 /* Manually ACK or NACK an IBI */
+-#define MCTRL_REQUEST_PROCESSDAA    4 /* Starts the DAA process */
+-#define MCTRL_REQUEST_FORCEEXIT     6 /* Emit HDR Exit Pattern  */
+-/* Emits a START with address 7Eh when a slave pulls I3C_SDA low to request an IBI */
+-#define MCTRL_REQUEST_AUTOIBI       7
+-
+-/* ACK with mandatory byte determined by IBIRULES or ACK with no mandatory byte */
+-#define MCTRL_IBIRESP_ACK           0
+-#define MCTRL_IBIRESP_NACK          1 /* NACK */
+-#define MCTRL_IBIRESP_ACK_MANDATORY 2 /* ACK with mandatory byte  */
+-#define MCTRL_IBIRESP_MANUAL        3
+-
+-/* For REQUEST = EmitStartAddr */
+-enum npcx_i3c_mctrl_type {
+-	NPCX_I3C_MCTRL_TYPE_I3C,
+-	NPCX_I3C_MCTRL_TYPE_I2C,
+-	NPCX_I3C_MCTRL_TYPE_I3C_HDR_DDR,
+-};
+-
+-/* For REQUEST = ForceExit/Target Reset */
+-#define MCTRL_TYPE_HDR_EXIT    0
+-#define MCTRL_TYPE_TGT_RESTART 2
+-
+-/* MSTATUS options */
+-#define MSTATUS_STATE_IDLE    0x0
+-#define MSTATUS_STATE_TGTREQ  0x1
+-#define MSTATUS_STATE_NORMACT 0x3 /* SDR message mode */
+-#define MSTATUS_STATE_MSGDDR  0x4
+-#define MSTATUS_STATE_DAA     0x5
+-#define MSTATUS_STATE_IBIACK  0x6
+-#define MSTATUS_STATE_IBIRCV  0x7
+-#define MSTATUS_IBITYPE_NONE  0x0
+-#define MSTATUS_IBITYPE_IBI   0x1
+-#define MSTATUS_IBITYPE_CR    0x2
+-#define MSTATUS_IBITYPE_HJ    0x3
+-
+-/* IBIRULES */
+-#define IBIRULES_ADDR_MSK   0x3F
+-#define IBIRULES_ADDR_SHIFT 0x6
+-
+-/* MDMACTRL options */
+-#define MDMA_DMAFB_DISABLE      0x0
+-#define MDMA_DMAFB_EN_ONE_FRAME 0x1
+-#define MDMA_DMAFB_EN_MANUAL    0x2
+-#define MDMA_DMATB_DISABLE      0x0
+-#define MDMA_DMATB_EN_ONE_FRAME 0x1
+-#define MDMA_DMATB_EN_MANUAL    0x2
++/* I3C controller register fields */
++#define NPCX_I3C_MCONFIG_CTRENA         FIELD(0, 2)
++#define NPCX_I3C_MCONFIG_DISTO          3
++#define NPCX_I3C_MCONFIG_HKEEP          FIELD(4, 2) /* Must be '11' */
++#define NPCX_I3C_MCONFIG_ODSTOP         6
++#define NPCX_I3C_MCONFIG_PPBAUD         FIELD(8, 4)
++#define NPCX_I3C_MCONFIG_PPLOW          FIELD(12, 4)
++#define NPCX_I3C_MCONFIG_ODBAUD         FIELD(16, 8)
++#define NPCX_I3C_MCONFIG_ODHPP          24
++#define NPCX_I3C_MCONFIG_SKEW           FIELD(25, 3)
++#define NPCX_I3C_MCONFIG_I2CBAUD        FIELD(28, 4)
++#define NPCX_I3C_MCTRL_REQUEST          FIELD(0, 3)
++#define NPCX_I3C_MCTRL_TYPE             FIELD(4, 2)
++#define NPCX_I3C_MCTRL_IBIRESP          FIELD(6, 2)
++#define NPCX_I3C_MCTRL_DIR              8
++#define NPCX_I3C_MCTRL_ADDR             FIELD(9, 7)
++#define NPCX_I3C_MCTRL_RDTERM           FIELD(16, 8)
++#define NPCX_I3C_MSTATUS_STATE          FIELD(0, 3)
++#define NPCX_I3C_MSTATUS_BETWEEN        4
++#define NPCX_I3C_MSTATUS_NACKED         5
++#define NPCX_I3C_MSTATUS_IBITYPE        FIELD(6, 2)
++#define NPCX_I3C_MSTATUS_TGTSTART       8
++#define NPCX_I3C_MSTATUS_MCTRLDONE      9
++#define NPCX_I3C_MSTATUS_COMPLETE       10
++#define NPCX_I3C_MSTATUS_RXPEND         11
++#define NPCX_I3C_MSTATUS_TXNOTFULL      12
++#define NPCX_I3C_MSTATUS_IBIWON         13
++#define NPCX_I3C_MSTATUS_ERRWARN        15
++#define NPCX_I3C_MSTATUS_NOWCNTLR       19
++#define NPCX_I3C_MSTATUS_IBIADDR        FIELD(24, 7)
++#define NPCX_I3C_IBIRULES_MSB0          30
++#define NPCX_I3C_IBIRULES_NOBYTE        31
++#define NPCX_I3C_MINTSET_TGTSTART       8
++#define NPCX_I3C_MINTSET_MCTRLDONE      9
++#define NPCX_I3C_MINTSET_COMPLETE       10
++#define NPCX_I3C_MINTSET_RXPEND         11
++#define NPCX_I3C_MINTSET_TXNOTFULL      12
++#define NPCX_I3C_MINTSET_IBIWON         13
++#define NPCX_I3C_MINTSET_ERRWARN        15
++#define NPCX_I3C_MINTSET_NOWCNTLR       19
++#define NPCX_I3C_MINTCLR_TGTSTART       8
++#define NPCX_I3C_MINTCLR_MCTRLDONE      9
++#define NPCX_I3C_MINTCLR_COMPLETE       10
++#define NPCX_I3C_MINTCLR_RXPEND         11
++#define NPCX_I3C_MINTCLR_TXNOTFULL      12
++#define NPCX_I3C_MINTCLR_IBIWON         13
++#define NPCX_I3C_MINTCLR_ERRWARN        15
++#define NPCX_I3C_MINTCLR_NOWCNTLR       19
++#define NPCX_I3C_MINTMASKED_NOWCNTLR    19
++#define NPCX_I3C_MDATACTRL_FLUSHTB      0
++#define NPCX_I3C_MDATACTRL_FLUSHFB      1
++#define NPCX_I3C_MDATACTRL_UNLOCK       3
++#define NPCX_I3C_MDATACTRL_TXTRIG       FIELD(4, 2)
++#define NPCX_I3C_MDATACTRL_RXTRIG       FIELD(6, 2)
++#define NPCX_I3C_MDATACTRL_TXCOUNT      FIELD(16, 5)
++#define NPCX_I3C_MDATACTRL_RXCOUNT      FIELD(24, 5)
++#define NPCX_I3C_MDATACTRL_TXFULL       30
++#define NPCX_I3C_MDATACTRL_RXEMPTY      31
++#define NPCX_I3C_MERRWARN_NACK          2
++#define NPCX_I3C_MERRWARN_WRABT         3
++#define NPCX_I3C_MERRWARN_TERM          4
++#define NPCX_I3C_MERRWARN_HPAR          9
++#define NPCX_I3C_MERRWARN_HCRC          10
++#define NPCX_I3C_MERRWARN_OREAD         16
++#define NPCX_I3C_MERRWARN_OWRITE        17
++#define NPCX_I3C_MERRWARN_MSGERR        18
++#define NPCX_I3C_MERRWARN_INVERQ        19
++#define NPCX_I3C_MERRWARN_TIMEOUT       20
++#define NPCX_I3C_MDMACTRL_DMAFB         FIELD(0, 2)
++#define NPCX_I3C_MDMACTRL_DMATB         FIELD(2, 2)
++
++/* I3C target register fields */
++#define NPCX_I3C_CONFIG_TGTENA          0
++#define NPCX_I3C_CONFIG_MATCHSS         2
++#define NPCX_I3C_CONFIG_S0IGNORE        3
++#define NPCX_I3C_CONFIG_IDRAND          8
++#define NPCX_I3C_CONFIG_OFFLINE         9
++#define NPCX_I3C_CONFIG_HDRCMD          FIELD(10, 2)
++#define NPCX_I3C_CONFIG_BAMATCH         FIELD(16, 7)
++#define NPCX_I3C_CONFIG_SADDR           FIELD(25, 7)
++#define NPCX_I3C_STATUS_STNOTSTOP       0
++#define NPCX_I3C_STATUS_STMSG           1
++#define NPCX_I3C_STATUS_STCCCH          2
++#define NPCX_I3C_STATUS_STREQRD         3
++#define NPCX_I3C_STATUS_STREQWR         4
++#define NPCX_I3C_STATUS_STDAA           5
++#define NPCX_I3C_STATUS_STHDR           6
++#define NPCX_I3C_STATUS_START           8
++#define NPCX_I3C_STATUS_MATCHED         9
++#define NPCX_I3C_STATUS_STOP            10
++#define NPCX_I3C_STATUS_RXPEND          11
++#define NPCX_I3C_STATUS_TXNOTFULL       12
++#define NPCX_I3C_STATUS_DACHG           13
++#define NPCX_I3C_STATUS_CCC             14
++#define NPCX_I3C_STATUS_ERRWARN         15
++#define NPCX_I3C_STATUS_HDRMATCH        16
++#define NPCX_I3C_STATUS_CHANDLED        17
++#define NPCX_I3C_STATUS_EVENT           18
++#define NPCX_I3C_STATUS_TGTRST          19
++#define NPCX_I3C_STATUS_EVDET           FIELD(20, 2)
++#define NPCX_I3C_STATUS_IBIDIS          24
++#define NPCX_I3C_STATUS_MRDIS           25
++#define NPCX_I3C_STATUS_HJDIS           27
++#define NPCX_I3C_STATUS_ACTSTATE        FIELD(28, 2)
++#define NPCX_I3C_STATUS_TIMECTRL        FIELD(30, 2)
++#define NPCX_I3C_CTRL_EVENT             FIELD(0, 2)
++#define NPCX_I3C_CTRL_EXTDATA           3
++#define NPCX_I3C_CTRL_MAPIDX            FIELD(4, 4)
++#define NPCX_I3C_CTRL_IBIDATA           FIELD(8, 8)
++#define NPCX_I3C_CTRL_PENDINT           FIELD(16, 4)
++#define NPCX_I3C_CTRL_ACTSTATE          FIELD(20, 2)
++#define NPCX_I3C_CTRL_VENDINFO          FIELD(24, 8)
++#define NPCX_I3C_INTSET_START           8
++#define NPCX_I3C_INTSET_MATCHED         9
++#define NPCX_I3C_INTSET_STOP            10
++#define NPCX_I3C_INTSET_RXPEND          11
++#define NPCX_I3C_INTSET_TXNOTFULL       12
++#define NPCX_I3C_INTSET_DACHG           13
++#define NPCX_I3C_INTSET_CCC             14
++#define NPCX_I3C_INTSET_ERRWARN         15
++#define NPCX_I3C_INTSET_HDRMATCH        16
++#define NPCX_I3C_INTSET_CHANDLED        17
++#define NPCX_I3C_INTSET_EVENT           18
++#define NPCX_I3C_INTSET_TGTRST          19
++#define NPCX_I3C_INTCLR_START           8
++#define NPCX_I3C_INTCLR_MATCHED         9
++#define NPCX_I3C_INTCLR_STOP            10
++#define NPCX_I3C_INTCLR_RXPEND          11
++#define NPCX_I3C_INTCLR_TXNOTFULL       12
++#define NPCX_I3C_INTCLR_DACHG           13
++#define NPCX_I3C_INTCLR_CCC             14
++#define NPCX_I3C_INTCLR_ERRWARN         15
++#define NPCX_I3C_INTCLR_HDRMATCH        16
++#define NPCX_I3C_INTCLR_CHANDLED        17
++#define NPCX_I3C_INTCLR_EVENT           18
++#define NPCX_I3C_INTCLR_TGTRST          19
++#define NPCX_I3C_INTMASKED_START        8
++#define NPCX_I3C_INTMASKED_MATCHED      9
++#define NPCX_I3C_INTMASKED_STOP         10
++#define NPCX_I3C_INTMASKED_RXPEND       11
++#define NPCX_I3C_INTMASKED_TXNOTFULL    12
++#define NPCX_I3C_INTMASKED_DACHG        13
++#define NPCX_I3C_INTMASKED_CCC          14
++#define NPCX_I3C_INTMASKED_ERRWARN      15
++#define NPCX_I3C_INTMASKED_HDRMATCH     16
++#define NPCX_I3C_INTMASKED_CHANDLED     17
++#define NPCX_I3C_INTMASKED_EVENT        18
++#define NPCX_I3C_INTMASKED_TGTRST       19
++#define NPCX_I3C_ERRWARN_ORUN           0
++#define NPCX_I3C_ERRWARN_URUN           1
++#define NPCX_I3C_ERRWARN_URUNNACK       2
++#define NPCX_I3C_ERRWARN_TERM           3
++#define NPCX_I3C_ERRWARN_INVSTART       4
++#define NPCX_I3C_ERRWARN_SPAR           8
++#define NPCX_I3C_ERRWARN_HPAR           9
++#define NPCX_I3C_ERRWARN_HCRC           10
++#define NPCX_I3C_ERRWARN_S0S1           11
++#define NPCX_I3C_ERRWARN_OREAD          16
++#define NPCX_I3C_ERRWARN_OWRITE         17
++#define NPCX_I3C_DMACTRL_DMAFB          FIELD(0, 2)
++#define NPCX_I3C_DMACTRL_DMATB          FIELD(2, 2)
++#define NPCX_I3C_DATACTRL_FLUSHTB       0
++#define NPCX_I3C_DATACTRL_FLUSHFB       1
++#define NPCX_I3C_DATACTRL_UNLOCK        3
++#define NPCX_I3C_DATACTRL_TXTRIG        FIELD(4, 2)
++#define NPCX_I3C_DATACTRL_RXTRIG        FIELD(6, 2)
++#define NPCX_I3C_DATACTRL_TXCOUNT       FIELD(16, 6)
++#define NPCX_I3C_DATACTRL_RXCOUNT       FIELD(24, 6)
++#define NPCX_I3C_DATACTRL_TXFULL        30
++#define NPCX_I3C_DATACTRL_RXEMPTY       31
++#define NPCX_I3C_WDATAB_DATA            FIELD(0, 8)
++#define NPCX_I3C_WDATAB_END_B           8
++#define NPCX_I3C_WDATAB_END_A           16
++#define NPCX_I3C_WDATABE_DATA           FIELD(0, 8)
++#define NPCX_I3C_WDATAH_DATA0           FIELD(0, 8)
++#define NPCX_I3C_WDATAH_DATA1           FIELD(8, 8)
++#define NPCX_I3C_WDATAH_END             16
++#define NPCX_I3C_WDATAHE_DATA0          FIELD(0, 8)
++#define NPCX_I3C_WDATAHE_DATA1          FIELD(8, 8)
++#define NPCX_I3C_RDATAB_DATA            FIELD(0, 8)
++#define NPCX_I3C_RDATAH_DATA0           FIELD(0, 8)
++#define NPCX_I3C_RDATAH_DATA1           FIELD(8, 8)
++#define NPCX_I3C_CAPABILITIES2_MAPCNT   FIELD(0, 4)
++#define NPCX_I3C_CAPABILITIES2_I2C10B   4
++#define NPCX_I3C_CAPABILITIES2_I2CRST   5
++#define NPCX_I3C_CAPABILITIES2_I2CDEVID 6
++#define NPCX_I3C_CAPABILITIES2_DATA32   7
++#define NPCX_I3C_CAPABILITIES2_IBIEXT   8
++#define NPCX_I3C_CAPABILITIES2_IBIXREG  9
++#define NPCX_I3C_CAPABILITIES2_SMLANE   FIELD(12, 2)
++#define NPCX_I3C_CAPABILITIES2_V1_1     16
++#define NPCX_I3C_CAPABILITIES2_TGTRST   17
++#define NPCX_I3C_CAPABILITIES2_GROUP    FIELD(18, 2)
++#define NPCX_I3C_CAPABILITIES2_AASA     21
++#define NPCX_I3C_CAPABILITIES2_SSTSUB   22
++#define NPCX_I3C_CAPABILITIES2_SSTWR    23
++#define NPCX_I3C_CAPABILITIES_IDENA     FIELD(0, 2)
++#define NPCX_I3C_CAPABILITIES_IDREG     FIELD(2, 4)
++#define NPCX_I3C_CAPABILITIES_HDRSUPP   FIELD(6, 3)
++#define NPCX_I3C_CAPABILITIES_CNTLR     9
++#define NPCX_I3C_CAPABILITIES_SADDR     FIELD(10, 2)
++#define NPCX_I3C_CAPABILITIES_CCCHANDLE FIELD(12, 4)
++#define NPCX_I3C_CAPABILITIES_IBI_MR_HJ FIELD(16, 5)
++#define NPCX_I3C_CAPABILITIES_TIMECTRL  21
++#define NPCX_I3C_CAPABILITIES_EXTFIFO   FIELD(23, 3)
++#define NPCX_I3C_CAPABILITIES_FIFOTX    FIELD(26, 2)
++#define NPCX_I3C_CAPABILITIES_FIFORX    FIELD(28, 2)
++#define NPCX_I3C_CAPABILITIES_INT       30
++#define NPCX_I3C_CAPABILITIES_DMA       31
++#define NPCX_I3C_DYNADDR_DAVALID        0
++#define NPCX_I3C_DYNADDR_DADDR          FIELD(1, 7)
++#define NPCX_I3C_DYNADDR_CAUSE          FIELD(8, 3)
++#define NPCX_I3C_MAXLIMITS_MAXRD        FIELD(0, 12)
++#define NPCX_I3C_MAXLIMITS_MAXWR        FIELD(16, 12)
++#define NPCX_I3C_IDEXT_DCR              FIELD(8, 8)
++#define NPCX_I3C_IDEXT_BCR              FIELD(16, 8)
++#define NPCX_I3C_VENDORID_VID           FIELD(0, 15)
++#define NPCX_I3C_TCCLOCK_ACCURACY       FIELD(0, 8)
++#define NPCX_I3C_TCCLOCK_FREQ           FIELD(8, 8)
++#define NPCX_I3C_MSGLAST_MAPLAST        FIELD(0, 4)
++#define NPCX_I3C_MSGLAST_LASTSTATIC     4
++#define NPCX_I3C_MSGLAST_LASTGROUP      5
++#define NPCX_I3C_MSGLAST_LASTMODE       FIELD(6, 2)
++#define NPCX_I3C_MSGLAST_MAPLASTM1      FIELD(8, 4)
++#define NPCX_I3C_MSGLAST_LASTGROUPM1    13
++#define NPCX_I3C_MSGLAST_LASTMODE1      FIELD(14, 2)
++#define NPCX_I3C_MSGLAST_MAPLASTM2      FIELD(16, 4)
++#define NPCX_I3C_MSGLAST_LASTGROUPM2    21
++#define NPCX_I3C_MSGLAST_LASTMODE2      FIELD(22, 2)
++#define NPCX_I3C_RSTACTTIME_PERRSTTIM   FIELD(0, 8)
++#define NPCX_I3C_RSTACTTIME_SYSRSTTIM   FIELD(8, 8)
++#define NPCX_I3C_HDRCMD_CMD0            FIELD(0, 8)
++#define NPCX_I3C_HDRCMD_OVFL            30
++#define NPCX_I3C_HDRCMD_NEWCMD          31
++#define NPCX_I3C_GROUPDEF_GRP0ENA       0
++#define NPCX_I3C_GROUPDEF_GRP0DA        FIELD(1, 7)
++#define NPCX_I3C_GROUPDEF_GRP1ENA       8
++#define NPCX_I3C_GROUPDEF_GRP1DA        FIELD(9, 7)
++#define NPCX_I3C_GROUPDEF_GRP2ENA       16
++#define NPCX_I3C_GROUPDEF_GRP2DA        FIELD(17, 7)
++#define NPCX_I3C_MAPCTRL0_ENA           0
++#define NPCX_I3C_MAPCTRL0_DA            FIELD(1, 7)
++#define NPCX_I3C_MAPCTRL0_CAUSE         FIELD(8, 3)
++#define NPCX_I3C_MAPCTRLn_ENA           0
++#define NPCX_I3C_MAPCTRLn_ADDR          FIELD(1, 7)
++#define NPCX_I3C_MAPCTRLn_MAPSA         8
++#define NPCX_I3C_MAPCTRLn_NACK          12
++#define NPCX_I3C_MAPCTRLn_AUTO          13
++#define NPCX_I3C_MAPCTRLn_SLOT_PID      FIELD(14, 5)
++#define NPCX_I3C_IBIEXT1_CNT            FIELD(0, 3)
++#define NPCX_I3C_IBIEXT1_EXT1           FIELD(8, 8)
++#define NPCX_I3C_IBIEXT1_EXT2           FIELD(16, 8)
++#define NPCX_I3C_IBIEXT1_EXT3           FIELD(24, 8)
++#define NPCX_I3C_IBIEXT2_EXT4           FIELD(0, 8)
++#define NPCX_I3C_IBIEXT2_EXT5           FIELD(8, 8)
++#define NPCX_I3C_IBIEXT2_EXT6           FIELD(16, 8)
++#define NPCX_I3C_IBIEXT2_EXT7           FIELD(24, 8)
+ 
+ /* MDMA Controller registers */
+ struct mdma_reg {
+@@ -1977,11 +2220,16 @@ struct mdma_reg {
+ };
+ 
+ /* MDMA register fields */
+-#define NPCX_MDMA_CTL_MDMAEN    0
+-#define NPCX_MDMA_CTL_MPD       1
+-#define NPCX_MDMA_CTL_SIEN      8
+-#define NPCX_MDMA_CTL_MPS       14
+-#define NPCX_MDMA_CTL_TC        18
+-#define NPCX_MDMA_TCNT_TFR_CNT  FIELD(0, 12)
++#define NPCX_MDMA_CTL_MDMAEN 0
++#define NPCX_MDMA_CTL_MPD    1
++#define NPCX_MDMA_CTL_SIEN   8
++#define NPCX_MDMA_CTL_MPS    14
++#define NPCX_MDMA_CTL_TC     18
++
++/* Channel 0/1 Transfer Count Register (MDMA_TCNT0/MDMA_TCNT1) */
++#define NPCX_MDMA_TCNT_TFR_CNT FIELD(0, 13)
++
++/* Channel 0/1 Current Transfer Count Register (MDMA_CTCNT0/MDMA_CTCNT1) */
++#define NPCX_MDMA_CTCNT_CURRENT_TFR_CNT FIELD(0, 13)
+ 
+ #endif /* _NUVOTON_NPCX_REG_DEF_H */
+diff --git a/soc/arm/nuvoton_npcx/common/registers.c b/soc/arm/nuvoton_npcx/common/registers.c
+index 00ee142b1..e54775bc6 100644
+--- a/soc/arm/nuvoton_npcx/common/registers.c
++++ b/soc/arm/nuvoton_npcx/common/registers.c
+@@ -199,8 +199,8 @@ NPCX_REG_OFFSET_CHECK(swrst_reg, SWRST_CTL[2], 0x00c);
+ NPCX_REG_OFFSET_CHECK(swrst_reg, SWRST_CTL[3], 0x010);
+ 
+ /* I3C register structure check */
+-NPCX_REG_SIZE_CHECK(i3c_reg, 0x0E8);
+-NPCX_REG_OFFSET_CHECK(i3c_reg, MCONFIG, 0x000);
++NPCX_REG_SIZE_CHECK(i3c_reg, 0x148);
++NPCX_REG_OFFSET_CHECK(i3c_reg, MCONFIG, 0x000); /* Controller register */
+ NPCX_REG_OFFSET_CHECK(i3c_reg, MCTRL, 0x084);
+ NPCX_REG_OFFSET_CHECK(i3c_reg, IBIRULES, 0x08C);
+ NPCX_REG_OFFSET_CHECK(i3c_reg, MINTSET, 0x090);
+@@ -217,6 +217,16 @@ NPCX_REG_OFFSET_CHECK(i3c_reg, MRDATAH, 0x0C8);
+ NPCX_REG_OFFSET_CHECK(i3c_reg, MWMSG_DDR, 0x0D8);
+ NPCX_REG_OFFSET_CHECK(i3c_reg, MRMSG_DDR, 0x0DC);
+ NPCX_REG_OFFSET_CHECK(i3c_reg, MDYNADDR, 0x0E4);
++NPCX_REG_OFFSET_CHECK(i3c_reg, CONFIG, 0x004); /* Target register */
++NPCX_REG_OFFSET_CHECK(i3c_reg, STATUS, 0x008);
++NPCX_REG_OFFSET_CHECK(i3c_reg, CTRL, 0x00C);
++NPCX_REG_OFFSET_CHECK(i3c_reg, INTSET, 0x010);
++NPCX_REG_OFFSET_CHECK(i3c_reg, INTCLR, 0x014);
++NPCX_REG_OFFSET_CHECK(i3c_reg, INTMASKED, 0x018);
++NPCX_REG_OFFSET_CHECK(i3c_reg, ERRWARN, 0x01C);
++NPCX_REG_OFFSET_CHECK(i3c_reg, DMACTRL, 0x020);
++NPCX_REG_OFFSET_CHECK(i3c_reg, DATACTRL, 0x02C);
++NPCX_REG_OFFSET_CHECK(i3c_reg, IBIEXT2, 0x144);
+ 
+ /* MDMA register structure check */
+ NPCX_REG_SIZE_CHECK(mdma_reg, 0x03C);
+diff --git a/soc/arm/nuvoton_npcx/common/scfg.c b/soc/arm/nuvoton_npcx/common/scfg.c
+index 6dac027cb..6d3142e7a 100644
+--- a/soc/arm/nuvoton_npcx/common/scfg.c
++++ b/soc/arm/nuvoton_npcx/common/scfg.c
+@@ -131,6 +131,21 @@ void npcx_host_interface_sel(enum npcx_hif_type hif_type)
+ 	SET_FIELD(inst_scfg->DEVCNT, NPCX_DEVCNT_HIF_TYP_SEL_FIELD, hif_type);
+ }
+ 
++void npcx_i3c_target_sel(uint8_t module_id, bool enable)
++{
++#if defined(CONFIG_SOC_SERIES_NPCX4)
++	struct scfg_reg *inst_scfg = HAL_SFCG_INST();
++
++	if (enable == true) {
++		inst_scfg->DEV_CTL3 |= NPCX_DEV_CTL3_I3C_MODE_BIT(module_id);
++	} else {
++		inst_scfg->DEV_CTL3 &= ~NPCX_DEV_CTL3_I3C_MODE_BIT(module_id);
++	}
++#else
++	LOG_ERR("%s: i3c target select not supported yet", __func__);
++#endif
++}
++
+ void npcx_dbg_freeze_enable(bool enable)
+ {
+ 	const uintptr_t dbg_base = npcx_scfg_cfg.base_dbg;
+diff --git a/soc/arm/nuvoton_npcx/common/soc_pins.h b/soc/arm/nuvoton_npcx/common/soc_pins.h
+index 93b5d601c..143aad6b5 100644
+--- a/soc/arm/nuvoton_npcx/common/soc_pins.h
++++ b/soc/arm/nuvoton_npcx/common/soc_pins.h
+@@ -85,6 +85,15 @@ bool npcx_lvol_get_detect_level(int lvol_ctrl, int lvol_bit);
+  */
+ void npcx_host_interface_sel(enum npcx_hif_type hif_type);
+ 
++/**
++ * @brief Select the I3C module controller or target mode for the mdma
++ *        module operation.
++ *
++ * @param module i3c device
++ * @param enable true to enable target mode, false to controller mode.
++ */
++void npcx_i3c_target_sel(uint8_t module, bool enable);
++
+ #ifdef __cplusplus
+ }
+ #endif
 -- 
 2.17.1
 

@@ -21,8 +21,6 @@
 	aliases {
 		i2c0 = &i2c2_0;
 		i2c1 = &i2c0_0;
-		ssd-i3c-bus = &i3c2;
-		ssd-i3c-dev = &i3c_dev1;
 		pwm0 = &pwm6;
 		watchdog0 = &twd0;
 		peci-0 = &peci0;
@@ -160,7 +158,7 @@
 	en-direct-access-2dev;
 
 	/* NOR flash */
-	shd_flash1: w25q128@1 {
+	shd_flash1: w25q128@0 {
 		compatible ="nuvoton,npcx-fiu-nor";
 		size = <0x10000000>;  /* 32Mbytes size in bits */
 		max-timeout = <86784>;
@@ -195,28 +193,4 @@
 
 &ps2_0_dat_clk_gp67_70 {
 	drive-open-drain;
-};
-
-&i3c2 {
-	status = "okay";
-	i3c-scl-hz = <12500000>;
-	i3c-od-scl-hz = <4170000>;
-	pinctrl-0 = <&i3c3_sda_scl_gpf4_f5>;
-	pinctrl-names = "default";
-	/* required for Zephyr 4.1 with I3C target support */
-	bcr = <0x67>; /* Set for controller mode */
-
-	/* SSD */
-	i3c_dev1: i3c-dev1@d0fefff1fd10 {
-		compatible = "samsung,pm9e1";
-		reg = <0x0 0x0000d0fe 0xfff1fd10>;
-		status = "okay";
-	};
-
-	/* LSMOD sensor using dummy driver for test purposes */
-	i3c_dev2: i3c-dev2@208006c100b {
-		compatible = "samsung,pm9e1";
-		reg = <0x0 0x00000208 0x006c100b>;
-		status = "okay";
-	};
 };

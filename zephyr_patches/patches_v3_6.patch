@@ -1,7 +1,7 @@
-From 6b8f8e1a1541f853e8d86ea42fc80c6d75d14b3b Mon Sep 17 00:00:00 2001
+From 3592b0f11ece89f389d6c0d73110850a0232ef34 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Mon, 21 Aug 2023 14:09:40 -0700
-Subject: [PATCH 01/39] soc: arm: microchip: mec172x: Add macro to get pin mux
+Subject: [PATCH 01/40] soc: arm: microchip: mec172x: Add macro to get pin mux
  value
 
 Add macro to read pin mux control value
@@ -29,10 +29,10 @@ index 39ed59d27..f013ba69a 100644
 2.17.1
 
 
-From d447956a7bd8931e08d2da9a403f768676132c9b Mon Sep 17 00:00:00 2001
+From a0db96f2d008283e575c26dc9d57b52468a5e165 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Mon, 21 Aug 2023 14:51:56 -0700
-Subject: [PATCH 02/39] drivers: gpio: mec172x: Add message to warn about pins
+Subject: [PATCH 02/40] drivers: gpio: mec172x: Add message to warn about pins
  not in GPIO mode
 
 Warn about potential device tree errors for cases when driver's
@@ -82,10 +82,10 @@ index 3c89ed79c..67697b1e3 100644
 2.17.1
 
 
-From 0e45e8ea6298183df7cc862de3184a8a5164e1c5 Mon Sep 17 00:00:00 2001
+From c2bff70e3fecbf8509a4c08504485d21f29e4875 Mon Sep 17 00:00:00 2001
 From: Mulin Chao <mlchao@nuvoton.com>
 Date: Tue, 23 Jan 2024 18:43:19 -0800
-Subject: [PATCH 03/39] drivers: espi: npcx: add ESPI_OOB_CHANNEL_RX_ASYNC
+Subject: [PATCH 03/40] drivers: espi: npcx: add ESPI_OOB_CHANNEL_RX_ASYNC
  support
 
 Add CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC support in npcx espi driver.
@@ -173,10 +173,10 @@ index fc6712575..628de8426 100644
 2.17.1
 
 
-From 1fea82eb4d8baea05a1ccd88c58efca22cda8af9 Mon Sep 17 00:00:00 2001
+From 9b8d9300e303aefb22c32060b11c72d5d3287a6c Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Tue, 5 Mar 2024 11:15:37 +0800
-Subject: [PATCH 04/39] drivers: espi: npcx: workaround Global Reset issue
+Subject: [PATCH 04/40] drivers: espi: npcx: workaround Global Reset issue
 
 Apply the workaround for the issue "eSPI global reset" in the
 NPCX49nF_Errata
@@ -289,10 +289,10 @@ index 628de8426..d506c1ec9 100644
 2.17.1
 
 
-From ba312ab3775c8d2383f292782e8afa3e815f47c4 Mon Sep 17 00:00:00 2001
+From a88028125521561b0b468b06297202ffbc9752c4 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Tue, 9 Apr 2024 14:15:26 +0800
-Subject: [PATCH 05/39] drivers: espi: npcx: support multi-byte for dp80
+Subject: [PATCH 05/40] drivers: espi: npcx: support multi-byte for dp80
 
 This CL adds multi-byte support for debug port 80 on npcx4.
 
@@ -319,10 +319,10 @@ index d746d89f9..d67f1a481 100644
 2.17.1
 
 
-From da27d89d2d685f79836dd1f2fc415055fa45b86f Mon Sep 17 00:00:00 2001
+From 30817d34cb3f0069d5c84bebd4ede3b155930ef3 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 6 May 2024 15:42:54 +0800
-Subject: [PATCH 06/39] pinctrl: npcx: add nodes for Serial Port SIO clock
+Subject: [PATCH 06/40] pinctrl: npcx: add nodes for Serial Port SIO clock
  selection
 
 This commits adds required pinctrl node to provide the corresponding SIO
@@ -404,10 +404,10 @@ index 2ba0b78fd..583b5352f 100644
 2.17.1
 
 
-From 29fa0e60b116c5e2de9aa4cdc9944c63417f117f Mon Sep 17 00:00:00 2001
+From 8b7001eb493f21e9cbe00de49ccf5ba9639d6aea Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 6 May 2024 15:43:09 +0800
-Subject: [PATCH 07/39] driver: espi: npcx: enable the Serial Port
+Subject: [PATCH 07/40] driver: espi: npcx: enable the Serial Port
 
 Initialize and enable the Serial Port/Host UART when
 CONFIG_ESPI_PERIPHERAL_UART=y.
@@ -516,10 +516,10 @@ index 418106666..51802586c 100644
 2.17.1
 
 
-From f46317a453f58a3db0884163a4f1b11f1d847ab8 Mon Sep 17 00:00:00 2001
+From c7806332927c35c39fa85828aaf454871d6f88d9 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Mon, 22 Apr 2024 18:18:24 +0800
-Subject: [PATCH 08/39] drivers: espi: npcx: update espi taf driver
+Subject: [PATCH 08/40] drivers: espi: npcx: update espi taf driver
 
 This CL updates the read, write, erase, and get_channel_status
 implementations of NPCX chip.
@@ -1012,10 +1012,10 @@ index a8755e080..90b98cbb6 100644
 2.17.1
 
 
-From 3b40d9df775b8a5adbc185005d4fb5dc898f6b56 Mon Sep 17 00:00:00 2001
+From 933a65ecf1d98dd6210844e7d7ac2055538cefa5 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Wed, 24 Apr 2024 11:25:15 +0800
-Subject: [PATCH 09/39] drivers: espi: npcx: select RING_BUFFER for p80
+Subject: [PATCH 09/40] drivers: espi: npcx: select RING_BUFFER for p80
 
 This CL adds automatic select CONFIG_RING_BUFFER for port 80 multi-byte.
 
@@ -1041,10 +1041,10 @@ index d67f1a481..035db2415 100644
 2.17.1
 
 
-From accdfac4488eb8f7b1e85b126189834d2cf14394 Mon Sep 17 00:00:00 2001
+From b5d387d5f279bc2e2208e65d4188bfd71932df4c Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Thu, 30 May 2024 13:45:47 +0800
-Subject: [PATCH 10/39] drivers: espi: npcx: add support 66MHz eSPI clock
+Subject: [PATCH 10/40] drivers: espi: npcx: add support 66MHz eSPI clock
 
 This CL adds support 66MHz eSPI clock for NPCX4.
 
@@ -1082,10 +1082,10 @@ index 89d46c367..302aff132 100644
 2.17.1
 
 
-From a5ce1bfca99a9ba5efe03e65f321b46c97e21407 Mon Sep 17 00:00:00 2001
+From 015a6073a933a5722abb68e0e9fafc735225b0b0 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 1 Apr 2024 10:34:25 +0800
-Subject: [PATCH 11/39] driver: reset: npcx: add driver support for reset
+Subject: [PATCH 11/40] driver: reset: npcx: add driver support for reset
  controller
 
 Nuvoton NPCX chips have reset registers which allow to reset the
@@ -1683,10 +1683,10 @@ index 8c4ed132b..e12b3bc10 100644
 2.17.1
 
 
-From 717c8c11290cbc74b006dd55aa14d210de6d293f Mon Sep 17 00:00:00 2001
+From 21b06523433ba49b088b085e3f937580c21c0889 Mon Sep 17 00:00:00 2001
 From: Tom Chang <CHChang19@nuvoton.com>
 Date: Wed, 6 Mar 2024 10:23:33 +0800
-Subject: [PATCH 12/39] drivers: espi: npcx: fix warning when using
+Subject: [PATCH 12/40] drivers: espi: npcx: fix warning when using
  ESPI_OOB_RX_ASYNC macro
 
 This CL prevents unused warnings when CONFIG_ESPI_OOB_CHANNEL_RX_ASYNC
@@ -1728,10 +1728,10 @@ index 302aff132..42e559a8b 100644
 2.17.1
 
 
-From 5a3c36cea856536f9601fee6c28f273f194112ce Mon Sep 17 00:00:00 2001
+From 57060f5d454537037d097becbcbb1b78004a96c5 Mon Sep 17 00:00:00 2001
 From: Alvis Sun <yfsun@nuvoton.com>
 Date: Wed, 17 Apr 2024 11:03:50 +0800
-Subject: [PATCH 13/39] dts: arm: nuvoton: add I3C device nodes
+Subject: [PATCH 13/40] dts: arm: nuvoton: add I3C device nodes
 
 Add I3C device nodes.
 
@@ -1840,10 +1840,10 @@ index 9070b4a71..1a02a70d2 100644
 2.17.1
 
 
-From b979b4453ad0826b55295a06bf9128053119a989 Mon Sep 17 00:00:00 2001
+From 7fbef831827ab0423ec4826644f99c45061f679c Mon Sep 17 00:00:00 2001
 From: Alvis Sun <yfsun@nuvoton.com>
 Date: Wed, 17 Apr 2024 11:04:47 +0800
-Subject: [PATCH 14/39] boards: nuvoton: npcx4m8f_evb: add i3c pinctrl
+Subject: [PATCH 14/40] boards: nuvoton: npcx4m8f_evb: add i3c pinctrl
 
 Add I3C pinmux configuration.
 
@@ -1880,10 +1880,10 @@ index a34002e8b..b90d94b0c 100644
 2.17.1
 
 
-From a46679a2699bf11f1312a32ab14e77be4acd5cb0 Mon Sep 17 00:00:00 2001
+From 444e125bddc1968edf9f00dc50ec66a4e6c46180 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Tue, 23 Apr 2024 14:32:36 +0800
-Subject: [PATCH 15/39] driver: uart: npcx: fix coding style
+Subject: [PATCH 15/40] driver: uart: npcx: fix coding style
 
 Fix the coding style by clang-format tool.
 
@@ -2061,10 +2061,10 @@ index 979cbd038..a698130ff 100644
 2.17.1
 
 
-From 49cc6aab7018a54486dfb3fbb9c62bfe35167623 Mon Sep 17 00:00:00 2001
+From 7b4859ed1e6d8250220e6b7c35950335e180bce1 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Tue, 23 Apr 2024 14:33:09 +0800
-Subject: [PATCH 16/39] drivers: uart: npcx: add asychronous API support
+Subject: [PATCH 16/40] drivers: uart: npcx: add asychronous API support
 
 This commit implement the UART asynchronous API mode support.
 When the API is used, the UART hardware cooperates with the DMA (MDMA)
@@ -3015,10 +3015,10 @@ index 01b4a365e..214eadd47 100644
 2.17.1
 
 
-From c29abc4ef95015e93931aa97ed3f3e912b4502dd Mon Sep 17 00:00:00 2001
+From 0ced59561750d9eb8d4bae91bfea073efdeaa7a7 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Wed, 24 Apr 2024 10:31:54 +0800
-Subject: [PATCH 17/39] drivers: uart: npcx: extend the UART baudrate support
+Subject: [PATCH 17/40] drivers: uart: npcx: extend the UART baudrate support
 
 1. support the baudrate = 3MHz.
 2. add baudrate = 115200 setting when UART source clock = 25/30/48/50 MHz.
@@ -3078,10 +3078,10 @@ index 8e25da50d..085f7cccd 100644
 2.17.1
 
 
-From 2aa10cf1a1c41cd5a91f3ab1899d57c26353ac5e Mon Sep 17 00:00:00 2001
+From 31f12cd789c2287dc480f7b3780b2f6b089a3ac4 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 15 Jul 2024 10:17:52 +0800
-Subject: [PATCH 18/39] drivers: espi: host_subs: npcx: fix LDN register
+Subject: [PATCH 18/40] drivers: espi: host_subs: npcx: fix LDN register
  definition of PMCH
 
 The register offset definition of the I/O port Data Base Address
@@ -3141,10 +3141,10 @@ index 51802586c..d92516fa0 100644
 2.17.1
 
 
-From 7bdb4416f98d2be7e7837b81ebf3c26dac035165 Mon Sep 17 00:00:00 2001
+From 91a9750d3025dfffd9422b5c5564d0e1bbcb23c1 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Fri, 19 Jul 2024 09:59:12 +0800
-Subject: [PATCH 19/39] soc: npcx: scfg: select host interface type in global
+Subject: [PATCH 19/40] soc: npcx: scfg: select host interface type in global
 
 The Host Interface Type in the DEVCNT register sets the HIF type
 (either eSPI or LPC).
@@ -3215,10 +3215,10 @@ index a5bb9adad..e30de1295 100644
 2.17.1
 
 
-From baa7754541515b4189be3906167a5da653854b98 Mon Sep 17 00:00:00 2001
+From 8bc454b508964d100d657e0bfbee9bb908529334 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Tue, 13 Aug 2024 19:47:13 -0700
-Subject: [PATCH 20/39] drivers: espi: npcx: Fix TAF driver dependency
+Subject: [PATCH 20/40] drivers: espi: npcx: Fix TAF driver dependency
 
 Set correct dependency for TAF driver protected regions
 
@@ -3252,10 +3252,10 @@ index 035db2415..9a731426a 100644
 2.17.1
 
 
-From 86b7a7b3b1dc501b71158ee9ecba30c2ea26a8e0 Mon Sep 17 00:00:00 2001
+From 259b2c0f9f3cef7958560ae5161e729d70dcbf57 Mon Sep 17 00:00:00 2001
 From: Vijay Hiremath <vijay.p.hiremath@intel.com>
 Date: Thu, 7 Nov 2024 18:48:29 -0800
-Subject: [PATCH 21/39] eSPI: NPCX/ITE: Enable conditional virtual wire valid
+Subject: [PATCH 21/40] eSPI: NPCX/ITE: Enable conditional virtual wire valid
  bit check
 
 On the new Intel SoC, the "Valid" bit of the Virtual Wire is set only for
@@ -3351,10 +3351,10 @@ index 9233b1708..8c5ebb33c 100644
 2.17.1
 
 
-From 88778f2632eb9eb72597362127af36028466964b Mon Sep 17 00:00:00 2001
+From fd074000504b7d47bd816070f27cfbbc4d85546f Mon Sep 17 00:00:00 2001
 From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
 Date: Mon, 9 May 2022 10:59:51 +0530
-Subject: [PATCH 22/39] drivers: peci: increased peci write time delay 2ms
+Subject: [PATCH 22/40] drivers: peci: increased peci write time delay 2ms
 
 peci delay is increased to 2ms as peci write is failing with 1ms
 
@@ -3384,10 +3384,10 @@ index e03181e0f..202d0f0bb 100644
 2.17.1
 
 
-From 778e796545873f1a4d76a50c1fd3b508673de687 Mon Sep 17 00:00:00 2001
+From eaf72d6f8f3a3aca8077efcdd2cb57d234179898 Mon Sep 17 00:00:00 2001
 From: NagarajuGundimi <nagaraju.gundimi@intel.com>
 Date: Thu, 29 Dec 2022 03:29:54 -0500
-Subject: [PATCH 23/39] ite: Defined GPIO ports and delta changes for Zephyr
+Subject: [PATCH 23/40] ite: Defined GPIO ports and delta changes for Zephyr
  v3.2
 
 Defined GPIO ports and delta changes for Zephyr v3.2
@@ -3607,10 +3607,10 @@ index 000000000..38290ba40
 2.17.1
 
 
-From a681163f12c7f5905926be236eebd4db9e234a20 Mon Sep 17 00:00:00 2001
+From b3312c4c59791500d9f90e806484231f6d456320 Mon Sep 17 00:00:00 2001
 From: NagarajuGundimi <nagaraju.gundimi@intel.com>
 Date: Thu, 29 Dec 2022 04:29:40 -0500
-Subject: [PATCH 24/39] ite: eSPI: WA for ACPI IBF flag clear at driver level
+Subject: [PATCH 24/40] ite: eSPI: WA for ACPI IBF flag clear at driver level
 
 WA for ACPI IBF flag clear due to PM1DI read at driver.
 
@@ -3639,10 +3639,10 @@ index e8bb5d581..0a41b24b1 100644
 2.17.1
 
 
-From 92b3908e04dd8cbee616af17a049f785ebf38156 Mon Sep 17 00:00:00 2001
+From fde8ca97ab780d82681575bba95b4242d716ed69 Mon Sep 17 00:00:00 2001
 From: Rajavardhan Gundi <rajavardhan.gundi@intel.com>
 Date: Tue, 29 Nov 2022 20:52:52 +0530
-Subject: [PATCH 25/39] drivers: espi: Nuvoton: Do not read Input Buffer
+Subject: [PATCH 25/40] drivers: espi: Nuvoton: Do not read Input Buffer
 
 Reading the HIPMDI register will clear the IBF bit in ACPI
 and Host command handling. This will end up breaking the EC
@@ -3698,10 +3698,10 @@ index d92516fa0..0eacd6911 100644
 2.17.1
 
 
-From dacb7e372f25bb4cbecb3d9dfe9e9fae07eb255a Mon Sep 17 00:00:00 2001
+From eea0e4a9320ea76b104c5b41375e3699c48ef73c Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Fri, 15 Mar 2024 17:22:23 -0700
-Subject: [PATCH 26/39] boards: mec172x: Do not enable KSCAN PM device pinctrl
+Subject: [PATCH 26/40] boards: mec172x: Do not enable KSCAN PM device pinctrl
 
 Remove sleep pinctrl from KSCAN device
 
@@ -3763,10 +3763,10 @@ index d355f19af..631f7ca15 100644
 2.17.1
 
 
-From 048360b148d92eef863144bc6c5f3f6646ae9ea5 Mon Sep 17 00:00:00 2001
+From 86fb6ab1a6e620ffa2fd9b99785deaef6c945b61 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Mon, 15 Apr 2024 12:15:52 -0700
-Subject: [PATCH 27/39] soc: arm: npcx: ECST add support to generated
+Subject: [PATCH 27/40] soc: arm: npcx: ECST add support to generated
  bootloader header
 
 Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
@@ -3919,10 +3919,10 @@ index ab1aad770..f22f4011a 100755
 2.17.1
 
 
-From 2e4e015e55501ecb4558a31eda21702540531cd8 Mon Sep 17 00:00:00 2001
+From 1ba2340ffd66c29b5eaf5952a81f149d85921762 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Thu, 11 Jan 2024 21:54:10 -0800
-Subject: [PATCH 28/39] boards: arm: npcx: Allow to generate EC region SPI
+Subject: [PATCH 28/40] boards: arm: npcx: Allow to generate EC region SPI
  layout
 
 Add post build command to generate EC region SPI layout
@@ -4103,10 +4103,10 @@ index 000000000..d766972ca
 2.17.1
 
 
-From 4d3afb5bdf78937d292c32fe8bf653a826b1f490 Mon Sep 17 00:00:00 2001
+From 257b825ce4d90bb31dcc7613cc57d60071fcdf79 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Tue, 23 Apr 2024 19:43:16 -0700
-Subject: [PATCH 29/39] include: drivers: espi: Postcode multibyte support
+Subject: [PATCH 29/40] include: drivers: espi: Postcode multibyte support
 
 Add structure for multi-byte support
 
@@ -4138,10 +4138,10 @@ index d2f77622f..ca04f52e0 100644
 2.17.1
 
 
-From 76417d02e4f0e046d32cca94ca6925bc878e2153 Mon Sep 17 00:00:00 2001
+From 846f60998feb15d90b187acbf738c5aa6a5b4063 Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Thu, 11 Jul 2024 14:31:04 -0700
-Subject: [PATCH 30/39] dts: arm: nuvoton: Add support for PM3 channel as ACPI
+Subject: [PATCH 30/40] dts: arm: nuvoton: Add support for PM3 channel as ACPI
 
 Enable PM3 channel as ACPI PVT interface
 
@@ -4171,10 +4171,10 @@ index 6c9a82f01..b395c3802 100644
 2.17.1
 
 
-From 11bec58b9d298fbd85930f4741ca7b0ad0cc410d Mon Sep 17 00:00:00 2001
+From b33da47725fdeeedabc95021c3b3ca9fc56375df Mon Sep 17 00:00:00 2001
 From: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
 Date: Thu, 11 Jul 2024 14:49:51 -0700
-Subject: [PATCH 31/39] drivers: espi: npcx: Add support for ACPI PVT port
+Subject: [PATCH 31/40] drivers: espi: npcx: Add support for ACPI PVT port
 
 Use PM3 channel as ACPI PVT interface
 
@@ -4310,10 +4310,10 @@ index 0eacd6911..ba692c034 100644
 2.17.1
 
 
-From caae2ea2f54f5eb559dde64b7d6009c1eadaafa5 Mon Sep 17 00:00:00 2001
+From a8a0b2900ffcd608a70bc0bba7aca289289996fe Mon Sep 17 00:00:00 2001
 From: "Veturi, Sameer" <sameer.veturi@intel.com>
 Date: Mon, 7 Oct 2024 16:17:11 +0530
-Subject: [PATCH 32/39] soc: ite: ITE Zephyr fork delta changes for v3.6
+Subject: [PATCH 32/40] soc: ite: ITE Zephyr fork delta changes for v3.6
 
 ITE Zephyr fork delta changes for v3.6
 
@@ -4545,10 +4545,10 @@ index 527152601..d4fb6f68e 100644
 2.17.1
 
 
-From bac0b1ed258f56485187058d0e3367f5c76ad219 Mon Sep 17 00:00:00 2001
+From 3740bf9dea6f1a16452dc8964ec572dde1f4d997 Mon Sep 17 00:00:00 2001
 From: Aditya Bhutada <aditya.bhutada@intel.com>
 Date: Mon, 14 Apr 2025 15:27:37 -0700
-Subject: [PATCH 33/39] drivers: espi: espi_mchp_xec: Fix the VW change check
+Subject: [PATCH 33/40] drivers: espi: espi_mchp_xec: Fix the VW change check
  time
 
 Adjusted the VW change check timings:
@@ -4639,10 +4639,10 @@ index a1a5acefd..67e4d9a68 100644
 2.17.1
 
 
-From 7b15f526dc65fb5aa18879d92a38fe92c5d326b3 Mon Sep 17 00:00:00 2001
+From 3a76f9e41f0253cd3f5549a6166c810d93740c3e Mon Sep 17 00:00:00 2001
 From: Aditya Bhutada <aditya.bhutada@intel.com>
 Date: Mon, 14 Apr 2025 15:29:26 -0700
-Subject: [PATCH 34/39] drivers: espi: Add return value to eSPI send_vwire API
+Subject: [PATCH 34/40] drivers: espi: Add return value to eSPI send_vwire API
 
 Added note about return value to the eSPI send_vwire API in the header:
 -ETIMEDOUT & _EINVAL.
@@ -4669,10 +4669,10 @@ index ca04f52e0..985bba316 100644
 2.17.1
 
 
-From f647b22e542476670f0ba9b2f136de0bce7d60d3 Mon Sep 17 00:00:00 2001
+From 0aa84a11ba13809abc787044f269eae79d0bb27e Mon Sep 17 00:00:00 2001
 From: Ederson de Souza <ederson.desouza@intel.com>
 Date: Fri, 5 Jan 2024 13:29:20 -0800
-Subject: [PATCH 35/39] kernel: Device deferred initialization
+Subject: [PATCH 35/40] kernel: Device deferred initialization
 
 Currently, all devices are initialized at boot time (following their
 level and priority order). This patch introduces deferred
@@ -4918,10 +4918,10 @@ index e4637d3af..e41301956 100644
 2.17.1
 
 
-From 87d6e67de167a8f5dce46a5f7f75affb39ebdeff Mon Sep 17 00:00:00 2001
+From 4371bc4fc186863b502c2624a41876fffbae6331 Mon Sep 17 00:00:00 2001
 From: Ederson de Souza <ederson.desouza@intel.com>
 Date: Fri, 5 Jan 2024 13:33:25 -0800
-Subject: [PATCH 36/39] tests/kernel/device: Add tests for device deferred init
+Subject: [PATCH 36/40] tests/kernel/device: Add tests for device deferred init
 
 Ensure that devices are not ready before calling `device_init()`, but
 are after the call.
@@ -5082,10 +5082,10 @@ index 4c02a52ce..437f2ae05 100644
 2.17.1
 
 
-From 1dbd269449cf3f627e17cf5cfc9fc5038f19e32b Mon Sep 17 00:00:00 2001
+From b2b50f480687c23a6504c6cf821ec13d857c8efd Mon Sep 17 00:00:00 2001
 From: Adrien Ricciardi <aricciardi@baylibre.com>
 Date: Wed, 15 May 2024 11:28:34 +0200
-Subject: [PATCH 37/39] sys: util: Add SIZEOF_FIELD() macro
+Subject: [PATCH 37/40] sys: util: Add SIZEOF_FIELD() macro
 
 This macro allows to know the size of a struct member at compile time.
 
@@ -5149,10 +5149,10 @@ index 3ae9778ae..1299d5567 100644
 2.17.1
 
 
-From c4e0a779032f099198530e05ac4ef0e2566d52a2 Mon Sep 17 00:00:00 2001
+From 6945a2c6f2ec463cadf082306c86098cfa5d77f3 Mon Sep 17 00:00:00 2001
 From: Alvis Sun <yfsun@nuvoton.com>
 Date: Mon, 7 Oct 2024 18:26:53 +0800
-Subject: [PATCH 38/39] soc: nuvoton: reg: add i3c target registers and soc
+Subject: [PATCH 38/40] soc: nuvoton: reg: add i3c target registers and soc
  functions
 
 As title.
@@ -5276,10 +5276,10 @@ index 93b5d601c..143aad6b5 100644
 2.17.1
 
 
-From 7b46816b1c5e13007b0f23ae530e56e31594fae9 Mon Sep 17 00:00:00 2001
+From af23ff58119e4e1294fd0f162aab860c4814a71e Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Fri, 1 Nov 2024 16:40:27 +0800
-Subject: [PATCH 39/39] board: npcx: remove CONFIG_PINCTRL from defconfig of
+Subject: [PATCH 39/40] board: npcx: remove CONFIG_PINCTRL from defconfig of
  npcx boards
 
 The CONFIG_PINCTRL is removed from the board's defconfig files.
@@ -5480,6 +5480,116 @@ index de9ec9205..396e3146f 100644
  	help
  	  This option enables the driver for SHI backend in the
  	  Nuvoton NPCX chip.
+-- 
+2.17.1
+
+
+From 305f197bc11d25ff9e01934dffc615e97af51476 Mon Sep 17 00:00:00 2001
+From: Alvis Sun <yfsun@nuvoton.com>
+Date: Wed, 17 Apr 2024 10:28:16 +0800
+Subject: [PATCH 40/40] drivers: clock_control: npcx: add MCLKD as i3c source
+ clock
+
+1. The only valid values of MCLKD clock frequency
+   are between 40Mhz to 50Mhz.
+2. If DMA is used, the APB4_CLK clock frequency must
+   be equal to or higher than 20Mhz.
+
+Signed-off-by: Alvis Sun <yfsun@nuvoton.com>
+Signed-off-by: Jose Alberto Meza <jose.a.meza.arellano@intel.com>
+---
+ drivers/clock_control/clock_control_npcx.c    | 11 +++++++++++
+ include/zephyr/dt-bindings/clock/npcx_clock.h |  4 +++-
+ soc/arm/nuvoton_npcx/common/soc_clock.h       | 12 ++++++++++++
+ 3 files changed, 26 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/clock_control/clock_control_npcx.c b/drivers/clock_control/clock_control_npcx.c
+index dcc4a925c..eec3604aa 100644
+--- a/drivers/clock_control/clock_control_npcx.c
++++ b/drivers/clock_control/clock_control_npcx.c
+@@ -105,6 +105,9 @@ static int npcx_clock_control_get_subsys_rate(const struct device *dev,
+ 	case NPCX_CLOCK_BUS_FMCLK:
+ 		*rate = FMCLK;
+ 		break;
++	case NPCX_CLOCK_BUS_MCLKD:
++		*rate = OFMCLK/(MCLKD_SL + 1);
++		break;
+ 	default:
+ 		*rate = 0U;
+ 		/* Invalid parameters */
+@@ -185,6 +188,13 @@ BUILD_ASSERT(APBSRC_CLK / (APB4DIV_VAL + 1) <= MAX_OFMCLK &&
+ 	     (APB4DIV_VAL + 1) % (FPRED_VAL + 1) == 0,
+ 	     "Invalid APB4_CLK setting");
+ #endif
++#if defined(CONFIG_I3C_NPCX)
++BUILD_ASSERT(OFMCLK / (MCLKD_SL + 1) <= MHZ(50) &&
++	     OFMCLK / (MCLKD_SL + 1) >= MHZ(40),
++	     "Invalid MCLKD_SL setting");
++BUILD_ASSERT(APBSRC_CLK / (APB4DIV_VAL + 1) >= MHZ(20),
++	     "Invalid PDMA CLK setting");
++#endif
+ 
+ static int npcx_clock_control_init(const struct device *dev)
+ {
+@@ -222,6 +232,7 @@ static int npcx_clock_control_init(const struct device *dev)
+ 	inst_cdcg->HFCBCD  = VAL_HFCBCD;
+ 	inst_cdcg->HFCBCD1 = VAL_HFCBCD1;
+ 	inst_cdcg->HFCBCD2 = VAL_HFCBCD2;
++	inst_cdcg->HFCBCD3 = VAL_HFCBCD3;
+ 
+ 	/*
+ 	 * Power-down (turn off clock) the modules initially for better
+diff --git a/include/zephyr/dt-bindings/clock/npcx_clock.h b/include/zephyr/dt-bindings/clock/npcx_clock.h
+index 713a05c57..d522478d2 100644
+--- a/include/zephyr/dt-bindings/clock/npcx_clock.h
++++ b/include/zephyr/dt-bindings/clock/npcx_clock.h
+@@ -20,6 +20,7 @@
+ #define NPCX_CLOCK_BUS_FMCLK       10
+ #define NPCX_CLOCK_BUS_FIU0        NPCX_CLOCK_BUS_FIU
+ #define NPCX_CLOCK_BUS_FIU1        11
++#define NPCX_CLOCK_BUS_MCLKD       12
+ 
+ /* clock enable/disable references */
+ #define NPCX_PWDWN_CTL1            0
+@@ -30,6 +31,7 @@
+ #define NPCX_PWDWN_CTL6            5
+ #define NPCX_PWDWN_CTL7            6
+ #define NPCX_PWDWN_CTL8            7
+-#define NPCX_PWDWN_CTL_COUNT       8
++#define NPCX_PWDWN_CTL9            8
++#define NPCX_PWDWN_CTL_COUNT       9
+ 
+ #endif /* ZEPHYR_INCLUDE_DT_BINDINGS_CLOCK_NPCX_CLOCK_H_ */
+diff --git a/soc/arm/nuvoton_npcx/common/soc_clock.h b/soc/arm/nuvoton_npcx/common/soc_clock.h
+index d43a70d45..4ec4c591b 100644
+--- a/soc/arm/nuvoton_npcx/common/soc_clock.h
++++ b/soc/arm/nuvoton_npcx/common/soc_clock.h
+@@ -105,6 +105,16 @@ struct npcx_clk_cfg {
+ #endif
+ #endif /* CONFIG_CLOCK_CONTROL_NPCX_SUPP_FIU1 */
+ 
++/* I3C clock divider */
++#if (OFMCLK == MHZ(120)) /* MCLkD must between 40 mhz to 50 mhz*/
++#define MCLKD_SL 2    /* I3C_CLK = (MCLK / 3) */
++#elif (OFMCLK <= MHZ(100) && OFMCLK >= MHZ(80))
++#define MCLKD_SL 1    /* I3C_CLK = (MCLK / 2) */
++#else
++#define MCLKD_SL 0    /* I3C_CLK = MCLK */
++#endif
++
++
+ /* Get APB clock freq */
+ #define NPCX_APB_CLOCK(no) (APBSRC_CLK / (APB##no##DIV_VAL + 1))
+ 
+@@ -158,6 +168,8 @@ struct npcx_clk_cfg {
+ #else
+ #define VAL_HFCBCD2 APB3DIV_VAL
+ #endif /* APB4DIV_VAL */
++/* I3C1~I3C3 share the same configuration */
++#define VAL_HFCBCD3 MCLKD_SL
+ 
+ /**
+  * @brief Function to notify clock driver that backup the counter value of
 -- 
 2.17.1
 

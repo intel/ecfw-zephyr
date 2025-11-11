@@ -10,10 +10,10 @@
 #include "spi_winbond_opcodes.h"
 
 /* Adjust descriptors based on SPI capacity to simplify SAF structure */
-#if DT_NODE_HAS_STATUS(DT_NODELABEL(spi0), disabled)
+#if DT_NODE_HAS_STATUS(DT_ALIAS(spi0), disabled)
 #pragma error "spi hw block not enabled"
 #else
-#define DT_SPI_INST	DT_NODELABEL(spi0)
+#define DT_SPI_INST	DT_ALIAS(spi0)
 #if DT_PROP(DT_SPI_INST, lines) == 4
 #define FAST_READ_IO_OPCODE            FAST_READ_QUAD_IO_OPCODE
 #else

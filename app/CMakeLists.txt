@@ -16,92 +16,18 @@ include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/kbchost)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/saf)
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/soc_debug_awareness)
 
-#
+include(${CMAKE_CURRENT_LIST_DIR}/peripheral_management/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/power_sequencing/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/dnx/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/soc_debug_awareness/CMakeLists.txt)
 
-target_sources_ifdef(CONFIG_PERIPHERAL_MANAGEMENT app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/peripheral_management/periphmgmt.c
-    ${CMAKE_CURRENT_LIST_DIR}/peripheral_management/pwrbtnmgmt.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/peripheral_management/periphmgmt.h
-    ${CMAKE_CURRENT_LIST_DIR}/peripheral_management/pwrbtnmgmt.h
-    )
+include(${CMAKE_CURRENT_LIST_DIR}/smchost/CMakeLists.txt)
 
-target_sources_ifdef(CONFIG_PWRMGMT app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pwrplane.c
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/dswmode.c
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/deepsx.c
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pseudog3.c
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pmc.c
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pwrseq_utils.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pwrplane.h
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/dswmode.h
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/deepsx.h
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pseudog3.h
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pmc.h
-    ${CMAKE_CURRENT_LIST_DIR}/power_sequencing/pwrseq_utils.h
-    )
+include(${CMAKE_CURRENT_LIST_DIR}/thermal_management/CMakeLists.txt)
 
-target_sources_ifdef(CONFIG_DNX_SUPPORT app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/dnx/dnx.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/dnx/dnx.h
-    )
+include(${CMAKE_CURRENT_LIST_DIR}/debug/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/kbchost/CMakeLists.txt)
 
-target_sources_ifdef(CONFIG_DNX_EC_ASSISTED_TRIGGER app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/dnx/dnx_ec_assisted_trigger.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/dnx/dnx_ec_assisted_trigger.h
-    )
-
-target_sources_ifdef(CONFIG_SOC_DEBUG_AWARENESS app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/soc_debug_awareness/soc_debug.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/soc_debug_awareness/soc_debug.h
-    )
-
-target_sources_ifdef(CONFIG_SMCHOST app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/smchost.c
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/smchost_info.c
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/smchost_pm.c
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/smc.c
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/sci.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/smchost.h
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/smc.h
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/sci.h
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/scicodes.h
-    )
-
-target_sources_ifdef(CONFIG_THERMAL_MANAGEMENT app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/thermal_management/thermalmgmt.c
-    ${CMAKE_CURRENT_LIST_DIR}/smchost/smchost_thermal.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/thermal_management/thermalmgmt.h
-    )
-
-target_sources_ifdef(CONFIG_POSTCODE_MANAGEMENT app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/debug/postcodemgmt.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/debug/postcodemgmt.h
-    )
-
-target_sources_ifdef(CONFIG_ESPI_PERIPHERAL_8042_KBC app
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/kbchost/kbchost.c
-    ${CMAKE_CURRENT_LIST_DIR}/kbchost/keyboard_utility.c
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/kbchost/kbchost.h
-    ${CMAKE_CURRENT_LIST_DIR}/kbchost/keyboard_utility.h
-    )
 
 target_sources_ifdef(CONFIG_ESPI_SAF app
     PRIVATE

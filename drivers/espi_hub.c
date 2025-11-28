@@ -179,6 +179,15 @@ static void espi_reset_handler(const struct device *dev,
 	LOG_WRN("%s", __func__);
 	if (event.evt_type == ESPI_BUS_RESET) {
 		hub.espi_rst_sts = event.evt_data;
+
+#if defined(CONFIG_SOC_SERIES_NPCX4)
+		if (hub.espi_rst_sts) {
+			uint32_t enable = 1;
+
+			espi_write_lpc_request(espi_dev, ECUSTOM_HOST_SUBS_INTERRUPT_EN, &enable);
+		}
+#endif
+
 		LOG_INF("eSPI BUS reset %d", event.evt_data);
 		if (warn_handlers[ESPIHUB_BUS_RESET]) {
 			warn_handlers[ESPIHUB_BUS_RESET](event.evt_data);
@@ -410,6 +419,13 @@ int espihub_init(void)
 	hub.espi_rst_sts = gpio_read_pin(ESPI_RESET_MAF);
 
 	LOG_DBG("%s hub.host_vw_ready: %d", __func__, hub.host_vw_ready);
+
+#if defined(CONFIG_SOC_SERIES_NPCX4)
+	uint32_t enable = 1;
+
+	espi_write_lpc_request(espi_dev, ECUSTOM_HOST_SUBS_INTERRUPT_EN, &enable);
+#endif
+
 	return ret;
 }
 

@@ -48,17 +48,32 @@ void update_error(uint8_t errcode)
 	signal_request();
 }
 
-static void update_postcode(uint8_t port_index, uint8_t code)
+void update_postcode(uint8_t port_index, uint32_t code)
 {
 	bool update_pending = false;
 
 	switch (port_index) {
 	case POSTCODE_PORT80:
+#if defined(CONFIG_SOC_SERIES_NPCX4)
+		struct espi_evt_post data = { .code32 = code };
+
+		if (port80_code != data.code[0]) {
+			port80_code = data.code[0];
+			update_pending = true;
+		}
+
+		if (port81_code != data.code[1]) {
+			port81_code = data.code[1];
+			update_pending = true;
+		}
+
+#else
 		if (port80_code != code) {
 			port80_code = code;
 			LOG_DBG("port80:%02x", code);
 			update_pending = true;
 		}
+#endif
 		break;
 	case POSTCODE_PORT81:
 		if (port81_code != code) {

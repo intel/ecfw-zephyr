@@ -13,5 +13,5 @@ set_property(GLOBAL APPEND PROPERTY extra_post_build_commands
     COMMAND echo "${NPCX_SPI_GEN}"
     COMMAND echo "${PROJECT_BINARY_DIR}"
     COMMAND echo "${NPCX_SPI_GEN} -i ${NPCX_SPI_CFG} -f ${PROJECT_BINARY_DIR}/zephyr.npcx.bin -o ${PROJECT_BINARY_DIR}/spi_image.bin"
-    COMMAND ${NPCX_SPI_GEN} ${NPCX_SPI_CFG} ${PROJECT_BINARY_DIR}/zephyr.npcx.bin ${PROJECT_BINARY_DIR}/spi_image.bin
+    COMMAND ${NPCX_SPI_GEN} ${NPCX_SPI_CFG} ${PROJECT_BINARY_DIR}/zephyr.npcx.bin ${PROJECT_BINARY_DIR}/ksc.bin
   )

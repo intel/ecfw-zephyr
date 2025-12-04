@@ -13,8 +13,8 @@ declare -a S07=("ptl_npcx4_card"	"npcx4m8f_ptl"			"")
 
 declare -a SUPPORTED_PLATFORMS=( \
 	# Regular RVP
-	"R01" "R04" "R05" "R06" \
+	"R05" "R06" \
 	# MECC enablement
-	"S03"
+	"S07"
 	# Special binaries
 	)

@@ -24,21 +24,33 @@ manifest:
       repo-path: zephyr.git
       path: ecfwwork/zephyr_fork
       remote: zephyrproject
-      revision: v3.7-branch
+      revision: v4.4.0
       west-commands: scripts/west-commands.yml
 
     - name: cmsis
-      revision: 4b96cbb174678dcd3ca86e11e1f24bc5f8726da0
+      revision: 512cc7e895e8491696b61f7ba8066b4a182569b8
       path: ecfwwork/modules/hal/cmsis
       remote: zephyrproject
 
+    - name: cmsis_6
+      repo-path: CMSIS_6
+      revision: 30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74
+      path: ecfwwork/modules/hal/cmsis_6
+      remote: zephyrproject
+      groups:
+        - hal
+
+
+
     - name: hal_microchip
-      revision: 5d079f1683a00b801373bbbbf5d181d4e33b30d5
+      revision: 86f3ea6b389d860332bd81ae8b97543def619395
       path: ecfwwork/modules/hal/microchip
+      groups:
+        - hal
       remote: zephyrproject
     - name: picolibc
       path: ecfwwork/modules/lib/picolibc
-      revision: 764ef4e401a8f4c6a86ab723533841f072885a5b
+      revision: 01254932e8e81085817ed61fd858648584ffe37c
       remote: zephyrproject
   self:
     path: ecfwwork

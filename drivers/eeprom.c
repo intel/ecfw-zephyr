@@ -35,7 +35,7 @@ LOG_MODULE_REGISTER(eeprom, CONFIG_EEPROM_LOG_LEVEL);
 
 int eeprom_read_byte(uint16_t offset, uint8_t *data)
 {
-	uint8_t ret;
+	int ret;
 	uint8_t buf = OFS_MSB(offset);
 
 	ret = i2c_hub_write_read(I2C_0,
@@ -52,7 +52,7 @@ int eeprom_read_byte(uint16_t offset, uint8_t *data)
 
 int eeprom_write_byte(uint16_t offset, uint8_t data)
 {
-	uint8_t ret;
+	int ret;
 	uint8_t buf[] = { OFS_LSB(offset), data };
 
 	ret = i2c_hub_write(I2C_0, buf, sizeof(buf),
@@ -69,7 +69,7 @@ int eeprom_write_byte(uint16_t offset, uint8_t data)
 
 int eeprom_read_word(uint16_t offset, uint16_t *data)
 {
-	uint8_t ret;
+	int ret;
 	uint8_t buf = { OFS_LSB(offset) };
 	uint8_t rbuf[] = {EEPROM_DEFAULT_DATA, EEPROM_DEFAULT_DATA};
 
@@ -90,7 +90,7 @@ int eeprom_read_word(uint16_t offset, uint16_t *data)
 
 int eeprom_write_word(uint16_t offset, uint16_t data)
 {
-	uint16_t ret;
+	int ret;
 	uint8_t buf[] = { OFS_LSB(offset),
 		       OFS_MSB(data), OFS_LSB(data) };
 
@@ -109,7 +109,7 @@ int eeprom_write_word(uint16_t offset, uint16_t data)
 
 int eeprom_read_block(uint16_t offset, uint8_t len, uint8_t *data)
 {
-	uint16_t ret;
+	int ret;
 	uint8_t buf = { OFS_LSB(offset) };
 
 	if (len > DATA_MAX_LEN) {

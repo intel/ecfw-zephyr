@@ -18,8 +18,8 @@ LOG_MODULE_DECLARE(pwrmgmt, CONFIG_PWRMGT_LOG_LEVEL);
 int pmc_reset_soc(enum pmc_request req_type, bool sync)
 {
 	uint8_t buf[sizeof(struct oob_msg_str) + PMC_RESET_PAYLOAD_SIZE];
-	struct espi_oob_packet req_pckt;
-	struct oob_msg_str oob_msg;
+	struct espi_oob_packet req_pckt = {0};
+	struct oob_msg_str oob_msg = {0};
 	int ret = 0;
 
 	LOG_DBG("%s", __func__);

@@ -501,6 +501,7 @@ static bool pwrseq_handle_transition_to_s3(void)
 	case SYSTEM_S0_STATE: /* S0 -> S3 */
 		suspend();
 		valid_transition = true;
+		break;
 	case SYSTEM_G3_STATE: /* G3 -> S3 */
 	case SYSTEM_S5_STATE: /* S5 -> S3 */
 	case SYSTEM_S4_STATE: /* S4 -> S3 */

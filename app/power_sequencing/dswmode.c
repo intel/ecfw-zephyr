@@ -25,20 +25,21 @@ static bool dsw_mode_update;
 
 bool dsw_enabled(void)
 {
-#ifndef CONFIG_PWRMGMT_DEEPSX
+#ifdef CONFIG_PWRMGMT_DEEPSX
+	return dsw_valid_config != 0;
+#else
 	return false;
 #endif
-	return dsw_valid_config != 0;
 }
 
 uint8_t dsw_mode(void)
 {
-#ifndef CONFIG_PWRMGMT_DEEPSX
+#ifdef CONFIG_PWRMGMT_DEEPSX
+	LOG_DBG("Current Dsx mode %x", dsw_valid_config);
+	return dsw_valid_config;
+#else
 	return DSW_DISABLED;
 #endif
-	LOG_DBG("Current Dsx mode %x", dsw_valid_config);
-
-	return dsw_valid_config;
 }
 
 void dsw_update_mode(uint8_t mode)

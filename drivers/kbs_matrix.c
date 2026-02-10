@@ -382,14 +382,25 @@ int kbs_matrix_init(kbs_matrix_callback callback, uint8_t *initial_set)
 	return 0;
 }
 
+/**
+ * Set typematic rate and delay according to the PS/2 keyboard 0xF3 command.
+ *
+ * The 0xF3 command (Set Typematic Rate/Delay) is sent by the host to the keyboard,
+ * followed by a data byte encoding the repeat rate and delay:
+ *   - Bits 0-4: Typematic rate (lower value = faster repeat)
+ *   - Bits 5-6: Typematic delay (00=250ms, 01=500ms, 10=750ms, 11=1000ms)
+ *   - Bit 7: Unused
+ * This function extracts the rate and delay from the data byte and updates the
+ * typematic settings accordingly. The timer is stopped before updating.
+ */
 void kbs_write_typematic(uint8_t data)
 {
 	/* Cancel typematic timer before attempting to change settings */
 	k_timer_stop(&typematic_timer);
 
-	typematic_period_idx = data  & TYPEMATIC_RATE_MASK;
+	typematic_period_idx = data & TYPEMATIC_RATE_MASK;
 	typematic_delay_idx =
-		(data >> TYPEMATIC_DELAY_POS) & TYPEMATIC_DELAY_MASK;
+		(data & TYPEMATIC_DELAY_MASK) >> TYPEMATIC_DELAY_POS;
 }
 
 void kbs_keyboard_enable(void)

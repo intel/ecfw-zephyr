@@ -113,8 +113,8 @@ struct km_api gtech_keyboard_api = {
 
 int gtech_get_keynum(uint8_t col, uint8_t row)
 {
-	if (col > MAX_MTX_KEY_COLS &&
-	    row > MAX_MTX_KEY_ROWS) {
+	if (col >= MAX_MTX_KEY_COLS ||
+	    row >= MAX_MTX_KEY_ROWS) {
 		return -EINVAL;
 	}
 

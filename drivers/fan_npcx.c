@@ -132,7 +132,7 @@ int fan_set_duty_cycle(enum fan_type fan_idx, uint8_t duty_cycle)
 {
 	int ret;
 
-	if (fan_idx > ARRAY_SIZE(fan_table)) {
+	if (fan_idx >= ARRAY_SIZE(fan_table)) {
 		return -ENOTSUP;
 	}
 
@@ -167,7 +167,7 @@ int fan_read_rpm(enum fan_type fan_idx, uint16_t *rpm)
 	int ret;
 	struct sensor_value val;
 
-	if (fan_idx > ARRAY_SIZE(fan_table)) {
+	if (fan_idx >= ARRAY_SIZE(fan_table)) {
 		return -ENOTSUP;
 	}
 

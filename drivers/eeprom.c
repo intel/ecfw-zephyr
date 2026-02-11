@@ -53,10 +53,10 @@ int eeprom_read_byte(uint16_t offset, uint8_t *data)
 int eeprom_write_byte(uint16_t offset, uint8_t data)
 {
 	int ret;
-	uint8_t buf[] = { OFS_LSB(offset), data };
+	uint8_t buf[] = { (uint8_t)OFS_LSB(offset), data };
 
 	ret = i2c_hub_write(I2C_0, buf, sizeof(buf),
-			EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset));
+			EEPROM_DRIVER_I2C_ADDR | (uint8_t)OFS_MSB(offset));
 	if (ret) {
 		LOG_ERR("Fail to write: %d", ret);
 		return ret;
@@ -91,11 +91,11 @@ int eeprom_read_word(uint16_t offset, uint16_t *data)
 int eeprom_write_word(uint16_t offset, uint16_t data)
 {
 	int ret;
-	uint8_t buf[] = { OFS_LSB(offset),
-		       OFS_MSB(data), OFS_LSB(data) };
+	uint8_t buf[] = { (uint8_t)OFS_LSB(offset),
+		       (uint8_t)OFS_MSB(data), (uint8_t)OFS_LSB(data) };
 
 	ret = i2c_hub_write(I2C_0, buf, sizeof(buf),
-			EEPROM_DRIVER_I2C_ADDR | OFS_MSB(offset));
+			EEPROM_DRIVER_I2C_ADDR | (uint8_t)OFS_MSB(offset));
 	if (ret) {
 		LOG_ERR("Fail to write: %d", ret);
 		return ret;

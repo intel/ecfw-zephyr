@@ -66,12 +66,15 @@ static bool is_pseudo_g3_condition(void)
 		return false;
 	}
 
-	if (gpio_read_pin(ESPI_RESET_MAF) > 0) {
-		espihub_retrieve_vw(ESPI_VWIRE_SIGNAL_SUS_PWRDN_ACK, &sus_pwrdn_ack);
-		if (!sus_pwrdn_ack) {
-			LOG_DBG("No Pseudo G3 with sus_pwrdn_ack:0");
-			return false;
-		}
+	if (gpio_read_pin(ESPI_RESET_MAF) <= 0) {
+		LOG_WRN("No Pseudo G3 when eSPI reset is low");
+		return false;
+	}
+
+	espihub_retrieve_vw(ESPI_VWIRE_SIGNAL_SUS_PWRDN_ACK, &sus_pwrdn_ack);
+	if (!sus_pwrdn_ack) {
+		LOG_WRN("No Pseudo G3 with sus_pwrdn_ack:0");
+		return false;
 	}
 	return true;
 }

@@ -390,7 +390,7 @@ static int process_keyboard_data(uint8_t data, uint8_t *output)
 #if defined(CONFIG_PS2_KEYBOARD)
 			ps2_keyboard_write(data);
 #endif
-			output[out_len] = KBC_8042_ACK;
+			output[out_len++] = KBC_8042_ACK;
 			break;
 		case KBC_8042_DEFAULT_DIS:
 			/* Set default and disable */

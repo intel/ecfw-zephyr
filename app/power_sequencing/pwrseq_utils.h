@@ -22,6 +22,13 @@ void ec_reset(void);
 void disable_ec_timeout(void);
 
 /**
+ * @brief Override EC timeout mechanism.
+ *
+ */
+void enable_ec_timeout(void);
+
+
+/**
  * @brief Perform evaluation of EC timeout HW strap.
  *
  */

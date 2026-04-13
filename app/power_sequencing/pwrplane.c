@@ -118,6 +118,13 @@ void disable_ec_timeout(void)
 	}
 }
 
+void enable_ec_timeout(void)
+{
+	if (pwrseq_timeout_disabled) {
+		pwrseq_timeout_disabled = false;
+	}
+}
+
 bool ec_timeout_status(void)
 {
 	return pwrseq_timeout_disabled;

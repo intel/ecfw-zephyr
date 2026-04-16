@@ -160,8 +160,8 @@ to apt-get wget, pip, git.</p>
 considerations below during each step.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Latest EC FW Open source project is based on Zephyr v3.4 so need to
-refer to Zephyr v3.4 documentation and use Zephyr SDK 0.16.1.</p>
+<p>Latest EC FW Open source project is based on Zephyr v3.6 so need to
+refer to Zephyr v3.6 documentation and use Zephyr SDK 0.16.1.</p>
 </div>
 <div class="section" id="os-selection">
 <h3><a class="toc-backref" href="#id5">1) OS selection</a><a class="headerlink" href="#os-selection" title="Permalink to this heading">¶</a></h3>
@@ -250,7 +250,7 @@ west<span class="w"> </span>init<span class="w"> </span>-l
 <tbody>
 <tr class="row-even"><td><p>zephyr</p></td>
 <td><p>zephyr_fork</p></td>
-<td><p>v3.4.0</p></td>
+<td><p>v3.6.0</p></td>
 <td><p><a class="reference external" href="https://github.com/zephyrproject-rtos/zephyr">https://github.com/zephyrproject-rtos/zephyr</a></p></td>
 </tr>
 <tr class="row-odd"><td><p>cmsis</p></td>
@@ -281,7 +281,7 @@ west<span class="w"> </span>init<span class="w"> </span>-l
 <h3><a class="toc-backref" href="#id13">3) Apply back-ported fixes</a><a class="headerlink" href="#apply-back-ported-fixes" title="Permalink to this heading">¶</a></h3>
 <p>Some additional patches are required to be applied to the Zephyr kernel
 for building the open source EC FW application. The latest release is based out
-of Zephyr v3.4 and hence these patches need to be applied on that branch.</p>
+of Zephyr v3.6 and hence these patches need to be applied on that branch.</p>
 <p>These patches are expected to be part of the future Zephyr releases (if
 they are not already integrated).</p>
 <p>Note: Below steps assume environment has been setup as indicated in the
@@ -297,7 +297,7 @@ git<span class="w"> </span>checkout<span class="w"> </span>master
 <li><p>Apply zephyr patches on to the kernel branch</p></li>
 </ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>../ecfwwork/zephyr_fork
-git<span class="w"> </span>am<span class="w"> </span>../../ecfw-zephyr/zephyr_patches/patches_v3.4.patch
+git<span class="w"> </span>am<span class="w"> </span>../../ecfw-zephyr/zephyr_patches/patches_v3_6.patch
 </pre></div>
 </div>
 </div>

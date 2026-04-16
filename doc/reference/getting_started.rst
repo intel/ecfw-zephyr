@@ -31,8 +31,8 @@ Setting Up Zephyr environment
 Refer to the official `Zephyr's Getting Started Guide`_ while reviewing
 considerations below during each step.
 
-.. note:: Latest EC FW Open source project is based on Zephyr v3.4 so need to
-          refer to Zephyr v3.4 documentation and use Zephyr SDK 0.16.1.
+.. note:: Latest EC FW Open source project is based on Zephyr v3.6 so need to
+          refer to Zephyr v3.6 documentation and use Zephyr SDK 0.16.1.
 
 1) OS selection
 ---------------
@@ -107,7 +107,7 @@ See EC FW's dependencies
 +---------------+-----------------------+-------------+-----------------------------------------------------+
 | repo          | destination           | revision    | external repository                                 |
 +===============+=======================+=============+=====================================================+
-| zephyr        | zephyr_fork           | v3.4.0      | https://github.com/zephyrproject-rtos/zephyr        |
+| zephyr        | zephyr_fork           | v3.6.0      | https://github.com/zephyrproject-rtos/zephyr        |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
 | cmsis         | modules/hal/cmsis     | 74981bf     | https://github.com/zephyrproject-rtos/cmsis         |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
@@ -155,7 +155,7 @@ main Intel Open source EC FW documentation.
 .. code-block:: bash
 
    cd ../ecfwwork/zephyr_fork
-   git am ../../ecfw-zephyr/zephyr_patches/patches_v3.4.patch
+   git am ../../ecfw-zephyr/zephyr_patches/patches_v3_6.patch
 
 
 Troubleshoot

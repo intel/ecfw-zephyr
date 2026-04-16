@@ -37,7 +37,7 @@ typedef void (*espi_acpi_handler_t)(void);
 typedef void (*espi_warn_handler_t)(uint8_t status);
 typedef void (*espi_state_handler_t)(uint32_t signal, uint32_t status);
 typedef void (*espi_kbc_handler_t)(struct espi_evt_data_kbc *kbc);
-typedef void (*espi_postcode_handler_t)(uint8_t port_index, uint8_t code);
+typedef void (*espi_postcode_handler_t)(uint8_t port_index, uint32_t code);
 
 #define	ESPIHUB_VW_LOW	0
 #define	ESPIHUB_VW_HIGH	1

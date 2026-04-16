@@ -33,4 +33,12 @@ void postcode_thread(void *p1, void *p2, void *p3);
  */
 void update_error(uint8_t errcode);
 
+/**
+ * @brief Update code in BIOS debug port.
+ *
+ * @param port_index the debug port index.
+ * @param code the hexadecimal byte code.
+ */
+void update_postcode(uint8_t port_index, uint32_t code);
+
 #endif /* __POSTCODE_MGMT_H__ */

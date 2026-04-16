@@ -3081,6 +3081,7 @@ index 8e25da50d..085f7cccd 100644
 From 31f12cd789c2287dc480f7b3780b2f6b089a3ac4 Mon Sep 17 00:00:00 2001
 From: Jun Lin <CHLin56@nuvoton.com>
 Date: Mon, 15 Jul 2024 10:17:52 +0800
+
 Subject: [PATCH 18/42] drivers: espi: host_subs: npcx: fix LDN register
  definition of PMCH
 

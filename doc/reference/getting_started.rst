@@ -193,14 +193,20 @@ for more details.
    # Building for MTL-S/ARL -S (on-board EC)
    west build -c -p auto -b mec172x_mtl_s
 
-   # Building for MTL-P (on-board EC)
+   # Building for MTL-P (on-board EC) (deprecated)
    west build -c -p auto -b mec1501_mtl_p
 
    # Building for TGL + MECC card (deprecated)
    west build -c -p always -b mec1501modular_assy6885 -- -DCONFIG_MEC15XX_AIC_ON_TGL=y
 
-   # Building for MTL-P + MECC card (i.e. mec172x)
+   # Building for MTL-P + MECC card (i.e. mec172x) (deprecated)
    west build -c -p always -b mec172xmodular_assy6930
+
+   # Building for PTL-UH (on-board EC)
+   west build -c -p auto -b mec172x_ptl_uh
+
+   # Building for PTL-UH + MECC card (i.e. Nuvoton)
+   west build -c -p auto -b npcx4m8f_ptl
 
 .. note:: Additional EC vendors are enabling their MECC cards in Zephyr.
           Similar build is possible replacing -b <modular board>.

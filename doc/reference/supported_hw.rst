@@ -35,21 +35,21 @@ EC vendors in an Intel RVP.
 +--------------------+--------------------------+-------------------------+
 |  Meteorlake S      |  RVP (on-board MEC172x)  | Supported               |
 +--------------------+--------------------------+-------------------------+
-|  Meteorlake P      |  RVP (on-board MEC152x)  | * To be deprecated      |
+|  Meteorlake P      |  RVP (on-board MEC152x)  | Deprecated              |
 |                    |                          |                         |
-|                    |  RVP + MEC172x card      |                         |
+|                    |  RVP + MEC172x card      | Deprecated              |
 +--------------------+--------------------------+-------------------------+
 |  Lunarlake M       | RVP (on-board MEC172x)   | No plans to support     |
 +--------------------+--------------------------+-------------------------+
-| Pantherlake U/P    | RVP (on board MEC172x)   | * To be added           |
+| Pantherlake U/P    | RVP (on board MEC172x)   | Supported               |
 |                    |                          |                         |
-|                    | RVP + NPCX4 card         |                         |
+|                    | RVP + NPCX4 card         | Supported               |
 |                    |                          |                         |
-|                    | RVP + ITE8002 card       |                         |
+|                    | RVP + ITE8002 card       | * To be added           |
 +--------------------+--------------------------+-------------------------+
 
-Custom HW
-=========
+Custom HWs
+==========
 For generic guidelines to adapt basic EC open source to custom HW design.
 
 .. toctree::

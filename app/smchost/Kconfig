@@ -12,6 +12,14 @@ config SMCHOST
 	help
 	  Enables EC communication to BIOS.
 
+config SMC_TASK_STACK_SIZE
+	int "Adjust System management controller thread stack size"
+	default 444 if ECFW_STACK_OPTIMIZATION
+	default 1372 if SMCHOST_LOG_LEVEL > 2
+	default 804
+	help
+	 EC FW System management controller thread task stack size.
+
 config SMCHOST_SCI_OVER_ESPI
 	bool "Enable SCI support over eSPI"
 	default y

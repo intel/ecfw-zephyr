@@ -32,6 +32,26 @@ config KSCAN_EC
 	  PS/2 and keyboard scan matrix use the same application interfaces
 	  to communicate information from/to the host.
 
+config KBC_TASK_STACK_SIZE
+	int "Adjust host keyboard management thread stack size"
+	default 402 if ECFW_STACK_OPTIMIZATION
+	default 684 if KBCHOST_LOG_LEVEL > 2
+	default 500 if SOC_IT8XXX2
+	default 572 if SOC_FAMILY_MEC
+	default 500
+	help
+	 EC FW keyboard management thread task stack size.
+
+config KB_TASK_STACK_SIZE
+	int "Adjust keyboard matrix/PS2 devices management thread stack size"
+	default 276 if ECFW_STACK_OPTIMIZATION
+	default 508 if KBCHOST_LOG_LEVEL > 2
+	default 452 if SOC_IT8XXX2
+	default 468 if SOC_FAMILY_MEC
+	default 468
+	help
+	 EC FW keyboard matrix/PS2 device management thread task stack size.
+
 config KBCHOST_LOG_LEVEL
 	int "kbchost log level"
 	depends on LOG

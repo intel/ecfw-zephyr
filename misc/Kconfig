@@ -1,0 +1,20 @@
+# Kconfig - Config options for EC FW app
+#
+# Copyright (c) 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menu "EC FW modules stack configuration"
+
+config ECFW_STACK_OPTIMIZATION
+	bool "Enable EC FW stack optimizations"
+	help
+	 Use minimum thread stack for each EC FW module.
+	 Depending on the work that some task must some tasks may require more
+	 or less stack space than the default value.
+
+config MAIN_STACK_SIZE
+	default 512 if ECFW_STACK_OPTIMIZATION
+
+endmenu

@@ -3,6 +3,7 @@
 
 source ${CI_EC_SCRIPTS}/boards_platforms.sh
 source ${CI_EC_SCRIPTS}/misc.sh
+source ${CI_EC_SCRIPTS}/check_pins.sh
 
 function config_build_env {
     cd ${CI_PROJECT_DIR}
@@ -17,6 +18,21 @@ function config_build_env {
     west config --global zephyr.base-prefer env
     # We go back to the app  directory for the next steps
     cd ${CI_PROJECT_DIR}
+
+    # CMAKE info
+    info "CMAKE version"
+    cmake -version
+
+    # SDK info
+    info "List the Zephyr SDKs available..."
+    ls -l /opt/toolchains/
+    info "Show Zephyr SDK selected"
+    printenv | grep SDK
+    info ${ZEPHYR_SDK_INSTALL_DIR}sdk_version
+    if [ -f ${ZEPHYR_SDK_INSTALL_DIR}/sdk_version ]; then
+        info "Selected Zephyr SDK version: "
+        cat ${ZEPHYR_SDK_INSTALL_DIR}/sdk_version
+    fi
 }
 
 function set_artifacts_folder {
@@ -54,14 +70,32 @@ function save_binaries() {
     if [ "debug" = "${FOLDER_NAME}" ]; then
         # Save debug binaries
         cp -v build/zephyr/zephyr.* ${DEST_PATH}
+
+        # Copy RAM/ROM reports
+        if [ -f "${CI_PROJECT_DIR}/build/${BOARD_ID}_debug_rom_report.txt" ]; then
+            cp -v build/*report.txt ${DEST_PATH}
+        else
+            error "RAM/ROM reports not found"
+            ls -l "${CI_PROJECT_DIR}/build/${BOARD_ID}_debug_rom_report.txt"
+        fi
+    else
+        # Copy release notes
+        cp -v ${CI_PROJECT_DIR}/release_notes.txt ${DEST_PATH}
     fi
 
-    # Board definition is from public tree where ksc is not used
-    MECC_CARD_REGEX="[a-z\-]+_mec+[a-z0-9]+_card"
-    if [[ ${PLATFORM_NAME} =~ $MECC_CARD_REGEX ]]; then
+    # For MECC board definitions from public tree generated binaries are not named
+    # neither ECFW nor ksc, hence need to rename them
+    MCHP_CARD_REGEX="[a-z\-]+_mec+[a-z0-9]+_card"
+    NPCX_CARD_REGEX="[a-z\-]+_npc[a-z0-9]+_card"
+
+    if [[ ${PLATFORM_NAME} =~ $MCHP_CARD_REGEX ]]; then
+        debug "MCHP SPI binary, spi_image.bin"
         cp -v build/zephyr/spi_image.bin ${DEST_PATH}/ECFW_${BIN_SUFFIX}.bin
+    elif [[ ${PLATFORM_NAME} =~ $NPCX_CARD_REGEX ]]; then
+        debug "NPCX SPI binary, zephyr.npcx.bin"
+        cp -v build/zephyr/zephyr.npcx.bin ${DEST_PATH}/ECFW_${BIN_SUFFIX}.bin
     else
-        cp -v build/zephyr/ksc.bin ${DEST_PATH}/ECFW_${BIN_SUFFIX}.bin
+        cp -v build/zephyr/ECFW.bin ${DEST_PATH}/ECFW_${BIN_SUFFIX}.bin
     fi
 }
 
@@ -115,14 +149,25 @@ function build_boards() {
 
             printf "Debug configuration: ${DEBUG_CONFIG}\n"
             info "Building debug binary for board: ${PLATFORM_NAME}\n"
-            debug "west build -c -p always -b ${BOARD_ID} -- -- -G'Unix Makefiles' ${DEBUG_CONFIG}"
+            debug "west build -c -p always -b ${BOARD_ID} -- -G'Unix Makefiles' ${DEBUG_CONFIG}"
             west build -o=-j4 -c -p always -b ${BOARD_ID} -- -G'Unix Makefiles' \
                 "${DEBUG_CONFIG}"
+
+            debug "Generate reports for ${PLATFORM_NAME}\n"
+            ls -l build/zephyr/*.elf
+            west build -o=-j4 -t rom_report > build/${BOARD_ID}_debug_rom_report.txt || \
+                REPORT_ERROR=$?
+            west build -o=-j4 -t ram_report > build/${BOARD_ID}_debug_ram_report.txt || \
+                REPORT_ERROR=$?
+            debug "$REPORT_ERROR"
 
             debug "Save binaries for ${PLATFORM_NAME}\n"
             save_binaries ${PLATFORM_NAME} ${BOARD_ID} "debug"
         fi
         end_build=$(date +%s)
         echo "Board build time: $(($end_build-$start_build)) seconds"
+
+    perform_buffer_checks ${PLATFORM_NAME} ${BOARD_ID}
+
     done
 }

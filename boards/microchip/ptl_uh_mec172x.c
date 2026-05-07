@@ -33,7 +33,7 @@ uint8_t pd_i2c_addr_set;
  */
 
 /* APP-owned gpios */
-struct gpio_ec_config mecc172x_cfg[] = {
+static const struct gpio_ec_config mecc172x_cfg[] = {
 	{ HOME_BUTTON,		GPIO_INPUT },
 	{ EC_GPIO_002,		GPIO_DISCONNECTED },
 	{ PM_SLP_SUS,		GPIO_DISCONNECTED },
@@ -78,14 +78,10 @@ struct gpio_ec_config mecc172x_cfg[] = {
 	{ VOL_DOWN,		GPIO_INPUT | GPIO_INT_EDGE_BOTH },
 	{ STD_ADPT_CNTRL_GPIO,	GPIO_OUTPUT_LOW },
 	{ CATERR_LED_DRV,		GPIO_DISCONNECTED},
-
-	/* Not used */
-	{ SLP_S0_PLT_EC_N,		GPIO_DISCONNECTED },
-
 };
 
 /* Any IO expanders pins should be defined here */
-struct gpio_ec_config expander_cfg[] = {
+static const struct gpio_ec_config expander_cfg[] = {
 #ifdef CONFIG_GPIO_PCA95XX
 	{ SPD_PRSNT,		GPIO_INPUT },
 	{ VIRTUAL_BAT,		GPIO_INPUT },
@@ -100,10 +96,10 @@ struct gpio_ec_config expander_cfg[] = {
 #endif
 };
 
-struct gpio_ec_config mecc172x_cfg_sus[] =  {
+static const struct gpio_ec_config mecc172x_cfg_sus[] =  {
 };
 
-struct gpio_ec_config mecc172x_cfg_res[] =  {
+static const struct gpio_ec_config mecc172x_cfg_res[] =  {
 };
 
 #ifdef CONFIG_THERMAL_MANAGEMENT

@@ -18,6 +18,7 @@
 uint8_t platformskutype;
 
 LOG_MODULE_DECLARE(board, CONFIG_BOARD_LOG_LEVEL);
+
 /** @brief EC FW app owned gpios list.
  *
  * This list is not exhaustive, it do not include driver-owned pins,
@@ -31,7 +32,7 @@ LOG_MODULE_DECLARE(board, CONFIG_BOARD_LOG_LEVEL);
  */
 
 /* APP-owned gpios */
-struct gpio_ec_config mecc172x_cfg[] = {
+static const struct gpio_ec_config mecc172x_cfg[] = {
 	{ PM_SLP_SUS,		GPIO_INPUT },
 	{ EC_SPI_CS1_N,		GPIO_OUTPUT_HIGH},
 	{ EC_GPIO_011,		GPIO_INPUT },
@@ -83,20 +84,20 @@ struct gpio_ec_config mecc172x_cfg[] = {
 };
 
 /* APP-owned GPIOs for MTL-S CRB */
-struct gpio_ec_config mecc172x_cfg_mtl_s_crb_divergence[] = {
+static const struct gpio_ec_config mecc172x_cfg_mtl_s_crb_divergence[] = {
 	{ PM_PWRBTN_CRB,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
 	{ KBC_NUM_LOCK_CRB,		GPIO_OUTPUT_LOW },
 };
 
 /* APP-owned GPIOs for MTL-P DDR5 SBS*/
-struct gpio_ec_config mecc172x_cfg_mtl_s_erb_divergence[] = {
+static const struct gpio_ec_config mecc172x_cfg_mtl_s_erb_divergence[] = {
 	{ PM_PWRBTN_ERB,		GPIO_OUTPUT_HIGH | GPIO_OPEN_DRAIN },
 	{ KBC_NUM_LOCK_ERB,		GPIO_OUTPUT_LOW },
 };
 
 
 /* Any IO expanders pins should be defined here */
-struct gpio_ec_config expander_cfg[] = {
+static const struct gpio_ec_config expander_cfg[] = {
 #ifdef CONFIG_GPIO_PCA95XX
 	{ SPD_PRSNT,		GPIO_INPUT },
 	{ DISPLAY_ID_0,		GPIO_INPUT },
@@ -113,10 +114,10 @@ struct gpio_ec_config expander_cfg[] = {
 #endif
 };
 
-struct gpio_ec_config mecc172x_cfg_sus[] =  {
+static const struct gpio_ec_config mecc172x_cfg_sus[] =  {
 };
 
-struct gpio_ec_config mecc172x_cfg_res[] =  {
+static const struct gpio_ec_config mecc172x_cfg_res[] =  {
 };
 
 #ifdef CONFIG_THERMAL_MANAGEMENT

@@ -14,7 +14,7 @@ Pre-requisites
 ==============
 * GitHub account
 
-* Ubuntu 18.04 LTS or later.
+* Ubuntu 20.04 LTS or later.
 
 .. note:: Alternatively `Ubuntu shell`_ installed on Windows can be used.
 
@@ -31,8 +31,8 @@ Setting Up Zephyr environment
 Refer to the official `Zephyr's Getting Started Guide`_ while reviewing
 considerations below during each step.
 
-.. note:: Latest EC FW Open source project is based on Zephyr v3.6 so need to
-          refer to Zephyr v3.6 documentation and use Zephyr SDK 0.16.1.
+.. note:: Latest EC FW Open source project is based on Zephyr v3.7 so need to
+          refer to Zephyr v3.7 documentation and use Zephyr SDK 0.16.8.
 
 1) OS selection
 ---------------
@@ -69,9 +69,8 @@ Dediprog.
 
 5) EC SoC vendor-specific setup
 -------------------------------
-Currently only MEC15xx and MEC172x are supported.
-Perform steps 1 to 3 from Setup section in `MEC15xx EVB Setup guide`_ and
-steps 2 to 4 from Setup section in `MEC172x EVB Setup guide`_
+Currently only MEC172x and NPCX4 are supported.
+Perform steps 2 to 4 from Setup section in `MEC172x EVB Setup guide`_
 
 .. note::  GitHub repo root folder is `MEC SPI generator tools`_
 
@@ -107,9 +106,11 @@ See EC FW's dependencies
 +---------------+-----------------------+-------------+-----------------------------------------------------+
 | repo          | destination           | revision    | external repository                                 |
 +===============+=======================+=============+=====================================================+
-| zephyr        | zephyr_fork           | v3.6.0      | https://github.com/zephyrproject-rtos/zephyr        |
+| zephyr        | zephyr_fork           | v3.7.0      | https://github.com/zephyrproject-rtos/zephyr        |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
-| cmsis         | modules/hal/cmsis     | 74981bf     | https://github.com/zephyrproject-rtos/cmsis         |
+| cmsis         | modules/hal/cmsis     | 4b96cbb     | https://github.com/zephyrproject-rtos/cmsis         |
++---------------+-----------------------+-------------+-----------------------------------------------------+
+| cmsis_6       | modules/hal/cmsis_6   | 30a859f     | https://github.com/zephyrproject-rtos/cmsis         |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
 | hal_microchip | modules/hal/microchip | 5d079f1     | https://github.com/zephyrproject-rtos/hal_microchip |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
@@ -135,7 +136,7 @@ Your directory structure should look like this:
 --------------------------
 Some additional patches are required to be applied to the Zephyr kernel
 for building the open source EC FW application. The latest release is based out
-of Zephyr v3.4 and hence these patches need to be applied on that branch.
+of Zephyr v3.7 and hence these patches need to be applied on that branch.
 
 These patches are expected to be part of the future Zephyr releases (if
 they are not already integrated).
@@ -155,7 +156,7 @@ main Intel Open source EC FW documentation.
 .. code-block:: bash
 
    cd ../ecfwwork/zephyr_fork
-   git am ../../ecfw-zephyr/zephyr_patches/patches_v3_6.patch
+   git am ../../ecfw-zephyr/zephyr_patches/patches_v3_7.patch
 
 
 Troubleshoot
@@ -191,19 +192,10 @@ for more details.
 
    cd ~/sandbox/ecfw-zephyr
    # Building for MTL-S/ARL -S (on-board EC)
-   west build -c -p auto -b mec172x_mtl_s
-
-   # Building for MTL-P (on-board EC) (deprecated)
-   west build -c -p auto -b mec1501_mtl_p
-
-   # Building for TGL + MECC card (deprecated)
-   west build -c -p always -b mec1501modular_assy6885 -- -DCONFIG_MEC15XX_AIC_ON_TGL=y
-
-   # Building for MTL-P + MECC card (i.e. mec172x) (deprecated)
-   west build -c -p always -b mec172xmodular_assy6930
+   west build -p -b mtl_s/mec172x_nsz app/ -- -DCONFIG_PICOLIBC_USE_MODULE=y
 
    # Building for PTL-UH (on-board EC)
-   west build -c -p auto -b mec172x_ptl_uh
+   west build -p -b ptl_uh/mec172x_nsz app/ -- -DCONFIG_PICOLIBC_USE_MODULE=y
 
    # Building for PTL-UH + MECC card (i.e. Nuvoton)
    west build -c -p auto -b npcx4m8f_ptl
@@ -211,10 +203,9 @@ for more details.
 .. note:: Additional EC vendors are enabling their MECC cards in Zephyr.
           Similar build is possible replacing -b <modular board>.
 
-
 If build is successful, zephyr.bin and ksc.bin will be generated.
 
-.. note:: For modular cards this steps generates spi_image.bin instead.
+.. note:: For modular cards this steps generates ECFW.bin too.
 
 .. code-block:: bash
 
@@ -229,7 +220,7 @@ repository, make sure that step 1) is executed correctly.
 
    printenv | grep ZEPHYR_BASE
 
-2) If spi_image.bin is not generated, revisit EC vendor-specific setup.
+2) If ECFW.bin is not generated, revisit EC vendor-specific setup.
 
     a) Ensure SPI generator is available
 
@@ -257,13 +248,10 @@ Dediprog. Refer to `Intel documentation`_.
 
 
 .. _Zephyr's Getting Started Guide:
-    https://docs.zephyrproject.org/3.2.0/develop/getting_started/index.html
+    https://docs.zephyrproject.org/3.7.0/develop/getting_started/index.html
 
 .. _west documentation:
    https://docs.zephyrproject.org/latest/develop/west/index.html
-
-.. _MEC15xx EVB Setup guide:
-   https://docs.zephyrproject.org/latest/boards/microchip/mec1501modular_assy6885/doc/index.html#programming-and-debugging
 
 .. _MEC172x EVB Setup guide:
    https://docs.zephyrproject.org/latest/boards/microchip/mec172xevb_assy6906/doc/index.html#programming-and-debugging

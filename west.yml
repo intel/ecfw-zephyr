@@ -24,8 +24,7 @@ manifest:
       repo-path: zephyr.git
       path: ecfwwork/zephyr_fork
       remote: zephyrproject
-      revision: v3.6.0
-      clone-depth: 1
+      revision: v3.7-branch
       west-commands: scripts/west-commands.yml
 
     - name: cmsis
@@ -37,6 +36,9 @@ manifest:
       revision: 5d079f1683a00b801373bbbbf5d181d4e33b30d5
       path: ecfwwork/modules/hal/microchip
       remote: zephyrproject
-
+    - name: picolibc
+      path: ecfwwork/modules/lib/picolibc
+      revision: 764ef4e401a8f4c6a86ab723533841f072885a5b
+      remote: zephyrproject
   self:
     path: ecfwwork

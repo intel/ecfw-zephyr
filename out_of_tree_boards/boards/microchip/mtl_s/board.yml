@@ -1,5 +1,6 @@
-boards:
-  - name: mtl_s
-    vendor: intel
-    socs:
-      - name: mec172x_nsz
+board:
+  name: mtl_s
+  full_name: MEC172X MTLS
+  vendor: intel
+  socs:
+    - name: mec172x_nsz

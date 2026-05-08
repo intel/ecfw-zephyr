@@ -1,5 +1,6 @@
-boards:
-  - name: ptl_uh
-    vendor: intel
-    socs:
-      - name: mec172x_nsz
+board:
+  name: ptl_uh
+  full_name: MEC172X PTL_UH
+  vendor: intel
+  socs:
+    - name: mec172x_nsz

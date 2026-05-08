@@ -10,16 +10,12 @@
 #include "spi_winbond_opcodes.h"
 
 /* Adjust descriptors based on SPI capacity to simplify SAF structure */
-#if DT_NODE_HAS_STATUS(DT_ALIAS(spi0), disabled)
-#pragma error "spi hw block not enabled"
-#else
+#if !DT_NODE_EXISTS(DT_ALIAS(spi0))
+#error "spi0 alias not defined in board DTS"
+#endif
 #define DT_SPI_INST	DT_ALIAS(spi0)
-#if DT_PROP(DT_SPI_INST, lines) == 4
+/* SPI flash is hardwired for quad I/O on these boards */
 #define FAST_READ_IO_OPCODE            FAST_READ_QUAD_IO_OPCODE
-#else
-#define FAST_READ_IO_OPCODE            FAST_READ_DUAL_IO_OPCODE
-#endif /* DT_PROP(DT_SPI_INST, lines) == 4 */
-#endif /* DT_NODE_HAS_STATUS(DT_NODELABEL(spi0), disabled) */
 
 /*
  * Dual mode adjustments
@@ -65,7 +61,6 @@
 #define SAF_POLL_MASK		(MCHP_W25Q256_POLL2_MASK)
 #endif
 
-#if DT_PROP(DT_SPI_INST, lines) == 4
 #define SAF_FLAGS		(MCHP_FLASH_FLAG_ADDR32)
 #define SAF_DESCR_CM_RD_D0	MCHP_W25Q256_CM_RD_D0
 #define SAF_DESCR_CM_RD_D1	MCHP_W25Q256_CM_RD_D1
@@ -75,20 +70,6 @@
 #define SAF_DESCR_ENTER_CM_D2	MCHP_W25Q256_ENTER_CM_D2
 #define SAF_DESCR_EXIT_CM12	MCHP_SAF_EXIT_CM_DESCR12
 #define SAF_DESCR_EXIT_CM13	MCHP_SAF_EXIT_CM_DESCR13
-#elif DT_PROP(DT_SPI_INST, lines) == 2
-#define SAF_FLAGS		(MCHP_FLASH_FLAG_ADDR32 | \
-				MCHP_FLASH_CONT_READ_NO_DUMMY_CLK)
-#define SAF_DESCR_CM_RD_D0	DUAL_W25Q256_CM_RD_D0
-#define SAF_DESCR_CM_RD_D1	MCHP_W25Q256_CM_RD_D1
-#define SAF_DESCR_CM_RD_D2	DUAL_W25Q256_CM_RD_D2
-#define SAF_DESCR_ENTER_CM_D0	MCHP_W25Q256_ENTER_CM_D0
-#define SAF_DESCR_ENTER_CM_D1	DUAL_W25Q256_ENTER_CM_D1
-#define SAF_DESCR_ENTER_CM_D2	DUAL_W25Q256_ENTER_CM_D2
-#define SAF_DESCR_EXIT_CM12	DUAL_SAF_EXIT_CM_DESCR12
-#define SAF_DESCR_EXIT_CM13	DUAL_SAF_EXIT_CM_DESCR13
-#else
-#pragma "Unsupported SPI IO mode"
-#endif /* DT_PROP(DT_SPI_INST, lines) == 4 */
 
 #elif (CONFIG_SAF_SPI_CAPACITY == 16)
 #define SAF_POLL_MASK		(MCHP_W25Q128_POLL2_MASK)
@@ -102,7 +83,7 @@
 #define SAF_DESCR_EXIT_CM12	MCHP_SAF_EXIT_CM_DESCR12
 #define SAF_DESCR_EXIT_CM13	MCHP_SAF_EXIT_CM_DESCR13
 #else
-#pragma "Unsupported SPI capacity"
+#error "Unsupported SPI capacity"
 #endif /* CONFIG_SAF_SPI_CAPACITY */
 
 /**

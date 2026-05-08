@@ -6,8 +6,8 @@
 
 /dts-v1/;
 
-#include <microchip/mec172xnsz.dtsi>
-#include <microchip/mec172x/mec172xnsz-pinctrl.dtsi>
+#include <microchip/mec/mec172xnsz.dtsi>
+#include <microchip/mec/mec172x/mec172xnsz-pinctrl.dtsi>
 #include "../mec172x-espi-based-board.dtsi"
 #include "../mec172x-kscan-pinctrl-bias.dtsi"
 #include "../mec172x-ps2-pinctrl-bias.dtsi"
@@ -70,7 +70,10 @@
 /* I2C */
 &i2c_smb_0 {
 	status = "okay";
-	port_sel = <0>;
+	port-sel = <0>;
+
+	sda-gpios = <MCHP_GPIO_DECODE_003 0>;
+	scl-gpios = <MCHP_GPIO_DECODE_004 0>;
 	pinctrl-0 = < &i2c00_scl_gpio004 &i2c00_sda_gpio003 >;
 	pinctrl-names = "default";
 
@@ -122,7 +125,9 @@
 
 &i2c_smb_1 {
 	status = "okay";
-	port_sel = <6>;
+	port-sel = <6>;
+	scl-gpios = <MCHP_GPIO_DECODE_140 0>;
+	sda-gpios = <MCHP_GPIO_DECODE_132 0>;
 	pinctrl-0 = <&i2c06_scl_gpio140 &i2c06_sda_gpio132 >;
 	pinctrl-names = "default";
 };
@@ -141,7 +146,9 @@
 
 &i2c_smb_2 {
 	status = "okay";
-	port_sel = <5>;
+	port-sel = <5>;
+	scl-gpios = <MCHP_GPIO_DECODE_142 0>;
+	sda-gpios = <MCHP_GPIO_DECODE_141 0>;
 	pinctrl-0 = <&i2c05_scl_gpio142 &i2c05_sda_gpio141>;
 	pinctrl-names = "default";
 };

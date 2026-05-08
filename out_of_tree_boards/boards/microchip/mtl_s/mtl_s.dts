@@ -7,8 +7,8 @@
 
 /dts-v1/;
 
-#include <microchip/mec172xnsz.dtsi>
-#include <microchip/mec172x/mec172xnsz-pinctrl.dtsi>
+#include <microchip/mec/mec172xnsz.dtsi>
+#include <microchip/mec/mec172x/mec172xnsz-pinctrl.dtsi>
 
 / {
 	model = "Intel MEC172X_MTL_S Development board";
@@ -28,7 +28,7 @@
 		i2c1 = &i2c_smb_1;
 		i2c7 = &i2c_smb_2;
 		espitaf = &espi_saf0;
-		spi0 = &spi0;
+		spi0 = &qspi0;
 		kscan0 = &kscan_input;
 	};
 
@@ -112,8 +112,10 @@
 /* I2C */
 &i2c_smb_0 {
 	status = "okay";
-	port_sel = <0>;
+	port-sel = <0>;
 
+	sda-gpios = <MCHP_GPIO_DECODE_003 0>;
+	scl-gpios = <MCHP_GPIO_DECODE_004 0>;
 	pinctrl-0 = < &i2c00_scl_gpio004 &i2c00_sda_gpio003 >;
 	pinctrl-names = "default";
 
@@ -164,7 +166,9 @@
 
 &i2c_smb_1 {
 	status = "okay";
-	port_sel = <6>;
+	port-sel = <6>;
+	scl-gpios = <MCHP_GPIO_DECODE_140 0>;
+	sda-gpios = <MCHP_GPIO_DECODE_132 0>;
 	pinctrl-0 = <&i2c06_scl_gpio140 &i2c06_sda_gpio132 >;
 	pinctrl-names = "default";
 };
@@ -183,7 +187,9 @@
 
 &i2c_smb_2 {
 	status = "okay";
-	port_sel = <5>;
+	port-sel = <5>;
+	scl-gpios = <MCHP_GPIO_DECODE_142 0>;
+	sda-gpios = <MCHP_GPIO_DECODE_141 0>;
 	pinctrl-0 = <&i2c05_scl_gpio142 &i2c05_sda_gpio141>;
 	pinctrl-names = "default";
 };
@@ -200,12 +206,10 @@
 	output-high;
 };
 
-&spi0 {
+&qspi0 {
 	status = "okay";
 	compatible = "microchip,xec-qmspi-ldma";
 	clock-frequency = <4000000>;
-	lines = <4>;
-	chip-select = <0>;
 
 	pinctrl-0 = < &shd_cs0_n_gpio055
 		      &shd_clk_gpio056

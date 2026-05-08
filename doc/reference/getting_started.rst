@@ -14,7 +14,7 @@ Pre-requisites
 ==============
 * GitHub account
 
-* Ubuntu 18.04 LTS or later.
+* Ubuntu 20.04 LTS or later.
 
 .. note:: Alternatively `Ubuntu shell`_ installed on Windows can be used.
 
@@ -69,9 +69,8 @@ Dediprog.
 
 5) EC SoC vendor-specific setup
 -------------------------------
-Currently only MEC15xx and MEC172x are supported.
-Perform steps 1 to 3 from Setup section in `MEC15xx EVB Setup guide`_ and
-steps 2 to 4 from Setup section in `MEC172x EVB Setup guide`_
+Currently only MEC172x and NPCX4 are supported.
+Perform steps 2 to 4 from Setup section in `MEC172x EVB Setup guide`_
 
 .. note::  GitHub repo root folder is `MEC SPI generator tools`_
 
@@ -135,7 +134,7 @@ Your directory structure should look like this:
 --------------------------
 Some additional patches are required to be applied to the Zephyr kernel
 for building the open source EC FW application. The latest release is based out
-of Zephyr v3.4 and hence these patches need to be applied on that branch.
+of Zephyr v3.6 and hence these patches need to be applied on that branch.
 
 These patches are expected to be part of the future Zephyr releases (if
 they are not already integrated).
@@ -257,13 +256,10 @@ Dediprog. Refer to `Intel documentation`_.
 
 
 .. _Zephyr's Getting Started Guide:
-    https://docs.zephyrproject.org/3.2.0/develop/getting_started/index.html
+    https://docs.zephyrproject.org/3.6.0/develop/getting_started/index.html
 
 .. _west documentation:
    https://docs.zephyrproject.org/latest/develop/west/index.html
-
-.. _MEC15xx EVB Setup guide:
-   https://docs.zephyrproject.org/latest/boards/microchip/mec1501modular_assy6885/doc/index.html#programming-and-debugging
 
 .. _MEC172x EVB Setup guide:
    https://docs.zephyrproject.org/latest/boards/microchip/mec172xevb_assy6906/doc/index.html#programming-and-debugging

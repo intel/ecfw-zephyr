@@ -70,9 +70,9 @@ LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 int gtech_get_fn_key(uint8_t key_num, struct fn_data *data, bool pressed);
 
 #ifdef CONFIG_KSCAN_EC
-#ifdef CONFIG_SOC_FAMILY_MEC
-#define MAX_MTX_KEY_COLS CONFIG_KSCAN_XEC_COLUMN_SIZE
-#define MAX_MTX_KEY_ROWS CONFIG_KSCAN_XEC_ROW_SIZE
+#ifdef CONFIG_SOC_FAMILY_MICROCHIP_MEC
+#define MAX_MTX_KEY_COLS CONFIG_INPUT_XEC_COLUMN_SIZE
+#define MAX_MTX_KEY_ROWS CONFIG_INPUT_XEC_ROW_SIZE
 #endif
 /* 64 is not assigned. We marked as KM_RSVD in the first column */
 /* 0 in the first column  _, - is also marked as KM_RSVD */

@@ -68,7 +68,7 @@ target_sources(app
     ${CMAKE_CURRENT_LIST_DIR}/acpi.h
     )
 
-target_sources_ifdef(CONFIG_SOC_FAMILY_MEC app
+target_sources_ifdef(CONFIG_SOC_FAMILY_MICROCHIP_MEC app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/led.c
     PUBLIC

@@ -8,6 +8,7 @@
 	aliases {
 		espitaf = &espi_saf0;
 		spi0 = &spi0;
+		kscan0 = &kscan_input;
 	};
 };
 
@@ -120,7 +121,7 @@
 	status = "okay";
 };
 
-&kscan0 {
+&kbd0 {
 	status = "okay";
 
 	pinctrl-0 = < &ksi0_gpio017
@@ -148,6 +149,11 @@
 		      &kso14_gpio152
 		      &kso15_gpio151 >;
 	pinctrl-names = "default";
+        row-size = <8>;
+        col-size = <16>;
+	kscan_input: kscan-input {
+		compatible = "zephyr,kscan-input";
+	};
 };
 
 &ps2_0 {

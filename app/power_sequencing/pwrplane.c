@@ -12,7 +12,7 @@
 #include "gpio_ec.h"
 #include "espi_hub.h"
 #include "espioob_mngr.h"
-#ifdef CONFIG_ESPI_SAF
+#ifdef CONFIG_ESPI_TAF
 #include "saf_config.h"
 #endif
 #include "system.h"
@@ -213,7 +213,7 @@ static void handle_spi_sharing(uint8_t boot_mode)
 	switch (boot_mode) {
 	case FLASH_BOOT_MODE_SAF:
 		LOG_DBG("Booted in SAF mode");
-#ifdef CONFIG_ESPI_SAF
+#ifdef CONFIG_ESPI_TAF
 		initialize_saf_bridge();
 #endif
 		break;

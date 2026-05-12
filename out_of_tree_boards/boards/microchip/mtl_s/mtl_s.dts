@@ -29,6 +29,7 @@
 		i2c7 = &i2c_smb_2;
 		espitaf = &espi_saf0;
 		spi0 = &spi0;
+		kscan0 = &kscan_input;
 	};
 
 	zephyr,user {
@@ -223,7 +224,7 @@
 	status = "okay";
 };
 
-&kscan0 {
+&kbd0 {
 	status = "disabled";
 
 	pinctrl-0 = < &ksi0_gpio017
@@ -249,6 +250,10 @@
 		      &kso12_gpio125
 		      &kso13_gpio126 >;
 	pinctrl-names = "default";
+
+	kscan_input: kscan-input {
+		compatible = "zephyr,kscan-input";
+	};
 };
 
 &pwm8 {

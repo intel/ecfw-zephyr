@@ -38,6 +38,7 @@
 #include "fan.h"
 #include "kbchost.h"
 #include "task_handler.h"
+#include <zephyr/pm/policy.h>
 #include "softstrap.h"
 #include "smchost.h"
 #ifdef CONFIG_DNX_SUPPORT
@@ -750,10 +751,20 @@ void therm_shutdown(void)
 	/* Sleep for 100ms as pwr_seq state machine needs to move S5 state */
 	k_msleep(PWR_PLANE_RSMRST_DELAY_MS);
 
+#ifdef CONFIG_ESPI_PERIPHERAL_8042_KBC
+	/* Disable KBC interface to prevent BIOS communication during thermal shutdown */
+	kbc_disable_interface();
+#endif
+
 	/* System is moved to S5 state and SX state machine also updated.
 	 * Now suspend all the tasks
 	 */
 	suspend_all_tasks();
+
+	/* Lock the policy state from entering into PM_STATE_SUSPEND_TO_RAM during
+	 * thermal shutdown.
+	 */
+	pm_policy_state_lock_get(PM_STATE_SUSPEND_TO_RAM, PM_ALL_SUBSTATES);
 
 	while (true) {
 		if (gpio_read_pin(PWRBTN_EC_IN_N) == LOW) {
@@ -778,6 +789,10 @@ void therm_shutdown(void)
 	}
 
 	in_therm_shutdown = false;
+
+	/* UnLock the policy state of PM_STATE_SUSPEND_TO_RAM while thermal shutdown exit */
+	pm_policy_state_lock_put(PM_STATE_SUSPEND_TO_RAM, PM_ALL_SUBSTATES);
+
 	/* Pwr btn pressed. Resume suspended tasks to allow boot */
 	resume_all_tasks();
 }

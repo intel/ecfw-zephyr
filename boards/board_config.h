@@ -12,26 +12,17 @@
  */
 extern uint8_t boot_mode_maf;
 
-#if defined(CONFIG_SOC_FAMILY_MEC)
+#if defined(CONFIG_SOC_FAMILY_MICROCHIP_MEC)
 
-#ifdef CONFIG_BOARD_MEC1501MODULAR_ASSY6885
-#include "mec15xx_aic_rvp_selection.h"
-#elif CONFIG_BOARD_MEC172XMODULAR_ASSY6930
+#if CONFIG_BOARD_MEC172XMODULAR_ASSY6930
 #include "mecc172x_aic_rvp_selection.h"
-#elif defined(CONFIG_BOARD_MEC1501_EUCLID)
-#include "euclid_mec1501.h"
-#elif defined(CONFIG_BOARD_MEC1501_ADL)
-#include "adl_mec1501.h"
-#elif defined(CONFIG_BOARD_MEC1501_ADL_P)
-#include "adl_p_mec1501.h"
-#elif defined(CONFIG_BOARD_MEC1501_MTL_P)
-#include "mtl_p_mec1501.h"
-#elif defined(CONFIG_BOARD_MEC172XLJ_MTL_TEMPLATE)
+#elif defined(CONFIG_BOARD_MTL_S_MEC172X_NSZ)
+#include "mtl_s_mec172x.h"
+#elif defined(CONFIG_BOARD_PTL_UH)
+#include "ptl_uh_mec172x.h"
+#elif defined(CONFIG_BOARD_MTL_S_MEC172X_LJ)
 #include "mtl_template_mec172xlj.h"
 #elif defined(CONFIG_BOARD_MEC172X_MTL_S)
-#include "mtl_s_mec172x.h"
-#elif defined(CONFIG_BOARD_MEC172X_PTL_UH)
-#include "ptl_uh_mec172x.h"
 #else
 #error "Platform not supported"
 #endif /* CONFIG_BOARD_MEC1501MODULAR_ASSY6885 */
@@ -41,7 +32,7 @@ extern uint8_t boot_mode_maf;
 #include "npcx4m8f_aic_rvp_selection.h"
 #endif
 
-#endif /* CONFIG_SOC_FAMILY_MEC */
+#endif /* CONFIG_SOC_FAMILY_MICROCHIP_MEC */
 
 #ifdef CONFIG_THERMAL_MANAGEMENT
 #include "thermalmgmt.h"

@@ -7,11 +7,9 @@ target_sources(app
     ${CMAKE_CURRENT_LIST_DIR}/board.h
     )
 
-if(CONFIG_SOC_FAMILY_MEC)
+target_include_directories(app PRIVATE ${CMAKE_CURRENT_LIST_DIR} )
 
-# RVP + MECC
-include(${CMAKE_CURRENT_LIST_DIR}/microchip/mec15xx_mecc/CMakeLists.txt)
-include(${CMAKE_CURRENT_LIST_DIR}/microchip/mec172x_mecc/CMakeLists.txt)
+if(CONFIG_SOC_FAMILY_MICROCHIP_MEC)
 
 target_sources_ifdef(CONFIG_BOARD_MEC1501_ADL app
     PRIVATE
@@ -34,21 +32,21 @@ target_sources_ifdef(CONFIG_BOARD_MEC1501_MTL_P app
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mtl_p_mec1501.h
     )
 
-target_sources_ifdef(CONFIG_BOARD_MEC172XLJ_MTL_TEMPLATE app
+target_sources_ifdef(CONFIG_BOARD_MTL_S_MEC172X_LJ app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mtl_template_mec172xlj.c
     PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mtl_template_mec172xlj.h
     )
 
-target_sources_ifdef(CONFIG_BOARD_MEC172X_MTL_S app
+target_sources_ifdef(CONFIG_BOARD_MTL_S_MEC172X_NSZ app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mtl_s_mec172x.c
     PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mtl_s_mec172x.h
     )
 
-target_sources_ifdef(CONFIG_BOARD_MEC172X_PTL_UH app
+target_sources_ifdef(CONFIG_BOARD_PTL_UH app
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/microchip/ptl_uh_mec172x.c
     PUBLIC
@@ -57,7 +55,6 @@ target_sources_ifdef(CONFIG_BOARD_MEC172X_PTL_UH app
 
 target_include_directories(app
     PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/microchip
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mec15xx_mecc
     ${CMAKE_CURRENT_LIST_DIR}/microchip/mec172x_mecc

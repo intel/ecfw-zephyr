@@ -19,6 +19,11 @@
 #endif
 #include <zephyr/logging/log.h>
 #include <memops.h>
+#define KEY_RELEASED_POS                7U
+#define LEFT_CTRL                       0x1DU
+#define LEFT_ALT                        0x38U
+#define LEFT_SHIFT                      0x2AU
+
 LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 
 static const struct device *kscan_dev;
@@ -377,14 +382,25 @@ int kbs_matrix_init(kbs_matrix_callback callback, uint8_t *initial_set)
 	return 0;
 }
 
+/**
+ * Set typematic rate and delay according to the PS/2 keyboard 0xF3 command.
+ *
+ * The 0xF3 command (Set Typematic Rate/Delay) is sent by the host to the keyboard,
+ * followed by a data byte encoding the repeat rate and delay:
+ *   - Bits 0-4: Typematic rate (lower value = faster repeat)
+ *   - Bits 5-6: Typematic delay (00=250ms, 01=500ms, 10=750ms, 11=1000ms)
+ *   - Bit 7: Unused
+ * This function extracts the rate and delay from the data byte and updates the
+ * typematic settings accordingly. The timer is stopped before updating.
+ */
 void kbs_write_typematic(uint8_t data)
 {
 	/* Cancel typematic timer before attempting to change settings */
 	k_timer_stop(&typematic_timer);
 
-	typematic_period_idx = data  & TYPEMATIC_RATE_MASK;
+	typematic_period_idx = data & TYPEMATIC_RATE_MASK;
 	typematic_delay_idx =
-		(data >> TYPEMATIC_DELAY_POS) & TYPEMATIC_DELAY_MASK;
+		(data & TYPEMATIC_DELAY_MASK) >> TYPEMATIC_DELAY_POS;
 }
 
 void kbs_keyboard_enable(void)
@@ -679,6 +695,10 @@ static void get_scan_code(uint8_t key_num, struct scan_code *sc2, bool pressed)
 
 static void make_key(uint8_t key_num)
 {
+	bool ctrl_down = ctrl_pressed();
+	bool alt_down = alt_pressed();
+	bool shift_down = shift_pressed();
+
 	struct scan_code sc2;
 
 	memsets(&sc2, 0, sizeof(sc2));
@@ -731,6 +751,19 @@ static void make_key(uint8_t key_num)
 		if (translate_key(*scan_code_set, &value) == 0U &&
 		    make_tpmatic_code.len  < MAX_SCAN_CODE_LEN) {
 			make_tpmatic_code.code[make_tpmatic_code.len++] = value;
+			if (ctrl_down & alt_down & shift_down) {
+				if ((value != LEFT_CTRL) && (value != LEFT_ALT)
+						&& (value != LEFT_SHIFT)) {
+					if (value & BIT(KEY_RELEASED_POS)) {
+						g_acpi_tbl.acpi_hotkey_scan = 0U;
+					} else {
+						g_acpi_tbl.cas_hotkey = value;
+					}
+					LOG_DBG("Sending CAS Key SCI for %x",
+							g_acpi_tbl.cas_hotkey);
+					enqueue_sci(SCI_HOTKEY_CAS);
+				}
+			}
 		}
 	}
 

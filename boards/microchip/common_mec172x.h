@@ -5,12 +5,9 @@
  */
 
 #include <soc.h>
-#include "mec150x_pin.h"
 
 #ifndef __COMMON_MEC1721_H__
 #define __COMMON_MEC1721_H__
-
-
 
 /* GPIO expander ports, offset from valid gpios */
 #define EC_EXP_PORT_1			MCHP_GPIO_MAX_PORT

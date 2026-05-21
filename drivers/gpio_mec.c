@@ -10,7 +10,7 @@
 #include <zephyr/drivers/pinctrl.h>
 #include <zephyr/logging/log.h>
 #include "gpio_ec.h"
-#include "common_mec1501.h"
+#include "common_mec172x.h"
 
 LOG_MODULE_REGISTER(gpio_ec, CONFIG_GPIO_EC_LOG_LEVEL);
 

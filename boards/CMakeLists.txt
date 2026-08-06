@@ -7,7 +7,9 @@ target_sources(app
     ${CMAKE_CURRENT_LIST_DIR}/board.h
     )
 
-if(CONFIG_SOC_FAMILY_MEC)
+target_include_directories(app PRIVATE ${CMAKE_CURRENT_LIST_DIR} )
+
+if(CONFIG_SOC_FAMILY_MICROCHIP_MEC)
 
 target_sources_ifdef(CONFIG_BOARD_MEC172XLJ_MTL_TEMPLATE app
     PRIVATE
@@ -32,7 +34,6 @@ target_sources_ifdef(CONFIG_BOARD_MEC172X_PTL_UH app
 
 target_include_directories(app
     PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/microchip
     )
 

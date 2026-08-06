@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2022, Intel Corporation Inc.
  *
@@ -112,7 +111,6 @@
 &i2c_smb_0 {
 	status = "okay";
 	port_sel = <0>;
-
 	pinctrl-0 = < &i2c00_scl_gpio004 &i2c00_sda_gpio003 >;
 	pinctrl-names = "default";
 
@@ -223,34 +221,6 @@
 	status = "okay";
 };
 
-&kscan0 {
-	status = "disabled";
-
-	pinctrl-0 = < &ksi0_gpio017
-		      &ksi1_gpio020
-		      &ksi2_gpio021
-		      &ksi3_gpio026
-		      &ksi4_gpio027
-		      &ksi5_gpio030
-		      &ksi6_gpio031
-		      &ksi7_gpio032
-		      &kso00_gpio040
-		      &kso01_gpio045
-		      &kso02_gpio046
-		      &kso03_gpio047
-		      &kso04_gpio107
-		      &kso05_gpio112
-		      &kso06_gpio113
-		      &kso07_gpio120
-		      &kso08_gpio121
-		      &kso09_gpio122
-		      &kso10_gpio123
-		      &kso11_gpio124
-		      &kso12_gpio125
-		      &kso13_gpio126 >;
-	pinctrl-names = "default";
-};
-
 &pwm8 {
 	status = "okay";
 	pinctrl-0 = < &pwm8_gpio035 >;
@@ -272,6 +242,7 @@
 
 &ps2_0 {
 	status = "okay";
+
 	pinctrl-0 = < &ps2_clk0b_gpio007 &ps2_dat0b_gpio010 >;
 	pinctrl-names = "default";
 };

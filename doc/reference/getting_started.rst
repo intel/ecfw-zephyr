@@ -31,8 +31,8 @@ Setting Up Zephyr environment
 Refer to the official `Zephyr's Getting Started Guide`_ while reviewing
 considerations below during each step.
 
-.. note:: Latest EC FW Open source project is based on Zephyr v3.6 so need to
-          refer to Zephyr v3.6 documentation and use Zephyr SDK 0.16.1.
+.. note:: Latest EC FW Open source project is based on Zephyr v3.7 so need to
+          refer to Zephyr v3.7 documentation and use Zephyr SDK 0.16.8.
 
 1) OS selection
 ---------------
@@ -106,9 +106,11 @@ See EC FW's dependencies
 +---------------+-----------------------+-------------+-----------------------------------------------------+
 | repo          | destination           | revision    | external repository                                 |
 +===============+=======================+=============+=====================================================+
-| zephyr        | zephyr_fork           | v3.6.0      | https://github.com/zephyrproject-rtos/zephyr        |
+| zephyr        | zephyr_fork           | v3.7.0      | https://github.com/zephyrproject-rtos/zephyr        |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
-| cmsis         | modules/hal/cmsis     | 74981bf     | https://github.com/zephyrproject-rtos/cmsis         |
+| cmsis         | modules/hal/cmsis     | 4b96cbb     | https://github.com/zephyrproject-rtos/cmsis         |
++---------------+-----------------------+-------------+-----------------------------------------------------+
+| cmsis_6       | modules/hal/cmsis_6   | 30a859f     | https://github.com/zephyrproject-rtos/cmsis         |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
 | hal_microchip | modules/hal/microchip | 5d079f1     | https://github.com/zephyrproject-rtos/hal_microchip |
 +---------------+-----------------------+-------------+-----------------------------------------------------+
@@ -134,7 +136,7 @@ Your directory structure should look like this:
 --------------------------
 Some additional patches are required to be applied to the Zephyr kernel
 for building the open source EC FW application. The latest release is based out
-of Zephyr v3.6 and hence these patches need to be applied on that branch.
+of Zephyr v3.7 and hence these patches need to be applied on that branch.
 
 These patches are expected to be part of the future Zephyr releases (if
 they are not already integrated).
@@ -154,7 +156,7 @@ main Intel Open source EC FW documentation.
 .. code-block:: bash
 
    cd ../ecfwwork/zephyr_fork
-   git am ../../ecfw-zephyr/zephyr_patches/patches_v3_6.patch
+   git am ../../ecfw-zephyr/zephyr_patches/patches_v3_7.patch
 
 
 Troubleshoot
@@ -192,15 +194,6 @@ for more details.
    # Building for MTL-S/ARL -S (on-board EC)
    west build -c -p auto -b mec172x_mtl_s
 
-   # Building for MTL-P (on-board EC) (deprecated)
-   west build -c -p auto -b mec1501_mtl_p
-
-   # Building for TGL + MECC card (deprecated)
-   west build -c -p always -b mec1501modular_assy6885 -- -DCONFIG_MEC15XX_AIC_ON_TGL=y
-
-   # Building for MTL-P + MECC card (i.e. mec172x) (deprecated)
-   west build -c -p always -b mec172xmodular_assy6930
-
    # Building for PTL-UH (on-board EC)
    west build -c -p auto -b mec172x_ptl_uh
 
@@ -210,10 +203,9 @@ for more details.
 .. note:: Additional EC vendors are enabling their MECC cards in Zephyr.
           Similar build is possible replacing -b <modular board>.
 
-
 If build is successful, zephyr.bin and ksc.bin will be generated.
 
-.. note:: For modular cards this steps generates spi_image.bin instead.
+.. note:: For modular cards this steps generates ECFW.bin too.
 
 .. code-block:: bash
 
@@ -228,7 +220,7 @@ repository, make sure that step 1) is executed correctly.
 
    printenv | grep ZEPHYR_BASE
 
-2) If spi_image.bin is not generated, revisit EC vendor-specific setup.
+2) If ECFW.bin is not generated, revisit EC vendor-specific setup.
 
     a) Ensure SPI generator is available
 
@@ -256,7 +248,7 @@ Dediprog. Refer to `Intel documentation`_.
 
 
 .. _Zephyr's Getting Started Guide:
-    https://docs.zephyrproject.org/3.6.0/develop/getting_started/index.html
+    https://docs.zephyrproject.org/3.7.0/develop/getting_started/index.html
 
 .. _west documentation:
    https://docs.zephyrproject.org/latest/develop/west/index.html

@@ -36,7 +36,6 @@
 		i2c0 = &i2c_smb_0;
 		i2c1 = &i2c_smb_1;
 		i2c2 = &i2c_smb_2;
-
 	};
 
 	zephyr,user {

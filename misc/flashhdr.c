@@ -9,8 +9,8 @@
 #include "board_config.h"
 #include "flashhdr.h"
 
-#define KSC_MAJOR_VER     4
-#define KSC_MINOR_VER     1
+#define KSC_MAJOR_VER     5
+#define KSC_MINOR_VER     0
 #define KSC_PATCH_ID      0
 #define KSC_QS_BUILD_VER  0
 

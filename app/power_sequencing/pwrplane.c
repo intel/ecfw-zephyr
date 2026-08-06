@@ -206,6 +206,9 @@ void espi_bus_reset_handler(uint8_t status)
 
 	if (!status) {
 		set_next_state_to_S5();
+#ifdef CONFIG_SOC_DEBUG_AWARENESS
+		soc_debug_reset();
+#endif
 	}
 }
 

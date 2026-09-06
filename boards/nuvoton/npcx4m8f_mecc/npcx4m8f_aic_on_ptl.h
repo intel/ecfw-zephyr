@@ -88,14 +88,14 @@ enum i2c_addr_set {
 #define EC_SLATEMODE_HALLOUT_SNSR_R	EC_DUMMY_GPIO_HIGH
 #define WAKE_SCI			EC_GPIO_076
 
-/* In PTL, this is already accesible via IO expander no need to redefine
+/* In PTL, this is already accessible via IO expander no need to redefine
  *
  * #define VIRTUAL_BAT			EC_GPIO_080
  */
 
 #define PM_BATLOW			EC_GPIO_112
 
-/* In PTL, this is already accesible via IO expander no need to redefine
+/* In PTL, this is already accessible via IO expander no need to redefine
  *
  * #define KBC_SCROLL_LOCK		EC_GPIO_117
  */
@@ -226,7 +226,7 @@ enum i2c_addr_set {
 
 /* TIPD UCSI version details
  * UCSI Version format is 0xJJMN (2 Bytes)
- * JJ – Manjor Version
+ * JJ – Major Version
  * M – Minor Version
  * N – Sub Minor Version
  */

@@ -56,7 +56,7 @@ struct gpio_ec_config mecc172x_cfg[] = {
 	{ DNX_FORCE_RELOAD_EC,	GPIO_INPUT },
 	{ KBC_CAPS_LOCK,	GPIO_OUTPUT_LOW },
 	{ TYPEC_EC_SMBUS_ALERT_0_R,	GPIO_INPUT },
-	/* PM_BATLOW NA for S platfroms, so make it input */
+	/* PM_BATLOW NA for S platforms, so make it input */
 	{ PM_BATLOW,		GPIO_INPUT },
 	{ CATERR_LED_DRV,	GPIO_INPUT },
 	{ CS_INDICATE_LED,	GPIO_OUTPUT_LOW },

@@ -65,7 +65,7 @@ static ps2_func cb_ops[] = {
 static int convert_sc1_to_keynumber(uint8_t sc1, uint8_t *key_num)
 {
 	/* We ignore makes and breaks as we just want
-	 * to now if there was an interaction with one of the
+	 * to know if there was an interaction with one of the
 	 * FX keys
 	 */
 	switch (sc1 & ~BIT(KEY_RELEASED_POS)) {

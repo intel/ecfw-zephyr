@@ -176,9 +176,9 @@ static void pg3_handle_state_idle(void)
 
 static void pg3_handle_state_waiting_entry(void)
 {
-	/* 1. Move to PG3_STATE_IDLE if system transition to S0/S3.
-	 * 2. Move to PG3_STATE_ENTERED if pg3 condition meet.
-	 * 3. Continue in PG3_STATE_WAITING_ENTRY if pg3 not condition meet.
+	/* 1. Move to PG3_STATE_IDLE if system transitions to S0/S3.
+	 * 2. Move to PG3_STATE_ENTERED if pg3 condition is met.
+	 * 3. Continue in PG3_STATE_WAITING_ENTRY if pg3 condition is not met.
 	 */
 	switch (pwrseq_system_state()) {
 	case SYSTEM_S0_STATE:
@@ -188,7 +188,7 @@ static void pg3_handle_state_waiting_entry(void)
 		return;
 	case SYSTEM_S4_STATE:
 	case SYSTEM_S5_STATE:
-		/* If PG3 condition meet, then move to
+		/* If PG3 condition is met, then move to
 		 * PG3_STATE_ENTERED state
 		 */
 		if (is_pseudo_g3_condition()) {
@@ -209,11 +209,11 @@ static void pg3_handle_state_waiting_entry(void)
 
 static void pg3_handle_state_entered(void)
 {
-	/* 1. Move to PG3_STATE_IDLE if system transition to S0/S3.
+	/* 1. Move to PG3_STATE_IDLE if system transitions to S0/S3.
 	 * 2. Move to PG3_STATE_WAITING_ENTRY if ac connect.
 	 * 3. If RSMRST released then pg3 wake due to pwrnbtn or timer expiry.
 	 *    Move to PG3_STATE_WAKE_WAIT till system move to S0/S3
-	 * 4. Else Continue in PG3_STATE_ENTERED as pg3 condition meet.
+	 * 4. Else Continue in PG3_STATE_ENTERED as pg3 condition is met.
 	 */
 	switch (pwrseq_system_state()) {
 	case SYSTEM_S0_STATE:
@@ -223,7 +223,7 @@ static void pg3_handle_state_entered(void)
 		return;
 	case SYSTEM_S4_STATE:
 	case SYSTEM_S5_STATE:
-		/* If PG3 condition not meet, then move to
+		/* If PG3 condition is not met, then move to
 		 * PG3_STATE_WAITING_ENTRY state and from that state
 		 * move appropriately.
 		 */
@@ -249,7 +249,7 @@ static void pg3_handle_state_entered(void)
 
 static void pg3_handle_state_wake_wait(void)
 {
-	/* Move to PG3_STATE_IDLE if system transition to S0/S3.
+	/* Move to PG3_STATE_IDLE if system transitions to S0/S3.
 	 * else continue in PG3_STATE_WAKE_WAIT.
 	 */
 	switch (pwrseq_system_state()) {

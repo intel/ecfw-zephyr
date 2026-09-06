@@ -235,7 +235,7 @@ enum i2c_addr_set {
 
 /* TIPD UCSI version details
  * UCSI Version format is 0xJJMN (2 Bytes)
- * JJ – Manjor Version
+ * JJ – Major Version
  * M – Minor Version
  * N – Sub Minor Version
  */

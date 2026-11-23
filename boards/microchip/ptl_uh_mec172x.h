@@ -164,7 +164,7 @@ enum i2c_addr_set {
 #define SPI_0				DT_NODELABEL(spi0)
 #define ADC_CH_BASE			DT_NODELABEL(adc0)
 #define PECI_0_INST			DT_NODELABEL(peci0)
-#define KSCAN_MATRIX			DT_NODELABEL(kscan0)
+#define KSCAN_MATRIX			DT_CHOSEN(zephyr_keyboard_scan)
 #define WDT_0				DT_NODELABEL(wdog)
 
 /* EC Emulation device instances */

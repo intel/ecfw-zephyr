@@ -2,7 +2,7 @@
 
 target_sources(app
     PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/app.c
+    ${CMAKE_CURRENT_LIST_DIR}/main.c
     )
 
 include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/app/peripheral_management)

@@ -70,10 +70,11 @@ LOG_MODULE_DECLARE(kbchost, CONFIG_KBCHOST_LOG_LEVEL);
 int gtech_get_fn_key(uint8_t key_num, struct fn_data *data, bool pressed);
 
 #ifdef CONFIG_KSCAN_EC
-#ifdef CONFIG_SOC_FAMILY_MEC
-#define MAX_MTX_KEY_COLS CONFIG_KSCAN_XEC_COLUMN_SIZE
-#define MAX_MTX_KEY_ROWS CONFIG_KSCAN_XEC_ROW_SIZE
-#endif
+#define MAX_MTX_KEY_COLS \
+	DT_PROP(DT_PARENT(DT_CHOSEN(zephyr_keyboard_scan)), col_size)
+#define MAX_MTX_KEY_ROWS \
+	DT_PROP(DT_PARENT(DT_CHOSEN(zephyr_keyboard_scan)), row_size)
+
 /* 64 is not assigned. We marked as KM_RSVD in the first column */
 /* 0 in the first column  _, - is also marked as KM_RSVD */
 
@@ -120,7 +121,7 @@ int gtech_get_keynum(uint8_t col, uint8_t row)
 
 	return gtech_keymap[col][row];
 }
-#else
+#else /* CONFIG_KSCAN_EC */
 /* We still want to compile the function that handles FN top row keys since
  * we want to test it via PS/2 keyboard
  */

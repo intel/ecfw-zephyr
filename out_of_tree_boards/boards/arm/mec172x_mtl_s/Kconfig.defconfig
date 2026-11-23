@@ -1,11 +1,6 @@
 # Copyright (c) 2021 Microchip Technology Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-if BOARD_MEC172X_MTL_S
-
-config BOARD
-	default "mec172x_mtl_s"
-
 if RTOS_TIMER
 
 # XEC RTOS timer HW frequency is fixed at 32768 Hz.
@@ -39,5 +34,3 @@ endif # RTOS_TIMER
 config TACH_XEC
 	default y
 	depends on SENSOR
-
-endif # BOARD_MEC172X_MTL_S

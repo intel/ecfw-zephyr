@@ -12,7 +12,7 @@
 #include "gpio_ec.h"
 #include "espi_hub.h"
 #include "espioob_mngr.h"
-#ifdef CONFIG_ESPI_SAF
+#ifdef CONFIG_ESPI_TAF
 #include "saf_config.h"
 #endif
 #include "system.h"
@@ -32,7 +32,7 @@
 #endif
 #include "pwrseq_timeouts.h"
 #include "errcodes.h"
-#ifdef CONFIG_SOC_FAMILY_MEC
+#ifdef CONFIG_SOC_FAMILY_MICROCHIP_MEC
 #include "vci.h"
 #endif
 #include "fan.h"
@@ -214,7 +214,7 @@ static void handle_spi_sharing(uint8_t boot_mode)
 	switch (boot_mode) {
 	case FLASH_BOOT_MODE_SAF:
 		LOG_DBG("Booted in SAF mode");
-#ifdef CONFIG_ESPI_SAF
+#ifdef CONFIG_ESPI_TAF
 		initialize_saf_bridge();
 #endif
 		break;
@@ -384,7 +384,7 @@ static inline int pwrseq_task_init(void)
 	handle_spi_sharing(espihub_boot_mode());
 	gpio_write_pin(PM_PWRBTN, 1);
 
-	#ifdef CONFIG_SOC_FAMILY_MEC
+	#ifdef CONFIG_SOC_FAMILY_MICROCHIP_MEC
 	/* Disable VBAT powered VCI logic */
 	vci_disable();
 	#endif
